@@ -325,18 +325,18 @@ def test_probe_exit_codes(mock_server, capsys):
 
 def test_probe_reads_both_logprob_shapes():
     probe = _load_probe()
-    full, start = probe._join("one two", "three four")
-    assert (full, start) == ("one two three four", 8)
+    full, start = probe._join("one two", " three four")     # the text as generated
+    assert (full, start) == ("one two three four", 7)
     legacy = {"logprobs": {
         "tokens": ["one", " two", " three", " four"], "text_offset": [0, 3, 7, 13],
         "top_logprobs": [None] + [{f"t{i}": -1.0 - i / 100 for i in range(20)}] * 3}}
-    info = probe.read_echo(legacy, full, 8, "three four", 4)
+    info = probe.read_echo(legacy, full, start, " three four", 4)
     assert info["shape"] == "logprobs" and info["problems"] == [], info
     broken = {"logprobs": {"tokens": ["one"], "top_logprobs": [None]}}
-    assert probe.read_echo(broken, full, 8, "three four", 4)["problems"]
+    assert probe.read_echo(broken, full, start, " three four", 4)["problems"]
     vllm = {"prompt_logprobs": [None] + [{"11": {"logprob": -0.5, "rank": 1, "decoded_token": "a"},
                                            "12": {"logprob": -1.5, "rank": 2, "decoded_token": "b"}}] * 3}
-    info = probe.read_echo(vllm, full, 8, "three four", 4)
+    info = probe.read_echo(vllm, full, start, " three four", 4)
     assert info["shape"] == "prompt_logprobs" and info["problems"] == [], info
-    assert probe.read_echo({}, full, 8, "x", 4)["shape"] is None
+    assert probe.read_echo({}, full, start, "x", 4)["shape"] is None
 

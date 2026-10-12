@@ -126,6 +126,7 @@ model:
 | `local_dir` | yes | Where the weights are on the box. The judge mounts the host's `/opt/models` into each launch at the same path, read-only, and tells the launch script this value as `IJ_MODEL_DIR`, so the weights must sit under `/opt/models`. An empty string means no model mount. |
 | `tokenizer` | yes | The tokenizer the harness uses to build prompts of the right length. The mock target uses the word `ws`. |
 | `hf_id` | no | The Hugging Face repository. With `hf_id` and a 40-character `revision`, bootstrap downloads exactly that revision to `local_dir`, checks every file against the Hub's sha256 list, and makes the result read-only. Without `hf_id`, the weights must already be at `local_dir`. |
+| `chat_template_kwargs` | no | A mapping the judge sends as `chat_template_kwargs` on every chat request: the speed test, the canary and the quality tasks. Use it for a template switch such as `{enable_thinking: false}`. An engine ignores a name its chat template does not use, so check the name against the model's template. Changing it changes the target's fingerprint, so measure a new baseline afterwards. |
 | `chat_template`, `gcs` | no | Accepted by the schema. Nothing in `bench/` reads them today. |
 
 ### engine

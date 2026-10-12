@@ -158,7 +158,7 @@ The other options, all in `bash setup/bootstrap.sh --help`:
 | `--agent NAME` | The coding agent that does the research: a folder in `research/adapters/` (`claude`, `codex`, `pi` or your own). Also `IJ_AGENT=NAME`; the flag wins. Default `claude`. |
 | `--skip-model` | Skip the weights, for a dry install. |
 | `--no-clock` | Install everything but do not start the clock or lock the judge. |
-| `--reset-clock` | Restart the clock even if it is running. **Destructive:** the hours already run are lost. |
+| `--reset-clock` | Restart the clock even if it is running or the run has finished. This starts a new run with a fresh budget; the earlier run's results and events are kept as history. **Destructive:** the hours already run are lost. |
 | `--reinstall-engines` | Force the engine checkouts back to the pinned refs, or copy them out of the image again on a TPU. **Destructive:** it discards uncommitted engine patches. |
 | `IJ_VERIFY_MODEL=1` | Re-hash every weight file against the Hub manifest (slow). |
 | `IJ_ACCEL_HOURS`, `IJ_WALL_HOURS` | The run's budget in accelerator hours, and its wall-clock deadline in hours from the clock start. The deadline defaults to the accelerator-hour budget, and that defaults to 24. |
@@ -234,7 +234,7 @@ The order that works:
    sudo bash tools/tpu_deadman.sh save           # copy the results to the cache disk now
    ```
 
-   `arm` checks that it can authenticate, and exits 3 with the timer still armed when it cannot confirm that deletion would work. It cannot test the delete permission without deleting, so treat exit 3 as "not proven". While armed, the guard copies the results, leaderboard, calibration, reference, the researcher's repository and state, the logs and the compile seed to the cache disk every hour, and once more before the delete, under `inference-judge-saved/` on the disk. At the deadline it tries `gcloud compute tpus tpu-vm delete` five times. If all five fail it halts the VM, which may not stop the billing. Check the VM list from your laptop after any deadline. Size the guard to cover the reference, the calibration, the rehearsal and the loop together.
+   `arm` checks that it can authenticate, and exits 3 with the timer still armed when it cannot confirm that deletion would work. It cannot test the delete permission without deleting, so treat exit 3 as "not proven". While armed, the guard copies the results, leaderboard, calibration, reference, the researcher's repository and state, the logs and the compile seed to the cache disk every hour, and once more before the delete, under `inference-judge-saved/` on the disk. Before that last copy it stops the loop (the driver, the runner and the heartbeat), so nothing is written while it copies; a judged run still in flight is killed and leaves no verdict, and stopping can take up to 6 minutes. At the deadline it tries `gcloud compute tpus tpu-vm delete` five times. If all five fail it halts the VM, which may not stop the billing. Check the VM list from your laptop after any deadline. Size the guard to cover the reference, the calibration, the rehearsal and the loop together.
 4. **Bootstrap, first pass.** It stops after the chip gate with exit 3 and prints what to do next.
 5. **If the gate says the target's flags cannot reach the chips**, find flags that can. Bootstrap prints this exact command:
 
@@ -404,7 +404,7 @@ Two optional things to do before you start:
   sudo -u driver -H bash -c 'set -a; . /etc/inference-judge/loop.env; set +a; exec /opt/inference-judge/loop/run.sh --dry-run'
   ```
 
-`research/README.md` describes the loop's policy in full. In short, the driver starts an agent session when something happened that the researcher should see: a verdict arrived, the queue ran low, an hour passed, or the run is about to end. A session is capped at `IJ_ITER_TIMEOUT_S` (3600 s by default). The runner keeps measuring while the researcher thinks, and it starts no run with less than 2700 s of budget left. In the last 1800 s the researcher gets a wrap-up session to write `SUMMARY.md`.
+`research/README.md` describes the loop's policy in full. In short, the driver starts an agent session when something happened that the researcher should see: a verdict arrived, the queue ran low, an hour passed, or the run is about to end. A session is capped at `IJ_ITER_TIMEOUT_S` (3600 s by default). The runner keeps measuring while the researcher thinks, and it starts no run with less time left than one run can take: `IJ_RUN_MIN_S` in `/etc/inference-judge/loop.env`, which bootstrap sets to the target's `budgets.run_s` plus 1860 s (7260 s for a 5400 s run budget) when that is more than the default of 2700 s. Bootstrap leaves a value that is already in the file alone, so after you change `budgets.run_s` edit or remove that line yourself, then restart the driver and the runner: the runner uses the larger of its own value and the one the driver logged when it last started. In the last 1800 s the researcher gets a wrap-up session to write `SUMMARY.md`.
 
 ## Watch the loop
 

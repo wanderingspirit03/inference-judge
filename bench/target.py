@@ -104,6 +104,10 @@ def _any(v):
     return True
 
 
+def _str_keyed(v):
+    return isinstance(v, dict) and all(isinstance(k, str) for k in v)
+
+
 SOURCE_RE = re.compile(r"^[a-z][a-z0-9_]*$")
 # where run.sh itself mounts or copies things: a cache may not shadow them
 RESERVED_MOUNTS = ("/ro", "/exp", "/src", "/out", "/opt/models", "/opt/inference-judge")
@@ -156,6 +160,8 @@ SCHEMA: dict[str, dict[str, tuple]] = {
         "local_dir": (_str, REQ, None),
         "tokenizer": (_nonempty, REQ, None),
         "chat_template": (_str, OPT, ""),
+        # sent as chat_template_kwargs on every chat request the ruler makes
+        "chat_template_kwargs": (_str_keyed, OPT, None),
         "hf_id": (_str, OPT, None),
         "gcs": (_str, OPT, None),
     },
@@ -434,6 +440,9 @@ def shell_vars(t: dict, bench_root: str | Path) -> str:
         "T_HASH": target_hash(t),
         "T_ACCEL": t["accelerator"]["kind"], "T_CHIPS": t["accelerator"]["chips"],
         "T_SERVED_NAME": t["model"]["served_name"],
+        "T_CHAT_KWARGS": (json.dumps(t["model"]["chat_template_kwargs"],
+                                     separators=(",", ":"))
+                          if t["model"].get("chat_template_kwargs") else ""),
         "T_MODEL_DIR": t["model"]["local_dir"],
         "T_REVISION": t["model"]["revision"], "T_TOKENIZER": t["model"]["tokenizer"],
         "T_ENGINE": e["name"], "T_IMAGE": e["image"], "T_PORT": e["port"],

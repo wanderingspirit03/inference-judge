@@ -260,6 +260,14 @@ def replay(events: Iterable[dict]) -> State:
         s.last_seq = max(s.last_seq, int(ev.get("seq", 0)))
         s.last_ts = ts
         if t == "run_config":
+            if s.clock_start is not None and ev.get("clock_start") not in (None, s.clock_start):
+                # A clock started again (bootstrap --reset-clock) is a new run.
+                # What ended or was charged to the earlier one stays in the log
+                # as history; the runs, the queue's and the alerts' records and
+                # any pause carry over.
+                s.finished = None
+                s.accel_used_s = 0.0
+                s.last_tick_ts = None      # as before the first start: nothing charged until the next
             s.clock_start = ev.get("clock_start", s.clock_start)
             s.wall_deadline = ev.get("wall_deadline", s.wall_deadline)
             if ev.get("accel_budget_s") is not None:

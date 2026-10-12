@@ -222,7 +222,7 @@ Sections and fields:
 |---|---|---|
 | top level | `id` | `runnable` (`true`) |
 | `accelerator` | `kind`, `chips`, `hosts` | `type`, `topology`, `hbm_gb_per_chip` |
-| `model` | `served_name`, `revision`, `local_dir`, `tokenizer` | `chat_template` (`""`), `hf_id`, `gcs` |
+| `model` | `served_name`, `revision`, `local_dir`, `tokenizer` | `chat_template` (`""`), `chat_template_kwargs`, `hf_id`, `gcs` |
 | `engine` | `name`, `image`, `docker_flags` | `env` (`{}`), `launch`, `port` (`8000`), `shm_size` (`""`), `sources` (`[]`), `compile_cache` (`{seed, mount}`) |
 | `metric` | `kind` (`tps`), `isl`, `osl`, `concurrency`, `slo`, `ramp_s`, `window_s` | `screen_window_s`, `design` (`abba`), `blocks` (`2`), `prompt_pool`, `confirm_pool`, `pool_size` (`2048`), `length_tol` (`0.0`), `guard_tol` (`0.03`), `screen_tol` (`0.02`), `stall_ms` (`1000`) |
 | `budgets` | `build_s`, `compile_s`, `health_s`, `run_s` | none |
@@ -647,7 +647,10 @@ experiment at a time, independent of any agent session. For each pass it:
 
 1. stops if the run has finished, or idles if the clock has not started, if
    the loop is paused because frozen files changed, or if less than
-   `run_min_s` (2700 s) of the budget remains;
+   `run_min_s` of the budget remains (2700 s by default; on an installed
+   machine bootstrap sets it to the target's `budgets.run_s` plus 1860 s
+   when that is more, unless `loop.env` already sets one, so a run that is
+   started can end before the loop does);
 2. takes the oldest accepted queue file (by modification time, then name);
 3. runs `preflight.sh <id>` as the researcher. A failure logs a
    `PREFLIGHT_FAILED` verdict that costs no judge slot, and the same file is
@@ -756,7 +759,7 @@ environment variable:
 | `auth_probe_s` | 1800 | Retry interval while paused on authentication. |
 | `limit_alert_streak` | 6 | Quota limits in a row before an alert. |
 | `summary_lead_s` | 1800 | Wrap-up phase before the end. |
-| `run_min_s` | 2700 | The runner starts no run with less time left. |
+| `run_min_s` | 2700 | The runner starts no run with less time left. Bootstrap writes `IJ_RUN_MIN_S` into `loop.env` as the target's `budgets.run_s` plus 1860 s (900 s for the pre-flight, 960 s for the judge to remove a run that timed out and write its verdict) when that is more than the default. A value already in the file is the operator's and stands. The runner uses the larger of the value the driver logged and the one in its own environment. |
 
 A crash backs off, then moves to the fallback model, then pauses and raises
 an alert. A quota limit sleeps and is never a crash. An authentication

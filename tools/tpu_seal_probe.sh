@@ -43,6 +43,10 @@ sets=(
   "privileged-host|none: privileged and host network (worked by hand)|--network host --privileged"
 )
 
+PROBE_NAME=inference-judge-seal-probe
+docker rm -f "$PROBE_NAME" >/dev/null 2>&1 || true
+trap 'docker rm -f "$PROBE_NAME" >/dev/null 2>&1 || true' EXIT INT TERM
+
 winner=""
 for s in "${sets[@]}"; do
   IFS='|' read -r name seal flags <<<"$s"
@@ -51,9 +55,12 @@ for s in "${sets[@]}"; do
   echo "   docker run --rm $flags --shm-size 16g IMAGE python -c '<chip count>'"
   start=$(date +%s)
   # shellcheck disable=SC2086  # the flag sets are word lists on purpose
-  out="$(timeout --signal=KILL "$PER_TRY_S" docker run --rm $flags --shm-size 16g \
+  out="$(timeout --signal=KILL "$PER_TRY_S" docker run --rm --name "$PROBE_NAME" $flags --shm-size 16g \
            "$IMAGE" python -c "$check" 2>&1)"
   rc=$?
+  # The kill above stops the docker client only. A container left behind keeps
+  # the chips, and every later try would fail for that reason alone.
+  docker rm -f "$PROBE_NAME" >/dev/null 2>&1 || true
   took=$(( $(date +%s) - start ))
   if [ "$rc" -eq 0 ]; then
     echo "   PASS in ${took}s: $(printf '%s\n' "$out" | grep '^CHIPS' | tail -n 1)"

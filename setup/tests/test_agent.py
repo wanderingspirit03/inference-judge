@@ -165,6 +165,38 @@ def test_an_agent_that_is_not_installed_adds_nothing_to_loop_env(box):
     assert box.loop_env.read_text() == "IJ_AGENT=pi\n"
 
 
+def loop_env_for(box, run_s: int, before: str = "IJ_AGENT=pi\n") -> list[str]:
+    """loop.env after s_loop_env, for a target that gives one judged run run_s seconds."""
+    shutil.copy(REPO / "bench" / "target.py", box.repo / "bench" / "target.py")
+    target = box.root / "target.yaml"
+    target.write_text((REPO / "targets" / "cpu-mock.yaml").read_text().replace("run_s: 2400", f"run_s: {run_s}"))
+    assert f"run_s: {run_s}" in target.read_text()
+    box.loop_env.write_text(before)
+    r = box.run("pi", f'T_FILE="{target}"; s_loop_env')
+    assert r.returncode == 0, r.stderr
+    return box.loop_env.read_text().splitlines()
+
+
+def test_the_runner_keeps_back_the_targets_whole_bound_for_one_run(box):
+    # 5400 s for the run, 900 s for the pre-flight before it, 960 s for the judge's clean-up after it
+    assert loop_env_for(box, 5400) == ["IJ_AGENT=pi", "IJ_RUN_MIN_S=7260"]
+    assert box.run("pi", f'T_FILE="{box.root}/target.yaml"; s_loop_env').returncode == 0
+    assert box.loop_env.read_text().count("IJ_RUN_MIN_S=") == 1     # once is enough
+
+
+def test_a_target_with_short_runs_keeps_the_default_reserve(box):
+    sys.path.insert(0, str(REPO / "research" / "loop"))
+    import loopstate
+    default = loopstate.DEFAULT_POLICY["run_min_s"]
+    assert loop_env_for(box, default - 1860) == ["IJ_AGENT=pi"]     # the bound is the default: nothing to add
+    assert loop_env_for(box, 60) == ["IJ_AGENT=pi"]                 # never below the default
+
+
+def test_a_reserve_already_in_loop_env_is_the_operators_and_stands(box):
+    assert loop_env_for(box, 5400, "IJ_AGENT=pi\nIJ_RUN_MIN_S=10\n") == ["IJ_AGENT=pi", "IJ_RUN_MIN_S=10"]
+    assert loop_env_for(box, 5400, "IJ_AGENT=pi\nIJ_RUN_MIN_S=9000\n") == ["IJ_AGENT=pi", "IJ_RUN_MIN_S=9000"]
+
+
 def test_bootstrap_hands_the_agent_to_harden():
     text = (REPO / "setup" / "bootstrap.sh").read_text()
     assert 'AGENT="$IJ_AGENT" bash "$SCRIPT_DIR/harden_research.sh"' in text

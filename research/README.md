@@ -78,7 +78,7 @@ The last line it prints is `PREFLIGHT_OK <id>` or `PREFLIGHT_FAILED <id>: <reaso
 2. calls the judge as an argument list (never a shell string): `$IJ_BENCH_CMD <id>` for a candidate, `$IJ_BENCH_CMD --instrument <id>` for an instrument run. `IJ_BENCH_CMD` defaults to `sudo -n -u bench /opt/bench/run.sh`;
 3. reads the verdict from `results/<id>/results.json` and appends it to `events.jsonl`.
 
-It starts no run with less than 2700 s (`run_min_s`) of the budget left. `loop/runner.sh --once` handles at most one item and exits.
+It starts no run with less than `run_min_s` of the budget left: 2700 s by default, and on an installed box the target's `budgets.run_s` plus 1860 s when that is more (`IJ_RUN_MIN_S` in `/etc/inference-judge/loop.env`, written by bootstrap unless the file already sets one). `loop/runner.sh --once` handles at most one item and exits.
 
 ### The driver
 

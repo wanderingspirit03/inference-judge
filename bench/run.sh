@@ -1401,8 +1401,9 @@ commit_references() {
 # reference. Only the baseline writes that reference; a production run that
 # finds none is an infrastructure fault, not something to fill in.
 canary_step() {
-  local out="${1:-$RESULTS_DIR}" aborted="" limit=(--canary-timeout "$CANARY_TIMEOUT_S")
-  [[ -n "$CANARY_MAX_TIMEOUTS" ]] && limit+=(--canary-max-timeouts "$CANARY_MAX_TIMEOUTS")
+  local out="${1:-$RESULTS_DIR}" aborted="" opts=(--canary-timeout "$CANARY_TIMEOUT_S")
+  [[ -n "$CANARY_MAX_TIMEOUTS" ]] && opts+=(--canary-max-timeouts "$CANARY_MAX_TIMEOUTS")
+  [[ -n "$T_CHAT_KWARGS" ]] && opts+=(--chat-template-kwargs "$T_CHAT_KWARGS")
   if (( IS_BASELINE )) || [[ ! -f "$CANARY_REF" && "$DRY_RUN" != "1" ]]; then
     if (( UNDER_SUDO && ! IS_BASELINE )); then
       add_reason "no canary reference at $CANARY_REF: only the operator's baseline writes it"
@@ -1412,7 +1413,7 @@ canary_step() {
     meas "$BENCH_ROOT/harness.py" --mode canary --base-url "$BASE_URL" \
          --model "$MODEL_NAME" \
          --canary-prompts "$BENCH_ROOT/canary/prompts.json" \
-         "${limit[@]}" --out "$out"
+         "${opts[@]}" --out "$out"
     stage_ref "$out/canary.json" canary.json
     CANARY_MATCHED=10
     return 0
@@ -1421,7 +1422,7 @@ canary_step() {
        --model "$MODEL_NAME" \
        --canary-prompts "$BENCH_ROOT/canary/prompts.json" \
        --canary-baseline "$CANARY_REF" \
-       "${limit[@]}" --out "$out"
+       "${opts[@]}" --out "$out"
   if [[ "$DRY_RUN" == "1" ]]; then CANARY_MATCHED=10; return 0; fi
   CANARY_MATCHED="$(json_get "$out/canary.json" matched)"
   CANARY_MATCHED="${CANARY_MATCHED:-0}"
@@ -1517,6 +1518,7 @@ tps_sweep() {
               --slo "$T_SLO" --seed "$seed" --base-url "$BASE_URL" --model "$MODEL_NAME"
               --run-id "$RUN_ID" --phase "$phase" --out "$out")
   [[ -n "$T_LENGTH_TOL" ]] && args+=(--length-tol "$T_LENGTH_TOL")
+  [[ -n "$T_CHAT_KWARGS" ]] && args+=(--chat-template-kwargs "$T_CHAT_KWARGS")
   if [[ "$phase" == "warm" ]]; then
     limit="$WARM_TIMEOUT_S"
     # a mix of sizes: every stream sends each size once before the clock

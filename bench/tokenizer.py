@@ -16,7 +16,7 @@ Two adapters behind one small interface:
 
 Interface (all a caller needs):
   load_tokenizer(spec) -> Tokenizer
-  tok.tokens(text) -> list[str]   the tokens of `text`, no special tokens
+  tok.tokens(text) -> list[str]   the tokens of `text` as text, no special tokens
   tok.count(text) -> int          len(tok.tokens(text))
   tok.fit(text, n) -> str         `text` cut or padded to exactly n tokens
   tok.name, tok.fingerprint()     what to stamp into a summary (sha256)
@@ -87,7 +87,10 @@ class HFTokenizer:
         return self._tok.encode(text, add_special_tokens=False).ids
 
     def tokens(self, text: str) -> list[str]:
-        return list(self._tok.encode(text, add_special_tokens=False).tokens)
+        # Each id decoded on its own: the text a server echoes for that token
+        # (" blue"), not the vocabulary piece ("\u2581blue", "\u0120blue").
+        return [self._tok.decode([i], skip_special_tokens=False)
+                for i in self._ids(text)]
 
     def count(self, text: str) -> int:
         return len(self._ids(text))

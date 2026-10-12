@@ -159,21 +159,23 @@ class HttpCandidate:
     Teacher forcing sends POST /v1/completions with the continuation appended
     to the prompt, echo=true, logprobs=k, max_tokens=1, temperature 0, and
     reads either choices[0].prompt_logprobs (vLLM) or choices[0].logprobs
-    {tokens, top_logprobs, text_offset} (OpenAI legacy echo). The positions
-    whose text_offset falls inside the continuation are kept, and each echoed
-    token must equal the token we sent, else AlignmentError.
+    {tokens, top_logprobs, text_offset} (OpenAI legacy echo). The echoed tokens
+    that cover part of the continuation are kept, and each must equal the
+    token we sent (as text, edge whitespace aside), else AlignmentError.
     """
 
     def __init__(self, base_url: str, model: str = "mock",
                  tokenize: Callable[[str], list[str]] = str.split,
                  timeout: float = REQUEST_TIMEOUT_S,
-                 api_key: str | None = None) -> None:
+                 api_key: str | None = None,
+                 chat_template_kwargs: dict | None = None) -> None:
         import httpx                                  # bench dependency
         headers = {"Authorization": f"Bearer {api_key}"} if api_key else {}
         self._http = httpx.Client(base_url=base_url.rstrip("/"),
                                   timeout=timeout, headers=headers)
         self.model = model
         self.tokenize = tokenize
+        self.chat_template_kwargs = chat_template_kwargs or None
         # Requests in flight at once. The answers do not depend on it (temperature
         # 0, results kept in input order); only the wall time does.
         self.concurrency = MAX_IN_FLIGHT
@@ -196,7 +198,10 @@ class HttpCandidate:
     def teacher_force(self, prompt: str, text: str, tokens: list[str],
                       k: int) -> list[Top]:
         import httpx
-        full, start = join_continuation(prompt, text)
+        if self.tokenize is str.split:
+            full, start = join_continuation(prompt, text)
+        else:                       # a real tokenizer: the text as generated
+            full, start = prompt + text, len(prompt)
         try:
             data = self._post("/completions", {
                 "prompt": full, "max_tokens": 1, "temperature": 0.0,
@@ -229,7 +234,10 @@ class HttpCandidate:
             raise LogprobsUnavailable("response has no echoed logprobs")
         offsets = lp.get("text_offset")
         if offsets:
-            idx = [i for i, off in enumerate(offsets) if start <= off < len(full)]
+            # Every echoed token that covers part of the continuation: one that
+            # starts on the prompt's last space (" blue") is still its first.
+            idx = [i for i, (off, tok) in enumerate(zip(offsets, echoed))
+                   if off < len(full) and off + len(tok) > start]
         else:                       # no offsets: the last token is generated
             idx = list(range(len(echoed) - 1 - len(tokens), len(echoed) - 1))
         if len(idx) != len(tokens):
@@ -251,6 +259,8 @@ class HttpCandidate:
                       "temperature": 0.0, "max_tokens": 256, "stream": False}
         if task.get("tools"):
             body["tools"] = task["tools"]
+        if self.chat_template_kwargs is not None:
+            body["chat_template_kwargs"] = self.chat_template_kwargs
         msg = self._post("/chat/completions", body)["choices"][0]["message"]
         calls = []
         for c in msg.get("tool_calls") or []:
@@ -305,8 +315,13 @@ def _excess_nll(r_tokens: list[str], r_tops: list[Top],
         return 0.0
     top = r_tops[d]
     floor = min(top.values())
-    gap = top.get(r_tokens[d], floor) - top.get(c_tokens[d], floor)
-    return max(0.0, gap) / (d + 1)
+
+    def logp(tok: str) -> float:      # top is keyed by the text R's server echoed
+        if tok in top:
+            return top[tok]
+        return next((v for t, v in top.items() if _same_token(t, tok)), floor)
+
+    return max(0.0, logp(r_tokens[d]) - logp(c_tokens[d])) / (d + 1)
 
 
 def _sanity_stats(text: str) -> tuple[float, float]:
@@ -971,7 +986,8 @@ def _client(args, tgt: dict, tokenizer: str | None = None) -> HttpCandidate:
     spec = tokenizer if tokenizer is not None else model.get("tokenizer", "ws")
     return HttpCandidate(args.base_url, model=args.model or model.get(
         "served_name", "mock"), tokenize=_tokenize_fn(spec),
-        timeout=args.request_timeout)
+        timeout=args.request_timeout,
+        chat_template_kwargs=model.get("chat_template_kwargs"))
 
 
 def _is_mock(tgt: dict) -> bool:

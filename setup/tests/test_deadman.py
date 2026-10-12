@@ -257,6 +257,25 @@ def test_extend_when_not_armed_or_already_late_refuses(g):
 
 
 # -------------------------------------------------------------------- disarm
+def test_extend_that_cannot_write_the_deadline_says_so_and_changes_nothing(g):
+    g.armed_for("2")
+    timer = (g.units / "inference-judge-deadman.timer").read_text()
+    (g.state / "deadline.tmp").mkdir()                               # the write fails, as on a full disk
+    r = g.run("extend", "1", now=T0 + 600)
+    assert r.returncode == 2 and "NOT extended" in r.stderr, r.stdout + r.stderr
+    assert "deadline now" not in r.stdout
+    assert (g.state / "deadline").read_text().strip() == str(T0 + 7200)
+    assert (g.units / "inference-judge-deadman.timer").read_text() == timer
+
+
+def test_arm_that_cannot_write_the_deadline_installs_no_timer(g):
+    (g.state / "deadline.tmp").mkdir(parents=True)
+    r = g.run("arm", "2")
+    assert r.returncode == 2 and "NOT armed" in r.stderr, r.stdout + r.stderr
+    assert not (g.units / "inference-judge-deadman.timer").exists()
+    assert "armed:" not in r.stdout
+
+
 def test_disarm_removes_the_deadline_the_timer_and_the_units(g):
     g.armed_for()
     r = g.run("disarm")
@@ -487,6 +506,49 @@ def test_the_hourly_save_is_stopped_before_the_last_one_starts(g):
     calls = g.calls()
     stop = calls.index("systemctl stop inference-judge-deadman-save.timer inference-judge-deadman-save.service")
     assert stop < next(i for i, l in enumerate(calls) if " rsync " in l)
+
+
+LOOP_STOP = ("systemctl stop inference-judge-heartbeat.timer inference-judge-heartbeat.service "
+             "inference-judge-driver.service inference-judge-runner.service")
+
+
+def test_the_loop_is_stopped_before_the_last_save_so_nothing_is_written_during_the_copy(g):
+    g.bootstrapped()
+    g.armed_for("2")
+    g.fire(T0 + 7200)
+    calls = g.calls()
+    assert calls.index(LOOP_STOP) < next(i for i, l in enumerate(calls) if " rsync " in l)
+    # boxed above the 300 s systemd gives the runner's unit before it kills a judged run
+    unit = (REPO / "setup" / "systemd" / "inference-judge-runner.service").read_text()
+    assert "KillMode=mixed" in unit and "TimeoutStopSec=300" in unit
+    assert calls[calls.index(LOOP_STOP) - 1] == "timeout -k 10 360 " + LOOP_STOP
+    assert "stopped the loop" in g.log()
+
+
+def test_a_loop_that_does_not_stop_is_logged_and_the_results_are_still_saved_and_the_vm_deleted(g):
+    g.bootstrapped()
+    g.armed_for("2")
+    r = g.fire(T0 + 7200, FAKE_STOP_RC="5")                          # 5: no such unit (no loop on this VM)
+    assert r.returncode == 0 and "the loop did not stop cleanly (exit 5)" in g.log()
+    assert (g.saved() / str(g.results).lstrip("/") / "exp-1" / "results.json").exists()
+    assert len(g.deletes()) == 1
+
+
+def test_a_loop_stop_that_runs_out_of_time_still_saves_and_deletes(g):
+    g.bootstrapped()
+    g.armed_for("2")
+    r = g.fire(T0 + 7200, FAKE_TIMEOUT_KILLS="systemctl")
+    assert r.returncode == 0 and "the loop did not stop cleanly (exit 124)" in g.log()
+    assert f"saved {g.results}" in g.log() and len(g.deletes()) == 1
+
+
+def test_an_early_or_disarmed_fire_leaves_the_loop_running(g):
+    g.bootstrapped()
+    g.armed_for("2")
+    g.fire(T0 + 3600)                                                # an hour early
+    g.run("disarm")
+    g.fire(T0 + 7200)
+    assert not [l for l in g.calls() if "inference-judge-runner" in l or "inference-judge-driver" in l]
 
 
 def test_each_save_adds_to_the_last_and_never_removes(g):

@@ -172,7 +172,7 @@ def read_echo(choice: dict, full: str, start: int, text: str, prompt_tokens: int
         if prompt_tokens is not None and len(tokens) < prompt_tokens:
             problems.append(f"{len(tokens)} echoed tokens for {prompt_tokens} prompt tokens")
         if offsets:
-            # a token that carries the joining space starts before `start` but ends after it
+            # a token that starts on the last space of the prompt (" blue") still ends after `start`
             idx = [i for i, off in enumerate(offsets) if start < off + len(tokens[i]) and off < len(full)]
             joined = "".join(tokens[i] for i in idx)
             if not idx or not joined.replace(" ", "").endswith(text.strip().replace(" ", "")):
@@ -210,9 +210,8 @@ def _completion_text(parsed: dict | None) -> str | None:
 
 
 def _join(prompt: str, text: str) -> tuple[str, int]:
-    """quality2.join_continuation."""
-    sep = "" if (not prompt or not text or prompt[-1].isspace() or text[0].isspace()) else " "
-    return prompt + sep + text, len(prompt) + len(sep)
+    """As quality2 joins them for a real tokenizer: the text exactly as generated."""
+    return prompt + text, len(prompt)
 
 
 def check_echo_logprobs(srv: Server, k: int = TOP_K) -> list[Result]:

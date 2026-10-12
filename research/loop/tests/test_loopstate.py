@@ -138,6 +138,50 @@ def test_finish_at_wall_deadline_and_when_budget_spent(T0):
     assert (a.kind, a.reason) == ("finish", "accelerator-hour budget spent")
 
 
+# ------------------------------------------------- a clock started again ---
+def finished_run(T0):
+    """A 6-hour run that spent its budget and was finished by the driver."""
+    evs = [clock(T0, accel_h=6, wall_h=6), start(T0), sess(T0), end(T0 + 10)]
+    evs += [(T0 + 300 * i, {"type": "tick"}) for i in range(1, 73)]
+    return evs + [(T0 + 6 * H, {"type": "finish", "reason": "accelerator-hour budget spent"})]
+
+
+def test_a_clock_started_again_is_a_new_run(T0):
+    old = replay(log(*finished_run(T0)))
+    assert old.finished and old.accel_used_s == 6 * H
+    T1 = T0 + 8 * H
+    st = replay(log(*finished_run(T0), clock(T1, accel_h=24, wall_h=24), start(T1)))
+    assert st.finished is None and st.accel_used_s == 0
+    assert (st.clock_start, st.accel_budget_s, st.end_ts(T1)) == (T1, 24 * H, T1 + 24 * H)
+    assert decide(st, T1 + 120, EMPTY).kind == "session"       # the driver works; it does not stop
+    assert st.sessions == 1                                    # the earlier run is still history
+
+
+def test_a_new_run_is_charged_only_for_its_own_time(T0):
+    T1 = T0 + 8 * H
+    evs = finished_run(T0) + [clock(T1), (T1 + 100, {"type": "tick"})]   # no driver start yet: not charged
+    assert replay(log(*evs)).accel_used_s == 0
+    evs += [start(T1 + 100), (T1 + 160, {"type": "tick"}), (T1 + 220, {"type": "tick"})]
+    assert replay(log(*evs)).accel_used_s == 120
+
+
+def test_a_new_run_keeps_what_the_queue_and_the_results_scan_already_saw(T0):
+    evs = [clock(T0), start(T0), verdict(T0 + 10, "r1", "exp-a", source="runner"),
+           (T0 + 20, {"type": "queue_reject", "file": "bad.json", "sig": "s1", "reason": "kind must be"}),
+           (T0 + 30, {"type": "alert", "key": "limit:1", "msg": "x"}),
+           (T0 + 40, {"type": "pause", "reason": "frozen files changed"}),
+           (T0 + H, {"type": "finish", "reason": "wall deadline reached"}), clock(T0 + 2 * H)]
+    st = replay(log(*evs))
+    assert "r1" in st.runs and "exp-a" in st.consumed and ("bad.json", "s1") in st.rejected_files
+    assert "limit:1" in st.alert_keys
+    assert st.paused["reason"] == "frozen files changed"       # only the operator's RESUME lifts a pause
+
+
+def test_the_same_clock_logged_twice_is_not_a_new_run(T0):
+    evs = [clock(T0), start(T0), (T0 + 60, {"type": "tick"}), clock(T0), (T0 + 120, {"type": "tick"})]
+    assert replay(log(*evs)).accel_used_s == 120
+
+
 def test_session_is_capped_by_the_end_of_the_run(T0):
     st = replay(log(clock(T0, wall_h=1), start(T0)))
     a = decide(st, T0 + H - 600, EMPTY)

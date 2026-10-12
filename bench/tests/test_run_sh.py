@@ -1451,6 +1451,20 @@ def test_a_server_that_exits_at_start_does_not_use_the_ready_wait(tmp_path):
     assert res["duration_s"] < 60, res["duration_s"]
 
 
+def test_dry_run_sends_the_target_chat_template_kwargs_on_every_chat_request(tmp_path):
+    flag = """--chat-template-kwargs {"enable_thinking":false}"""
+    chat = lambda plan: [l for l in plan.splitlines()
+                         if "--mode canary" in l or "--mode tps" in l]
+    (tmp_path / "plain").mkdir()
+    (tmp_path / "set").mkdir()
+    plain = chat(_plan(tmp_path / "plain", MIX_TARGET))
+    assert plain and not any("--chat-template-kwargs" in l for l in plain)
+    lines = chat(_plan(tmp_path / "set", MIX_TARGET.replace(
+        'tokenizer: "ws"}',
+        'tokenizer: "ws", chat_template_kwargs: {enable_thinking: false}}')))
+    assert len(lines) == len(plain) and all(flag in l for l in lines), lines
+
+
 def test_dry_run_without_a_screen_window_is_the_four_launch_plan(tmp_path):
     plan = _plan(tmp_path,
                  MIX_TARGET.replace("  screen_window_s: 2\n", ""))

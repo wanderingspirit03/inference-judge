@@ -228,6 +228,45 @@ def test_runner_starts_nothing_too_close_to_the_end(lab: Lab):
     assert "too little time" in r.stdout and lab.bench_calls() == []
 
 
+def test_the_reserve_the_driver_logged_holds_for_the_runner(lab: Lab):
+    lab.start_clock(24, deadline=time.time() + 6000)
+    lab.lstate("start", IJ_RUN_MIN_S=7260)
+    lab.ready("exp-long")
+    r = lab.runner_once()
+    assert "too little time" in r.stdout and lab.bench_calls() == []
+
+
+def test_the_reserve_in_the_runners_own_environment_holds_before_any_driver_start(lab: Lab):
+    lab.start_clock(24, deadline=time.time() + 6000)
+    lab.ready("exp-long")
+    r = lab.runner_once(IJ_RUN_MIN_S=7260)
+    assert "too little time" in r.stdout and lab.bench_calls() == []
+    lab.runner_once()                                # 6000 s left covers the default reserve
+    assert lab.bench_calls() == [["exp-long"]]
+
+
+def test_a_shorter_reserve_applies_once_the_driver_has_logged_it(lab: Lab):
+    lab.start_clock(24, deadline=time.time() + 600)
+    lab.lstate("start", IJ_RUN_MIN_S=10)
+    lab.ready("exp-short")
+    lab.runner_once(IJ_RUN_MIN_S=10)
+    assert lab.bench_calls() == [["exp-short"]]
+
+
+def test_a_clock_started_again_gives_the_runner_a_new_run(clocked: Lab):
+    import loopstate
+    loopstate.append_events(clocked.state, [{"type": "tick"}, {"type": "finish", "reason": "wall deadline reached"}])
+    clocked.ready("exp-next-run")
+    r = clocked.runner_once()
+    assert "run finished" in r.stdout and clocked.bench_calls() == []
+    clocked.start_clock(24)                          # bootstrap --reset-clock
+    st = clocked.state_now()
+    assert st.finished is None and st.accel_used_s == 0
+    r = clocked.runner_once()
+    assert r.returncode == 0, r.stderr
+    assert clocked.bench_calls() == [["exp-next-run"]]
+
+
 def test_a_second_runner_refuses_to_start(clocked: Lab):
     import fcntl
     with open(clocked.state / "runner.lock", "w") as f:

@@ -310,9 +310,11 @@ cmd_arm() {
   if ! { cp "$0" "$INSTALLED.tmp" && chmod 0755 "$INSTALLED.tmp" && mv -f "$INSTALLED.tmp" "$INSTALLED"; }; then
     die "cannot install $INSTALLED"
   fi
-  write_atomic "$TARGET_FILE" "$(printf 'NAME=%s\nZONE=%s\nPROJECT=%s' "$NAME" "$ZONE" "$PROJECT")"
-  write_atomic "$GCLOUD_FILE" "$GCLOUD"
-  write_atomic "$DEADLINE_FILE" "$deadline"
+  # A timer whose deadline never reached the disk fires and does nothing.
+  write_atomic "$TARGET_FILE" "$(printf 'NAME=%s\nZONE=%s\nPROJECT=%s' "$NAME" "$ZONE" "$PROJECT")" \
+    && write_atomic "$GCLOUD_FILE" "$GCLOUD" \
+    && write_atomic "$DEADLINE_FILE" "$deadline" \
+    || die "cannot write the deadline under $STATE_DIR (is the disk full?): NOT armed, so NOTHING WILL DELETE THIS VM"
   install_timer || die "the systemd timer did not come up: $UNIT.timer is NOT active, so NOTHING WILL DELETE THIS VM"
   log "armed: delete $NAME ($ZONE/$PROJECT) at $(utc "$deadline") UTC, in $(left "$deadline")"
   save_dir "" >/dev/null || true                       # names this VM's directory by its first arm
@@ -382,10 +384,27 @@ cmd_extend() {
   [ "$deadline" -gt "$(now)" ] || die "the deadline has passed: use arm"
   deadline=$(( deadline + secs ))
   [ $(( deadline - $(now) )) -le $(( MAX_HOURS * 3600 )) ] || die "that is more than $MAX_HOURS hours from now"
-  write_atomic "$DEADLINE_FILE" "$deadline"
+  write_atomic "$DEADLINE_FILE" "$deadline" \
+    || die "cannot write the new deadline to $DEADLINE_FILE (is the disk full?): NOT extended, the old deadline stands"
   install_timer || die "the systemd timer did not come up: $UNIT.timer is NOT active, so NOTHING WILL DELETE THIS VM"
   log "extended: delete $NAME at $(utc "$deadline") UTC, in $(left "$deadline")"
   echo "deadline now $(utc "$deadline") UTC, $(left "$deadline") from now"
+}
+
+# stop_loop: nothing may write while the last save copies, or the copy can hold a
+# leaderboard that names a result it does not have.  The loop is these units
+# (setup/systemd/).  A judged run in flight ignores SIGTERM, so stopping the runner's
+# unit waits out its TimeoutStopSec (300 s) and systemd then kills the run: the box is
+# longer than that.  Best effort: a stop that fails or runs out of time is logged, and
+# the save and the delete go ahead.
+LOOP_UNITS="inference-judge-heartbeat.timer inference-judge-heartbeat.service inference-judge-driver.service inference-judge-runner.service"
+LOOP_STOP_S=360
+stop_loop() {
+  local rc=0
+  # shellcheck disable=SC2086  # a word list on purpose
+  boxed "$LOOP_STOP_S" systemctl stop $LOOP_UNITS >> "$LOG" 2>&1 || rc=$?
+  if [ "$rc" -eq 0 ]; then log "stopped the loop (driver, runner, heartbeat) before the last save"
+  else log "the loop did not stop cleanly (exit $rc): saving the results and deleting the VM all the same"; fi
 }
 
 # _fire: what systemd runs.  Acts only if now >= the deadline FILE (see the header).
@@ -404,6 +423,7 @@ cmd_fire() {
   fi
   load_node || { log "no node on file: cannot delete; shutting down instead"; shutdown -h now; return 1; }
   log "DEADLINE REACHED: saving the results, then deleting TPU VM $NAME ($ZONE/$PROJECT)"
+  stop_loop
   # The hourly save must not run beside the last one, nor start after it.
   systemctl stop "$SAVE_UNIT.timer" "$SAVE_UNIT.service" >/dev/null 2>&1 || true
   cmd_save || log "RESULTS NOT FULLY SAVED (see above): deleting the VM all the same"

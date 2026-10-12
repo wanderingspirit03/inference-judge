@@ -35,6 +35,9 @@ model:
   local_dir: /opt/models/gemma-4-26b-a4b-it   # a flat directory of real files, mounted :ro
   served_name: gemma-4-26b-a4b       # served 8-bit; label results as fp8
   tokenizer: /opt/models/gemma-4-26b-a4b-it/tokenizer.json
+  # The model's chat template already leaves thinking off unless asked. Saying
+  # so here puts it in every chat request and in each launch's manifest.
+  chat_template_kwargs: {enable_thinking: false}
 engine:
   name: vllm-tpu
   # v0.31.0 (2026-10-06). The recipe names the tag `gemma4`, which is from

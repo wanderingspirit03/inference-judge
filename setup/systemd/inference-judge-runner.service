@@ -16,7 +16,7 @@ WorkingDirectory=/home/driver
 ExecStart=/opt/inference-judge/loop/runner.sh
 Restart=on-failure
 RestartSec=15
-# The bench measures for up to ~45 min; give a stop time to land the verdict.
+# A judged run takes up to the target's budgets.run_s; give a stop time to land the verdict.
 KillMode=mixed
 TimeoutStopSec=300
 

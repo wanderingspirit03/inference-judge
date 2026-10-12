@@ -14,6 +14,7 @@ import math
 import stat
 import threading
 import time
+from pathlib import Path
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 import numpy as np
@@ -368,6 +369,7 @@ def test_mock_task_set_shape():
 class _Handler(BaseHTTPRequestHandler):
     model: ToyModel = ToyModel("r0", 0.0)
     shape = "openai"          # openai | vllm | misaligned | no_logprobs
+    chat_bodies: list = []    # every chat request seen, for the tests to read
 
     def log_message(self, *a):            # quiet
         pass
@@ -387,6 +389,7 @@ class _Handler(BaseHTTPRequestHandler):
             wait, cls.compile_s = cls.compile_s, 0.0
             time.sleep(wait)
         if self.path.endswith("/chat/completions"):
+            cls.chat_bodies.append(body)
             task = next(t for t in TASKS
                         if t["prompt"] == body["messages"][-1]["content"])
             reply = honest_reply(task)
@@ -429,7 +432,8 @@ class _Handler(BaseHTTPRequestHandler):
 @pytest.fixture()
 def http_server():
     handler = type("H", (_Handler,), {"model": ToyModel("r0", 0.0),
-                                      "shape": "openai", "compile_s": 0.0})
+                                      "shape": "openai", "compile_s": 0.0,
+                                      "chat_bodies": []})
     srv = ThreadingHTTPServer(("127.0.0.1", 0), handler)
     t = threading.Thread(target=srv.serve_forever, daemon=True)
     t.start()
@@ -465,6 +469,130 @@ def _small_ref(tmp_path) -> Reference:
     return quality2.make_reference([l0], tmp_path / "small", prompts=PROMPTS[:4],
                                    tasks=TASKS[:3], target_id="cpu-mock",
                                    source="mock-replicated")
+
+
+def test_http_adapter_sends_chat_template_kwargs_only_when_set(http_server):
+    handler, url = http_server
+    quality2.HttpCandidate(url).answer(TASKS[0])
+    assert "chat_template_kwargs" not in handler.chat_bodies[-1]
+    quality2.HttpCandidate(url, chat_template_kwargs={"enable_thinking": False}
+                           ).answer(TASKS[0])
+    assert handler.chat_bodies[-1]["chat_template_kwargs"] == {"enable_thinking": False}
+
+
+def test_reference_and_gate_answer_under_the_target_chat_template_kwargs(
+        http_server, tmp_path):
+    handler, url = http_server
+    mock = Path(quality2.__file__).parent.parent / "targets" / "cpu-mock.yaml"
+    tgt = tmp_path / "t.yaml"
+    tgt.write_text(mock.read_text().replace(
+        'tokenizer: "ws"}', 'tokenizer: "ws", chat_template_kwargs: {enable_thinking: false}}'))
+    assert "enable_thinking" in tgt.read_text()
+    ref_dir, out = tmp_path / "ref", tmp_path / "gate.json"
+    assert quality2.main(["make-reference", "--base-url", url, "--target", str(tgt),
+                          "--out", str(ref_dir), "--replicate", "2",
+                          "--max-tokens", "16"]) == 0
+    made = len(handler.chat_bodies)
+    quality2.main(["gate", "--base-url", url, "--target", str(tgt),
+                   "--reference", str(ref_dir), "--out", str(out)])
+    assert made and len(handler.chat_bodies) > made
+    assert all(b.get("chat_template_kwargs") == {"enable_thinking": False}
+               for b in handler.chat_bodies)
+
+
+class _EngineHandler(BaseHTTPRequestHandler):
+    """A completions endpoint that echoes as a real engine does: each token as
+    the text it covers (" hello", not the vocabulary piece), with its offset."""
+    hf = None
+    reply = " hello world"
+    echo_prompts: list = []
+    bos = ""            # set: answer as vLLM does, with this token in front
+
+    def log_message(self, *a):
+        pass
+
+    def do_POST(self):                    # noqa: N802
+        body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
+        cls, prompt = type(self), body["prompt"]
+        if not body.get("echo"):
+            out = {"choices": [{"text": cls.reply, "finish_reason": "length"}]}
+        else:
+            cls.echo_prompts.append(prompt)
+            spans = cls.hf.encode(prompt, add_special_tokens=False).offsets
+            toks = [prompt[a:b] for a, b in spans] + [" again"]
+            out = {"choices": [{"text": prompt + " again", "logprobs": {
+                "tokens": toks, "text_offset": [a for a, _ in spans] + [len(prompt)],
+                "top_logprobs": [None] + [{t: -0.1, "other": -3.0} for t in toks[1:]]}}]}
+            if cls.bos:
+                # vLLM: prompt_logprobs keyed by token id, nothing for the first
+                # token, and text_offset counted over the tokens' own text, so
+                # every offset is late by the begin token's length.
+                toks = [cls.bos] + toks
+                lp = out["choices"][0]["logprobs"]
+                lp["tokens"] = toks
+                lp["text_offset"] = [sum(map(len, toks[:i])) for i in range(len(toks))]
+                lp["top_logprobs"] = [None] + lp["top_logprobs"]
+                out["choices"][0]["prompt_logprobs"] = [None] + [
+                    {str(i): {"logprob": -0.1, "rank": 1, "decoded_token": t},
+                     "9999": {"logprob": -3.0, "rank": 2, "decoded_token": "other"}}
+                    for i, t in enumerate(toks[1:-1])]
+        raw = json.dumps(out).encode()
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(raw)))
+        self.end_headers()
+        self.wfile.write(raw)
+
+
+@pytest.fixture()
+def engine(tmp_path):
+    """(handler, candidate): a sentencepiece-style tokenizer on both sides."""
+    tokenizers = pytest.importorskip("tokenizers")
+    from tokenizers import decoders, models, pre_tokenizers
+    import tokenizer as bench_tokenizer
+    words = ("say", "hello", "world", "again")
+    hf = tokenizers.Tokenizer(models.WordLevel(
+        {"[UNK]": 0, **{"\u2581" + w: i for i, w in enumerate(words, 1)}}, unk_token="[UNK]"))
+    hf.pre_tokenizer, hf.decoder = pre_tokenizers.Metaspace(), decoders.Metaspace()
+    hf.save(str(tmp_path / "tokenizer.json"))
+    handler = type("E", (_EngineHandler,), {"hf": hf, "echo_prompts": []})
+    srv = ThreadingHTTPServer(("127.0.0.1", 0), handler)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    tok = bench_tokenizer.load_tokenizer(str(tmp_path / "tokenizer.json"))
+    yield handler, quality2.HttpCandidate(
+        f"http://127.0.0.1:{srv.server_address[1]}/v1", tokenize=tok.tokens)
+    srv.shutdown()
+
+
+def test_http_adapter_lines_up_with_a_real_tokenizer(engine):
+    handler, cand = engine
+    toks, text = cand.greedy("say", 2)
+    assert text == " hello world" and len(toks) == 2
+    tops = cand.teacher_force("say", text, toks, 2)
+    assert [max(t, key=t.get) for t in tops] == [" hello", " world"]
+
+
+def test_http_adapter_keeps_a_token_that_starts_in_the_prompt_whitespace(engine):
+    handler, cand = engine
+    handler.reply = "hello world"         # the space belongs to the prompt
+    toks, text = cand.greedy("say ", 2)
+    tops = cand.teacher_force("say ", text, toks, 2)
+    assert [max(t, key=t.get) for t in tops] == [" hello", " world"]
+
+
+def test_http_adapter_lines_up_behind_a_begin_token_as_vllm_answers(engine):
+    handler, cand = engine
+    handler.bos = "<bos>"
+    toks, text = cand.greedy("say", 2)
+    tops = cand.teacher_force("say", text, toks, 2)
+    assert [max(t, key=t.get) for t in tops] == [" hello", " world"]
+
+
+def test_http_adapter_sends_a_real_tokenizer_the_text_exactly_as_generated(engine):
+    handler, cand = engine
+    with pytest.raises(quality2.AlignmentError):
+        cand.teacher_force("say", "hello", ["hello"], 2)
+    assert handler.echo_prompts == ["sayhello"]      # no space invented at the join
 
 
 def test_http_adapter_reads_vllm_prompt_logprobs(http_server, tmp_path):
@@ -575,3 +703,13 @@ def test_one_server_measured_again_is_no_reference_for_a_real_engine(tmp_path):
                        "--prompts", _jsonl(tmp_path / "p.jsonl", PROMPTS[:2]),
                        "--tasks", _jsonl(tmp_path / "t.jsonl", TASKS[:2])])
     assert not (tmp_path / "ref").exists()
+
+
+def test_excess_nll_finds_a_token_whose_edge_whitespace_differs():
+    # R's top-k is keyed by the text the server echoed (" blue"); our own
+    # tokens may lack the space ("blue"). The lookup must still find them.
+    tops = [{" sky": -0.1}, {" blue": -0.2, " red": -3.0, " a": -6.0}]
+    plain = quality2._excess_nll([" sky", " blue"], tops, [" sky", " red"])
+    assert plain == pytest.approx((3.0 - 0.2) / 2)
+    assert quality2._excess_nll(["sky", "blue"], tops, ["sky", "red"]) == pytest.approx(plain)
+

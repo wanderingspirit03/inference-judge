@@ -52,7 +52,9 @@ def step(cfg: ls.Config, now: float | None = None) -> str:
     end = state.end_ts(now)
     if end is None:
         return "idle: clock not started"
-    if end - now < state.policy["run_min_s"]:
+    # The larger of what the last driver start logged and what this process was
+    # given (loop.env), so the reserve holds before any driver has started.
+    if end - now < max(state.policy["run_min_s"], cfg.policy["run_min_s"]):
         return "idle: too little time left for a run"
 
     hyps = ls.load_hypotheses(cfg.hypotheses)

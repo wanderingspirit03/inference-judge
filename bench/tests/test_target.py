@@ -378,6 +378,26 @@ def test_screen_window_and_length_tol_reach_the_shell(tmp_path):
         target.load_target(write(tmp_path, t))
 
 
+def test_chat_template_kwargs_reach_the_shell_as_json(tmp_path):
+    t = cpu_mock()
+    assert shell_eval(tmp_path, t, '"[$T_CHAT_KWARGS]"') == ["[]"]
+    t["model"]["chat_template_kwargs"] = {}
+    assert shell_eval(tmp_path, t, '"[$T_CHAT_KWARGS]"') == ["[]"]
+    t["model"]["chat_template_kwargs"] = {"enable_thinking": False}
+    assert shell_eval(tmp_path, t, '"$T_CHAT_KWARGS"') == ['{"enable_thinking":false}']
+    for bad in ("enable_thinking=false", ["enable_thinking"], {1: False}):
+        t["model"]["chat_template_kwargs"] = bad
+        with pytest.raises(target.TargetError, match=r"model\.chat_template_kwargs"):
+            target.load_target(write(tmp_path, t))
+
+
+def test_chat_template_kwargs_are_part_of_the_target_hash(tmp_path):
+    t = cpu_mock()
+    before = target.target_hash(target.load_target(write(tmp_path, t)))
+    t["model"]["chat_template_kwargs"] = {"enable_thinking": False}
+    assert target.target_hash(target.load_target(write(tmp_path, t))) != before
+
+
 def test_compile_cache_is_a_seed_and_a_mount_point(tmp_path):
     t = cpu_mock()
     assert shell_eval(tmp_path, t, '"[$T_CACHE_SEED]" "[$T_CACHE_MOUNT]"') == ["[]", "[]"]

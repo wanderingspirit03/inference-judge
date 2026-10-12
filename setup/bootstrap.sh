@@ -831,6 +831,31 @@ s_harden() {
   assert_bench_access
 }
 
+# The runner starts no judged run that could end after the loop does.  One run
+# is bounded by the 900 s the runner gives the pre-flight, the target's
+# budgets.run_s (run.sh's watchdog), and what the watchdog may then spend
+# removing the run before it writes the verdict (300 + 300 + 60 + 240 s, and a
+# minute for the kill and the write).  The default is run_min_s in
+# research/loop/loopstate.py; bootstrap writes the bound when it is larger and
+# the file does not set IJ_RUN_MIN_S already.
+RUN_MIN_DEFAULT_S=2700
+RUN_MARGIN_S=1860
+run_reserve() {
+  local env="$1" run_s need have rest
+  [ -n "${T_FILE:-}" ] || return 0
+  run_s=$(tget_opt budgets.run_s "")
+  case "$run_s" in ""|*[!0-9]*) return 0 ;; esac
+  need=$(( run_s + RUN_MARGIN_S ))
+  # A value already in the file is the operator's (or an earlier bootstrap's): it stands.
+  if grep -q '^IJ_RUN_MIN_S=' "$env"; then
+    info "IJ_RUN_MIN_S is already set in $env -- left alone (this target's bound for one run is ${need}s)"
+    return 0
+  fi
+  [ "$need" -gt "$RUN_MIN_DEFAULT_S" ] || return 0
+  printf 'IJ_RUN_MIN_S=%s\n' "$need" >> "$env"
+  info "one judged run may take ${need}s in all (budgets.run_s ${run_s}s); IJ_RUN_MIN_S=$need set in $env"
+}
+
 # sudo replaces PATH with secure_path, so an agent outside it must be named.
 s_loop_env() {
   local env="$LOOP_ENV" c
@@ -843,6 +868,7 @@ s_loop_env() {
          info "$IJ_AGENT is outside sudo's secure_path; IJ_AGENT_BIN=$c added to $env"
        fi ;;
   esac
+  run_reserve "$env"
   info "$env: $(grep -c '^[A-Z]' "$env") settings"
 }
 

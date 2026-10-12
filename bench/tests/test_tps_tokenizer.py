@@ -45,3 +45,17 @@ def test_hf_tokenizer_json(tmp_path):
     assert tok.tokens("hello world again") == ["hello", "world", "again"]
     assert tok.count(tok.fit("hello world", 5)) == 5
     assert len(tok.fingerprint()) == 64
+
+
+def test_tokens_are_text_as_a_server_echoes_it_not_vocabulary_pieces(tmp_path):
+    tokenizers = pytest.importorskip("tokenizers")
+    from tokenizers import decoders, models, pre_tokenizers
+    vocab = {"[UNK]": 0, "\u2581hello": 1, "\u2581world": 2}
+    hf = tokenizers.Tokenizer(models.WordLevel(vocab, unk_token="[UNK]"))
+    hf.pre_tokenizer, hf.decoder = pre_tokenizers.Metaspace(), decoders.Metaspace()
+    path = tmp_path / "tokenizer.json"
+    hf.save(str(path))
+    tok = load_tokenizer(str(path))
+    assert [t.strip() for t in tok.tokens(" hello world")] == ["hello", "world"]
+    assert tok.count(" hello world") == 2
+
