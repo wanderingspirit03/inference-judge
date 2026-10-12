@@ -498,7 +498,7 @@ When the run ends you should find `/home/researcher/research/SUMMARY.md`. The re
 
 Treat it as the researcher's account, and check it against the judge's records:
 
-1. **Read the verdicts, not the prose.** A claim is real when `results/<id>/results.json` says `PROMOTED`, and the leaderboard in `/opt/bench/leaderboard/<target id>.json` names it. A gain the judge cannot tell from noise is `REJECTED` or `INCONCLUSIVE`, and the best configuration stays as it was.
+1. **Read the verdicts, not the prose.** A claim is real when `results/<id>/results.json` says `PROMOTED`, and the leaderboard in `/opt/bench/leaderboard/<target id>.json` names it. A gain the judge cannot tell from noise is `REJECTED`, and the best configuration stays as it was.
 2. **Look for the interval.** If a quoted interval crosses zero, the honest reading is "no proven win", however good the point estimate looks.
 3. **Check the numbers** the summary quotes against `results.json`.
 4. **Check the reference.** Every comparison is against the reference you measured. If you changed the reference's launcher, say so in your own notes: the number is only meaningful alongside the flags that produced it.
@@ -512,7 +512,7 @@ The verdicts you may see in `results.json`:
 | `PROMOTED` | A real gain over the incumbent. The candidate becomes the new best. |
 | `REJECTED` | The gain is below the minimum detectable effect, or the run failed the quality gate or a guard. |
 | `REJECTED_SCREEN` | The first, single launch already showed no gain, so the run stopped early. |
-| `INCONCLUSIVE` | The gain reaches the minimum detectable effect but is not statistically significant, or no calibration or incumbent exists yet. The best stays. |
+| `INCONCLUSIVE` | No calibration or incumbent exists yet. The best stays. |
 | `VOID_DRIFT` | The machine drifted during the run, so there is no judgement. |
 | `INVALID` | The measurement was not usable. For example the judge's stamps differ from the calibration's or the incumbent's (`ruler_mismatch`), or the server returned invalid requests, text outside the sanity band, or stalled requests. |
 | `CANARY_FAILED` | The server's answers to the ten fixed prompts changed. |

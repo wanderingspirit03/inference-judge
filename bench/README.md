@@ -242,9 +242,8 @@ A candidate is **PROMOTED** only when all of these hold:
   and with several input sizes no single size lost more than that either;
 * the quality gate passed against R.
 
-A gain that reaches the minimum detectable effect but is not significant is
-**INCONCLUSIVE**, and so is any run with no calibration; the current best
-stays. A candidate whose gain is below the minimum detectable effect, or that
+A run with no calibration or no incumbent is **INCONCLUSIVE**; the current
+best stays. A candidate whose gain is below the minimum detectable effect, or that
 fails the quality gate or a guard, is **REJECTED** (`REJECTED_SCREEN` when the
 screen already said so). A run whose measurement cannot be trusted is **INVALID**.
 Other endings: `CANARY_FAILED`, `BUILD_FAILED`, `HUNG` (a sweep outlived its

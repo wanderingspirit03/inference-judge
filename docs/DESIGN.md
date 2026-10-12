@@ -188,7 +188,7 @@ The judge writes one of these into `results.json`:
 | `PROMOTED` | Faster by more than the noise threshold, quality and guards held. Becomes the incumbent. |
 | `REJECTED` | Slower, not faster enough, failed the quality gate, broke a guard, or met the SLO at no level. `reasons` is never empty. |
 | `REJECTED_SCREEN` | The screen (section 2.5) measured the candidate more than `metric.screen_tol` below the incumbent's stored value. |
-| `INCONCLUSIVE` | The estimated gain reached the threshold but was not significant, or there is no calibration, no incumbent or no stored snapshot of the incumbent yet. |
+| `INCONCLUSIVE` | There is no calibration, no incumbent or no stored snapshot of the incumbent yet. The code also gives it when the estimated gain reaches the threshold without being significant, which the default settings cannot produce (section 2.5, step 8 of the decision order). |
 | `INVALID` | The measurement cannot be trusted or compared: stamps from a different judge (`ruler_mismatch`), an incumbent launch that is not a measurement or never became healthy (the box needs looking at, not the candidate), a candidate launch that is not a measurement, or, in a confirmation, a missing snapshot of the best. |
 | `VOID_DRIFT` | The two incumbent launches differ by more than the noise allows, so the pair is thrown away. |
 | `BUILD_FAILED` | The image build failed or timed out, `deps.txt` did not install in time, or the candidate server was not healthy within the health budget. |
@@ -499,7 +499,10 @@ first that applies:
    incumbent and of the stock reference. A size mix has per-size guards too.
    A failure in 5 or 6 gives `REJECTED`.
 7. If the test passes, `PROMOTED`.
-8. If it does not pass but `delta >= mde`, `INCONCLUSIVE`.
+8. If it does not pass but `delta >= mde`, `INCONCLUSIVE`. With the default
+   alpha `0.01` this step is never reached: `mde` is at least `3.2 * sigma_L`,
+   and a gain is already significant at `2.33 * sigma_L` (ABBA) or
+   `2.85 * sigma_L` (ICI), below `mde`.
 9. Otherwise `REJECTED`.
 
 **Launch status.** A launch is `ok` or one of `invalid_requests`,
