@@ -1,0 +1,31 @@
+[project]
+name = "inference-judge-bench"
+version = "1.0.0"
+description = "Measurement side of the inference-judge loop"
+requires-python = ">=3.12"
+dependencies = [
+    "httpx>=0.27",
+    "numpy>=1.26",
+    "pyyaml>=6.0",
+    "fastapi>=0.110",
+    "uvicorn>=0.29",
+    "tokenizers>=0.23",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8.0", "pytest-asyncio>=0.23"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+markers = ["slow: end-to-end runs against the mock server"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+# Flat layout: the modules are top-level files, and the data directories that
+# appear on the box (results/, leaderboard/, canary/) must not be
+# auto-discovered as packages (setuptools refuses to guess and the install fails).
+[tool.setuptools]
+py-modules = ["harness", "metrics", "compare", "mock_server", "stats", "quality2", "tokenizer", "target"]

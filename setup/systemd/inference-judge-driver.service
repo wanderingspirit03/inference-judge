@@ -1,0 +1,32 @@
+# The research driver: decides when an agent session runs, on which model, and
+# with which BRIEF; owns the clock and the ledgers.  Installed by
+# setup/harden_research.sh (or by hand: copy to /etc/systemd/system/, then
+# `systemctl daemon-reload && systemctl enable --now inference-judge-driver`).
+#
+# Exit 10 means the run's budget is spent: systemd must not restart it.  Any
+# other exit (a bug, an OOM, a reboot) restarts it, forever; the driver itself
+# never exits on crashed sessions (it backs off, falls back, then pauses).
+[Unit]
+Description=inference-judge research driver (agent sessions, clock, ledgers)
+After=network-online.target docker.service
+Wants=network-online.target inference-judge-runner.service inference-judge-heartbeat.timer
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=driver
+Group=driver
+EnvironmentFile=/etc/inference-judge/loop.env
+WorkingDirectory=/home/driver
+ExecStart=/opt/inference-judge/loop/run.sh
+Restart=always
+RestartSec=30
+RestartPreventExitStatus=10
+SuccessExitStatus=10
+# A session is a process tree (sudo -> adapter -> agent -> tools): stop it as a group.
+KillMode=mixed
+TimeoutStopSec=90
+Nice=5
+
+[Install]
+WantedBy=multi-user.target

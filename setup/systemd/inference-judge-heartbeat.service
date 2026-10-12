@@ -1,0 +1,12 @@
+# One heartbeat: writes heartbeat.json in the state dir, charges accelerator
+# time while the driver is down, and alerts once if the driver looks wedged.
+[Unit]
+Description=inference-judge loop heartbeat
+
+[Service]
+Type=oneshot
+User=driver
+Group=driver
+EnvironmentFile=/etc/inference-judge/loop.env
+ExecStart=/opt/inference-judge/loop/heartbeat.sh
+TimeoutStartSec=60

@@ -1,0 +1,149 @@
+# v6e4-gemma4-26b-tps - goal: speed for one user on TPU (single-stream
+# tokens/s), not total throughput.
+# Brought up by hand on an on-demand v6e-4 with these flags, at
+# --max-model-len 4096: about 8 ms per token for one user, the same from 128
+# to 2048 input tokens; cold start 25 min (compile 17.5), 7 min from a saved
+# restart disk; 2 chips fail at load. The compile cache saved on the disk is
+# from that length too. This file now asks for inputs up to 8000 tokens
+# (--max-model-len 9216, --max-num-batched-tokens 8192), which nobody has
+# measured: the first run on a real machine recompiles and measures the
+# baseline.
+# runnable: false until the launch below has been seen to reach the chips on a
+# real v6e-4 (see docker_flags). The ruler fingerprints this file: finish every
+# edit (docker_flags, env, runnable) BEFORE the baseline is measured; an edit
+# after it means measuring the baseline and the calibration again.
+id: v6e4-gemma4-26b-tps
+runnable: false
+accelerator: {kind: tpu, type: v6e-4, chips: 4, hosts: 1, topology: 2x2, hbm_gb_per_chip: 32}
+provision:                          # bootstrap's section, not read by the ruler
+  provider: gcp
+  zone: europe-west4-a              # verify which zone holds the quota
+  runtime_version: v2-alpha-tpuv6e  # from the recipe; verify
+  mode: on-demand                   # spot | flex-start | on-demand
+  data_disk_gb: 300
+  # the saved restart disk: image export, weights, and the
+  # compile cache that seeds engine.compile_cache.seed
+  cache_disk:
+    label: gemma4-cache
+    mount: /mnt/gemma4-cache
+    image_tar: runtime/vllm-tpu-image.tar
+    hf_cache: artifacts/gemma4-hf
+    compile_cache: artifacts/gemma4-vllm
+model:
+  hf_id: google/gemma-4-26B-A4B-it  # BF16, 51.6 GB, Apache 2.0, not gated
+  revision: 4d7ae4984b7db7de8f8457170b3f1a419ee76d52   # HF main on 2026-10-10
+  local_dir: /opt/models/gemma-4-26b-a4b-it   # a flat directory of real files, mounted :ro
+  served_name: gemma-4-26b-a4b       # served 8-bit; label results as fp8
+  tokenizer: /opt/models/gemma-4-26b-a4b-it/tokenizer.json
+engine:
+  name: vllm-tpu
+  # v0.31.0 (2026-10-06). The recipe names the tag `gemma4`, which is from
+  # April; verify that the release image serves Gemma 4 before trusting it.
+  image: "vllm/vllm-tpu@sha256:8a56fb9620c878ca4d5a5654c4fcddfc65d263c1ecdb6c374f41f414cd07fc48"
+  # The image's two editable installs: /workspace/tpu_inference (the TPU
+  # backend, where most edits go) and /workspace/vllm (commit 72e7874f). The
+  # researcher's checkouts are ~/tpu_inference-src and ~/vllm-src; a launch
+  # sees private copies at /src/tpu_inference and /src/vllm.
+  sources: [tpu_inference, vllm]
+  # The strong seal: the four chips and the vfio container device, the TPU
+  # control service through its unix socket (mounted read-only; see env), and
+  # no network. NOT PROVEN: nobody has started the chips without --privileged.
+  # Bootstrap's chip gate tries exactly these flags; if they cannot reach the
+  # chips, tools/tpu_seal_probe.sh finds the strongest set that can, and its
+  # line goes here (and its -e pairs into env). Results name what was passed
+  # in: with these flags isolation.seal reads "weaker: device ..., host socket
+  # ..." and exfil_probe "not_proven: ...", and a privileged launch says so.
+  docker_flags: [--device, /dev/vfio/vfio, --device, /dev/vfio/0, --device, /dev/vfio/1,
+                 --device, /dev/vfio/2, --device, /dev/vfio/3,
+                 -v, "/var/run/tpu-plugin:/var/run/tpu-plugin:ro"]
+  shm_size: 16g
+  # Each launch gets a private writable copy of the ruler's seed at `mount`.
+  # A candidate keeps its copy from its first launch to its last and it is
+  # then discarded; only incumbent and baseline launches add to the seed. The
+  # seed starts as the saved
+  # disk's artifacts/gemma4-vllm (1.8 GB, compiled at max-model-len 4096, so
+  # the first session's baseline fills it again).
+  compile_cache: {seed: /opt/bench/cache/v6e4-gemma4-26b-tps, mount: /root/.cache/vllm}
+  # 8-bit at load: weights and activations are converted to
+  # float8_e4m3fn when the model loads; the checkpoint on disk stays BF16.
+  # env and quantization flags are copied from upstream's daily benchmark
+  # (.buildkite/benchmark/cases/daily/Gemma4-26B-dataset_custom-inlen_1024-
+  # outlen_500.json), which runs on v7x only: every one is `verify` on v6e.
+  # The served model is the 8-bit one, so the reference is recorded from it.
+  env:
+    MODEL_IMPL_TYPE: flax_nnx
+    USE_BATCHED_RPA_KERNEL: "1"
+    MOE_REQUANTIZE_WEIGHT_DTYPE: float8_e4m3fn
+    # the control service over the mounted socket instead of host TCP
+    VBAR_CONTROL_SERVICE_URL: "unix:/var/run/tpu-plugin/vbar.sock"
+    # 1: the server compiles a shape the first time it is used instead of
+    # every token bucket before it is ready. Ready in ~4 min instead of ~7
+    # from a warm cache, and a candidate whose engine edit misses the cache
+    # compiles the handful of shapes the ruler sends, not all of them
+    # (17.5 min at 4096; more at 8192). The price is a compile on first use:
+    # the ruler's warm sweep sends every input size once per stream before
+    # anything is scored, and waits up to budgets.compile_s for it.
+    SKIP_JAX_PRECOMPILE: "1"
+  # The serve command is not here: it is research/experiments/baseline-tpu/
+  # launch.sh (--tensor-parallel-size 4, --max-model-len 9216,
+  # --max-num-batched-tokens 8192, --max-num-seqs 8, --kv-cache-dtype fp8 and
+  # the 8-bit rules), and every candidate brings its own.
+  port: 8000
+metric:
+  kind: tps
+  # A list: one stream is served a balanced mix of these input sizes in a
+  # fixed order (the same for candidate and incumbent), and the headline is
+  # the whole-answer speed over the mix: the 512 tokens over the time from
+  # sending the request to the last token. Sizes count the user text; the chat
+  # template adds a few tokens. The engine pads a prompt to a power-of-two
+  # bucket (9 buckets, 16..4096, at max-num-batched-tokens 4096), so each
+  # size sits just under an edge and 8000 is the largest that still fits the
+  # 8192 bucket with the template. Verify against the server's
+  # "Prepared request paddings" line. Only 128..2048 has been measured.
+  isl: [100, 1000, 2000, 4000, 8000]
+  osl: 512
+  # One level only: with [1] the headline is the single-stream speed over
+  # the 4 chips. Adding a higher level would make it a throughput number.
+  concurrency: [1]
+  # Fixed ceilings, not numbers read off the baseline (this file must not
+  # change after the baseline). p99_tpot_ms is over each request's MEAN time
+  # per token, a 20 tok/s floor, so tokens arriving in bursts never trip it.
+  # p95_ttft_ms is the only rule on the first token; by hand it was 56 ms at
+  # 2048 tokens in, and nobody has measured 8000.
+  slo: {p99_tpot_ms: 50, p95_ttft_ms: 2000}
+  # The longest silence allowed between two tokens of one answer; at ~8 ms a
+  # token it allows bursts of up to ~125 tokens. A block with a stall is
+  # dropped, and a launch with every block stalled is INVALID.
+  stall_ms: 1000
+  # A request is ~4.2 s (512 tokens at about 8 ms plus the prefill), a pass over
+  # the five sizes ~21 s. Per-token time was within 1% request to request, so
+  # a window needs a few passes, not minutes: 60 s is ~3 requests per size,
+  # two blocks and two launches give the per-size guard ~12 a side.
+  ramp_s: 5
+  window_s: 60
+  # The candidate alone first, for one 45 s window (two passes): a loser
+  # costs one launch (~6 min) and never starts the incumbent.
+  screen_window_s: 45
+  design: abba
+  blocks: 2
+  prompt_pool: /opt/bench/pools/gemma4-main.jsonl
+  confirm_pool: /opt/bench/pools/gemma4-confirm.jsonl    # disjoint from prompt_pool
+  length_tol: 0.01
+# How long a launch may take to answer /v1/models. Ready was ~4 min by hand
+# (weights 156 s; shapes compile on first use, in the warm sweep, which has
+# budgets.compile_s). A server that exits is given up on at once; this is for
+# one that hangs.
+health: {url: "http://127.0.0.1:8000/v1/models", ready_timeout_s: 900}
+metrics: {url: "http://127.0.0.1:8000/metrics"}
+probes:
+  present: "ls /dev/vfio/[0-9]* | wc -l"           # the chips; /dev/vfio/vfio is the container device
+budgets: {build_s: 1200, compile_s: 1800, health_s: 1800, run_s: 5400}
+reference:
+  dir: reference/v6e4-gemma4-26b-tps
+  prompts: /opt/bench/pools/gemma4-quality-prompts.jsonl
+  tasks: /opt/bench/pools/gemma4-quality-tasks.jsonl
+  # The reference answers come from three cold launches of the baseline, 128
+  # tokens each (these are also the defaults for a real engine).
+  max_tokens: 128
+  launches: 3
+quality: {allow_missing_logprobs: false}           # verify the engine returns logprobs

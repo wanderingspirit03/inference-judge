@@ -1,0 +1,57 @@
+# sketch-tpu-8chip - an example of a target that is not ready to run. Every
+# value marked `verify` is a placeholder. With runnable: false, target.py
+# validates the file and bootstrap.sh --plan lists its steps, but run.sh
+# refuses to run it. Copy it, check each value on a real machine, then set
+# runnable: true.
+id: sketch-tpu-8chip
+runnable: false
+accelerator: {kind: tpu, type: v6e-8, chips: 8, hosts: 1, topology: 2x4, hbm_gb_per_chip: 32}  # verify
+provision:                          # bootstrap's section, not read by the ruler
+  provider: gcp
+  zone: "<zone>"                    # verify which zone holds the quota
+  runtime_version: "<verify>"       # TPU VM software version
+  mode: spot                        # spot | flex-start | on-demand
+  data_disk_gb: 1000
+model:
+  hf_id: "<org>/<model>"            # verify exact repo
+  revision: "<commit sha>"          # verify; required, never "main"
+  local_dir: /mnt/models/model      # run.sh mounts its parent at /opt/models:ro
+  served_name: model
+  tokenizer: /mnt/models/model/tokenizer.json   # verify
+engine:
+  name: jax-engine
+  image: "<registry>/<engine>@sha256:<digest>"  # verify
+  # verify: /dev/accel* needs --privileged (or --device per chip). --net=host
+  # is left out: a single host should not need it, and with it the network
+  # seal is off (run.sh would record network=host). The model mount comes
+  # from model.local_dir, not from here.
+  docker_flags: [--privileged]
+  env: {TPU_SKIP_MDS_QUERY: "1"}    # verify: libtpu without the metadata server
+  launch: [python, -m, "<engine entrypoint>", --model-path, /opt/models/model, --tp-size, "8"]  # verify
+  port: 30000
+  # An engine with a compile cache names it here; the v6e-4 target has one:
+  # compile_cache: {seed: /opt/bench/cache/sketch-tpu-8chip, mount: /root/.cache/<engine>}
+metric:
+  kind: tps
+  isl: 2048
+  osl: 512
+  concurrency: [16, 32, 64, 128]    # verify against the HBM budget
+  slo: {p99_tpot_ms: 50, p95_ttft_ms: 2000}
+  ramp_s: 30
+  window_s: 120
+  design: ici                       # compile time makes a 4-launch ABBA dear; verify
+  blocks: 2
+  prompt_pool: /opt/bench/pools/main.jsonl      # verify
+  confirm_pool: /opt/bench/pools/confirm.jsonl  # disjoint from prompt_pool
+  length_tol: 0.01
+health: {url: "http://127.0.0.1:30000/v1/models", ready_timeout_s: 3600}
+metrics: {url: "http://127.0.0.1:30000/metrics"}   # verify
+probes:
+  present: "ls /dev/accel* | wc -l"                # verify device path
+  idle: "! fuser /dev/accel* 2>/dev/null"
+budgets: {build_s: 1200, compile_s: 2400, health_s: 3600, run_s: 5400}
+reference:
+  dir: reference/sketch-tpu-8chip
+  prompts: /opt/bench/pools/quality-prompts.jsonl  # verify
+  tasks: /opt/bench/pools/quality-tasks.jsonl      # verify
+quality: {allow_missing_logprobs: false}

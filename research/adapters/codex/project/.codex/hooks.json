@@ -1,0 +1,38 @@
+{
+  "description": "inference-judge guard. A PreToolUse hook exits 2 to block a tool call; its stderr is what Codex sees. See guard/*.sh and docs/DESIGN.md.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "^apply_patch$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$(git rev-parse --show-toplevel)/guard/pretooluse-edit.sh\"",
+            "timeout": 15
+          }
+        ]
+      },
+      {
+        "matcher": "^Bash$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$(git rev-parse --show-toplevel)/guard/pretooluse-bash.sh\"",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$(git rev-parse --show-toplevel)/guard/posttooluse-audit.sh\"",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}

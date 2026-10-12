@@ -1,0 +1,24 @@
+# The research repo is git-init'd on the box by setup/bootstrap.sh and committed
+# by the driver after every iteration. These are machine output, not science.
+
+# The adapter's raw JSON result per iteration (loop/run.sh keeps them so there
+# is a verbatim record; they are large and not worth versioning).
+loop/iterations/
+
+# Driver and guard logs.
+loop/*.log
+loop/last-crash.stderr
+audit.log
+
+# Profiles can be hundreds of MB; keep the summary in the notebook instead.
+profiles/*.nsys-rep
+profiles/*.sqlite
+
+__pycache__/
+*.pyc
+.venv/
+
+# The run queue is read and consumed by the driver's runner (the ledger in
+# ~driver/research-state records what ran); the spool belongs to loop/bg.sh.
+queue/
+.inference-judge-jobs/

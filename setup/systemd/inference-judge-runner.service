@@ -1,0 +1,24 @@
+# The ruler queue runner: takes queue/<id>.json (id and kind only), pre-flights
+# it, and calls `sudo -n -u bench /opt/bench/run.sh [--instrument] <id>`, one
+# at a time, whatever the agent sessions are doing.  Exits 0 when the run is
+# finished; any other exit restarts it.
+[Unit]
+Description=inference-judge ruler queue runner
+After=docker.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=driver
+Group=driver
+EnvironmentFile=/etc/inference-judge/loop.env
+WorkingDirectory=/home/driver
+ExecStart=/opt/inference-judge/loop/runner.sh
+Restart=on-failure
+RestartSec=15
+# The bench measures for up to ~45 min; give a stop time to land the verdict.
+KillMode=mixed
+TimeoutStopSec=300
+
+[Install]
+WantedBy=multi-user.target

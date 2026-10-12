@@ -1,0 +1,166 @@
+# inference-judge-base:latest -- the default container image for experiments.
+#
+# Built once by setup/bootstrap.sh:
+#   docker build -f setup/Dockerfile.base -t inference-judge-base:latest \
+#       --build-arg VLLM_TAG=<tag> --build-arg SGLANG_TAG=<tag or empty> \
+#       --build-arg TORCH_BACKEND=cu130 setup/
+#
+# It is only for a target whose engine.image is inference-judge-base:*.  A target that
+# names a prebuilt engine image never builds this one and is not held to
+# anything below.
+#
+# CUDA 13, AND ONLY CUDA 13
+# -------------------------
+# What the host needs for this image: an NVIDIA driver r580 or newer (CUDA 13)
+# and Docker with the NVIDIA container toolkit.  The reason is the wheels:
+# every engine release this file has been built with (vLLM 0.29, SGLang 0.5.19)
+# pins torch 2.13 with CUDA 13 wheels -- including SGLang v0.5.16, which an
+# earlier version of this repo wrongly treated as the newest cu128-compatible
+# tag.  There is no cu128 path any more; bootstrap's
+# gpu step fails loudly on a driver below r580 rather than quietly building
+# something that cannot run.  setup/gpu.sh reads CUDA_IMAGE below to pick the
+# image its passthrough probe runs.
+#
+# WHEELS, NOT EDITABLE SOURCE BUILDS
+# ----------------------------------
+# Both engines are installed from their published PyPI wheels.  The previous
+# `VLLM_USE_PRECOMPILED=1 pip install -e .` on a detached tag was not the
+# "matching prebuilt kernels" it claimed to be: vLLM's setup.py asks git for the
+# current BRANCH to find a merge base, a detached checkout has none, and it
+# falls back to a nightly wheel whose kernels do not match the source.
+#
+# So: `uv pip install vllm==<version>` for the runtime, plus a read-only source
+# checkout at /opt/vllm-src pinned to the same tag for patching.  The exact
+# wheel URL that was installed is resolved from PyPI at build time and written
+# to /opt/vllm-wheel-url; an experiment that patched python under /src/vllm
+# re-installs editable against THAT wheel, which is the only way the compiled
+# kernels are guaranteed to match:
+#
+#   VLLM_PRECOMPILED_WHEEL_LOCATION="$(cat /opt/vllm-wheel-url)" \
+#     uv pip install --python /opt/venv/vllm/bin/python -e /src/vllm --no-deps
+#
+# experiments/TEMPLATE/launch.sh documents this for the researcher.
+#
+# TWO VIRTUALENVS
+# ---------------
+# vLLM and SGLang pin conflicting versions of torch, flashinfer, triton and
+# tokenizers, and a single environment holding both is unreproducible in
+# practice.  The image therefore has two: /opt/venv/vllm (first on PATH, so
+# `python`, `vllm` and `pip` mean vLLM) and /opt/venv/sglang.  An experiment
+# that wants SGLang calls /opt/venv/sglang/bin/python explicitly, as
+# experiments/baseline-sglang/launch.sh does.  Anything else (a hand-written
+# decode loop, TensorRT-LLM, ...) can create a third venv in its own layer.
+
+ARG CUDA_IMAGE=nvidia/cuda:13.0.3-devel-ubuntu24.04
+FROM ${CUDA_IMAGE}
+
+# Tags are `vX.Y.Z` (git); the PyPI versions are the same without the leading v.
+ARG VLLM_TAG=v0.29.0
+ARG SGLANG_TAG=v0.5.19
+# cu130 is the only supported channel; the arg stays so a future CUDA 14 box
+# needs one build-arg and not a rewrite.
+ARG TORCH_BACKEND=cu130
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    UV_LINK_MODE=copy \
+    UV_HTTP_TIMEOUT=600 \
+    VLLM_TAG=${VLLM_TAG} \
+    SGLANG_TAG=${SGLANG_TAG} \
+    TORCH_BACKEND=${TORCH_BACKEND}
+
+# ---------------------------------------------------------------- system deps
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential ca-certificates cmake curl git jq kmod libgl1 \
+        libnuma1 ninja-build numactl pkg-config python3.12 python3.12-dev \
+        python3.12-venv rsync tini wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Nsight Systems (nsys) for profiling.  Best effort: the NVIDIA devtools repo
+# is occasionally unavailable and a missing profiler must not fail the build.
+RUN set -eux; \
+    ( curl -fsSL https://developer.download.nvidia.com/devtools/repos/ubuntu2404/amd64/nvidia.pub \
+        | gpg --dearmor -o /usr/share/keyrings/nvidia-devtools.gpg \
+      && echo "deb [signed-by=/usr/share/keyrings/nvidia-devtools.gpg] https://developer.download.nvidia.com/devtools/repos/ubuntu2404/amd64/ /" \
+        > /etc/apt/sources.list.d/nvidia-devtools.list \
+      && apt-get update \
+      && apt-get install -y --no-install-recommends nsight-systems-cli ) \
+    || echo "WARN: nsight-systems not installed; nsys profiling unavailable" > /opt/NSYS_MISSING; \
+    rm -rf /var/lib/apt/lists/*
+
+# ------------------------------------------------------------------------ uv
+RUN curl -LsSf https://astral.sh/uv/install.sh | UV_INSTALL_DIR=/usr/local/bin sh \
+    && uv --version
+
+# ------------------------------------------------------------------ vllm venv
+RUN uv venv --python 3.12 /opt/venv/vllm
+ENV PATH=/opt/venv/vllm/bin:$PATH \
+    VIRTUAL_ENV=/opt/venv/vllm
+
+# torch from the cu130 channel first, so the engine install cannot silently
+# replace it with a different CUDA build.
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install --python /opt/venv/vllm/bin/python \
+        --torch-backend=${TORCH_BACKEND} torch \
+    && uv pip install --python /opt/venv/vllm/bin/python \
+        triton httpx numpy pyyaml setuptools wheel ninja cmake
+
+# The wheel, and the exact URL it came from.  The URL is what an experiment
+# needs to re-install a patched /src/vllm without falling back to a nightly.
+RUN --mount=type=cache,target=/root/.cache/uv \
+    set -eux; \
+    VLLM_VER="${VLLM_TAG#v}"; \
+    curl -fsSL "https://pypi.org/pypi/vllm/${VLLM_VER}/json" \
+      | jq -r '.urls[] | select(.filename | test("manylinux.*x86_64\\.whl$")) | .url' \
+      | head -1 > /opt/vllm-wheel-url; \
+    test -s /opt/vllm-wheel-url; \
+    echo "vllm ${VLLM_VER} wheel: $(cat /opt/vllm-wheel-url)"; \
+    uv pip install --python /opt/venv/vllm/bin/python \
+        --torch-backend=${TORCH_BACKEND} "vllm==${VLLM_VER}"; \
+    /opt/venv/vllm/bin/python -c 'import vllm,torch; print("vllm",vllm.__version__,"torch",torch.__version__,"cuda",torch.version.cuda)'
+
+# Source at the same tag, for reading and for patches.  NOT installed: the
+# runtime is the wheel above.  run.sh mounts Claude's own (possibly patched)
+# checkout at /src/vllm, which is what an experiment re-installs from.
+RUN git clone --depth 1 --branch "${VLLM_TAG}" \
+        https://github.com/vllm-project/vllm.git /opt/vllm-src
+
+# ---------------------------------------------------------------- sglang venv
+# Non-fatal: if SGLang cannot resolve against this channel the image is still
+# useful for the vLLM track, and the failure is recorded where baseline-sglang
+# and check.sh both look for it.  An empty SGLANG_TAG (the target names no
+# sglang) skips the install and says so in the same place.
+RUN uv venv --python 3.12 /opt/venv/sglang
+RUN --mount=type=cache,target=/root/.cache/uv \
+    SGLANG_VER="${SGLANG_TAG#v}"; \
+    if [ -z "${SGLANG_TAG}" ]; then \
+      echo "SGLang not built: the target names no sglang (SGLANG_TAG is empty)" > /opt/venv/sglang/.install-failed; \
+      exit 0; \
+    fi; \
+    ( uv pip install --python /opt/venv/sglang/bin/python \
+            --torch-backend=${TORCH_BACKEND} "sglang[all]==${SGLANG_VER}" \
+      && uv pip install --python /opt/venv/sglang/bin/python \
+            httpx numpy pyyaml \
+      && /opt/venv/sglang/bin/python -c 'import sglang,torch; print("sglang",sglang.__version__,"torch",torch.__version__,"cuda",torch.version.cuda)' \
+      && git clone --depth 1 --branch "${SGLANG_TAG}" \
+            https://github.com/sgl-project/sglang.git /opt/sglang-src ) \
+    || ( echo "SGLang install failed for ${SGLANG_TAG} on ${TORCH_BACKEND}" \
+           > /opt/venv/sglang/.install-failed && cat /opt/venv/sglang/.install-failed )
+
+# ------------------------------------------------------------------- runtime
+ENV HF_HUB_OFFLINE=1 \
+    VLLM_USE_MODELSCOPE=0 \
+    HF_HOME=/tmp/hf \
+    OUTLINES_CACHE_DIR=/tmp/outlines \
+    TRITON_CACHE_DIR=/tmp/triton \
+    TORCHINDUCTOR_CACHE_DIR=/tmp/inductor \
+    VLLM_CACHE_ROOT=/tmp/vllm \
+    XDG_CACHE_HOME=/tmp/cache
+
+# run.sh mounts: /opt/models (ro), /exp (rw copy of the experiment dir),
+# /src/vllm and /src/sglang (rw private copies), /out (rw results dir).
+# If /exp/deps.txt exists, run.sh installs it into /opt/venv/vllm before CMD.
+WORKDIR /exp
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD ["bash", "/exp/launch.sh"]

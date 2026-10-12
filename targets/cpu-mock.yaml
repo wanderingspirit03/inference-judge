@@ -1,0 +1,24 @@
+# cpu-mock - the honest mock server (bench/mock_server.py) as a target, so the
+# whole TPS ruler can run on a laptop and in CI. DESIGN 2.1.
+#
+# A sealed launch needs an image. Build it with
+#   docker build -t inference-judge-mock:latest -f targets/cpu-mock.Dockerfile targets
+# run.sh mounts bench/mock_server.py into it read-only at /opt/inference-judge/.
+id: cpu-mock
+runnable: true
+accelerator: {kind: none, chips: 1, hosts: 1}
+model: {served_name: mock, revision: "0", local_dir: "", tokenizer: "ws"}
+engine: {name: mock, image: "inference-judge-mock:latest", docker_flags: [], port: 8000}
+metric:
+  kind: tps
+  isl: 256
+  osl: 64
+  concurrency: [4, 8, 16]
+  slo: {p99_tpot_ms: 50, p95_ttft_ms: 2000}
+  ramp_s: 2
+  window_s: 10
+  design: abba          # abba: I C C I, ici: I C I
+  blocks: 2             # measured sweeps per launch, after one unscored warm sweep
+budgets: {build_s: 600, compile_s: 120, health_s: 120, run_s: 2400}
+reference: {dir: "reference/cpu-mock"}
+quality: {allow_missing_logprobs: false}

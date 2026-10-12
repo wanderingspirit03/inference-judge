@@ -1,0 +1,11 @@
+[Unit]
+Description=inference-judge loop heartbeat, every minute
+
+[Timer]
+OnBootSec=60
+OnUnitActiveSec=60
+AccuracySec=5
+Unit=inference-judge-heartbeat.service
+
+[Install]
+WantedBy=timers.target

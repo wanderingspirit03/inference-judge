@@ -1,0 +1,32 @@
+# download cache and virtualenvs
+bench/.cache/
+bench/.venv/
+.venv/
+__pycache__/
+*.pyc
+
+# Run output: results, leaderboard state and the stored best-run distribution.
+bench/results/
+bench/leaderboard.json
+bench/leaderboard/
+.env
+
+# Driver output produced on the box, never in this repo. research/.gitignore
+# repeats these for the git repo bootstrap creates at /home/researcher/research.
+research/loop/iterations/
+research/loop/*.log
+research/loop/last-crash.stderr
+research/audit.log
+research/ALERTS.md
+research/SUMMARY.md
+research/profiles/*
+!research/profiles/README.md
+
+# The researcher's run queue and background-job spool are live box
+# state (research/.gitignore repeats them for the repo on the box).
+research/queue/
+.inference-judge-jobs/
+
+# build and test spill
+bench/bench/
+*.egg-info/

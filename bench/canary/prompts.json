@@ -1,0 +1,19 @@
+{
+  "description": "Ten short fixed prompts. Run non-streaming at temperature 0, reasoning_effort low (the same setting the measured traffic uses) and max_tokens 64 before every experiment. The comparison is on the first 16 whitespace-separated words of the visible content - not on tokenizer tokens, because both sides have to be able to reproduce it by hand. A candidate needs at least 8 of 10 prefixes to match the baseline file; an errored or empty reply is a mismatch. Fewer than 8 means the weights, chat template or sampling changed and the run is not comparable, whatever the latency says. The baseline file itself is only written when all 10 prompts returned real, non-empty content.",
+  "prefix_words": 16,
+  "prefix_tokens": 16,
+  "max_tokens": 64,
+  "reasoning_effort": "low",
+  "prompts": [
+    {"id": "c01", "system": "You are a helpful assistant. Answer in one short sentence.", "user": "What is the capital of France?"},
+    {"id": "c02", "system": "You are a helpful assistant. Answer in one short sentence.", "user": "Add 17 and 25 and give only the number."},
+    {"id": "c03", "system": "You are a helpful assistant. Answer in one short sentence.", "user": "Name the three primary additive colours."},
+    {"id": "c04", "system": "You are a helpful assistant. Answer in one short sentence.", "user": "Translate 'good morning' into German."},
+    {"id": "c05", "system": "You are a receptionist. Answer in one short sentence.", "user": "Say hello and offer to book an appointment."},
+    {"id": "c06", "system": "You are a helpful assistant. Answer in one short sentence.", "user": "List the days of the week starting on Monday."},
+    {"id": "c07", "system": "You are a helpful assistant. Answer in one short sentence.", "user": "What does HTTP stand for?"},
+    {"id": "c08", "system": "You are a helpful assistant. Answer in one short sentence.", "user": "Spell the word 'benchmark' letter by letter."},
+    {"id": "c09", "system": "You are a helpful assistant. Answer in one short sentence.", "user": "How many minutes are in three hours?"},
+    {"id": "c10", "system": "You are a helpful assistant. Answer in one short sentence.", "user": "Finish this sentence: the quick brown fox"}
+  ]
+}

@@ -1,0 +1,124 @@
+# gpu-gemma4-26b-tps - speed for one user (single-stream tokens/s) on one NVIDIA
+# GPU, with the stock vLLM image and vLLM's defaults: the plain GPU target.
+#
+# A SKETCH. NEVER LAUNCHED: no GPU has run this file, the bootstrap steps for it
+# (setup/gpu.sh) or its baseline. Read from a primary source on 2026-10-12:
+#   - the model revision and its files (Hugging Face API): 12 files, 51.6 GB,
+#     not gated;
+#   - the image digest, and from the image's own config: entrypoint
+#     ["vllm", "serve"], CUDA 13.0.2 (NVIDIA_REQUIRE_CUDA cuda>=13.0, so the
+#     host driver must be r580 or newer), python3 with no `python`, and the
+#     commit it was built from (Docker Hub registry API; nothing was pulled).
+# NOT verified, each one a guess until a launch says otherwise:
+#   - that this vLLM release serves Gemma 4 at all, and with what quality;
+#   - the serve flags: research/experiments/baseline-vllm/launch.sh passes only
+#     the model directory, the served name, the host and the port. vLLM's
+#     default context length is the model's own maximum, and the engine refuses
+#     to start when its KV cache cannot hold one such request. If it does, this
+#     target needs its own baseline with --max-model-len 9216 (the largest
+#     input here is 8000 tokens plus 512 out), named in provision.baseline;
+#   - memory: the weights are ~52 GB unquantised (BF16), which leaves ~25 GB of
+#     an 80 GB card for the KV cache and the runtime. A smaller card cannot
+#     hold them; hbm_gb_per_chip below is what bootstrap checks;
+#   - that the engine returns logprobs (quality), the time to ready
+#     (health.ready_timeout_s) and every budget: copied from the TPU target;
+#   - that the container starts with the flags below (bootstrap's gpu gate
+#     tries exactly these, with nvidia-smi instead of the server);
+#   - the vllm commit in provision.sources was read from the image's label, not
+#     looked up in the repository.
+# runnable: false until a launch of the baseline has answered on a real GPU.
+# The ruler fingerprints this file: finish every edit BEFORE the baseline is
+# measured; an edit after it means measuring the baseline and the calibration
+# again.
+id: gpu-gemma4-26b-tps
+runnable: false
+# No `type`: any single NVIDIA card with this much memory. Name one (type: ...)
+# to tie the numbers to a card; bootstrap then refuses any other.
+accelerator: {kind: gpu, chips: 1, hosts: 1, hbm_gb_per_chip: 80}
+provision:                          # bootstrap's section, not read by the ruler
+  # Free space on / before the install: the weights (52), the image unpacked
+  # (~20; 9 GB compressed), and 40 for experiment images and results.
+  min_free_gb: 120
+  # The tree the researcher edits (~/vllm-src), at the commit the image was
+  # built from: its org.opencontainers.image.revision label. verify.
+  sources:
+    vllm: {url: "https://github.com/vllm-project/vllm.git", ref: db9527a46873454610df6dbedf79a36d6bf1a7f6}
+model:
+  hf_id: google/gemma-4-26B-A4B-it  # BF16, 51.6 GB, Apache 2.0, not gated
+  revision: 4d7ae4984b7db7de8f8457170b3f1a419ee76d52   # the TPU target's; still HF main on 2026-10-12
+  local_dir: /opt/models/gemma-4-26b-a4b-it   # a flat directory of real files, mounted :ro
+  served_name: gemma-4-26b-a4b       # served as downloaded: BF16, nothing quantised
+  tokenizer: /opt/models/gemma-4-26b-a4b-it/tokenizer.json
+engine:
+  name: vllm
+  # vllm/vllm-openai:v0.31.0 (created 2026-10-03), the multi-arch index digest;
+  # its linux/amd64 manifest is sha256:a4a4c0437bf7240089da5f08aa370c4aee17ae5290f7a3b468825ee26c4c3a6b.
+  image: "vllm/vllm-openai@sha256:c1c9f6fd5c109ba7f0546a59f5b2f15fb87f64c77782e90a27b648b42a8e67c3"
+  # The researcher's checkout is ~/vllm-src; a launch sees a private copy at
+  # /src/vllm. The image runs its installed wheel, not that copy: an experiment
+  # that edits the tree has to install or import it in its own launch.sh.
+  sources: [vllm]
+  # The image's entrypoint is `vllm serve`; the ruler starts `<image> bash -c
+  # ...`, so the entrypoint is cleared. Nothing else: the ruler adds the GPU
+  # (--gpus all, from accelerator.kind) and seals the network itself.
+  docker_flags: ["--entrypoint="]
+  shm_size: 8g                      # verify; one GPU needs little
+  env:
+    # no network in a sealed launch: never ask the Hub about a local directory
+    HF_HUB_OFFLINE: "1"
+  # The serve command is not here: it is research/experiments/baseline-vllm/
+  # launch.sh, and every candidate brings its own.
+  port: 8000
+metric:
+  kind: tps
+  # A list: one stream is served a balanced mix of these input sizes in a
+  # fixed order (the same for candidate and incumbent), and the headline is
+  # the whole-answer speed over the mix: the 512 tokens over the time from
+  # sending the request to the last token. Sizes count the user text; the chat
+  # template adds a few tokens. The sizes are the TPU target's, so the two
+  # are asked the same question; nothing about them is tuned for a GPU.
+  isl: [100, 1000, 2000, 4000, 8000]
+  osl: 512
+  # One level only: with [1] the headline is the single-stream speed. Adding a
+  # higher level would make it a throughput number.
+  concurrency: [1]
+  # Fixed ceilings, not numbers read off the baseline (this file must not
+  # change after the baseline). p99_tpot_ms is over each request's MEAN time
+  # per token, a 20 tok/s floor, so tokens arriving in bursts never trip it.
+  # p95_ttft_ms is the only rule on the first token. Nobody has measured
+  # either on a GPU.
+  slo: {p99_tpot_ms: 50, p95_ttft_ms: 2000}
+  # The longest silence allowed between two tokens of one answer. A block with
+  # a stall is dropped, and a launch with every block stalled is INVALID.
+  stall_ms: 1000
+  # Windows sized on the TPU target (a request ~4 s, a pass over the five
+  # sizes ~21 s); verify that a window still holds a few passes here.
+  ramp_s: 5
+  window_s: 60
+  # The candidate alone first, for one 45 s window: a loser costs one launch
+  # and never starts the incumbent.
+  screen_window_s: 45
+  design: abba
+  blocks: 2
+  prompt_pool: /opt/bench/pools/gemma4-main.jsonl
+  confirm_pool: /opt/bench/pools/gemma4-confirm.jsonl    # disjoint from prompt_pool
+  length_tol: 0.01
+# How long a launch may take to answer /v1/models: loading 52 GB of weights
+# from disk. A guess. A server that exits is given up on at once; this is for
+# one that hangs.
+health: {url: "http://127.0.0.1:8000/v1/models", ready_timeout_s: 900}
+metrics: {url: "http://127.0.0.1:8000/metrics"}
+probes:
+  # the GPUs on the host. For the record only: on a gpu target bootstrap counts
+  # them itself (setup/gpu.sh) and does not run this.
+  present: "nvidia-smi -L | grep -c '^GPU '"
+budgets: {build_s: 1200, compile_s: 1800, health_s: 1800, run_s: 5400}   # the TPU target's; verify
+reference:
+  dir: reference/gpu-gemma4-26b-tps
+  prompts: /opt/bench/pools/gemma4-quality-prompts.jsonl
+  tasks: /opt/bench/pools/gemma4-quality-tasks.jsonl
+  # The reference answers come from three cold launches of the baseline, 128
+  # tokens each (these are also the defaults for a real engine).
+  max_tokens: 128
+  launches: 3
+quality: {allow_missing_logprobs: false}           # verify the engine returns logprobs
