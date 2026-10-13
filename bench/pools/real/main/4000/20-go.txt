@@ -1,0 +1,350 @@
+This is the school-visit booking package we use at the Kestrel Hill Observatory and Outreach Centre for planetarium shows and telescope evenings. I inherited it from a volunteer and I'd like you to explain what each part does, review it properly (bugs, race conditions, anything that will bite us when the autumn rush of school bookings arrives), and then write table-driven tests for the important functions. If you find real bugs, please show the fix and include a test that would have caught each one.
+
+```go
+// Package visits handles bookings of school and public groups for shows at
+// the Kestrel Hill Observatory and Outreach Centre.
+package visits
+
+import (
+	"errors"
+	"fmt"
+	"sort"
+	"strings"
+	"sync"
+	"time"
+)
+
+// Kind is the type of a show.
+type Kind string
+
+const (
+	Planetarium Kind = "planetarium"
+	Telescope   Kind = "telescope"
+	Workshop    Kind = "workshop"
+)
+
+// Show is a scheduled event with limited seats.
+type Show struct {
+	ID       string
+	Title    string
+	Kind     Kind
+	Start    time.Time
+	Duration time.Duration
+	Capacity int
+	// PricePence is the price per paying visitor, in pence.
+	PricePence int
+}
+
+// Group describes a booking party.
+type Group struct {
+	Name      string
+	Contact   string
+	Children  int
+	Adults    int
+	IsSchool  bool
+	Postcode  string
+	NeedsStep bool // needs step-free access
+}
+
+// Booking is a confirmed reservation.
+type Booking struct {
+	ID        int
+	ShowID    string
+	Group     Group
+	Seats     int
+	CreatedAt time.Time
+	Cancelled bool
+}
+
+// WaitEntry is a group waiting for a place on a full show.
+type WaitEntry struct {
+	Group Group
+	Seats int
+	Added time.Time
+}
+
+var (
+	ErrNoSuchShow    = errors.New("visits: no such show")
+	ErrShowStarted   = errors.New("visits: show has already started")
+	ErrInvalidGroup  = errors.New("visits: invalid group")
+	ErrFull          = errors.New("visits: not enough seats")
+	ErrNoSuchBooking = errors.New("visits: no such booking")
+)
+
+// Scheduler keeps shows, bookings and waiting lists in memory.
+type Scheduler struct {
+	mu       sync.Mutex
+	shows    map[string]*Show
+	bookings map[int]*Booking
+	waiting  map[string][]WaitEntry
+	nextID   int
+	now      func() time.Time
+}
+
+// NewScheduler returns an empty scheduler. If now is nil, time.Now is used.
+func NewScheduler(now func() time.Time) *Scheduler {
+	if now == nil {
+		now = time.Now
+	}
+	return &Scheduler{
+		shows:    make(map[string]*Show),
+		bookings: make(map[int]*Booking),
+		waiting:  make(map[string][]WaitEntry),
+		nextID:   1,
+		now:      now,
+	}
+}
+
+// AddShow registers a show. The ID must be unique and capacity positive.
+func (s *Scheduler) AddShow(sh Show) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if sh.ID == "" || sh.Capacity <= 0 {
+		return fmt.Errorf("visits: invalid show %q", sh.ID)
+	}
+	if _, ok := s.shows[sh.ID]; ok {
+		return fmt.Errorf("visits: duplicate show %q", sh.ID)
+	}
+	s.shows[sh.ID] = &sh
+	return nil
+}
+
+func (g Group) seats() int {
+	return g.Children + g.Adults
+}
+
+func (g Group) validate() error {
+	if strings.TrimSpace(g.Name) == "" {
+		return fmt.Errorf("%w: empty name", ErrInvalidGroup)
+	}
+	if g.Children < 0 || g.Adults < 0 || g.seats() == 0 {
+		return fmt.Errorf("%w: no visitors", ErrInvalidGroup)
+	}
+	if g.IsSchool && g.Adults == 0 {
+		return fmt.Errorf("%w: school group needs an adult", ErrInvalidGroup)
+	}
+	return nil
+}
+
+// seatsTaken returns the number of seats in active bookings for a show.
+// The caller must hold s.mu.
+func (s *Scheduler) seatsTaken(showID string) int {
+	n := 0
+	for _, b := range s.bookings {
+		if b.ShowID == showID && !b.Cancelled {
+			n += b.Seats
+		}
+	}
+	return n
+}
+
+// Available returns the number of seats left on a show.
+func (s *Scheduler) Available(showID string) (int, error) {
+	sh, ok := s.shows[showID]
+	if !ok {
+		return 0, ErrNoSuchShow
+	}
+	return sh.Capacity - s.seatsTaken(showID), nil
+}
+
+// Book reserves seats for a group. If the show is full, ErrFull is returned
+// and the caller may call Wait.
+func (s *Scheduler) Book(showID string, g Group) (*Booking, error) {
+	if err := g.validate(); err != nil {
+		return nil, err
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	sh, ok := s.shows[showID]
+	if !ok {
+		return nil, ErrNoSuchShow
+	}
+	if s.now().After(sh.Start) {
+		return nil, ErrShowStarted
+	}
+	if sh.Capacity-s.seatsTaken(showID) < g.seats() {
+		return nil, ErrFull
+	}
+	b := &Booking{
+		ID:        s.nextID,
+		ShowID:    showID,
+		Group:     g,
+		Seats:     g.seats(),
+		CreatedAt: s.now(),
+	}
+	s.nextID++
+	s.bookings[b.ID] = b
+	return b, nil
+}
+
+// Wait puts a group on the waiting list of a full show.
+func (s *Scheduler) Wait(showID string, g Group) error {
+	if err := g.validate(); err != nil {
+		return err
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if _, ok := s.shows[showID]; !ok {
+		return ErrNoSuchShow
+	}
+	s.waiting[showID] = append(s.waiting[showID], WaitEntry{Group: g, Seats: g.seats(), Added: s.now()})
+	return nil
+}
+
+// Cancel cancels a booking. Groups cancelling less than 48 hours before the
+// show start are still charged (see Charge), but the seats are freed and
+// offered to the waiting list.
+func (s *Scheduler) Cancel(id int) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	b, ok := s.bookings[id]
+	if !ok {
+		return ErrNoSuchBooking
+	}
+	b.Cancelled = true
+	s.promote(b.ShowID)
+	return nil
+}
+
+// promote offers freed seats to waiting groups in order. The caller must
+// hold s.mu.
+func (s *Scheduler) promote(showID string) {
+	sh := s.shows[showID]
+	q := s.waiting[showID]
+	var rest []WaitEntry
+	for _, w := range q {
+		if sh.Capacity-s.seatsTaken(showID) >= w.Seats {
+			b := &Booking{
+				ID:        s.nextID,
+				ShowID:    showID,
+				Group:     w.Group,
+				Seats:     w.Seats,
+				CreatedAt: s.now(),
+			}
+			s.nextID++
+			s.bookings[b.ID] = b
+		} else {
+			rest = append(rest, w)
+		}
+	}
+	s.waiting[showID] = rest
+}
+
+// Charge returns the amount owed in pence for a booking.
+//
+// Rules: school groups get one free adult for every 10 children, and every
+// other adult pays full price. Children in school groups pay 80% of the show
+// price. Public groups of 10 or more seats get 10% off the whole booking.
+// A late cancellation (under 48 hours before the start) is charged 50% of
+// what the booking would have cost.
+func (s *Scheduler) Charge(id int) (int, error) {
+	s.mu.Lock()
+	b, ok := s.bookings[id]
+	if !ok {
+		s.mu.Unlock()
+		return 0, ErrNoSuchBooking
+	}
+	sh := s.shows[b.ShowID]
+	s.mu.Unlock()
+
+	g := b.Group
+	var total float64
+	if g.IsSchool {
+		freeAdults := g.Children / 10
+		payingAdults := g.Adults - freeAdults
+		if payingAdults < 0 {
+			payingAdults = 0
+		}
+		total = float64(g.Children)*float64(sh.PricePence)*0.8 +
+			float64(payingAdults)*float64(sh.PricePence)
+	} else {
+		total = float64(g.seats()) * float64(sh.PricePence)
+		if g.seats() >= 10 {
+			total = total * 0.9
+		}
+	}
+	if b.Cancelled {
+		if sh.Start.Sub(b.CreatedAt) < 48*time.Hour {
+			total = total * 0.5
+		} else {
+			total = 0
+		}
+	}
+	return int(total), nil
+}
+
+// DayReport lists, for each show starting on the given date, the title,
+// seats booked and the income in pence.
+func (s *Scheduler) DayReport(day time.Time) []string {
+	var lines []string
+	for _, sh := range s.shows {
+		if sh.Start.Year() == day.Year() && sh.Start.YearDay() == day.YearDay() {
+			income := 0
+			for id, b := range s.bookings {
+				if b.ShowID == sh.ID && !b.Cancelled {
+					c, _ := s.Charge(id)
+					income += c
+				}
+			}
+			lines = append(lines, fmt.Sprintf("%s: %d/%d seats, %d.%02d pounds",
+				sh.Title, s.seatsTaken(sh.ID), sh.Capacity, income/100, income%100))
+		}
+	}
+	sort.Strings(lines)
+	return lines
+}
+
+// AddVisitors adds children and adults to an existing booking if the show
+// has room, and returns the updated booking.
+func (s *Scheduler) AddVisitors(id, children, adults int) (*Booking, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	b, ok := s.bookings[id]
+	if !ok || b.Cancelled {
+		return nil, ErrNoSuchBooking
+	}
+	extra := children + adults
+	if extra <= 0 {
+		return nil, fmt.Errorf("%w: nothing to add", ErrInvalidGroup)
+	}
+	sh := s.shows[b.ShowID]
+	if s.now().After(sh.Start) {
+		return nil, ErrShowStarted
+	}
+	if sh.Capacity-s.seatsTaken(b.ShowID) < extra {
+		return nil, ErrFull
+	}
+	b.Group.Children += children
+	b.Group.Adults += adults
+	b.Seats += extra
+	return b, nil
+}
+
+// WaitingSeats returns the number of seats requested by each group on the
+// waiting list of a show, in the order they joined.
+func (s *Scheduler) WaitingSeats(showID string) []int {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	var out []int
+	for _, w := range s.waiting[showID] {
+		out = append(out, w.Seats)
+	}
+	return out
+}
+
+// StepFreeSeats returns the number of seats booked by groups that need
+// step-free access, across all shows of the given kind.
+func (s *Scheduler) StepFreeSeats(kind Kind) int {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	n := 0
+	for _, b := range s.bookings {
+		if b.Group.NeedsStep && s.shows[b.ShowID].Kind == kind {
+			n += b.Seats
+		}
+	}
+	return n
+}
+```
+
+A few notes from the person who used to maintain it: "Late cancellation" is meant to be measured from the moment of cancellation to the start of the show, not from when the booking was made, and I'm not sure the code does that. Schools sometimes ring up to add two or three children to an existing booking, and today we just cancel and rebook, which loses their place in the queue. The dashboard calls `DayReport` every few seconds while the bookings team are also taking bookings by phone. Our shows run in the local time of the centre, so there are two evenings a year when the clocks change. Finally, the planetarium dome has 60 seats but only 4 wheelchair spaces, and nothing in the code checks that.

@@ -1,0 +1,111 @@
+Here is our quarterly report for the Tamsin Valley Open Map project, written by our volunteer coordinator for the steering group meeting on Saturday. Can you give me a section-by-section summary (two or three sentences for each, with the figures that matter), then a list of the things in the report that should worry the steering group, and finally your recommendations, in priority order, with a reason for each? I would also like you to point out anywhere the numbers in the report do not quite agree with each other.
+
+---
+
+TAMSIN VALLEY OPEN MAP PROJECT
+Quarterly Report, July to September
+Prepared by: Odalys Merriweather-Cho, volunteer coordinator
+For: Steering group meeting, Saturday 18 October
+
+1. Summary
+
+The project is a volunteer effort to keep a free, openly licensed map of the Tamsin Valley up to date: roads, paths, buildings, shops, bus stops, flood defences and accessibility details such as step-free entrances. This quarter we had 143 active contributors, up from 118 last quarter, and 61 per cent of the valley's 2,310 square kilometres now has "complete" coverage under our own standard, up from 54 per cent. The headline problem is quality: our spot-check audit found that 9.4 per cent of the features checked had at least one error, against a target of 5 per cent. Our grant from the Tamsin Regional Trust runs out on 31 March and we have used 71 per cent of it. We also had two serious incidents involving contributor conduct and one data-loss event on our own tile server.
+
+2. Contributors
+
+Active contributors are people who made at least one edit in the quarter. Of the 143, 37 were new this quarter, 82 were returning contributors from earlier quarters and 24 were returning after a gap of more than a year. 19 people made more than 100 edits each and together produced 68 per cent of all edits; the top five alone produced 31 per cent. Edits totalled 214,600 in the quarter, a 22 per cent rise on the previous quarter's 175,900.
+
+We ran three mapping evenings (the first Thursday of each month, two in the Wexcombe library and one online in September) and one weekend "mapathon" in Harrowick on 6 and 7 September, which attracted 52 people, of whom 29 were new. Of the 37 new contributors this quarter, 22 came from the mapathon. Retention from the mapathon is, so far, disappointing: only 8 of those 22 made an edit in the three weeks after the event. Volunteer feedback on the mapathon was positive (average 4.4 out of 5 from 31 responses), and the main complaints were the unreliable wifi and a lack of beginner guidance for the tools.
+
+Demographically, our survey of contributors (61 responses) showed that 58 per cent are over 50, 11 per cent are under 25, and 29 per cent describe themselves as having a local connection to a village in the upper valley, the area with the least coverage.
+
+3. Coverage
+
+We measure coverage by dividing the valley into 1 km grid squares (2,310 in total) and rating each square as Empty, Partial or Complete. A square is Complete if it has all roads and paths named and connected, all buildings traced, and the main points of interest recorded. At the end of the quarter the position was:
+
+| Rating | Squares | Share |
+|---|---|---|
+| Complete | 1,409 | 61% |
+| Partial | 647 | 28% |
+| Empty | 254 | 11% |
+| Total | 2,310 | 100% |
+
+The last quarter's figures were 1,247 Complete (54 per cent), 702 Partial and 361 Empty. The 162 squares that moved to Complete came mainly from the lower valley around Harrowick and Wexcombe, where a school mapping project and the mapathon contributed. Of the 254 Empty squares, 211 are in the upper valley, mostly farmland and moorland with a few scattered hamlets. A further factor is that the aerial imagery we use for tracing in the upper valley is four years old, and the new imagery that the county council has promised for release in November has not yet arrived.
+
+We also added 1,870 accessibility records (step-free entrances, kerb heights and tactile paving) this quarter, bringing the total to 6,420. These were mostly collected by the Wexcombe Access Group, who walked every street in the town centre with a wheelchair user, and make up 83 per cent of the quarter's additions.
+
+4. Data quality
+
+Each quarter a small team of experienced volunteers checks a random sample of 800 features against imagery and, where possible, a site visit. This quarter the sample found errors in 75 features, which is 9.4 per cent. The previous quarter's rate was 7.8 per cent on 800 features. The errors were:
+
+| Type of error | Count | Share of errors |
+|---|---|---|
+| Wrong or missing name | 21 | 28% |
+| Wrong geometry (misplaced or badly traced) | 19 | 25% |
+| Wrong category tag (for example a shop tagged as an office) | 16 | 21% |
+| Out of date (closed or demolished) | 12 | 16% |
+| Duplicate feature | 5 | 7% |
+| Other | 2 | 3% |
+| Total | 75 | 100% |
+
+The reviewers noted that errors were concentrated in work by contributors with fewer than 20 lifetime edits. Of the 75 erroneous features, 44 (59 per cent) had been last edited by such contributors, even though they produce only 12 per cent of all edits. Errors in the "out of date" category are mostly shops and cafes in the Wexcombe high street, where 6 businesses closed during the summer. Only 31 per cent of the project's contributors have completed the optional online training module.
+
+We agreed last quarter to introduce a "second pair of eyes" review for edits from contributors with fewer than 20 edits. This was not implemented, mainly because the review tool needed work (see section 6) and because we have only 9 reviewers, who are already stretched.
+
+5. Incidents
+
+Incident 1 (conduct, 14 August). A long-standing contributor, anonymised here as Contributor A, posted insulting messages in the project forum about a new contributor's edits, after the new contributor corrected several of A's road names. Three members of the community complained. The coordinator and two members of the steering group spoke to Contributor A, who apologised; a written warning was issued under the code of conduct. The new contributor made no further edits after this incident.
+
+Incident 2 (conduct, 29 September). A contributor made more than 300 edits in one afternoon that changed the names of about 120 villages in the upper valley from their English form to an older local form, without discussion. These edits were challenged by several contributors and reverted within two days. A discussion on the forum was held on naming policy; no agreed position has yet been reached. The contributor has not been banned but has been asked to stop further bulk edits until there is an agreed policy.
+
+Incident 3 (data loss, 3 September). The tile server, which draws the project's web map from a virtual machine rented at a monthly cost, failed when its disk filled up during a rebuild. When the volunteer administrator restored from backup, the most recent backup was found to be 19 days old, because the nightly backup job had been failing silently since 15 August. Edits made to the map's own database were not lost, since these are stored separately, but the web map was out of date and then unavailable for 41 hours. Four local organisations that embed our map on their websites (the Wexcombe Parish Council, the Tamsin Valley Walkers, the Harrowick Bus Users' Group and a community cafe) complained. The backup job has been fixed and an alert added.
+
+6. Tools and infrastructure
+
+The project runs three systems: the map database and editing software (hosted by a free public service, with no cost to us), the tile server for our own web map, and a small review and statistics website built by a volunteer, Casimir Dunleavy. The review website had two outages in the quarter, both caused by Casimir being away on holiday when a software library update broke it. Casimir is the only person who understands the code. He has said he would like to step back from the project in the new year, and he has offered to write documentation and hand over in December.
+
+We also trialled a mobile survey app which volunteers use to collect data in the field, with photos. Forty-one volunteers installed it and 23 used it at least once. It produced 3,100 geotagged photos, of which 2,740 have been matched to features. The app's stability on older phones was criticised by 9 of the 23 users.
+
+The online training module has six lessons (basic tracing, naming, tagging, working with imagery, accessibility records and the code of conduct) and takes about 90 minutes. Of the 44 contributors who completed it, 17 did so this quarter. Casimir's statistics show that contributors who completed the module had an error rate of 4.1 per cent in the audit sample, against 11.2 per cent for those who had not. The module has not been updated since last year and still describes the previous version of the editing software, which two reviewers say is confusing for beginners. Updating the screenshots and the second lesson would take a volunteer about three weekends.
+
+7. Finance
+
+The grant from the Tamsin Regional Trust is 28,000 pounds over 24 months, ending 31 March; we are now 18 months in. At the end of September we had spent 19,900 pounds, which is 71 per cent. The spending to date is shown below.
+
+| Item | Spent | Notes |
+|---|---|---|
+| Part-time coordinator (0.4 FTE) | 12,600 | 18 months at 700 |
+| Tile server hosting | 1,540 | 18 months at about 85 |
+| Mapathon venue, food and printing | 1,480 | Harrowick, 6 and 7 September |
+| Training materials and videos | 1,120 | |
+| Field survey app licence | 980 | Annual |
+| Volunteer expenses (travel, equipment) | 1,630 | |
+| Insurance | 550 | Annual |
+| Total | 19,900 | |
+
+The remaining 8,100 pounds is enough to fund the coordinator's post until 31 March at the present rate, which needs another 4,200 pounds for six more months. The expected remaining non-staff costs (hosting, insurance renewal and expenses) are about 2,700 pounds, so only about 1,200 pounds is left unallocated. That is not enough for a second mapathon, which cost 1,480 pounds, nor for more training, and the project has nothing to pay the coordinator after 31 March. A new funding application to the County Heritage Fund (up to 15,000 pounds) has been drafted but not submitted. The deadline is Friday 31 October.
+
+8. Community and partners
+
+Relations with the parish councils are good. The county council has given us access to its planning data on new buildings, which should help in keeping buildings up to date. We have approached the local bus operator about sharing timetable data, but have had no answer after two emails. A teacher at Harrowick School has asked whether pupils can contribute as part of a geography project in the spring term, which would add perhaps 60 new contributors and would need extra moderation.
+
+9. Risks identified by the coordinator
+
+R1. Loss of the only developer. Casimir Dunleavy is the sole maintainer of the review website, and the code has no written documentation. If he leaves before handover, the project loses its sample audit tool and the contributor statistics. Likelihood: medium. Impact: high.
+
+R2. Funding cliff. The grant ends on 31 March and no other funding is yet secured. If the Heritage Fund application fails, the coordinator's post ends, and the project loses most of its organisation of events and training. Likelihood: medium. Impact: high.
+
+R3. Quality drift. The error rate rose from 7.8 to 9.4 per cent while the number of new contributors grew. Without the second-pair-of-eyes review, the rate is likely to rise further when school pupils join in spring. Likelihood: high. Impact: medium.
+
+R4. Community conflict. Two conduct incidents in one quarter, one of them driving a new contributor away, suggest that the code of conduct is not being applied consistently. The unresolved naming policy could provoke further conflict. Likelihood: high. Impact: medium.
+
+R5. Infrastructure. The tile server runs on a single rented machine managed by one volunteer administrator. The next failure could again leave partner websites without a map. Likelihood: medium. Impact: medium.
+
+10. Priorities proposed for next quarter
+
+1. Introduce second-pair-of-eyes review for new contributors.
+2. Agree a naming policy for villages in the upper valley.
+3. Submit the County Heritage Fund application by 31 October.
+4. Arrange the handover of the review website from Casimir.
+5. Retain more of the mapathon participants through a follow-up evening in November.
+6. Prepare for the new aerial imagery.

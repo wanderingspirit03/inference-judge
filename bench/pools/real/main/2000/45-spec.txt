@@ -1,0 +1,77 @@
+We're about to hand this spec to the volunteers who will test the new scheduling tool at the station. Please write a complete test plan for it, with numbered test cases that give the steps, the data to use and the expected result, and flag any places where the spec is vague or contradicts itself so we can fix those first.
+
+Product specification: AirDesk, the programme and studio scheduler for Wren Valley Community Radio
+Version 0.9 (draft for testing), owner: Halima Dufresne, station manager
+
+1. Purpose
+
+Wren Valley Community Radio broadcasts 24 hours a day from one studio and one small production room. Until now the weekly schedule has been kept on a shared spreadsheet and a whiteboard, which has led to double bookings, forgotten live slots and unclear rights for pre-recorded material. AirDesk replaces both. It lets presenters book studio time, lets the station manager publish a weekly programme grid, and produces the log of what was actually played that the station must send to the collecting society each quarter.
+
+2. Users and roles
+
+There are four roles.
+- Presenter: a volunteer who hosts a show. A presenter can request bookings, see the grid, and upload a show plan.
+- Producer: a volunteer who prepares recorded material. A producer can book the production room and upload audio files.
+- Scheduler: the station manager or a deputy. A scheduler can approve or reject bookings, edit the grid and publish it.
+- Auditor: the treasurer or a board member. An auditor has read-only access to the grid and the play log and can export the quarterly report.
+
+A person has exactly one role at a time. Only schedulers can change roles.
+
+3. Rooms and time
+
+3.1 There are two bookable rooms: Studio A (live broadcast) and Room B (production). Studio A is the only room from which live output can be sent.
+3.2 The day is divided into slots of 30 minutes starting on the hour and half hour. A booking covers one or more consecutive slots and may not cross midnight.
+3.3 Studio A is reserved from 06:00 to 09:00 on weekdays for the breakfast show and cannot be booked by anyone except the scheduler.
+3.4 A booking can be requested no more than 8 weeks ahead and no less than 24 hours ahead. Schedulers are exempt from the 24 hour limit.
+3.5 A presenter may have at most 6 hours of approved bookings in Studio A in any calendar week. Producers may have at most 10 hours in Room B.
+
+4. Booking workflow
+
+4.1 A presenter or producer submits a request with room, date, start slot, number of slots and a show title of up to 60 characters.
+4.2 A request that overlaps an approved booking in the same room is refused at once with the message "This time is already taken."
+4.3 A request that overlaps another pending request is accepted, and both stay pending until the scheduler decides.
+4.4 The scheduler approves or rejects each pending request. Approving a request automatically rejects every other pending request that overlaps it, and each affected requester receives an email.
+4.5 A rejection must include a reason of at least 10 characters.
+4.6 A requester can cancel their own pending or approved booking up to 2 hours before it starts. Cancelling within 2 hours is not allowed, and the requester is shown a phone number for the station manager.
+4.7 If an approved booking is not started within 15 minutes of its start time, the scheduler may release it, and the slot returns to open status.
+
+5. Programme grid
+
+5.1 The grid shows seven days from Monday, with each approved Studio A booking as a block labelled with the show title and presenter name.
+5.2 The scheduler can mark a block as Live, Repeat or Automated. A Repeat block must name the original show and the date of first broadcast. An Automated block fills a gap with the music rotation and has no presenter.
+5.3 The scheduler publishes the grid for the coming week no later than Thursday 18:00. Publishing locks all blocks for that week except Repeat and Automated blocks, which the scheduler can still change until broadcast.
+5.4 A published grid is exported as a PDF and as a public web page at the station's address. Presenters see a banner "Published" on blocks that are locked.
+
+6. Play log
+
+6.1 During a show, a presenter can log each track with artist, title, duration, and whether it is a licensed commercial recording, a station jingle, or a recording owned by a local artist who has given written consent.
+6.2 Entries can be added up to 24 hours after the show. After that only the scheduler can edit them, and every edit is recorded with the name of the editor and the time.
+6.3 At the end of each calendar quarter the auditor can export the log as a CSV file with one row per track, ordered by date and time. The file must include the column "Rights type" with one of the values Commercial, Jingle or Local consent.
+6.4 Tracks of type Local consent must reference a consent record. A consent record has the artist name, the date of signature and an expiry date. A track whose consent has expired cannot be logged, and the presenter is told which consent to renew.
+
+7. Notifications
+
+7.1 Email is sent for: request received, request approved, request rejected, booking cancelled by the scheduler, and a reminder 24 hours before an approved booking.
+7.2 A presenter can turn off the reminder but not the other emails.
+7.3 The scheduler receives a daily digest at 08:00 listing pending requests older than 48 hours.
+
+8. Accounts and security
+
+8.1 Users sign in with an email address and a password of at least 12 characters. After 5 failed attempts the account is locked for 15 minutes.
+8.2 Sessions end after 30 minutes without activity, except during a live show, when the presenter's session stays open for the length of the booking plus 30 minutes.
+8.3 All times are shown in the station's local time. The system must handle the clock change in spring and autumn without losing or doubling any slot.
+
+9. Performance and data
+
+9.1 The grid page must load in under 3 seconds on a typical home connection with up to 400 blocks in the visible month.
+9.2 The system must support 40 registered users, of whom no more than 10 are signed in at once.
+9.3 Booking and grid data are kept for 7 years. Play log data are kept for 7 years after the end of the quarter they belong to. Accounts of people who have left the station are made anonymous 12 months after the scheduler marks them as left, but their bookings and log entries remain.
+9.4 A scheduler can export the full list of bookings for any date range as a CSV file with the columns Date, Room, Start, End, Show title, Person and Status.
+
+10. Out of scope for this version
+
+Automatic playout of the music rotation, listener statistics, payment of any kind, and a mobile app. The grid page must still display correctly on a phone browser.
+
+11. Open questions
+
+The board has not decided whether Repeat blocks count towards a presenter's 6 hours. Until it does, they are counted. The wording of the rejection email is also still to be agreed with the volunteers' committee.

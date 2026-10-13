@@ -1,0 +1,179 @@
+I inherited this module from a colleague who left the county records office, and nobody can tell me why it works the way it does. Could you explain each part in turn, propose a refactoring that makes the request-handling logic easier to maintain, and write tests for the refactored version?
+
+```ts
+// requestQueue.ts - handles public records requests for the Halvern County Archive
+
+export type RequestStatus = "received" | "searching" | "review" | "fulfilled" | "denied";
+
+export interface RecordsRequest {
+  id: string;
+  requester: string;
+  email: string;
+  description: string;
+  receivedAt: Date;
+  dueAt: Date;
+  status: RequestStatus;
+  pageCount: number;
+  feeCents: number;
+  exemptions: string[];
+}
+
+const LEGAL_DAYS = 10;
+const FREE_PAGES = 25;
+const COST_PER_PAGE_CENTS = 15;
+const HOLIDAYS = ["2026-11-26", "2026-12-25", "2027-01-01"];
+
+function isBusinessDay(d: Date): boolean {
+  const day = d.getDay();
+  if (day === 0 || day === 6) return false;
+  const iso = d.toISOString().slice(0, 10);
+  return !HOLIDAYS.includes(iso);
+}
+
+export function computeDueDate(received: Date): Date {
+  const due = new Date(received.getTime());
+  let counted = 0;
+  while (counted < LEGAL_DAYS) {
+    due.setDate(due.getDate() + 1);
+    if (isBusinessDay(due)) counted++;
+  }
+  return due;
+}
+
+export function computeFee(pageCount: number, requesterIsPress: boolean): number {
+  if (requesterIsPress) return 0;
+  const billable = pageCount - FREE_PAGES;
+  if (billable <= 0) return 0;
+  return billable * COST_PER_PAGE_CENTS;
+}
+
+export class RequestQueue {
+  private items: Map<string, RecordsRequest> = new Map();
+  private counter = 0;
+
+  create(requester: string, email: string, description: string, now: Date = new Date()): RecordsRequest {
+    if (!email.includes("@")) {
+      throw new Error("invalid email");
+    }
+    if (description.trim().length < 10) {
+      throw new Error("description too short");
+    }
+    this.counter++;
+    const id = "HCA-" + now.getFullYear() + "-" + String(this.counter).padStart(4, "0");
+    const req: RecordsRequest = {
+      id,
+      requester,
+      email,
+      description,
+      receivedAt: now,
+      dueAt: computeDueDate(now),
+      status: "received",
+      pageCount: 0,
+      feeCents: 0,
+      exemptions: [],
+    };
+    this.items.set(id, req);
+    return req;
+  }
+
+  get(id: string): RecordsRequest | undefined {
+    return this.items.get(id);
+  }
+
+  advance(id: string, next: RequestStatus): RecordsRequest {
+    const req = this.items.get(id);
+    if (!req) throw new Error("no such request: " + id);
+    if (req.status === "fulfilled" || req.status === "denied") {
+      throw new Error("request already closed");
+    }
+    if (next === "searching" && req.status !== "received") {
+      throw new Error("can only search a received request");
+    }
+    if (next === "review" && req.status !== "searching") {
+      throw new Error("can only review after searching");
+    }
+    if (next === "fulfilled" && req.status !== "review") {
+      throw new Error("must be reviewed before fulfilment");
+    }
+    req.status = next;
+    return req;
+  }
+
+  recordSearchResult(id: string, pageCount: number, press = false): void {
+    const req = this.items.get(id);
+    if (!req) throw new Error("no such request: " + id);
+    req.pageCount = pageCount;
+    req.feeCents = computeFee(pageCount, press);
+  }
+
+  addExemption(id: string, code: string): void {
+    const req = this.items.get(id);
+    if (!req) throw new Error("no such request: " + id);
+    if (!req.exemptions.includes(code)) {
+      req.exemptions.push(code);
+    }
+  }
+
+  deny(id: string): RecordsRequest {
+    const req = this.items.get(id);
+    if (!req) throw new Error("no such request: " + id);
+    if (req.exemptions.length === 0) {
+      throw new Error("a denial needs at least one exemption code");
+    }
+    req.status = "denied";
+    return req;
+  }
+
+  overdue(now: Date = new Date()): RecordsRequest[] {
+    const result: RecordsRequest[] = [];
+    for (const req of this.items.values()) {
+      if (req.status !== "fulfilled" && req.status !== "denied" && req.dueAt < now) {
+        result.push(req);
+      }
+    }
+    return result.sort((a, b) => a.dueAt.getTime() - b.dueAt.getTime());
+  }
+
+  receipt(id: string): string {
+    const req = this.items.get(id);
+    if (!req) throw new Error("no such request: " + id);
+    const lines: string[] = [];
+    lines.push("Halvern County Archive - request " + req.id);
+    lines.push("Requester: " + req.requester + " <" + req.email + ">");
+    lines.push("Received: " + req.receivedAt.toISOString().slice(0, 10));
+    lines.push("Due: " + req.dueAt.toISOString().slice(0, 10));
+    lines.push("Status: " + req.status);
+    if (req.pageCount > 0) {
+      const dollars = (req.feeCents / 100).toFixed(2);
+      lines.push("Pages located: " + req.pageCount + ", fee: $" + dollars);
+    }
+    if (req.exemptions.length > 0) {
+      lines.push("Exemptions applied: " + req.exemptions.join(", "));
+    }
+    return lines.join("\n");
+  }
+
+  waitingTimeDays(id: string, now: Date = new Date()): number {
+    const req = this.items.get(id);
+    if (!req) throw new Error("no such request: " + id);
+    const ms = now.getTime() - req.receivedAt.getTime();
+    return Math.floor(ms / (1000 * 60 * 60 * 24));
+  }
+
+  summary(): Record<RequestStatus, number> {
+    const counts: Record<RequestStatus, number> = {
+      received: 0,
+      searching: 0,
+      review: 0,
+      fulfilled: 0,
+      denied: 0,
+    };
+    for (const req of this.items.values()) {
+      counts[req.status]++;
+    }
+    return counts;
+  }
+}
+```
+
+Two things I already know bother me. The fee for a requester who asks for exactly 26 pages came out wrong in a spreadsheet check last week, and the due date for requests that arrive on a Friday afternoon seems to land on the wrong day. I would like to know whether those are real bugs or whether I am misreading the code.

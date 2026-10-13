@@ -1,0 +1,87 @@
+Can you review this schema and the queries below? I'd like a critique of the design, a list of the indexes you would add (and any you would drop) with the reasons, and a rewrite of each query that explains why yours is better. It is PostgreSQL 15 and the readings table grows by about 4 million rows a month.
+
+```sql
+CREATE TABLE station (
+    station_id    serial PRIMARY KEY,
+    name          text NOT NULL,
+    latitude      numeric(8,5) NOT NULL,
+    longitude     numeric(8,5) NOT NULL,
+    elevation_m   integer,
+    installed_on  date NOT NULL,
+    region        text NOT NULL,
+    active        boolean NOT NULL DEFAULT true
+);
+
+CREATE TABLE sensor (
+    sensor_id     serial PRIMARY KEY,
+    station_id    integer NOT NULL REFERENCES station(station_id),
+    kind          text NOT NULL,   -- 'temperature', 'wind', 'rain', 'pressure'
+    unit          text NOT NULL,
+    calibrated_on date
+);
+
+CREATE TABLE reading (
+    reading_id    bigserial PRIMARY KEY,
+    sensor_id     integer NOT NULL REFERENCES sensor(sensor_id),
+    taken_at      timestamp NOT NULL,
+    value         numeric(10,3),
+    quality_flag  text DEFAULT 'ok'
+);
+
+CREATE INDEX idx_reading_sensor ON reading (sensor_id);
+CREATE INDEX idx_reading_taken ON reading (taken_at);
+CREATE INDEX idx_reading_flag ON reading (quality_flag);
+CREATE INDEX idx_sensor_station ON sensor (station_id);
+```
+
+Query 1: daily maximum temperature for one region last month, used on the public site.
+
+```sql
+SELECT st.name, date(r.taken_at) AS day, max(r.value) AS max_temp
+FROM reading r
+JOIN sensor s ON s.sensor_id = r.sensor_id
+JOIN station st ON st.station_id = s.station_id
+WHERE s.kind = 'temperature'
+  AND st.region = 'Northern Uplands'
+  AND to_char(r.taken_at, 'YYYY-MM') = '2026-09'
+GROUP BY st.name, date(r.taken_at)
+ORDER BY day, st.name;
+```
+
+Query 2: stations with no readings in the last 24 hours, used by the on-call engineer.
+
+```sql
+SELECT name
+FROM station
+WHERE active = true
+  AND station_id NOT IN (
+      SELECT s.station_id
+      FROM sensor s
+      JOIN reading r ON r.sensor_id = s.sensor_id
+      WHERE r.taken_at > now() - interval '24 hours'
+  );
+```
+
+Query 3: the latest reading for each sensor, which the dashboard runs every minute.
+
+```sql
+SELECT s.sensor_id, r.value, r.taken_at
+FROM sensor s
+JOIN reading r ON r.sensor_id = s.sensor_id
+WHERE r.taken_at = (SELECT max(taken_at) FROM reading WHERE sensor_id = s.sensor_id);
+```
+
+Query 4: how many readings were flagged as suspect per station in the last week.
+
+```sql
+SELECT st.name, count(*)
+FROM reading r, sensor s, station st
+WHERE r.sensor_id = s.sensor_id
+  AND s.station_id = st.station_id
+  AND r.quality_flag <> 'ok'
+  AND r.taken_at >= current_date - 7
+GROUP BY st.name
+ORDER BY count(*) DESC;
+```
+
+Query 1 takes about 40 seconds, query 3 about 12 seconds, and the other two are fine for now.

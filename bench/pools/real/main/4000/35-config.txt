@@ -1,0 +1,366 @@
+I volunteer as the "tech person" for our beekeeping association and I inherited this setup from the previous volunteer, who has moved away. It runs our member portal (hive registrations, apiary visit bookings, the swarm-collection phone list) and a small collector for sensor data from members' hive scales. Could you audit these files properly? I'd like a list of the problems ordered by how serious they are, an explanation of why each one matters, and then a corrected version of every file. Keep it simple enough that the next volunteer can understand it.
+
+Association: Valdoran Beekeepers' Association, about 340 members, one small VPS at a hosting company, one Postgres database.
+
+--- Dockerfile ---
+
+```dockerfile
+FROM python:latest
+
+WORKDIR /app
+COPY . /app
+
+RUN apt-get update
+RUN apt-get install -y build-essential libpq-dev curl vim git
+RUN pip install -r requirements.txt
+RUN pip install gunicorn
+
+ENV FLASK_ENV=development
+ENV DATABASE_URL=postgresql://portal:honeycomb2019@db:5432/portal
+ENV SECRET_KEY=bees-are-great-2019
+
+EXPOSE 8000
+CMD gunicorn -b 0.0.0.0:8000 -w 1 portal.wsgi:app
+```
+
+--- docker-compose.yml ---
+
+```yaml
+version: "3"
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+    restart: always
+
+  collector:
+    build: ./collector
+    environment:
+      - MQTT_HOST=mqtt.valdoran-bees.example.org
+      - MQTT_USER=scales
+      - MQTT_PASSWORD=scales-2019-pw
+      - DATABASE_URL=postgresql://portal:honeycomb2019@db:5432/portal
+    depends_on:
+      - db
+    restart: always
+
+  db:
+    image: postgres
+    environment:
+      POSTGRES_USER: portal
+      POSTGRES_PASSWORD: honeycomb2019
+      POSTGRES_DB: portal
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    restart: always
+
+  proxy:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - web
+```
+
+--- nginx.conf ---
+
+```nginx
+events {}
+
+http {
+    server {
+        listen 80;
+        server_name portal.valdoran-bees.example.org;
+
+        client_max_body_size 0;
+
+        location / {
+            proxy_pass http://web:8000;
+            proxy_set_header Host $host;
+        }
+
+        location /admin {
+            proxy_pass http://web:8000;
+        }
+    }
+}
+```
+
+--- .github/workflows/ci.yml ---
+
+```yaml
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      - run: pip install -r requirements.txt
+      - run: pytest || true
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@master
+      - name: Deploy
+        run: |
+          echo "${{ secrets.DEPLOY_KEY }}" > key.pem
+          chmod 777 key.pem
+          ssh -o StrictHostKeyChecking=no -i key.pem deploy@portal.valdoran-bees.example.org "cd /srv/portal && ./deploy.sh"
+```
+
+--- deploy.sh ---
+
+```bash
+#!/bin/bash
+cd /srv/portal
+git pull
+docker-compose down
+docker-compose build
+docker-compose up -d
+docker system prune -af
+echo deployed
+```
+
+--- backup.sh ---
+
+```bash
+#!/bin/bash
+# nightly backup, runs from root's crontab at 03:00
+# 0 3 * * * /srv/portal/backup.sh
+
+DATE=`date +%Y-%m-%d`
+BACKUP_DIR=/srv/backups
+mkdir $BACKUP_DIR
+
+docker exec portal_db_1 pg_dump -U portal portal > $BACKUP_DIR/portal-$DATE.sql
+
+# keep only recent ones
+cd $BACKUP_DIR
+rm `ls -t | tail -n +8`
+
+# copy to the association's storage bucket
+export AWS_ACCESS_KEY_ID=EXAMPLEKEYIDBEEKEEPER
+export AWS_SECRET_ACCESS_KEY=notarealsecretkeyjustforthisexample0123
+aws s3 cp $BACKUP_DIR/portal-$DATE.sql s3://valdoran-backups/portal-$DATE.sql --endpoint-url https://storage.example.org
+
+echo "backup done $DATE" | mail -s "backup" chair@valdoran-bees.example.org
+```
+
+--- restore-test.sh ---
+
+```bash
+#!/bin/bash
+# Run this by hand once a year to check backups work
+LATEST=$(ls /srv/backups/*.sql | tail -1)
+docker exec -i portal_db_1 psql -U portal -c "DROP DATABASE portal_test"
+docker exec -i portal_db_1 psql -U portal -c "CREATE DATABASE portal_test"
+docker exec -i portal_db_1 psql -U portal portal_test < $LATEST
+docker exec -i portal_db_1 psql -U portal portal_test -c "select count(*) from members"
+```
+
+--- collector/Dockerfile ---
+
+```dockerfile
+FROM python:3.8
+WORKDIR /collector
+COPY . .
+RUN pip install paho-mqtt psycopg2
+USER root
+CMD ["python", "collect.py"]
+```
+
+--- requirements.txt ---
+
+```text
+flask
+flask-login
+psycopg2
+gunicorn==19.9.0
+requests==2.19.0
+pyyaml==3.13
+jinja2==2.10
+```
+
+--- collector/collect.py ---
+
+```python
+import json
+import os
+import time
+
+import paho.mqtt.client as mqtt
+import psycopg2
+
+conn = psycopg2.connect(os.environ["DATABASE_URL"])
+cur = conn.cursor()
+
+
+def on_message(client, userdata, msg):
+    data = json.loads(msg.payload)
+    print("got", data)
+    cur.execute(
+        "INSERT INTO readings (scale_id, weight_kg, temp_c, recorded_at) VALUES ('%s', %s, %s, now())"
+        % (data["scale"], data["weight"], data["temp"])
+    )
+    conn.commit()
+
+
+client = mqtt.Client()
+client.username_pw_set(os.environ["MQTT_USER"], os.environ["MQTT_PASSWORD"])
+client.on_message = on_message
+client.connect(os.environ["MQTT_HOST"], 1883)
+client.subscribe("scales/#")
+
+while True:
+    try:
+        client.loop_forever()
+    except Exception as e:
+        print(e)
+        time.sleep(5)
+```
+
+--- provision.sh (run once as root on the new VPS) ---
+
+```bash
+#!/bin/bash
+apt-get update
+apt-get -y upgrade
+apt-get install -y docker.io docker-compose git awscli mailutils ufw
+
+ufw allow 22
+ufw allow 80
+ufw allow 5432
+ufw allow 8000
+ufw --force enable
+
+useradd -m deploy
+mkdir -p /home/deploy/.ssh
+echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEXAMPLEEXAMPLEEXAMPLEEXAMPLE deploy@ci" >> /home/deploy/.ssh/authorized_keys
+usermod -aG docker deploy
+echo "deploy ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+git clone https://git.example.org/valdoran-bees/portal.git /srv/portal
+chown -R deploy /srv/portal
+sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config
+service ssh restart
+```
+
+--- prune-readings.sh (monthly, run by hand when somebody remembers) ---
+
+```bash
+#!/bin/bash
+cd /srv/portal
+MONTHS=$1
+docker exec portal_db_1 psql -U portal portal -c "DELETE FROM readings WHERE recorded_at < now() - interval '$MONTHS months'"
+docker exec portal_db_1 psql -U portal portal -c "VACUUM FULL readings"
+```
+
+--- crontab of root on the VPS ---
+
+```text
+0 3 * * * /srv/portal/backup.sh
+*/10 * * * * docker start portal_web_1 portal_collector_1 > /dev/null 2>&1
+@reboot cd /srv/portal && docker-compose up -d
+```
+
+--- portal/config.py ---
+
+```python
+import os
+
+
+class Config:
+    DEBUG = True
+    SECRET_KEY = os.environ.get("SECRET_KEY", "dev")
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
+    SESSION_COOKIE_SECURE = False
+    SESSION_COOKIE_HTTPONLY = False
+    PERMANENT_SESSION_LIFETIME = 60 * 60 * 24 * 365
+    MAIL_SERVER = "localhost"
+    MAIL_PORT = 25
+    ADMIN_EMAILS = ["chair@valdoran-bees.example.org", "tomas@valdoran-bees.example.org"]
+    UPLOAD_DIR = "/app/uploads"
+    MAX_CONTENT_LENGTH = None
+```
+
+--- check-site.sh (run from Tomas's laptop crontab every 5 minutes) ---
+
+```bash
+#!/bin/bash
+STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://portal.valdoran-bees.example.org/)
+if [ $STATUS != 200 ]; then
+  echo "portal returned $STATUS" | mail -s "PORTAL DOWN" tomas@valdoran-bees.example.org
+fi
+LAST=$(ssh root@portal.valdoran-bees.example.org "docker exec portal_db_1 psql -U portal portal -t -c 'select max(recorded_at) from readings'")
+echo $LAST > /tmp/last-reading.txt
+```
+
+--- .github/workflows/nightly.yml ---
+
+```yaml
+name: nightly
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - run: pip install safety
+      - run: safety check -r requirements.txt
+        continue-on-error: true
+      - run: curl http://portal.valdoran-bees.example.org/healthz
+```
+
+--- notes on the database from the old README ---
+
+```text
+- Postgres runs with default settings. The only tuning done was by the previous
+  volunteer: shared_buffers = 4GB (the VPS has 2 GB of RAM) and max_connections = 500.
+- The readings table has no index except the primary key. The "my hives" page in the
+  portal takes about 9 seconds to load for members who have more than 3 scales.
+- Passwords of the 340 member accounts were stored with an unsalted hash of the
+  password until last year, when the new login code was added. Old accounts that have
+  not logged in since still have the old hash.
+- Uploaded photos of hives and swarm sightings are stored in /app/uploads inside the
+  container. They are not in the backup and are lost when the container is rebuilt.
+```
+
+--- logrotate and cron notes (from the old README) ---
+
+```text
+- Logs from gunicorn go to stdout, docker keeps them forever. Last time the disk
+  filled up in February we deleted /var/lib/docker/containers/*/*.log by hand.
+- Certificates: we used to run certbot by hand every three months. Nobody has done
+  it since the previous volunteer left. The portal is currently reachable on port 80
+  only. Members have been told to ignore the browser warning.
+- The collector restarts itself when the MQTT broker goes down, so there is no
+  alerting. If hive weights stop appearing, ask Tomas to restart the VPS.
+- Server login is root with a password that is kept in the shared document that all
+  committee members can read.
+```
+
+Some context on how things are used. The portal has about 340 accounts and gets most of its traffic in April and May, when swarm season starts and members book apiary visits. Hive scale readings arrive every 15 minutes from about 60 scales. Members' postal addresses and phone numbers are in the database, so I am nervous about losing it or leaking it. The only deployment that ever happens is when I push to the main branch; sometimes I push on a Saturday evening and the site is down for a minute or two while it rebuilds. We have no staging copy. The association pays about 12 euros per month for the VPS and nothing for the storage bucket, which is a free tier of 5 GB. The database file is currently 380 MB and grows by about 40 MB a month because of the scale readings.

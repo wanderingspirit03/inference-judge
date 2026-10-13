@@ -1,0 +1,223 @@
+I inherited this claims database at Brackenridge Mutual and the month-end reports keep timing out. Could you review the schema design, tell me which indexes are missing or useless, and rewrite the seven queries at the bottom so they are faster and correct? Please explain each change, and call out any data-integrity problems you spot along the way.
+
+```sql
+-- Brackenridge Mutual: claims office database (PostgreSQL 15)
+
+CREATE TABLE policyholder (
+    policyholder_id   SERIAL PRIMARY KEY,
+    full_name         VARCHAR(120) NOT NULL,
+    date_of_birth     DATE,
+    email             VARCHAR(160),
+    phone             VARCHAR(40),
+    postcode          VARCHAR(12),
+    created_at        TIMESTAMP DEFAULT now()
+);
+
+CREATE TABLE policy (
+    policy_id         SERIAL PRIMARY KEY,
+    policy_number     VARCHAR(20) NOT NULL,
+    policyholder_id   INTEGER REFERENCES policyholder(policyholder_id),
+    product_code      VARCHAR(10) NOT NULL,   -- HOME, MOTOR, TRAVEL, PET
+    start_date        DATE NOT NULL,
+    end_date          DATE,
+    annual_premium    NUMERIC(10,2) NOT NULL,
+    excess_amount     NUMERIC(10,2) DEFAULT 0,
+    status            VARCHAR(12) NOT NULL    -- ACTIVE, LAPSED, CANCELLED
+);
+
+CREATE TABLE adjuster (
+    adjuster_id       SERIAL PRIMARY KEY,
+    full_name         VARCHAR(120) NOT NULL,
+    region            VARCHAR(30) NOT NULL,
+    hired_on          DATE NOT NULL,
+    active            BOOLEAN DEFAULT true
+);
+
+CREATE TABLE claim (
+    claim_id          SERIAL PRIMARY KEY,
+    claim_number      VARCHAR(24) NOT NULL,
+    policy_id         INTEGER NOT NULL REFERENCES policy(policy_id),
+    adjuster_id       INTEGER REFERENCES adjuster(adjuster_id),
+    loss_date         DATE NOT NULL,
+    reported_at       TIMESTAMP NOT NULL,
+    closed_at         TIMESTAMP,
+    status            VARCHAR(16) NOT NULL,   -- OPEN, UNDER_REVIEW, APPROVED, DENIED, CLOSED
+    cause_code        VARCHAR(12),
+    description       TEXT,
+    amount_claimed    NUMERIC(12,2),
+    amount_approved   NUMERIC(12,2)
+);
+
+CREATE TABLE claim_note (
+    note_id           SERIAL PRIMARY KEY,
+    claim_id          INTEGER NOT NULL REFERENCES claim(claim_id),
+    author_id         INTEGER REFERENCES adjuster(adjuster_id),
+    created_at        TIMESTAMP DEFAULT now(),
+    body              TEXT NOT NULL
+);
+
+CREATE TABLE payment (
+    payment_id        SERIAL PRIMARY KEY,
+    claim_id          INTEGER NOT NULL REFERENCES claim(claim_id),
+    paid_on           DATE NOT NULL,
+    amount            NUMERIC(12,2) NOT NULL,
+    payee_type        VARCHAR(12) NOT NULL,   -- HOLDER, GARAGE, CONTRACTOR, VET
+    payee_name        VARCHAR(120) NOT NULL,
+    method            VARCHAR(10) NOT NULL,   -- BACS, CHEQUE
+    reversed          BOOLEAN DEFAULT false
+);
+
+CREATE TABLE claim_status_history (
+    history_id        SERIAL PRIMARY KEY,
+    claim_id          INTEGER NOT NULL REFERENCES claim(claim_id),
+    old_status        VARCHAR(16),
+    new_status        VARCHAR(16) NOT NULL,
+    changed_at        TIMESTAMP NOT NULL DEFAULT now(),
+    changed_by        INTEGER REFERENCES adjuster(adjuster_id)
+);
+
+CREATE TABLE cause_code (
+    cause_code        VARCHAR(12) PRIMARY KEY,
+    product_code      VARCHAR(10) NOT NULL,
+    label             VARCHAR(80) NOT NULL
+);
+
+CREATE TABLE claim_reserve (
+    reserve_id        SERIAL PRIMARY KEY,
+    claim_id          INTEGER NOT NULL REFERENCES claim(claim_id),
+    set_on            DATE NOT NULL,
+    reserve_amount    NUMERIC(12,2) NOT NULL,
+    set_by            INTEGER REFERENCES adjuster(adjuster_id)
+);
+
+CREATE TABLE claim_document (
+    document_id       SERIAL PRIMARY KEY,
+    claim_id          INTEGER NOT NULL REFERENCES claim(claim_id),
+    doc_type          VARCHAR(20) NOT NULL,   -- PHOTO, INVOICE, REPORT, LETTER
+    file_name         VARCHAR(200) NOT NULL,
+    uploaded_at       TIMESTAMP DEFAULT now(),
+    size_bytes        BIGINT
+);
+
+CREATE TABLE fraud_flag (
+    flag_id           SERIAL PRIMARY KEY,
+    claim_id          INTEGER NOT NULL REFERENCES claim(claim_id),
+    raised_on         DATE NOT NULL,
+    rule_name         VARCHAR(40) NOT NULL,
+    score             INTEGER NOT NULL,
+    reviewed          BOOLEAN DEFAULT false
+);
+
+-- Indexes that exist today
+CREATE INDEX idx_policy_holder      ON policy(policyholder_id);
+CREATE INDEX idx_policy_status      ON policy(status);
+CREATE INDEX idx_claim_policy       ON claim(policy_id);
+CREATE INDEX idx_claim_status       ON claim(status);
+CREATE INDEX idx_claim_description  ON claim(description);
+CREATE INDEX idx_note_claim         ON claim_note(claim_id);
+CREATE INDEX idx_payment_paid_on    ON payment(paid_on);
+CREATE INDEX idx_history_claim      ON claim_status_history(claim_id);
+CREATE INDEX idx_holder_name        ON policyholder(full_name);
+CREATE INDEX idx_reserve_claim      ON claim_reserve(claim_id);
+CREATE INDEX idx_document_type      ON claim_document(doc_type);
+CREATE INDEX idx_flag_claim         ON fraud_flag(claim_id);
+```
+
+Some facts about the data, as of the first of October: policyholder has about 410,000 rows, policy about 560,000, claim about 1.9 million (of which roughly 4 percent are OPEN or UNDER_REVIEW), claim_note about 7.5 million, payment about 3.1 million and claim_status_history about 6.2 million. claim_reserve holds about 2.4 million rows (a claim usually has one to three reserve changes), claim_document about 5.8 million, and fraud_flag about 140,000, of which roughly a third are not yet reviewed. About 8 percent of claims have no adjuster yet because they sit in the intake queue. Payments marked reversed are bounced transfers or cancelled cheques, about 1.5 percent of all rows. Month-end reports run on the read replica, which has 16 GB of memory and a spinning-disk array.
+
+```sql
+-- Q1: month-end paid total by product for September 2026 (runs 4+ minutes)
+SELECT p.product_code,
+       SUM(pay.amount) AS paid_total
+FROM payment pay, claim c, policy p
+WHERE pay.claim_id = c.claim_id
+  AND c.policy_id = p.policy_id
+  AND to_char(pay.paid_on, 'YYYY-MM') = '2026-09'
+GROUP BY p.product_code
+ORDER BY paid_total DESC;
+
+-- Q2: open claims older than 60 days, with adjuster name (runs 90 seconds)
+SELECT c.claim_number,
+       c.reported_at,
+       (SELECT a.full_name FROM adjuster a WHERE a.adjuster_id = c.adjuster_id) AS adjuster,
+       now() - c.reported_at AS age
+FROM claim c
+WHERE c.status IN ('OPEN', 'UNDER_REVIEW')
+  AND c.reported_at < now() - interval '60 days'
+  AND c.claim_id NOT IN (SELECT claim_id FROM claim_status_history WHERE new_status = 'APPROVED')
+ORDER BY c.reported_at;
+
+-- Q3: average days to close, per adjuster, for claims closed in the last 12 months
+SELECT a.full_name,
+       COUNT(*) AS closed_claims,
+       AVG(DATE_PART('day', c.closed_at - c.reported_at)) AS avg_days_to_close
+FROM claim c
+JOIN adjuster a ON a.adjuster_id = c.adjuster_id
+WHERE c.closed_at > now() - interval '12 months'
+  AND c.status = 'CLOSED'
+GROUP BY a.full_name
+HAVING COUNT(*) > 0
+ORDER BY avg_days_to_close;
+
+-- Q4: policyholders with three or more claims in the last 24 months
+SELECT ph.full_name, ph.postcode, COUNT(c.claim_id) AS claims
+FROM policyholder ph
+JOIN policy p ON p.policyholder_id = ph.policyholder_id
+JOIN claim c ON c.policy_id = p.policy_id
+WHERE c.loss_date >= current_date - 730
+GROUP BY ph.full_name, ph.postcode
+HAVING COUNT(c.claim_id) >= 3
+ORDER BY claims DESC;
+
+-- Q5: claims where total paid exceeds the approved amount
+SELECT c.claim_number, c.amount_approved,
+       (SELECT SUM(amount) FROM payment WHERE claim_id = c.claim_id) AS total_paid
+FROM claim c
+WHERE c.amount_approved IS NOT NULL
+  AND (SELECT SUM(amount) FROM payment WHERE claim_id = c.claim_id) > c.amount_approved;
+
+-- Q6: latest reserve per open claim, compared with what has been paid so far
+SELECT c.claim_number,
+       r.reserve_amount,
+       COALESCE(pd.paid, 0) AS paid_so_far,
+       r.reserve_amount - COALESCE(pd.paid, 0) AS remaining
+FROM claim c
+JOIN claim_reserve r ON r.claim_id = c.claim_id
+LEFT JOIN (SELECT claim_id, SUM(amount) AS paid FROM payment GROUP BY claim_id) pd
+       ON pd.claim_id = c.claim_id
+WHERE c.status IN ('OPEN', 'UNDER_REVIEW')
+  AND r.set_on = (SELECT MAX(set_on) FROM claim_reserve WHERE claim_id = c.claim_id)
+ORDER BY remaining DESC;
+
+-- Q7: unreviewed fraud flags with a score of 70 or more, with the number of documents
+SELECT f.flag_id, c.claim_number, f.rule_name, f.score,
+       (SELECT COUNT(*) FROM claim_document d WHERE d.claim_id = c.claim_id) AS documents
+FROM fraud_flag f
+JOIN claim c ON c.claim_id = f.claim_id
+WHERE f.reviewed = false
+  AND f.score >= 70
+  AND c.status <> 'DENIED'
+ORDER BY f.score DESC, f.raised_on;
+```
+
+A few representative rows, so you can see how the data really looks (the production values are messier than this):
+
+```sql
+INSERT INTO policyholder (full_name, date_of_birth, email, phone, postcode) VALUES
+  ('Odalys Verhoeven', '1979-03-14', 'odalys.verhoeven@example.org', '07700 900114', 'BK4 2QT'),
+  ('Sunniva Tallgren', '1991-11-02', NULL, '07700 900231', 'BK4 2QT'),
+  ('Hamish Ntuli',     '1966-06-27', 'h.ntuli@example.org', NULL, 'RW9 1LA');
+
+INSERT INTO policy (policy_number, policyholder_id, product_code, start_date, end_date, annual_premium, excess_amount, status) VALUES
+  ('BM-H-004417', 1, 'HOME',  '2024-04-01', NULL,         612.40, 250.00, 'ACTIVE'),
+  ('BM-M-009832', 1, 'MOTOR', '2025-01-15', '2026-01-14', 845.00, 300.00, 'LAPSED'),
+  ('BM-P-002210', 3, 'PET',   '2025-09-09', NULL,         318.75,  75.00, 'ACTIVE');
+
+INSERT INTO claim (claim_number, policy_id, adjuster_id, loss_date, reported_at, closed_at, status, cause_code, description, amount_claimed, amount_approved) VALUES
+  ('CL-2026-081120', 1, 4,    '2026-08-03', '2026-08-04 09:12', '2026-09-02 15:40', 'CLOSED', 'WATER-ESC', 'Burst pipe under kitchen sink, laminate floor damaged', 4180.00, 3930.00),
+  ('CL-2026-082877', 3, NULL, '2026-08-21', '2026-08-21 18:05', NULL,               'OPEN',   'VET-ILL',   'Emergency treatment, suspected poisoning',          1260.00, NULL);
+```
+
+The reports are produced by a nightly job that calls these queries one after another with a statement timeout of 300 seconds, and sends the results to the finance team and to the compliance officer, Ingeborg Castellanos. The month-end run on the first working day of the month is the one that fails, because the job starts at 01:00 while the replica is still replaying the overnight batch of claim imports. Last month Q1 was killed by the timeout and the finance team re-ran it by hand at lunchtime. I would like the queries to finish well inside the timeout even while the replica is busy, and I would prefer not to add more than two or three indexes in total, because the import batch is already slow and every index makes it slower.
+
+Two more things I should say. First, the claims team treats a claim as "settled" when the last row in claim_status_history says CLOSED, but the status column on claim is sometimes out of step with it, because an old import script wrote to one table and not the other. Second, the finance team wants Q1 and Q5 to ignore reversed payments, though nobody ever wrote that into the queries, and I am not sure whether the totals they have been sending to the regulator include them.

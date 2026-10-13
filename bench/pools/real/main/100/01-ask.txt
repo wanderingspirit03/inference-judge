@@ -1,0 +1,1 @@
+Our small team builds a mobile banking app and wants to move from monthly releases to weekly ones. Write a detailed, practical guide to doing this safely, covering testing, feature flags, staged rollouts and handling a bad release.

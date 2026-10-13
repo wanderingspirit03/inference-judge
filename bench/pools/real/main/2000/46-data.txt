@@ -1,0 +1,60 @@
+Below is a month of jobs from our workshop, pulled from the order book. Could you write me a proper analysis of it, with the main findings, the things that look odd or worrying, which kinds of work make us money and which don't, and a list of concrete next steps for the next quarter? Please explain the numbers in plain words, I'm a joiner and not an accountant.
+
+Context: Halden and Rowe Furniture Makers is a twelve-person workshop that builds and restores furniture. The table covers every job closed in September. Hours are the total hours booked by all staff on the job. Materials is what we paid the timber merchant and hardware suppliers. Price is what the customer paid, excluding tax. Labour is costed internally at 38 pounds an hour. Type is one of: Table, Chair, Cabinet, Bed, Shelving, Restoration, Kitchen. Channel is how the customer found us: Web, Referral, Trade (interior designers and builders), or Walk-in. Days is the number of working days from deposit to delivery.
+
+| Job | Type | Channel | Hours | Materials | Price | Days |
+|---|---|---|---|---|---|---|
+| H-2301 | Table | Referral | 46 | 710 | 2,450 | 21 |
+| H-2302 | Chair | Web | 31 | 260 | 980 | 18 |
+| H-2303 | Cabinet | Trade | 88 | 1,240 | 4,100 | 34 |
+| H-2304 | Restoration | Walk-in | 22 | 90 | 760 | 9 |
+| H-2305 | Kitchen | Trade | 214 | 5,880 | 14,600 | 52 |
+| H-2306 | Bed | Web | 39 | 520 | 1,820 | 20 |
+| H-2307 | Shelving | Referral | 18 | 340 | 920 | 12 |
+| H-2308 | Table | Web | 52 | 880 | 2,300 | 27 |
+| H-2309 | Restoration | Referral | 64 | 210 | 1,900 | 23 |
+| H-2310 | Chair | Trade | 74 | 590 | 2,350 | 29 |
+| H-2311 | Cabinet | Web | 61 | 760 | 2,650 | 31 |
+| H-2312 | Shelving | Walk-in | 9 | 160 | 410 | 6 |
+| H-2313 | Kitchen | Referral | 168 | 4,320 | 11,200 | 47 |
+| H-2314 | Bed | Referral | 44 | 610 | 1,950 | 19 |
+| H-2315 | Restoration | Web | 35 | 130 | 1,150 | 14 |
+| H-2316 | Table | Trade | 58 | 1,020 | 3,100 | 25 |
+| H-2317 | Chair | Walk-in | 12 | 85 | 340 | 5 |
+| H-2318 | Cabinet | Referral | 97 | 1,380 | 4,250 | 36 |
+| H-2319 | Shelving | Trade | 27 | 480 | 1,150 | 15 |
+| H-2320 | Bed | Web | 41 | 570 | 1,700 | 22 |
+| H-2321 | Restoration | Trade | 83 | 340 | 2,900 | 30 |
+| H-2322 | Table | Walk-in | 33 | 540 | 1,380 | 13 |
+| H-2323 | Kitchen | Web | 191 | 5,100 | 12,400 | 58 |
+| H-2324 | Chair | Referral | 28 | 230 | 890 | 16 |
+| H-2325 | Cabinet | Walk-in | 49 | 640 | 1,900 | 24 |
+| H-2326 | Table | Web | 63 | 1,150 | 2,780 | 33 |
+| H-2327 | Bed | Trade | 55 | 760 | 2,480 | 26 |
+| H-2328 | Shelving | Web | 21 | 390 | 870 | 17 |
+
+Summary figures calculated by the office (for checking):
+- Jobs closed: 28
+- Total hours: 1,723
+- Total materials: 29,385 pounds
+- Total price: 85,680 pounds
+- Number of jobs by channel: Web 9, Referral 7, Trade 7, Walk-in 5
+
+Enquiries and quotes in September (separate from the closed jobs above; a job accepted in September will mostly close in October or November):
+
+| Channel | Enquiries | Quotes sent | Quotes accepted |
+|---|---|---|---|
+| Web | 64 | 31 | 7 |
+| Referral | 19 | 17 | 11 |
+| Trade | 12 | 12 | 6 |
+| Walk-in | 15 | 9 | 5 |
+
+Notes from the workshop:
+1. Job H-2305 was the large fitted kitchen for a housing association show flat. The customer changed the worktop material in week three, which cost us about 20 hours of rework that was not charged.
+2. Job H-2323 ran six days over because the oak for the doors arrived late from the merchant.
+3. We had two people off sick for part of the month, and one apprentice, Tobias, started on the 9th.
+4. We raised our standard prices on tables and chairs by 6 percent on 1 September. Cabinets and beds were not changed.
+5. Restoration jobs are usually quoted at a fixed price after a short visit. The estimator, Wilf, did all of them in September.
+6. The web enquiry form was rebuilt in August and now asks the customer for a rough budget. Before that it did not.
+7. Two jobs from August that finished in September are in the table. These are H-2301 and H-2302, and they were priced at the old rates.
+8. September had 22 working days, and we paid for about 1,950 staff hours in total across the twelve people, including the apprentice from the 9th. Holiday and sickness are included in that paid time, and so are the hours spent on quoting, ordering and sweeping up, which are not booked to any job.

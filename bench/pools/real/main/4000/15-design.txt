@@ -1,0 +1,149 @@
+This is the design document our small tech team wrote for the festival's new scheduling and ticketing system, and I have to sign it off before we start building in January. Could you give me a hard but fair critique (what is missing, what is risky, what will break on the busiest weekend), suggest realistic alternatives for the parts that worry you most, and then lay out an implementation plan with phases, milestones and what to cut if we run out of time? I'm not a developer myself, so please explain the technical points clearly enough that I can discuss them with the team.
+
+---
+
+# Design: Festival Programme, Seating and Ticketing Service (FPST)
+
+Author: Cormac Ellesmere-Boyd (lead developer)
+Reviewers: Anneliese Tharp (festival operations), Joss Kimathi (box office), Verity Oduya (programming)
+Status: Draft 3, for sign-off
+Festival: Saltmere International Film Festival, 10 days in late October, 61 films, 7 venues
+
+## 1. Background and goals
+
+Today the festival runs on a shared spreadsheet for the programme, a third-party ticketing website that charges 8 per cent per ticket, and a paper process for venue allocation. Last year the box office oversold two screenings of "The Lantern Keepers" at the Alderman Cinema because tickets were being sold from a spreadsheet copy that had not been refreshed. About 140 people were turned away or moved, and the festival had to refund and apologise.
+
+This document describes a single service, FPST, that holds the programme, the venues and seating, sells tickets and passes, and checks people in at the door. The goals are:
+
+1. No double selling of any seat or any capacity-limited screening.
+2. The programme team can change the schedule up to the day before a screening without the box office having to edit anything by hand.
+3. Ticket fees to the festival fall from 8 per cent to under 3 per cent, using a payment provider directly.
+4. The system survives the busiest weekend, the middle Saturday and Sunday, when we expect about 9,000 ticket transactions across the two days.
+5. Door staff can check in ticket holders even if the venue internet fails.
+
+Non-goals: no mobile app (tickets are PDFs and wallet passes), no dynamic pricing, no integration with the accounting package this year.
+
+## 2. Users and scale
+
+| Group | Count | Needs |
+|---|---|---|
+| Public customers | about 14,000 accounts, 4,500 active in the busiest week | Browse, buy, download tickets |
+| Passholders | about 600 | Reserve seats in advance with a pass |
+| Box office staff | 6 | Sell tickets in person, refund, exchange |
+| Programming team | 4 | Edit the schedule, assign venues |
+| Door staff | about 40 over 7 venues | Scan tickets |
+| Press and guests | about 350 | Accreditation, free tickets with quotas |
+
+Venues range from the Alderman Cinema (412 seats) down to the Gallery Room (48 seats, unreserved). Of the seven venues, five have numbered seating and two are general admission. Total capacity per day, if every screening sold out, is about 5,300 seats.
+
+## 3. Architecture
+
+FPST is a single web application written in Python with a relational database (PostgreSQL), deployed as one container on the festival's cloud account, with a managed database and a managed object store for tickets. A second small container runs background jobs (emails, PDF generation, nightly reports). The public site and the staff screens are the same application and differ only by login role. Static assets are served through the cloud provider's CDN.
+
+The decision to keep one application and one database was deliberate. With four developers, only one of them full-time, we cannot run a collection of services, and the traffic is modest apart from two peaks.
+
+### 3.1 Data model
+
+The core tables are:
+
+- venues (id, name, address, capacity, seating_type)
+- seats (id, venue_id, row, number, accessible, held_back)
+- films (id, title, runtime_minutes, rating, synopsis)
+- screenings (id, film_id, venue_id, starts_at, ends_at, price_band, status)
+- tickets (id, screening_id, seat_id nullable, order_id, status, barcode)
+- orders (id, customer_id, total_pence, payment_status, created_at)
+- passes (id, customer_id, type, quota_remaining)
+- customers (id, email, name, accessibility_needs)
+
+A ticket row exists only once an order has been paid. Seat availability is computed by checking that no non-cancelled ticket exists for the seat and screening. During checkout the seat is "held" by inserting a row into a table seat_holds (screening_id, seat_id, session_id, expires_at). Holds last 10 minutes.
+
+### 3.2 Selling a seat
+
+The checkout flow for a numbered-seat screening is:
+
+1. The customer picks seats on a seat map. The page reads availability from the database every 5 seconds.
+2. When the customer clicks "Reserve", the application starts a transaction, reads the current tickets and holds for those seats, and if none conflict inserts hold rows.
+3. The customer pays through the payment provider's hosted page. On the success callback, the application converts holds into tickets.
+4. If the callback has not arrived after 10 minutes, a background job deletes the expired holds.
+
+For general-admission screenings, the application counts tickets and holds against the venue capacity, and refuses a hold if the count would exceed capacity.
+
+### 3.3 Scheduling
+
+The programming team edits screenings on a grid, with venues in columns and time in rows. Moving a screening to another venue changes the venue_id; if the new venue has fewer seats, the application tells the editor how many tickets are already sold and refuses the move if the sold number exceeds the new capacity. There is a "clash check" that warns when two screenings in the same venue overlap, or when a guest speaker is booked in two places. The check runs when the editor presses Save.
+
+Cancelling or moving a screening after tickets have been sold sends an email to every ticket holder through the background job, and offers a refund link valid for 14 days.
+
+### 3.4 Passes
+
+A pass has a quota of screenings (the Full Pass is unlimited, the Weekend Pass is 12 screenings, the Day Pass is 4). Passholders reserve seats in the same flow, but with no payment: the hold becomes a ticket straight away and the quota is decremented in the same transaction. Passholders may reserve up to 3 days ahead of the screening. Full Pass holders may reserve up to 7 days ahead, which means Full Pass holders get first choice of the popular screenings.
+
+### 3.5 Check-in and offline mode
+
+Door staff use a web page on a tablet, with a camera scanning the barcode on each ticket. Before the doors open, the tablet downloads the list of valid tickets for the screening and stores it in the browser's local storage. Scans are checked against the local list, and results are sent to the server when the connection returns. If a barcode is scanned twice, the second scan shows "already used" along with the time of the first scan.
+
+### 3.6 Reporting
+
+A nightly job produces a CSV of tickets sold per screening and revenue per film, which is emailed to Anneliese and Verity. Live attendance numbers are shown on a dashboard that reads from the same database.
+
+### 3.7 Refunds and exchanges
+
+Box office staff can refund a ticket from the order screen. The refund is sent to the payment provider through its API, the ticket status is set to cancelled and the seat becomes available again immediately. Exchanges are handled as a refund followed by a new sale, so the customer pays the difference by card at the desk. The rules are: full refund up to 48 hours before the screening, 50 per cent refund from 48 to 6 hours before, no refund after that unless the festival cancels. A ticket bought with a pass cannot be refunded in money, but the quota is returned if the ticket is cancelled more than 6 hours ahead. Refunds above 100 pounds need a second member of staff to approve them in the system.
+
+### 3.8 Staff roles
+
+There are four roles: customer, box office, programming and administrator. Box office staff can sell, refund and see customer details. Programming staff can edit the schedule but not see customer details. Administrators can do everything, including editing the seat maps and creating staff accounts. Every change to a screening, a refund and every login is written to an audit table with the user, the time and the old and new values. The audit table is never edited by the application.
+
+### 3.9 Press and guest allocations
+
+Accredited press and festival guests receive a code by email. The code is entered at checkout and sets the ticket price to zero for up to 6 screenings per person. Press codes are valid for the whole festival; guest codes are tied to one film and allow up to 2 tickets. Each code is stored with a counter of how many tickets have been issued against it. Codes are generated by the programming team in batches from a CSV file, and the application emails them through the background job. Press seats are limited to 15 per cent of the capacity of a screening, and the application checks this at the moment the free ticket is issued. If the screening is already at the limit, the person is told it is full for press and is offered the next showing.
+
+### 3.10 Accessibility
+
+Each venue has a set of accessible seats flagged in the seats table, and these are hidden from the public seat map unless the customer ticks "I need an accessible seat" in their profile. Companions are given a free ticket next to the accessible seat. For general-admission venues, the capacity count reserves 4 places for wheelchair users, which are released two hours before the screening.
+
+## 4. Performance and capacity
+
+We expect the traffic to peak at two moments. When the programme goes on sale, on Friday 25 September at 10:00, we expect about 2,500 people to arrive within the first ten minutes. On the busiest weekend, we expect about 9,000 transactions across two days, with a peak of about 25 orders per minute. A single application container with 4 CPU cores should handle 25 orders per minute without difficulty. For the on-sale moment, we have not load tested yet; we plan to run a test with 3,000 virtual users in mid August. If the single container proves too small, we will add a second and a third behind the load balancer, since the application keeps no session state in memory.
+
+The seat map polling at 5 second intervals from 2,500 users would produce about 500 requests per second against the database. We will add an in-memory cache with a 2 second expiry for the seat map query.
+
+## 5. Security and privacy
+
+Customer data (name, email, accessibility needs) is stored in the database in the clear, with the database encrypted at rest by the cloud provider. Staff log in with email and password; box office accounts require a second factor. We store no card data, since payment is handled by the provider's hosted page. Accessibility needs are visible to box office staff and are used to allocate accessible seats. Customers can request deletion of their account after the festival ends; we will anonymise their orders and keep the financial totals. Backups are taken daily and kept for 30 days.
+
+## 6. Failure modes considered
+
+- Payment provider outage: customers see an error page and holds expire after 10 minutes.
+- Database failure: the managed database has a standby in another zone, with automatic failover in about two minutes.
+- Venue internet failure: check-in continues from the downloaded list.
+- Duplicate payment callbacks: the callback handler ignores a callback if the order is already paid.
+
+## 7. Testing
+
+Developers write unit tests for the pricing rules, pass quotas and the clash check. We will run a full rehearsal at the Alderman Cinema on Saturday 5 September with real tablets and real tickets. Manual testing of the checkout will be done by the box office staff.
+
+## 8. Timeline
+
+| Phase | Dates | Content |
+|---|---|---|
+| Build | 5 January to 29 May | Data model, scheduling grid, checkout, passes |
+| Staff testing | 1 June to 31 July | Box office and programming team use it with dummy data |
+| Load testing and fixes | 10 to 28 August | Peak load test, security review |
+| Rehearsal | 5 September | Full test at the Alderman Cinema |
+| Soft launch | 18 September | Passes go on sale |
+| Programme on sale | 25 September | Public sale opens |
+| Festival | 23 October to 1 November | Live use |
+
+Note: the build phase is five months for one full-time developer and three part-time contributors, who give about 6 hours each per week.
+
+## 9. Costs
+
+Cloud hosting is estimated at 340 pounds a month in the festival period and 120 pounds a month otherwise. The payment provider charges 1.5 per cent plus 20 pence per transaction. Based on 38,000 tickets sold across about 21,000 orders at an average ticket price of 11.40 pounds, the estimated fee total is about 10,700 pounds (1.5 per cent of 433,200 pounds of ticket sales, plus 20 pence on each order), against about 34,700 pounds under the current third-party arrangement. Development is internal.
+
+## 10. Open questions
+
+1. Should press and guest quotas be tracked as passes or as a separate table?
+2. What happens when someone buys a pass after already buying tickets for individual screenings?
+3. Who is responsible for the seat map for each venue? Verity says the Alderman plan is out of date.
+4. Do we need a waiting list for sold-out screenings?

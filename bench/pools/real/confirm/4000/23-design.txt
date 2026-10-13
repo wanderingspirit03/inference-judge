@@ -1,0 +1,137 @@
+I wrote this design document for our school's new class booking and attendance system and I'd like it torn apart before we commit money to it. Please give me a proper critique, suggest at least two alternative approaches to the parts you think are weakest, and then draft an implementation plan with phases and the order in which things should be built.
+
+---
+
+# Design: Pirouette, the booking and attendance system for the Aldermere Academy of Dance
+
+Author: Colm Verhoeven (school administrator, with help from the contract developer)
+Status: Draft 3, for review
+Last updated: 3 October
+
+## 1. Background
+
+The Aldermere Academy of Dance teaches about 640 students between the ages of 3 and 70 across four studios in one building. We run roughly 95 weekly classes in ballet, contemporary, jazz and tap, plus a Saturday pre-professional programme for 41 students aged 11 to 17, a summer school in August, and two stage shows a year (the winter show in December and a spring showcase in May).
+
+Today, booking is a mix of a spreadsheet, a paper register at each studio door, a parent mailing list and a card reader at reception. This causes the problems we all know. Enrolment numbers are wrong because parents email the office, the office updates the spreadsheet days later and teachers are not told. Attendance is on paper, and three times this year a teacher was not told that a child had a medical note. Termly fee invoices take Colm about two full days to produce. Make-up classes for missed lessons are agreed by email and then lost. Costumes for the shows are ordered from a list that is wrong every year.
+
+## 2. Goals
+
+1. Parents can see the timetable, enrol a student in a class, pay termly fees and book make-up classes online.
+2. Teachers can mark the register on a tablet at the studio door, see medical notes and emergency contacts, and send a message to the parents of a class.
+3. The office can see rolls, waiting lists and balances at any time, and produce the termly invoices in one step.
+4. Show administration: casting by class, costume sizes and fees, ticket sales, rehearsal calendar.
+
+## 3. Non-goals
+
+We will not build a general shop, video lessons, a chat system between parents, or a payroll system. Staff payroll stays with the accountant.
+
+## 4. Users and volumes
+
+- 640 students from about 470 families (many have two or three children)
+- 22 teachers and accompanists, of whom 14 would mark registers
+- 3 office staff
+- Peak load: the first day of enrolment each term, when up to 250 families try to book within the first hour at 8:00, which the school announces by email the evening before
+- Data volume is small: about 62,000 attendance marks per year
+
+## 5. Proposed architecture
+
+A single web application with a relational database, hosted by a managed platform provider, with a responsive web interface that works on phones and tablets. The parts:
+
+**5.1 Application.** A monolithic server-rendered application written in the contract developer's preferred framework. It exposes pages for parents, teachers and the office. It also exposes a small JSON interface used by the tablet register page so that marks can be saved without reloading.
+
+**5.2 Database.** One PostgreSQL instance with nightly backups kept for 30 days. Tables: families, students, guardians, classes, class_sessions, enrolments, waiting_list, attendance, make_up_bookings, invoices, payments, shows, casting, costumes and notes. The medical notes are stored in a text column on the students table.
+
+**5.3 Payments.** Parents pay by card through an external payment provider's hosted checkout. The application stores only the provider's reference for each payment and never sees card numbers. Termly invoices are created by a monthly job that runs on the 1st and mails a link to the guardian.
+
+**5.4 Email and messages.** Transactional emails (confirmation, invoice, reminders, cancellations) go through an email delivery service. Teachers can send a message to a class, which is sent as email only. No text messages in version 1.
+
+**5.5 Authentication.** Parents sign in with an email address and a one-time code sent by email. Teachers and office staff have a password with no second factor. A family account can have several guardians, each with their own email.
+
+## 6. Key flows
+
+**6.1 Enrolment.** The parent picks a student, then picks a class from those matching the student's age and level. If places are available, the student is enrolled immediately and an invoice line is added. If the class is full the student joins the waiting list. When a place becomes free, the system offers it to the first person on the list by email, who has 48 hours to accept. If they do not respond, the offer passes to the next person.
+
+**6.2 Level changes.** A teacher can move a student up one level. The office confirms the move. There is no automatic check that the target class has space.
+
+**6.3 Attendance.** Before a class, the teacher opens the register on a tablet. The page lists the enrolled students with their photos, any medical notes in red, and a button for present, absent or late. The teacher can add one-off visitors for trial classes. The register is saved after each tap. If the studio network is down, the page keeps the marks in the browser and syncs them when the connection returns.
+
+**6.4 Make-up classes.** If a student is marked absent with notice of at least 24 hours, the family gets one make-up credit, valid for 8 weeks. The parent can use a credit to book into any class at the same or lower level that has an empty place. A student may hold at most three credits.
+
+**6.5 Fees.** The termly fee is calculated as the number of weekly classes times a per-class price, with a sibling discount of 10 percent for the second child and 15 percent for the third and any further children, and a reduction for classes starting after week one. Invoices are due in the second week of term.
+
+**6.6 Show management.** Each show has a cast list per number. Costume fees are added to the next invoice. Ticket sales for the shows are not included in version 1 and will use an outside ticket seller.
+
+**6.7 Cancelled and moved lessons.** If a teacher is ill or a studio is unusable, the office marks the session as cancelled. Every enrolled family receives an email and the session becomes visible as cancelled on the timetable. Each affected student receives a make-up credit automatically, without the 24-hour notice rule. If a whole day is lost, for example because of snow, the office can cancel all sessions for that date in one action. The system does not suggest replacement times, so the office must still agree a new date with the teacher and the studio.
+
+**6.8 Trial classes.** A new family may book one free trial class, limited to one trial per child. The booking takes only a name, a date of birth and an email address and creates a student record with the status "trial". After the class, the teacher marks whether the child would like to join, and the office receives a list each Monday of trial students to contact.
+
+## 7. Privacy and safety
+
+The system holds children's names, photos, medical notes and guardian contacts. Access is limited by role: parents see only their own family; teachers see only students in their own classes; the office sees everything. Photos are used only on the register. Data about former students is deleted after two years unless a family asks us to keep it. We will register the system with the data protection regulator and write a short privacy notice. A teacher's access to a class ends when they are removed from the class. There is no audit log in version 1.
+
+## 8. Hosting and operations
+
+The application will run on a small virtual server with 2 CPUs and 4 gigabytes of memory, costing about 40 pounds per month, plus the database service at about 25 pounds per month. No staging environment is planned; the contract developer will test on a copy of the production data on a laptop. Deployments are by the developer, who will be on call during the first week of each term. Monitoring is limited to an uptime checker that emails Colm.
+
+## 9. Migration
+
+Current data lives in a spreadsheet with one row per student. The developer will write a one-off import script during the summer holiday. Families will be sent an email asking them to check their details on first login. Paper registers continue to be used in parallel for the first term.
+
+## 10. Data model notes
+
+The main tables and their relationships, in short:
+
+- `families` has one row per household, with a billing address and a balance. `guardians` belong to a family and each has an email address, a phone number, and flags for "may collect" and "receives invoices".
+- `students` belong to a family and hold date of birth, photo path, level, medical notes and a consent flag for photos at shows.
+- `classes` describe the recurring class: name, studio, weekday, start time, length, level, capacity, teacher and price. `class_sessions` are the individual dated lessons generated from a class for the term, so that a cancelled lesson (teacher ill, studio flooded) can be marked on one date only.
+- `enrolments` link a student to a class for a term, with a start date and an end date. `attendance` links a student to a class session with a status and the time it was marked.
+- `make_up_bookings` link a credit, which is created from an absence, to a class session the student will attend instead.
+- `invoices` hold one row per family per term, with lines for classes, costumes and any adjustments. `payments` hold the provider's reference, the amount and the date.
+
+Enrolment capacity is checked in the application: it counts the current enrolments in the class and, if the count is below capacity, inserts a new row. The developer says that at the expected load this is fast enough and that a database lock is not needed. Money amounts are stored as decimal pounds with two places. Dates are stored without time zones because all classes take place in one building.
+
+## 11. Reporting
+
+The office needs five regular reports: the roll by class with medical flags, a list of students with unpaid balances over 30 days, a termly attendance summary per class showing the percentage present, the waiting lists with the date each family joined, and a financial summary of invoiced and received money by month. Reports are produced as pages with a button to download them as a spreadsheet. Teachers need a printable emergency sheet per class, to be kept in a folder at each studio in case the power fails or the network is down.
+
+The director also asked whether the system could show which students have dropped from two classes a week to one, or have missed more than three consecutive lessons, so that the school can phone them before they leave. This is not in the current estimate, but the developer thinks it is a simple query.
+
+## 12. Testing and rollout
+
+The contract developer will write automated tests for the fee calculation and the make-up credit rules, because these are the parts where mistakes cost money and trust. Other parts are tested by hand. Before going live, the office staff will spend two evenings entering a sample of 30 families, including a family with three children, a student with a medical condition, and an adult student. Teachers will try the register at their studios during the December term using test data. There will be a rollback plan only in the sense that paper registers remain available.
+
+Accessibility has not been specified. Several parents and grandparents are older or have limited eyesight, and some use their phones only. The developer has said the interface will use a standard design kit with readable text sizes.
+
+## 13. Cost and timeline
+
+Developer estimate: 38 days of work at 450 pounds per day, or 17,100 pounds, plus hosting for the first year of about 780 pounds, and a payment provider fee of 1.5 percent plus 20 pence per transaction. The aim is to go live for the January term, with the register and fees first and show management after the spring showcase.
+
+| Phase | Content | Estimate |
+|---|---|---|
+| 1 | Students, families, classes, enrolment | 12 days |
+| 2 | Register on tablets, notes | 8 days |
+| 3 | Fees, invoices, payments | 10 days |
+| 4 | Make-up classes, waiting list | 5 days |
+| 5 | Show management | 3 days |
+
+## 14. Risks identified so far
+
+- First-day enrolment rush could overload the server.
+- Teachers may not accept tablets; two senior teachers have said they prefer paper.
+- Studio wireless coverage is poor in studio 3.
+- The developer is a single contractor with no backup.
+
+## 15. Open questions
+
+1. Should we offer direct debit instead of card payment? Many families have asked for it.
+2. How should part-term enrolment fees be rounded?
+3. Do we need to handle adult students differently, since they do not have guardians?
+4. Who is allowed to see photos of students?
+5. What happens when two guardians in a family disagree, for example over a make-up booking or a level change?
+
+## 16. Alternatives the author considered
+
+Before choosing a custom build, Colm looked at three other routes. The first was a hosted dance-school product from an overseas vendor, priced at about 4 pounds per student per month, or around 30,000 pounds over a year for our numbers. Its register and fee features were good, but it could not handle our sibling discount rule or the make-up credit expiry, and the vendor wanted a two-year contract. The second was to extend the existing spreadsheet with a form for parents and a mail-merge for invoices. This would cost almost nothing but would not fix the register problem or the double-booking of places. The third was a general club-management app used by a neighbouring swimming club, which was cheaper at 9 pounds per month but had no medical note field and no waiting list.
+
+The custom build was chosen because it can match the school's own rules, the school owns the data, and the running cost is low. The main drawback is dependence on one contractor, which is why the source code and a written handover document are listed as deliverables in the draft contract, along with the right for the school to hire another developer to maintain it.
+

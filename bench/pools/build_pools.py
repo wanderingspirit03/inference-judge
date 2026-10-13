@@ -1,26 +1,21 @@
 #!/usr/bin/env python3
-"""Build the Gemma 4 speed pools, quality prompts and quality tasks.
+"""Build the Gemma 4 quality prompts and quality tasks.
 
 The files in this directory are the output of this script; rebuild them with
 
-    python build_pools.py --out .            # writes the five files
+    python build_pools.py --out .            # writes the three files
     python build_pools.py --out . --check    # exit 1 if the files on disk differ
 
 and the bytes are the same on every machine (one seed, `random.Random` only,
 no tokenizer, no network). Nothing here is scraped or copied: the text comes
 from the banks and templates in pool_text.py and the tasks from pool_tasks.py.
 
-Interface:
-  build(main_lines, confirm_lines, min_tokens, n_prompts, n_tasks) -> {filename: text}
-  write(out_dir, **sizes)  /  check(out_dir, **sizes) -> list of differing files
+The speed pools are not made here: real_pool.py copies them from the request
+files in real/.
 
-How the harness uses a speed pool line (harness.py, _TpsRun.prompt): the line's
-`prompt` is cut to exactly `isl - nonce` tokens with Tokenizer.fit, which also
-PADS a short text by repeating it. So every line must be longer than the
-largest input size; a line is built from at least `min_tokens` Gemma tokens,
-which is sized from per-kind chars-per-token ceilings (CEIL) so that the real
-token count is above min_tokens whatever the text. The cut keeps the start of
-the line, so the instruction sits at the start and the tail is what gets lost.
+Interface:
+  build(n_prompts, n_tasks) -> {filename: text}
+  write(out_dir, **sizes)  /  check(out_dir, **sizes) -> list of differing files
 """
 from __future__ import annotations
 
@@ -37,41 +32,25 @@ import pool_tasks  # noqa: E402
 import pool_text  # noqa: E402
 
 SEED = 20261011
-FILES = {"main": "gemma4-main.jsonl", "confirm": "gemma4-confirm.jsonl",
-         "prompts": "gemma4-quality-prompts.jsonl", "tasks": "gemma4-quality-tasks.jsonl"}
+FILES = {"prompts": "gemma4-quality-prompts.jsonl",
+         "prompts_6144": "gemma4-quality-prompts-6144.jsonl",
+         "tasks": "gemma4-quality-tasks.jsonl"}
 
-# Defaults. A single-stream sweep sends about (ramp + window) / 4.4 s = 75 requests
-# at today's 126 tok/s; each prompt is used once per sweep and a sweep also
-# avoids the previous one's prompts, so a pool must hold twice a sweep.
-MAIN_LINES = 384
-CONFIRM_LINES = 320
-MIN_TOKENS = 9000            # longest speed input is 8192, plus the nonce and headroom
 N_PROMPTS = 256
 N_TASKS = 200
 MAX_PROMPT_TOKENS = 7800     # 8192 context - 128 forced tokens - margin
+# The prompts a 6144 context cannot hold: over 6100 Gemma tokens (6108 to 7744;
+# the longest that fits is 5873). The builder has no tokenizer, so they are
+# listed by id; tests/test_pools.py checks the list with the real one.
+OVER_6144 = frozenset({
+    "q-0037-retrieve", "q-0040-summary", "q-0041-retrieve", "q-0056-retrieve",
+    "q-0063-code", "q-0075-code", "q-0078-retrieve", "q-0086-code",
+    "q-0095-summary", "q-0133-retrieve", "q-0188-code", "q-0210-retrieve",
+    "q-0216-code", "q-0230-retrieve", "q-0234-summary", "q-0241-retrieve"})
 
-# Characters per Gemma token. CEIL is the most characters one token covered in
-# any text measured (so chars / CEIL is a lower bound on tokens); MID is the
-# typical value, used to aim quality prompts at a token length.
-CEIL = {"prose": 5.0, "code": 3.4}
+# Typical characters per Gemma token, used to aim a quality prompt at a token
+# length.
 MID = {"prose": 4.65, "code": 3.1}
-
-PROSE_HEADS = [
-    "Read the following document carefully, then write a long, detailed essay of at least 1500 words about it.",
-    "Below are some notes. Write an extensive commentary that goes through them one by one. Do not stop early.",
-    "Continue the following text for as long as you can, in the same voice, adding sections, details and examples.",
-    "Summarise the text below section by section, then write a long FAQ with thirty questions and full answers.",
-    "Here is a long document. Write a thorough critique of it, quoting passages, and finish with recommendations.",
-    "Rewrite the text below as a detailed training handout with headings, examples and a quiz at the end.",
-    "Study the material below and write a long story set in the same world, with characters and dialogue.",
-    "Read these papers and write a detailed briefing for a new colleague, covering every section in turn.",
-]
-CODE_HEADS = [
-    "Review the source code below in detail. Explain every function, list bugs and edge cases, then write exhaustive unit tests.",
-    "Write complete documentation for the following code: an overview, one section per function, and worked examples.",
-    "Refactor the code below. Explain each change at length and show the full new version of every file.",
-    "You are a senior engineer. Go through the files below line by line and write a long code review.",
-]
 
 FACTUAL = [
     "Why does ice float on water?", "How do vaccines train the immune system?", "What causes the seasons on Earth?",
@@ -123,41 +102,6 @@ def _logspace(rng: random.Random, lo: float, hi: float, n: int) -> list[int]:
     """n values spread log-uniformly over [lo, hi], one per equal log slice."""
     a, b = math.log(lo), math.log(hi)
     return [int(math.exp(a + (b - a) * (i + rng.random()) / n)) for i in range(n)]
-
-
-# ---------------------------------------------------------------------------
-# speed pools
-# ---------------------------------------------------------------------------
-def _pool_line(w: pool_text.Writer, rng: random.Random, min_tokens: int) -> tuple[str, str]:
-    r = rng.random()
-    if r < 0.62:
-        kind, body = "prose", w.document(int(min_tokens * CEIL["prose"]))
-        head = rng.choice(PROSE_HEADS)
-    elif r < 0.85:
-        kind, body = "code", w.code(int(min_tokens * CEIL["code"]))
-        head = rng.choice(CODE_HEADS)
-    else:
-        kind = "mixed"
-        half = min_tokens // 2 + 1
-        body = w.document(int(half * CEIL["prose"])) + "\n\n```\n" + w.code(int(half * CEIL["code"])) + "\n```\n"
-        head = rng.choice(PROSE_HEADS)
-    return kind, f"{head}\n\n{body}"
-
-
-def build_pool(name: str, domains: list[int], names: tuple[int, int], seed: int, n_lines: int,
-               min_tokens: int, seen: set[str]) -> list[dict]:
-    rng = random.Random(seed)
-    w = pool_text.Writer(rng, domains, names)
-    rows = []
-    for i in range(n_lines):
-        while True:
-            kind, text = _pool_line(w, rng, min_tokens)
-            key = text.split("\n\n", 2)[1][:300]         # the body's first paragraph
-            if key not in seen:
-                seen.add(key)
-                break
-        rows.append({"id": f"{name}-{i + 1:04d}-{kind}", "prompt": text})
-    return rows
 
 
 # ---------------------------------------------------------------------------
@@ -265,17 +209,14 @@ def build_prompts(n: int) -> list[dict]:
 # ---------------------------------------------------------------------------
 # interface
 # ---------------------------------------------------------------------------
-def build(main_lines: int = MAIN_LINES, confirm_lines: int = CONFIRM_LINES, min_tokens: int = MIN_TOKENS,
-          n_prompts: int = N_PROMPTS, n_tasks: int = N_TASKS) -> dict[str, str]:
-    """{filename: file text} for the four data files. Main and confirm draw on
-    disjoint halves of the topic and name banks, so they cannot share a passage."""
-    n_dom = len(pool_text.DOMAINS)
-    seen: set[str] = set()
-    main = build_pool("main", list(range(0, n_dom, 2)), (0, 1), SEED + 1, main_lines, min_tokens, seen)
-    confirm = build_pool("confirm", list(range(1, n_dom, 2)), (1, 0), SEED + 2, confirm_lines, min_tokens, seen)
+def build(n_prompts: int = N_PROMPTS, n_tasks: int = N_TASKS) -> dict[str, str]:
+    """{filename: file text} for the three data files. The 6144 file is the
+    prompts file without the rows named in OVER_6144, in the same order."""
+    prompts = build_prompts(n_prompts)
     tasks = pool_tasks.make_tasks(random.Random(SEED + 4), n_tasks)
-    return {FILES["main"]: _jsonl(main), FILES["confirm"]: _jsonl(confirm),
-            FILES["prompts"]: _jsonl(build_prompts(n_prompts)), FILES["tasks"]: _jsonl(tasks)}
+    return {FILES["prompts"]: _jsonl(prompts),
+            FILES["prompts_6144"]: _jsonl([r for r in prompts if r["id"] not in OVER_6144]),
+            FILES["tasks"]: _jsonl(tasks)}
 
 
 def write(out_dir: str | Path, **sizes) -> list[str]:
@@ -298,14 +239,10 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--out", default=str(HERE))
     ap.add_argument("--check", action="store_true", help="compare with the files on disk, write nothing")
-    ap.add_argument("--main-lines", type=int, default=MAIN_LINES)
-    ap.add_argument("--confirm-lines", type=int, default=CONFIRM_LINES)
-    ap.add_argument("--min-tokens", type=int, default=MIN_TOKENS, help="Gemma tokens every pool line must exceed")
     ap.add_argument("--n-prompts", type=int, default=N_PROMPTS)
     ap.add_argument("--n-tasks", type=int, default=N_TASKS)
     a = ap.parse_args(argv)
-    sizes = dict(main_lines=a.main_lines, confirm_lines=a.confirm_lines, min_tokens=a.min_tokens,
-                 n_prompts=a.n_prompts, n_tasks=a.n_tasks)
+    sizes = dict(n_prompts=a.n_prompts, n_tasks=a.n_tasks)
     if a.check:
         bad = check(a.out, **sizes)
         print("differ: " + ", ".join(bad) if bad else "ok: files match a fresh build")

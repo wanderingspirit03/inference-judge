@@ -1,0 +1,85 @@
+I am on the review panel for our regional education technology workshop and have been sent the write-up below. Please write me a detailed peer review: what the study does well, the problems with the method, whether the conclusions follow from the results, and a list of concrete changes that you would ask the authors to make before accepting it. I would like it written so that I can paste most of it into the review form.
+
+Title: Does Replacing Shared Classroom Laptops with Personal Tablets Reduce Help-Desk Load? A Two-Year Study in the Marlow Borough Schools
+
+Authors: R. Penhallow, S. Adeyemi-Cole, and T. Wrenfield, Information Technology Office, Marlow Borough School District
+
+Abstract
+
+Schools in our district have for many years relied on trolleys of shared laptops. In September 2024 the district replaced the trolleys in eight of its sixteen secondary and middle schools with individually assigned tablets, a change expected to cut the volume of IT help-desk tickets. We compared ticket volumes, time to resolution, and teacher-reported lost lesson time between the eight tablet schools and the eight schools that kept trolleys. Over the two school years 2023-24 and 2024-25, tablet schools showed a 31 percent fall in tickets per hundred devices and a 22 percent fall in median resolution time, while trolley schools were nearly unchanged. Teachers in tablet schools reported 39 percent less lost lesson time. We conclude that personal tablets substantially reduce IT support load, and recommend extending them to all remaining schools.
+
+1. Introduction
+
+The IT Office of the district supports 4,950 laptops, 1,420 desktop computers and, since last year, 3,120 tablets across sixteen schools, with a support team of eleven staff. The mix of devices has changed because of a funding decision, not a research design: capital from a state grant allowed the purchase of tablets for roughly half of our schools. Because the grant was to be spent within a single financial year, the district chose the schools that were quickest to complete the required wireless upgrade, and our office was asked to monitor what followed. This paper reports that monitoring.
+
+We expected two effects. First, personal devices should reduce tickets caused by shared use: forgotten passwords, saved work on the wrong machine, and trolley charging failures. Second, a student who is responsible for one device may treat it with more care than a student using a machine shared by five classes in a day. We also acknowledged a possible opposing effect: tablets are a new technology to our teachers, and new technology tends to produce questions.
+
+2. Method
+
+2.1 Schools and assignment. The sixteen schools were divided into a tablet group and a comparison group. The tablet group comprised the eight schools whose wireless upgrade finished by July 2024. Five are middle schools and three are secondary schools. The comparison group comprised the remaining eight, of which four are middle schools and four are secondary schools. Tablet schools had a mean enrolment of 612 students and comparison schools a mean of 748. Assignment was therefore determined by the readiness of the school's network and not by chance. Tablets were issued to all students in years 7 to 9 at tablet schools, with years 10 and 11 continuing to use the shared laptops.
+
+2.2 Data sources. We used three sources. The first was the ticketing system, in which every request to the help desk is recorded with a category, the school, the device identifier, the time of opening and the time of closure. The second was a survey sent each June to all teachers, asking how many lessons in the past term had been disrupted by technology problems and for how many minutes. The third was an inventory extract giving the number of devices at each school on 1 October of each year.
+
+2.3 Outcome measures. The primary outcome was tickets per hundred devices per school per term. The secondary outcomes were median hours to resolution and the teacher-reported lost lesson time. Tickets arising from planned projects, such as the wireless upgrade itself, were excluded from the primary count by the help desk manager, who classified them by hand.
+
+2.4 Analysis. We compared the mean change in tickets per hundred devices between the 2023-24 and 2024-25 years in the two groups, using a t-test on the school-level changes. For resolution time, we compared the group medians with a Mann-Whitney test. The survey responses were summarised as the mean reported minutes of lost time per teacher per term, and groups were compared with a t-test on individual responses. We did not adjust for school size or type. A significance level of 0.05 was used throughout.
+
+2.5 Data handling. Ticket records contain the name of the member of staff who raised the request. Before analysis the help desk manager replaced names with a numeric code and removed free text fields. The teacher survey was anonymous and voluntary, and the responses were kept on a district drive accessible only to the three authors. The study used operational data collected for the ordinary running of the service and was therefore not submitted to an external ethics committee, although the superintendent's office approved the use of the survey results.
+
+3. Results
+
+3.1 Ticket volume. Table 1 shows the mean tickets per hundred devices per term.
+
+| Group | 2023-24 | 2024-25 | Change |
+|---|---|---|---|
+| Tablet schools (n = 8) | 24.6 | 17.0 | -31% |
+| Comparison schools (n = 8) | 22.9 | 22.1 | -3% |
+
+The difference in change between groups was statistically significant (t = 2.41, p = 0.03). Within the tablet group, the fall was largest for password and login tickets (down 54 percent) and trolley or charging tickets (down 89 percent, as there were no trolleys after the change). Tickets for physical damage rose by 19 percent, from 3.1 to 3.7 per hundred devices per term, and tickets for application problems rose by 12 percent.
+
+3.2 Resolution time. The median time to resolution at tablet schools fell from 31 hours to 24 hours (22 percent), and at comparison schools from 29 hours to 28 hours. The Mann-Whitney test gave p = 0.04. The authors note that, because tablets can be re-imaged centrally, many password and login problems were closed within an hour, and that this shifts the median.
+
+3.3 Lost lesson time. The June survey was returned by 212 of 390 teachers at tablet schools (54 percent) and 241 of 462 teachers at comparison schools (52 percent). The reported lost time per teacher per term fell from 46 minutes to 28 minutes in tablet schools (a fall of 39 percent) and from 44 to 43 minutes in comparison schools. The difference was significant (p = 0.01).
+
+3.4 Subgroups. Middle schools in the tablet group showed a larger fall in tickets (38 percent) than secondary schools (21 percent). There was no difference in the comparison group between middle and secondary schools.
+
+3.5 Staff workload and the cost of a ticket. The help desk logged 6,914 tickets across all sixteen schools in 2023-24 and 6,205 in 2024-25. Of the fall of 709 tickets, 664 were at tablet schools. Table 1b gives the breakdown by category for tablet schools only, as tickets per hundred devices per term.
+
+| Category | 2023-24 | 2024-25 | Change |
+|---|---|---|---|
+| Password and login | 8.1 | 3.7 | -54% |
+| Trolley, charging and cabling | 4.5 | 0.5 | -89% |
+| Application problems | 5.2 | 5.8 | +12% |
+| Network and wireless | 3.7 | 3.3 | -11% |
+| Physical damage | 3.1 | 3.7 | +19% |
+| Total | 24.6 | 17.0 | -31% |
+
+The average handling time per ticket was 38 minutes, so the 664 tickets avoided correspond to roughly 420 hours of help desk time per year, or about 0.25 of a full-time post. Our estimate of 41,000 per year in the discussion assumes a fully loaded cost of 97 per hour for a technician, including management overhead and the cost of travel between schools.
+
+3.6 Sensitivity to exclusions. The help desk manager excluded 513 project tickets from the 2024-25 count, 407 of them from the wireless upgrade at the eight comparison schools, which began in January 2025. When we included all excluded tickets, the fall at tablet schools was 29 percent and the change at comparison schools became an increase of 4 percent. The difference between groups was still significant (p = 0.04). We did not test other specifications.
+
+3.7 Timing. The overall figure hides a large difference between terms. The autumn term of 2024 was the first with tablets, and tickets per hundred devices at tablet schools were 25.0, slightly higher than the 24.1 for the autumn of 2023, because staff and students needed support in the first weeks. The fall appeared from the spring term, at 14.9 against 25.2, and continued in the summer, at 11.2 against 24.5. The mean of the three 2024-25 terms is the 17.0 reported in Table 1. The comparison schools showed no pattern across terms.
+
+3.8 Damage and repair costs. Tablet schools sent 212 devices for repair in 2024-25, mostly cracked screens, at an average cost of 84 per repair, or 17,800 in total. The trolley laptops at the same schools in 2023-24 generated 61 repairs at an average cost of 96, or 5,856. The extra repair spend of about 11,900 is not included in the cost comparison in the discussion.
+
+4. Discussion
+
+The results are consistent with our expectations. Personal tablets appear to remove a whole category of problems that arise from sharing, and they allow the IT office to fix many faults remotely. We were surprised by the size of the effect on lost lesson time, because it exceeds the fall in tickets, but we think this is because trolley failures interrupt whole lessons whereas a failed tablet affects one student.
+
+We acknowledge that tablet schools were smaller and that smaller schools might generate fewer tickets per device for reasons not connected to tablets. However, as the comparison is of changes within each school across years, we do not think the difference in size affects the conclusion. We also note that the survey response rate was about half in each group, and we have no reason to think that non-responders differ.
+
+Three alternative explanations deserve more attention than we have given them. The first is the novelty of the programme. Tablet schools received extra visits from our office in the first term, a training day for all teachers and a named contact for each school, and these may have reduced tickets independently of the device. The second is a change in how teachers ask for help: in several tablet schools, the head of department now collects minor requests and sends them as one ticket, which would lower the count without lowering the number of faults. The third is the end of the trolley, which removes a type of ticket by definition; if trolleys had been replaced by better trolleys, the same effect might have appeared.
+
+A cost comparison is given in Table 2. Tablets cost 310 per unit including cases and device management licences, against 540 per laptop. Because one tablet serves one student and a laptop trolley served five classes per day, the district bought more devices: 3,120 tablets against the 1,260 laptops they replaced. The total hardware outlay was therefore about 967,000 for tablets against 680,000 for equivalent laptops. We estimate the reduction in help-desk time to be worth about 41,000 per year, which on its own would not repay the difference. We therefore regard the case for tablets as resting on the educational benefit of the lost lesson time recovered, which we value at about 190,000 per year using the average cost of a teacher hour.
+
+5. Limitations
+
+The study was not randomised. The comparison group was drawn from schools whose wireless networks were not ready, and these schools may differ from the tablet group in ways that affect support load, such as the age of their buildings. Tickets are counted by a system whose categories were adjusted during the study, when the help desk added a new "tablet" category in October 2024. The survey relies on teacher recall. The study covers two years, and we cannot say whether the benefit will persist as the tablets age; the first batch is now fourteen months old and the damage rate has begun to rise.
+
+6. Conclusion and recommendations
+
+Personal tablets reduced help-desk tickets by almost a third and lost lesson time by almost two fifths in the schools where they were introduced. We recommend extending the tablet programme to the remaining eight schools in the next financial year, retaining laptops for years 10 and 11 where examination software requires them, and increasing the repair budget by 15 percent to cover the rise in damage tickets. We further recommend that the district adopt the tablet model as its standard for all new school devices.
+
+Acknowledgements
+
+We thank the school business managers for their help with the inventory, the help desk team for classifying tickets, and the district superintendent's office for access to enrolment figures.

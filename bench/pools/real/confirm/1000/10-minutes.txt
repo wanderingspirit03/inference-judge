@@ -1,0 +1,23 @@
+Below are the notes from our pre-cruise planning meeting on the research vessel. Please turn them into a full project plan for the cruise: work packages, a dated schedule, an owner for each task, dependencies, and a risk register with mitigations.
+
+**Planning meeting: RV Kestrel Bay, cruise KB-14 (North Basin survey)**
+Date: 2 October 2026, 14:00 to 15:30, harbour office, Room 3
+Present: Dr Amara Okafor (chief scientist), Captain Lars Nygaard, Pilar Vidal (chief engineer), Dev Raman (data manager), Hanne Lindgren (bosun), Tomasz Wirth (marine technician), Dr Ruth Calloway (visiting biologist)
+
+**1. Cruise window.** Sailing is planned for Monday 9 November from the home harbour, with 21 days at sea and return on Sunday 29 November. Lars warned that the November weather in the North Basin is bad and that the plan should assume two lost days. Amara agreed to keep stations 9 to 12 as optional.
+
+**2. Science programme.** Three tasks. First, 32 CTD stations along four transects, with water samples at 8 depths. Second, two sediment core sites, using the box corer and the gravity corer. Third, Ruth's plankton net tows, which must be done at night at 6 stations. Amara said the CTD work is the priority and that the cores can be dropped if time runs short.
+
+**3. Equipment.** Tomasz reported that the CTD rosette passed its calibration in September, but two of the twelve bottles leak and spare O-rings have not arrived. The gravity corer needs a new wire termination, which the workshop says takes ten days. The winch drum was serviced in August. The nets are available, but Ruth needs a flow meter, which she will borrow from her institute. Pilar said the sea-water pump shows pressure drops and asked to inspect it before sailing.
+
+**4. Data and communications.** Dev will set up the data server on board and wants all sampling sheets digital this time. The satellite link has a monthly cap and will be used only for weather charts and a daily status note. Hanne asked for a clear rule on who may call the shore office.
+
+**5. Safety and crew.** Eleven scientists and technicians will join; the vessel can take twelve. A safety briefing and survival suit fitting must be done on the first morning. Ruth has not done a sea survival course and will need one before 6 November. Captain Nygaard will not sail with fewer than two qualified winch operators; at the moment there is only Hanne.
+
+**6. Budget.** Fuel was budgeted at 94,000 and the revised estimate is 108,000. Amara will ask the funder for the difference. Nobody knows yet whether the funder will agree before sailing.
+
+**7. Shore contact and insurance.** Dev will keep a shore contact sheet with the harbour office number and the duty officer for the cruise. The insurer must be told of the revised track and the night operations at least two weeks before sailing, which Lars said he would leave to the office. Pilar pointed out that the ship's stores order closes on 30 October, so special food requirements from the visiting scientists have to be collected by then.
+
+**Decisions.** Sailing date 9 November, subject to weather on the day. CTD work has priority. Optional stations 9 to 12 may be dropped by the chief scientist alone.
+
+**Open items.** O-ring delivery date, winch operator training, fuel funding, pump inspection, flow meter loan.

@@ -1,0 +1,20 @@
+I run operations for a parcel-locker network and pulled this table for the last quarter. Please write a full written analysis with the main findings, what might explain them, anything that looks odd in the data, and a concrete list of next steps for the operations team.
+
+Description: one row per locker site. "Compartments" is the number of boxes at the site. "Avg fill" is the average share of compartments in use at 18:00 on weekdays. "Full days" is the number of days in the quarter on which the site had no free compartment for at least one hour. "Median pickup (h)" is the median time between a parcel being delivered to a locker and the customer collecting it. "Failed deliveries" counts parcels the courier could not place because the site was full. "Faults" is the number of hardware faults reported (door, screen or network).
+
+| Site | Type | Compartments | Avg fill | Full days | Median pickup (h) | Failed deliveries | Faults |
+|---|---|---|---|---|---|---|---|
+| Central Station | Transport | 120 | 91% | 48 | 14 | 612 | 9 |
+| Harbour Mall | Shopping | 96 | 84% | 31 | 19 | 340 | 4 |
+| Linden Road | Residential | 48 | 62% | 6 | 27 | 41 | 2 |
+| Tech Park North | Office | 72 | 77% | 22 | 11 | 188 | 3 |
+| University Gate | Campus | 80 | 88% | 40 | 16 | 455 | 12 |
+| Old Mill Square | Residential | 36 | 58% | 3 | 31 | 17 | 1 |
+| Airport Road | Transport | 64 | 71% | 14 | 12 | 96 | 5 |
+| Greenfield Estate | Residential | 40 | 66% | 8 | 29 | 52 | 0 |
+| Riverside Retail | Shopping | 88 | 79% | 25 | 21 | 210 | 6 |
+| Hospital Lane | Public | 32 | 94% | 52 | 9 | 380 | 7 |
+
+Totals for the quarter: 676 compartments, 2,391 failed deliveries, 49 faults, 91 days in the quarter.
+
+Notes from the team: the returns bin at Central Station was moved in week 6, so some of its parcels were counted twice in the first five weeks. University Gate was closed for a refurbishment of the building in week 9 and 10, but the lockers stayed in use. The Hospital Lane site was added in the second week of the quarter, so the figures for it cover 84 days and not 91. The pickup time at Old Mill Square looks high, and the local newsletter said the post office next door started offering free home redelivery in the same month. Our standard promise to customers is that a parcel is held for 72 hours, but we have not looked at how many parcels expire. Our target for failed deliveries is fewer than 1 percent of all parcels, and the total volume for the quarter was about 118,000 parcels.

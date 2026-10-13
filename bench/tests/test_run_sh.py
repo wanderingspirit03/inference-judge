@@ -1465,6 +1465,44 @@ def test_dry_run_sends_the_target_chat_template_kwargs_on_every_chat_request(tmp
     assert len(lines) == len(plain) and all(flag in l for l in lines), lines
 
 
+def test_dry_run_sends_the_target_extra_body_on_every_speed_request(tmp_path):
+    flag = """--extra-body {"min_tokens":8}"""
+    tps = lambda plan: [l for l in plan.splitlines() if "--mode tps" in l]
+    (tmp_path / "plain").mkdir()
+    (tmp_path / "set").mkdir()
+    plain = _plan(tmp_path / "plain", MIX_TARGET)
+    assert tps(plain) and "--extra-body" not in plain
+    plan = _plan(tmp_path / "set", MIX_TARGET.replace(
+        "  screen_window_s: 2\n", "  screen_window_s: 2\n  extra_body: {min_tokens: 8}\n"))
+    lines = tps(plan)
+    assert len(lines) == len(tps(plain)) and all(flag in l for l in lines), lines
+    assert plan.count("--extra-body") == len(lines)       # the speed test only
+
+
+def test_dry_run_passes_the_target_isl_tol_to_every_speed_run(tmp_path):
+    tps = lambda plan: [l for l in plan.splitlines() if "--mode tps" in l]
+    (tmp_path / "plain").mkdir()
+    (tmp_path / "set").mkdir()
+    plain = _plan(tmp_path / "plain", MIX_TARGET)
+    assert tps(plain) and "--isl-tol" not in plain
+    lines = tps(_plan(tmp_path / "set", MIX_TARGET.replace(
+        "  screen_window_s: 2\n", "  screen_window_s: 2\n  isl_tol: 0.25\n")))
+    assert len(lines) == len(tps(plain))
+    assert all("--isl-tol 0.25" in l for l in lines), lines
+
+
+def test_dry_run_asks_after_every_calibration_launch(tmp_path):
+    """Whether the launches so far can still make a calibration is asked after
+    each one, with every launch so far, and the calibration is made last."""
+    plan = _plan(tmp_path, MIX_TARGET, args=("--calibrate", "cal-1")).splitlines()
+    asked = [l for l in plan if "tps-calibrate --so-far" in l]
+    assert len(asked) == 10
+    assert [l.count("--launch") for l in asked] == list(range(1, 11))
+    made = [l for l in plan if "compare.py tps-calibrate" in l and "--so-far" not in l]
+    assert len(made) == 1 and made[0].count("--launch") == 10
+    assert plan.index(made[0]) > plan.index(asked[-1])
+
+
 def test_dry_run_without_a_screen_window_is_the_four_launch_plan(tmp_path):
     plan = _plan(tmp_path,
                  MIX_TARGET.replace("  screen_window_s: 2\n", ""))
@@ -1725,6 +1763,137 @@ def test_tps_a_sized_mix_end_to_end(tmp_path_factory):
     assert same["verdict"] == "REJECTED_SCREEN", same
     assert list(same["launches"]) == ["S"]
     assert same["duration_s"] < fast["duration_s"] / 2
+
+
+def _whole_pool(path: Path, sizes, per_size: int, tag: str) -> None:
+    """Whole requests for the ws tokenizer: each fits its size with the
+    harness's three-word reference line in front."""
+    path.write_text("".join(
+        json.dumps({"id": f"{tag}-{size}-{i}", "isl": size,
+                    "prompt": " ".join(f"{tag}{size}r{i}w{j}"
+                                       for j in range(size - 3 - i % 2))}) + "\n"
+        for size in sizes for i in range(per_size)))
+
+
+def _sent(run_dir: Path, launch: str) -> dict[int, set[str]]:
+    """size -> the ids one launch sent, over its warm sweep and its blocks."""
+    out: dict[int, set[str]] = {}
+    files = sorted((run_dir / "launches" / launch).glob("*/tps_records.jsonl"))
+    assert files, (run_dir, launch)
+    for f in files:
+        for r in map(json.loads, f.open()):
+            assert r["ok"], (f, r["prompt_id"], r["invalid_reason"])
+            assert r["prompt_id"].split("-")[1] == str(r["isl"]), r["prompt_id"]
+            out.setdefault(r["isl"], set()).add(r["prompt_id"])
+    return out
+
+
+@pytest.mark.slow
+def test_tps_a_pool_of_whole_requests_end_to_end(tmp_path_factory):
+    """The same mix served from a pool of whole requests, each sent under its
+    own size: baseline, calibration, a faster candidate through the screen and
+    its confirmation on the confirm pool. A size runs dry on its own, so the
+    pool must carry every launch of a run: no request is ever sent twice, and
+    the candidate's launches share none."""
+    from conftest import free_port
+    base = Path(os.path.realpath(tmp_path_factory.mktemp("whole")))
+    root = make_bench_root(base, allow_baseline=True)
+    sizes = (16, 32, 64)
+    _whole_pool(base / "main.jsonl", sizes, 64, "m")
+    _whole_pool(base / "confirm.jsonl", sizes, 24, "c")
+    (root / "targets" / "tps-mix.yaml").write_text(MIX_TARGET.replace(
+        "  blocks: 2\n", "  blocks: 2\n"
+        f"  prompt_pool: {base / 'main.jsonl'}\n  confirm_pool: {base / 'confirm.jsonl'}\n"))
+    exps = base / "src" / "research" / "experiments"
+    launch = BENCH.parent / "research" / "experiments" / "baseline-mock" / "launch.sh"
+    for exp_id, behaviour in (("baseline-mock", None), ("fast-1", "fast")):
+        (exps / exp_id).mkdir(parents=True)
+        shutil.copy(launch, exps / exp_id / "launch.sh")
+        if behaviour:
+            (exps / exp_id / "behaviour").write_text(behaviour + "\n")
+    env = {"BENCH_TARGET": "tps-mix", "RESEARCH_ROOT": str(base / "src" / "research"),
+           "IJ_SRC_ROOT": str(base / "src"),
+           "PORT": str(free_port()), "CALIBRATE_LAUNCHES": "3"}
+    bench = (root, env)
+
+    res = _tps_run(bench, ["baseline-mock"])
+    assert res["verdict"] == "BASELINE", res["reasons"]
+    assert set(res["metric"]["by_isl"]) == {"16", "32", "64"}
+    summary = json.loads((root / "results" / "baseline-mock" / "launches" / "B"
+                          / "b1" / "summary.json").read_text())
+    assert summary["prompts"] == "whole"
+    assert set(_sent(root / "results" / "baseline-mock", "B")) == set(sizes)
+
+    assert _tps_run(bench, ["--calibrate", "cal-1"])["verdict"] == "CALIBRATED"
+    cal = [_sent(root / "results" / "cal-1", f"K{i}") for i in (1, 2, 3)]
+    for a, b in zip(cal, cal[1:]):                  # neighbours share no request
+        assert all(not a[size] & b[size] for size in sizes)
+
+    fast = _tps_run(bench, ["fast-1"])
+    assert fast["verdict"] == "PROMOTED", fast["reasons"]
+    assert list(fast["launches"]) == ["C1", "C2", "I1", "I2", "S"]
+    run = root / "results" / "fast-1"
+    s, c1, c2 = (_sent(run, x) for x in ("S", "C1", "C2"))
+    for size in sizes:                              # nothing reaches it twice
+        assert not s[size] & c1[size] and not s[size] & c2[size]
+        assert not c1[size] & c2[size]
+    for x in ("I1", "I2"):
+        assert all(i.startswith("m-") for ids in _sent(run, x).values() for i in ids)
+
+    conf = _tps_run(bench, ["--confirm", "fast-1"])
+    assert conf["verdict"] == "PROMOTED", conf["reasons"]
+    for x in ("I1", "C1", "I2"):
+        assert all(i.startswith("c-") for ids in _sent(run / "confirm", x).values()
+                   for i in ids)
+
+
+# The mock, honest except on one launch: `bad` names which of its launches
+# (counted in `count`) cuts its answers short.
+FLAKY_LAUNCH = """\
+#!/usr/bin/env bash
+set -euo pipefail
+n=$(( $(cat {count} 2>/dev/null || echo 0) + 1 ))
+echo "$n" > {count}
+behaviour=honest
+[[ -f {bad} && "$n" == "$(cat {bad})" ]] && behaviour=truncate
+exec "${{IJ_PY:-python3}}" -I "${{IJ_MOCK_SERVER:-/opt/inference-judge/mock_server.py}}" \\
+  --behaviour "$behaviour" --port "${{PORT:-8000}}" \\
+  --host "${{IJ_HOST:-0.0.0.0}}" --model "${{IJ_SERVED_NAME:-mock}}"
+"""
+
+
+@pytest.mark.slow
+def test_tps_a_calibration_stops_at_the_launch_that_is_not_a_measurement(tmp_path_factory):
+    """One bad launch refuses a calibration. The run ends there and says which
+    launch and why: the launches after it are not run, and nothing is
+    installed."""
+    from conftest import free_port
+    base = Path(os.path.realpath(tmp_path_factory.mktemp("flaky")))
+    root = make_bench_root(base, allow_baseline=True)
+    (root / "targets" / "tps-test.yaml").write_text(TPS_TARGET)
+    exp = base / "src" / "research" / "experiments" / "baseline-mock"
+    exp.mkdir(parents=True)
+    count, bad = base / "count", base / "bad"
+    (exp / "launch.sh").write_text(FLAKY_LAUNCH.format(count=count, bad=bad))
+    (exp / "launch.sh").chmod(0o755)
+    bench = (root, {"BENCH_TARGET": "tps-test", "RESEARCH_ROOT": str(base / "src" / "research"),
+                    "IJ_SRC_ROOT": str(base / "src"), "PORT": str(free_port()),
+                    "CALIBRATE_LAUNCHES": "4"})
+    assert _tps_run(bench, ["baseline-mock"])["verdict"] == "BASELINE"
+
+    count.write_text("0\n")
+    bad.write_text("2\n")                          # the second calibration launch
+    res = _tps_run(bench, ["--calibrate", "cal-1"])
+    assert res["verdict"] == "INVALID", res
+    assert any("invalid_requests in K2" in why for why in res["reasons"]), res["reasons"]
+    assert any("stopped at launch 2 of 4" in why for why in res["reasons"]), res["reasons"]
+    launches = root / "results" / "cal-1" / "launches"
+    assert sorted(p.name for p in launches.iterdir()) == ["K1", "K2"]
+    assert count.read_text().strip() == "2"         # no third launch was started
+    assert not (root / "calibration" / "tps-test.json").exists()
+
+    bad.unlink()                                    # the fault mended: it calibrates
+    assert _tps_run(bench, ["--calibrate", "cal-2"])["verdict"] == "CALIBRATED"
 
 
 SEAL2_TARGET = """\

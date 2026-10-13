@@ -1,0 +1,139 @@
+I run the member support desk at our coworking spaces and I'm behind on the queue. Below are eleven tickets that came in this week. Please write a complete, individual reply to each one, in a warm but professional tone, signed "Tomasz, Member Support, Lantern Yard Workspaces". Where a ticket needs something I can't know (a refund decision, a facilities visit), say clearly what the member can expect and by when, and add a short internal note under each reply telling me what I need to do or check before sending.
+
+Some background you will need. Lantern Yard has three locations: Canal Street (the original, 140 desks), Foundry Row (opened last spring, 90 desks and four meeting rooms), and Pilcrow Mews (small, 35 desks, mostly private offices). Plans are Hot Desk (EUR 189 a month, any open desk during staffed hours 8:00 to 19:00), Fixed Desk (EUR 329, your own desk, 24-hour access) and Private Office (priced per office). Meeting room credits: Hot Desk gets 2 hours a month, Fixed Desk 6 hours, unused credits do not roll over. Day passes are EUR 22. Cancellation needs 30 days' notice before the next billing date. Invoices are issued on the 1st and are payable by direct debit on the 5th.
+
+---
+
+TICKET #48211
+Channel: web form
+Member: Ingrid Valkenburg (Fixed Desk, Canal Street, member since February)
+Subject: Charged twice in October?
+
+Hello, I looked at my bank statement this morning and there are two debits from Lantern Yard on the 5th of October, both EUR 329.00. I only have one desk. Could you please refund the second one? I'm a freelance translator and this month is tight. Thank you, Ingrid
+
+[Internal note from billing, 11 Oct: Ingrid's invoice INV-20418 shows one charge of 329.00. A second direct debit of 329.00 appears in the processor log with reference RETRY-5-OCT. The processor retried after a timeout that was reported as a failure but had in fact succeeded. Duplicates of this kind are normally reversed within five working days of a refund request. No refund has been started yet.]
+
+---
+
+TICKET #48219
+Channel: email
+Member: Dariusz Ohlsson (Hot Desk, Foundry Row, member since June)
+Subject: Meeting room booking disappeared before client visit
+
+Hi, I booked the Orchard room at Foundry Row for Thursday 16 October, 14:00 to 16:00, for a client workshop. I got a confirmation email on the 2nd. Today I opened the app and the booking is gone. A colleague told me the rooms were "re-allocated". I have four people from a client flying in. This is not acceptable. What happened and what are you going to do about it?
+
+I also notice the app only shows me 2 hours of credits and I had thought I would have more. Please explain.
+
+Dariusz
+
+[Internal note from community manager, 12 Oct: Orchard room was taken off the system on 9 Oct because a ceiling leak was found during an inspection; the room is closed until at least the 20th. Seven bookings were affected. The software should have emailed members, but the notification job failed for bookings made through the old calendar link, which is the one Dariusz used. Willow room (8 seats) is free on Thursday 16 Oct from 13:00 to 17:00. Rooms are not charged for credits when the operator cancels.]
+
+---
+
+TICKET #48230
+Channel: chat transcript
+Member: Priya Nandakumar (Private Office, Pilcrow Mews, a four-person design studio)
+Subject: Heating and noise in Office 3
+
+Priya: Hi, we've been in Office 3 for five weeks. Two issues. First, the radiator under the window doesn't get warm; we've been working in coats. Second, the studio next door plays music and we can hear the bass through the wall. We pay a lot for this office.
+Agent (Mei): Thanks for letting us know, Priya. I'll pass this to facilities.
+Priya: Please also tell me what the policy is on noise. Is there a rule? And can we get some kind of discount while the heating is broken?
+Agent (Mei): I'll find out and get back to you by email.
+
+[Internal note: Mei logged a facilities job #F-3391 for the radiator on 9 Oct. Facilities say a valve needs replacing and the part arrives Thursday. House rules, section 4: music in private offices must not be audible outside the office with the door closed; quiet hours in shared areas are 8:00 to 18:00. Office 4 (next door) is a three-person recording and podcast startup that is permitted to use speakers only with headphones for monitoring. No discount policy exists for heating faults of under two weeks; the community manager may approve a goodwill gesture of up to EUR 100 at her discretion.]
+
+---
+
+TICKET #48236
+Channel: email
+Member: Jonas Eberhardt (former Hot Desk member, Canal Street)
+Subject: Still being billed after cancelling
+
+Dear sir or madam, I cancelled my membership on 29 August by email to hello@example.org. I received a charge on 1 October of EUR 189 and another threatened for November. I haven't been in the building since August. I demand a refund of October and written confirmation that my account is closed.
+
+[Internal note: Records show Jonas's cancellation email was received on 29 August but was not actioned; it was sent to the general inbox instead of the cancellation form. Under the terms, 30 days' notice before the next billing date (1 October) would have been needed by 1 September, so the notice of 29 August was in time. The October invoice should therefore not have been issued. The November invoice has not been generated yet. His desk was released on 1 September.]
+
+---
+
+TICKET #48241
+Channel: web form
+Member: Lucía Fernández-Roth (prospective member, enquiring)
+Subject: Can I try before committing? Also accessibility
+
+Hello, I am a wheelchair user and I run a small bookkeeping business. I'm looking for a place with step-free access, an accessible bathroom, and ideally a desk that is height adjustable. I live in the Canal Street area. Do you have a trial option, and which location would you advise? I do not want to waste a trip.
+
+[Internal note: Canal Street is a converted warehouse with a lift (service lift, 1.1 m wide, but usable), an accessible toilet on the ground floor, and eight height-adjustable desks, all in the Fixed Desk zone. Foundry Row is fully step-free with a modern lift and accessible toilets on every floor, but has no adjustable desks currently; two have been ordered, delivery in three to four weeks. Pilcrow Mews has a short ramp at the entrance and no lift; private offices are on the first floor. A free trial day pass can be given by the community manager to prospective members on request.]
+
+---
+
+TICKET #48247
+Channel: email
+Member: Henrik Aaltonen (Fixed Desk, Foundry Row, team lead of a 6-person software team)
+Subject: Moving three people to private office, and 24-hour access problem
+
+Hi, our team has grown and we'd like to move from 6 fixed desks to a private office for 6 people, ideally at Foundry Row, starting 1 December. What does it cost, and what is the notice for dropping the desks? Also, two of our developers tried to enter the building at 22:30 on Tuesday with their key cards and the door did not open. They have 24-hour access on their plans. We lost an evening of work before a release. Please look into it.
+
+[Internal note: Foundry Row has one 6-person private office free from 1 December (Office 7, EUR 1,980 a month, one-year term, EUR 1,980 deposit). The six fixed desks currently cost 6 x 329 = 1,974 a month. Door controller logs show a firmware update ran at 22:10 on Tuesday and the readers were offline for 40 minutes; the cause was a scheduled update that should have been set for a daytime window. The vendor has been asked to change the schedule.]
+
+---
+
+TICKET #48255
+Channel: email
+Member: Anneliese Brouwer (Hot Desk, Canal Street)
+Subject: Lost a laptop charger and a locker question
+
+Hi there, I left a grey laptop charger (45W, USB-C) in the second-floor phone booth last Friday evening and cannot find it. Has anyone handed one in? Also I'm using a locker on the ground floor and the key seems to have disappeared from my bag. How much is a replacement and how do I swap the lock? Many thanks, Anneliese
+
+[Internal note: Lost property box at Canal Street holds two chargers: one grey 45W USB-C (handed in Saturday morning by the cleaner, found in the second-floor phone booth) and one black 65W. Lockers cost EUR 15 a month; a replacement key is EUR 12, and a lock change is EUR 25 and must be requested through facilities. Anneliese has a locker, number 31.]
+
+---
+
+TICKET #48262
+Channel: email
+Member: Marguerite Oyelaran (Hot Desk, Foundry Row, member since January)
+Subject: Invoice needs company name and VAT number, plus a question about the Fixed Desk upgrade
+
+Hello, my employer has started reimbursing my desk, so I need the invoices for August to October reissued in the name of Oyelaran Analytics BV, with their VAT number NL-000000000B01 (a placeholder from my employer's template; they will send the real one tomorrow, I'm told). Is that possible, and is there a fee? Separately, I'm thinking of moving up to a Fixed Desk from the 1st of November. Would the difference be charged pro rata, and would my meeting credits change immediately? I've used 1.5 hours of my 2 this month.
+
+Thanks, Marguerite
+
+[Internal note: Reissuing invoices to a different legal entity is allowed once per member without a fee, but it needs a valid VAT number; do not reissue on a placeholder. Upgrades take effect on the next billing date, so a move from 1 November means the November invoice shows 329 and no pro rata applies. Credits follow the plan active at the start of the month, so she would get the 6 hours from 1 November. Her October credits are 2 hours with 0.5 remaining, which expire on 31 October.]
+
+---
+
+TICKET #48270
+Channel: chat transcript
+Member: Bastian Kowalczyk (Day pass, first visit, Canal Street)
+Subject: Wi-Fi keeps dropping on the third floor
+
+Bastian: Hi, I bought a day pass this morning and the Wi-Fi on the third floor drops every ten minutes or so. I'm on a video call with a client in half an hour. What should I do?
+Agent (Luis): Sorry about that. Try the network called LanternYard-5G rather than LanternYard.
+Bastian: That one asks for a different password.
+Agent (Luis): I'll check and come back.
+Bastian: I've moved to the cafe downstairs, thanks. Can I get my money back for the day? Honestly, and I'll likely write a review about it.
+
+[Internal note: The third-floor access point was replaced on Monday and its 2.4 GHz radio is known to be unstable; the 5 GHz network works and uses the same password as the member network, printed on the card in the welcome pack, which day pass visitors get at the front desk. Luis forgot to mention the card. A day pass is EUR 22. Policy: the community manager may refund or credit a day pass if the service was not delivered, and we would rather give a free day pass for a return visit than a refund.]
+
+---
+
+TICKET #48278
+Channel: email
+Member: Collette Marchetti (Private Office, Canal Street, 2-person accountancy)
+Subject: Deliveries, post and a request for a business address
+
+Good afternoon. Three things. First, a courier left a parcel for us at the front desk on Monday and nobody told us until we asked on Wednesday. Second, we would like to use the Canal Street address as our registered business address and would like to know how that works with post: who opens it, how quickly do we hear, and what does it cost. Third, we're planning to be away from 24 December to 5 January and would like to pause our office rather than pay for empty rooms. Is that possible?
+
+Collette Marchetti
+
+[Internal note: Parcel notifications are sent by the front desk app but only to the main contact, which for this office is a former employee's address. Registered business addresses are available to Private Office members for EUR 15 a month; post is scanned and emailed the same day when the front desk is staffed, and originals are kept for 60 days. Offices cannot be paused; the minimum is a one-month notice to end the lease, and re-letting is not guaranteed. A reduced-rate hold of 50 percent for up to four weeks in a year is available to members who ask at least 30 days ahead, and 24 December is 70 days away.]
+
+---
+
+TICKET #48284
+Channel: web form
+Member: Ravi Lindqvist (Hot Desk, Pilcrow Mews, member since September)
+Subject: Suggestion: standing desk area and a quieter phone policy
+
+Hi team, I like the space and wanted to give some feedback rather than a complaint. Most of the desks at Pilcrow Mews are fine, but there is no place to stand and work, and the open area gets loud between 10:00 and 11:30 when several people take calls at their desks. Could you consider a standing bar by the window and a clearer rule that calls go to the phone booths? There are only two booths for 35 people. I'd also be happy to help set something up on a community afternoon if that is useful. Thanks, Ravi
+
+[Internal note: The community manager has already planned a standing bar for Pilcrow Mews in the November budget (about EUR 900). A third phone booth was quoted at EUR 4,200 and has not been approved. House rules, section 4, say calls should be taken in booths or meeting rooms when more than three people are in the open area, but this is not displayed on the walls. Community afternoons run on the last Friday of each month at 16:00.]

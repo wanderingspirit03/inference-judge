@@ -1,0 +1,180 @@
+Please walk me through what each part of this module does, propose a refactoring that would make it easier to maintain, and write a set of tests for the refactored version. I took over the booking code for our ballet school last month and I am worried about how the class capacity and waitlist logic fits together. Be concrete about the bugs you spot.
+
+```ts
+// enrolment.ts -- class enrolment for the Marlowe Street School of Ballet
+
+export type Level = "beginner" | "intermediate" | "advanced";
+
+export interface BalletClass {
+  id: string;
+  title: string;
+  level: Level;
+  weekday: number; // 0 = Sunday
+  startHour: number;
+  durationMinutes: number;
+  capacity: number;
+  teacher: string;
+}
+
+export interface Student {
+  id: string;
+  name: string;
+  age: number;
+  level: Level;
+  guardianEmail?: string;
+}
+
+export interface Enrolment {
+  classId: string;
+  studentId: string;
+  status: "confirmed" | "waitlisted";
+  createdAt: number;
+}
+
+const levelRank: Record<Level, number> = {
+  beginner: 0,
+  intermediate: 1,
+  advanced: 2,
+};
+
+export class EnrolmentBook {
+  private classes = new Map<string, BalletClass>();
+  private students = new Map<string, Student>();
+  private enrolments: Enrolment[] = [];
+
+  addClass(c: BalletClass): void {
+    this.classes.set(c.id, c);
+  }
+
+  addStudent(s: Student): void {
+    if (s.age < 18 && !s.guardianEmail) {
+      throw new Error("Guardian email required for " + s.name);
+    }
+    this.students.set(s.id, s);
+  }
+
+  confirmedCount(classId: string): number {
+    return this.enrolments.filter(
+      (e) => e.classId === classId && e.status === "confirmed"
+    ).length;
+  }
+
+  enrol(studentId: string, classId: string, now: number = Date.now()): Enrolment {
+    const student = this.students.get(studentId);
+    const cls = this.classes.get(classId);
+    if (!student || !cls) {
+      throw new Error("Unknown student or class");
+    }
+
+    const existing = this.enrolments.find(
+      (e) => e.studentId === studentId && e.classId === classId
+    );
+    if (existing) {
+      return existing;
+    }
+
+    if (levelRank[student.level] < levelRank[cls.level]) {
+      throw new Error(student.name + " is not ready for " + cls.title);
+    }
+
+    if (this.clashes(studentId, cls)) {
+      throw new Error("Timetable clash for " + student.name);
+    }
+
+    const status =
+      this.confirmedCount(classId) < cls.capacity ? "confirmed" : "waitlisted";
+    const enrolment: Enrolment = {
+      classId,
+      studentId,
+      status,
+      createdAt: now,
+    };
+    this.enrolments.push(enrolment);
+    return enrolment;
+  }
+
+  private clashes(studentId: string, cls: BalletClass): boolean {
+    return this.enrolments
+      .filter((e) => e.studentId === studentId)
+      .some((e) => {
+        const other = this.classes.get(e.classId)!;
+        if (other.weekday !== cls.weekday) return false;
+        const aStart = other.startHour * 60;
+        const aEnd = aStart + other.durationMinutes;
+        const bStart = cls.startHour * 60;
+        const bEnd = bStart + cls.durationMinutes;
+        return aStart < bEnd && bStart < aEnd;
+      });
+  }
+
+  drop(studentId: string, classId: string): Enrolment | undefined {
+    const index = this.enrolments.findIndex(
+      (e) => e.studentId === studentId && e.classId === classId
+    );
+    if (index === -1) return undefined;
+    const [removed] = this.enrolments.splice(index, 1);
+    if (removed.status === "confirmed") {
+      this.promoteFromWaitlist(classId);
+    }
+    return removed;
+  }
+
+  private promoteFromWaitlist(classId: string): void {
+    const next = this.enrolments
+      .filter((e) => e.classId === classId && e.status === "waitlisted")
+      .sort((a, b) => a.createdAt - b.createdAt)[0];
+    if (next) {
+      next.status = "confirmed";
+    }
+  }
+
+  timetableFor(studentId: string): BalletClass[] {
+    return this.enrolments
+      .filter((e) => e.studentId === studentId && e.status === "confirmed")
+      .map((e) => this.classes.get(e.classId)!)
+      .sort((a, b) => a.weekday - b.weekday || a.startHour - b.startHour);
+  }
+
+  fillRate(): Record<string, number> {
+    const out: Record<string, number> = {};
+    for (const [id, cls] of this.classes) {
+      out[id] = this.confirmedCount(id) / cls.capacity;
+    }
+    return out;
+  }
+
+  waitlist(classId: string): Student[] {
+    return this.enrolments
+      .filter((e) => e.classId === classId && e.status === "waitlisted")
+      .sort((a, b) => a.createdAt - b.createdAt)
+      .map((e) => this.students.get(e.studentId)!);
+  }
+
+  moveStudent(studentId: string, fromId: string, toId: string): Enrolment {
+    this.drop(studentId, fromId);
+    return this.enrol(studentId, toId);
+  }
+
+  teacherLoad(): Map<string, number> {
+    const hours = new Map<string, number>();
+    for (const cls of this.classes.values()) {
+      const current = hours.get(cls.teacher) ?? 0;
+      hours.set(cls.teacher, current + cls.durationMinutes / 60);
+    }
+    return hours;
+  }
+
+  weeklyEmail(studentId: string): string {
+    const student = this.students.get(studentId);
+    if (!student) throw new Error("Unknown student");
+    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const lines = this.timetableFor(studentId).map(
+      (c) => days[c.weekday] + " " + c.startHour + ":00 " + c.title + " with " + c.teacher
+    );
+    const to = student.guardianEmail ?? "(no email on file)";
+    return "To: " + to + "\n\n" + student.name + " this week:\n" + lines.join("\n");
+  }
+}
+```
+
+Context: we have about forty weekly classes and two hundred and ten students. Parents book through a form that calls `enrol` directly, and the front desk sometimes drops and re-adds a child by hand when a family changes slots. Last term two girls were promoted off the waitlist into a class that clashed with their other lesson, and one waitlisted child was promoted ahead of another who had asked first. Capacity for the studio classes is sixteen, and for the small pointe class it is eight.

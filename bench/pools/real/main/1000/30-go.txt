@@ -1,0 +1,100 @@
+Please explain what this Go package does, function by function, review it for bugs and design problems, and then write table-driven tests for it. The tests should cover the edge cases, not only the happy path.
+
+```go
+package pricing
+
+import (
+	"errors"
+	"fmt"
+	"math"
+	"sort"
+	"time"
+)
+
+// Vehicle describes a car in the dealership's stock.
+type Vehicle struct {
+	ID          string
+	Mileage     int
+	Cost        float64 // what we paid, in pounds
+	ListedOn    time.Time
+	Accidents   int
+	ServiceBook bool
+}
+
+// Rules holds the pricing parameters.
+type Rules struct {
+	BaseMarginPct       float64
+	MileageStepKm       int
+	MileageThreshold    int
+	MileagePenaltyPct   float64
+	AccidentPenaltyPct  float64
+	NoServiceBookPct    float64
+	AgeDiscountAfter    int // days on the lot before discounts start
+	AgeDiscountPctPerWk float64
+	MaxDiscountPct      float64
+	FloorMarginPct      float64
+}
+
+var ErrBadCost = errors.New("pricing: cost must be positive")
+
+// Price returns the asking price for a vehicle on the given day,
+// rounded to the nearest 10 pounds.
+func Price(v Vehicle, r Rules, today time.Time) (float64, error) {
+	if v.Cost <= 0 {
+		return 0, ErrBadCost
+	}
+	price := v.Cost * (1 + r.BaseMarginPct/100)
+
+	if v.Mileage > r.MileageThreshold && r.MileageStepKm > 0 {
+		steps := (v.Mileage - r.MileageThreshold) / r.MileageStepKm
+		price *= 1 - float64(steps)*r.MileagePenaltyPct/100
+	}
+	price *= 1 - float64(v.Accidents)*r.AccidentPenaltyPct/100
+	if !v.ServiceBook {
+		price *= 1 - r.NoServiceBookPct/100
+	}
+
+	days := int(today.Sub(v.ListedOn).Hours() / 24)
+	if days > r.AgeDiscountAfter {
+		weeks := (days - r.AgeDiscountAfter) / 7
+		disc := float64(weeks) * r.AgeDiscountPctPerWk
+		disc = math.Min(disc, r.MaxDiscountPct)
+		price *= 1 - disc/100
+	}
+
+	floor := v.Cost * (1 + r.FloorMarginPct/100)
+	if price < floor {
+		price = floor
+	}
+	return math.Round(price/10) * 10, nil
+}
+
+// Margin returns the margin over cost as a percentage.
+func Margin(price, cost float64) float64 {
+	return (price - cost) / cost * 100
+}
+
+// Report lists vehicles from lowest to highest margin.
+func Report(stock []Vehicle, r Rules, today time.Time) ([]string, error) {
+	type row struct {
+		id string
+		m  float64
+		p  float64
+	}
+	var rows []row
+	for _, v := range stock {
+		p, err := Price(v, r, today)
+		if err != nil {
+			return nil, fmt.Errorf("vehicle %s: %w", v.ID, err)
+		}
+		rows = append(rows, row{v.ID, Margin(p, v.Cost), p})
+	}
+	sort.Slice(rows, func(i, j int) bool { return rows[i].m < rows[j].m })
+
+	out := make([]string, len(rows))
+	for i, x := range rows {
+		out[i] = fmt.Sprintf("%s price=%.0f margin=%.1f%%", x.id, x.p, x.m)
+	}
+	return out, nil
+}
+```

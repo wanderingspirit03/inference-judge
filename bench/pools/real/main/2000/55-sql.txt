@@ -1,0 +1,137 @@
+Here is the database behind our translation agency's job tracker, plus the four queries that run the Monday reports. The reports have got slow since we passed 200,000 tasks. Can you review the design, tell me which indexes we should add and why, and rewrite each query with an explanation of what you changed? Please also point out schema problems that will cause us trouble later, even if they aren't causing slowness today.
+
+```sql
+-- PostgreSQL
+
+CREATE TABLE clients (
+    client_id     SERIAL PRIMARY KEY,
+    name          VARCHAR(200) NOT NULL,
+    country       VARCHAR(60),
+    vat_number    VARCHAR(30),
+    payment_days  INTEGER DEFAULT 30,
+    created_at    TIMESTAMP DEFAULT now()
+);
+
+CREATE TABLE linguists (
+    linguist_id   SERIAL PRIMARY KEY,
+    full_name     VARCHAR(120) NOT NULL,
+    email         VARCHAR(160),
+    is_active     BOOLEAN DEFAULT true,
+    rate_per_word VARCHAR(10)
+);
+
+CREATE TABLE linguist_languages (
+    linguist_id   INTEGER REFERENCES linguists(linguist_id),
+    source_lang   CHAR(2) NOT NULL,
+    target_lang   CHAR(2) NOT NULL,
+    PRIMARY KEY (linguist_id, source_lang, target_lang)
+);
+
+CREATE TABLE projects (
+    project_id    SERIAL PRIMARY KEY,
+    client_id     INTEGER REFERENCES clients(client_id),
+    title         VARCHAR(200) NOT NULL,
+    status        VARCHAR(20) DEFAULT 'open',
+    received_at   TIMESTAMP DEFAULT now(),
+    due_at        TIMESTAMP,
+    manager       VARCHAR(120)
+);
+
+CREATE TABLE tasks (
+    task_id       SERIAL PRIMARY KEY,
+    project_id    INTEGER REFERENCES projects(project_id),
+    linguist_id   INTEGER REFERENCES linguists(linguist_id),
+    task_type     VARCHAR(20) NOT NULL,   -- 'translate', 'review', 'proofread'
+    source_lang   CHAR(2) NOT NULL,
+    target_lang   CHAR(2) NOT NULL,
+    word_count    INTEGER NOT NULL,
+    status        VARCHAR(20) DEFAULT 'assigned',
+    assigned_at   TIMESTAMP,
+    delivered_at  TIMESTAMP,
+    price_per_word NUMERIC(8,4)
+);
+
+CREATE TABLE invoices (
+    invoice_id    SERIAL PRIMARY KEY,
+    client_id     INTEGER REFERENCES clients(client_id),
+    issued_on     DATE NOT NULL,
+    due_on        DATE NOT NULL,
+    paid_on       DATE,
+    total         VARCHAR(20)
+);
+
+CREATE TABLE invoice_lines (
+    line_id       SERIAL PRIMARY KEY,
+    invoice_id    INTEGER REFERENCES invoices(invoice_id),
+    project_id    INTEGER,
+    description   TEXT,
+    amount        NUMERIC(10,2)
+);
+```
+
+Current sizes: clients 1,900 rows; linguists 640; linguist_languages 2,100; projects 41,000; tasks 214,000; invoices 33,500; invoice_lines 96,000. There are no indexes other than the primary keys. About 2,000 tasks are added or updated each working day.
+
+Query 1: Monday report, late deliveries last week, by linguist
+
+```sql
+SELECT l.full_name,
+       count(*) AS late_tasks
+FROM tasks t, linguists l, projects p
+WHERE t.linguist_id = l.linguist_id
+  AND t.project_id = p.project_id
+  AND t.delivered_at > p.due_at
+  AND date_trunc('week', t.delivered_at) = date_trunc('week', now() - interval '7 days')
+GROUP BY l.full_name
+ORDER BY late_tasks DESC;
+```
+
+Query 2: words delivered per language pair this month, with the cost to us
+
+```sql
+SELECT t.source_lang || '-' || t.target_lang AS pair,
+       sum(t.word_count) AS words,
+       sum(t.word_count * l.rate_per_word::numeric) AS cost
+FROM tasks t
+JOIN linguists l ON l.linguist_id = t.linguist_id
+WHERE to_char(t.delivered_at, 'YYYY-MM') = to_char(now(), 'YYYY-MM')
+  AND t.status = 'delivered'
+GROUP BY pair
+ORDER BY words DESC;
+```
+
+Query 3: overdue invoices with the number of days late and the client's name
+
+```sql
+SELECT c.name,
+       i.invoice_id,
+       i.total,
+       current_date - i.due_on AS days_late
+FROM invoices i
+JOIN clients c ON c.client_id = i.client_id
+WHERE i.paid_on IS NULL
+  AND i.due_on < current_date
+  AND i.client_id IN (SELECT client_id FROM clients WHERE country <> 'UK')
+ORDER BY days_late DESC;
+```
+
+Query 4: projects that have tasks but have never been invoiced, and clients whose latest project is older than 6 months
+
+```sql
+SELECT p.project_id, p.title, c.name
+FROM projects p
+JOIN clients c ON c.client_id = p.client_id
+WHERE p.project_id IN (SELECT project_id FROM tasks)
+  AND p.project_id NOT IN (SELECT project_id FROM invoice_lines)
+  AND p.status = 'closed'
+UNION
+SELECT p.project_id, p.title, c.name
+FROM projects p
+JOIN clients c ON c.client_id = p.client_id
+WHERE c.client_id IN (
+    SELECT client_id FROM projects
+    GROUP BY client_id
+    HAVING max(received_at) < now() - interval '6 months'
+);
+```
+
+Some background that may help: the agency has two offices, one of which works mostly with clients outside the country, and the finance team exports the overdue invoice report to a spreadsheet every Monday. Linguists are paid per word, and the rate in the rate_per_word column is entered by hand by the office staff in the format 0.085, or sometimes with a currency sign. The project managers also want a screen that finds all open tasks for a given language pair that nobody has been assigned to yet, and that screen is the slowest page in the system. Only about 3 percent of the 214,000 tasks are open at any one time, and nearly all queries from the reports look only at the last 12 months of data.

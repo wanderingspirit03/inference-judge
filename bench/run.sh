@@ -1518,6 +1518,8 @@ tps_sweep() {
               --slo "$T_SLO" --seed "$seed" --base-url "$BASE_URL" --model "$MODEL_NAME"
               --run-id "$RUN_ID" --phase "$phase" --out "$out")
   [[ -n "$T_LENGTH_TOL" ]] && args+=(--length-tol "$T_LENGTH_TOL")
+  [[ -n "$T_ISL_TOL" ]] && args+=(--isl-tol "$T_ISL_TOL")
+  [[ -n "$T_EXTRA_BODY" ]] && args+=(--extra-body "$T_EXTRA_BODY")
   [[ -n "$T_CHAT_KWARGS" ]] && args+=(--chat-template-kwargs "$T_CHAT_KWARGS")
   if [[ "$phase" == "warm" ]]; then
     limit="$WARM_TIMEOUT_S"
@@ -1776,6 +1778,19 @@ tps_screen_step() {
   end_run "${v:-REJECTED_SCREEN}"
 }
 
+# add_reasons_from FILE - the "reasons" a compare.py step wrote, one by one.
+add_reasons_from() {
+  local why
+  while IFS= read -r why; do
+    [[ -n "$why" ]] && add_reason "$why"
+  done < <("$PY" -I -c 'import json, sys
+try:
+    print("\n".join(json.load(open(sys.argv[1]))["reasons"]))
+except Exception:
+    pass' "$1" 2>/dev/null)
+  return 0
+}
+
 # Before the first launch: whether this run can be judged at all. Stamps that
 # differ from the calibration's or the incumbent's can only end INVALID
 # (ruler_mismatch); with no calibration, or no incumbent yet, the run can only
@@ -1783,19 +1798,13 @@ tps_screen_step() {
 # to the verdict it costs every launch of the run. `nobest` for a
 # confirmation, whose verdict holds the stamps against the calibration only.
 tps_preflight_step() {
-  local out="$RESULTS_DIR/preflight.json" why v board=(--leaderboard "$LEADERBOARD_TPS")
+  local out="$RESULTS_DIR/preflight.json" v board=(--leaderboard "$LEADERBOARD_TPS")
   [[ "${1:-}" == "nobest" ]] && board=()
   if py "$BENCH_ROOT/compare.py" tps-preflight --stamps "$RESULTS_DIR/stamps.json" \
        --calibration "$CALIBRATION" ${board[@]+"${board[@]}"} --out "$out"; then
     return 0
   fi
-  while IFS= read -r why; do
-    [[ -n "$why" ]] && add_reason "$why"
-  done < <("$PY" -I -c 'import json, sys
-try:
-    print("\n".join(json.load(open(sys.argv[1]))["reasons"]))
-except Exception:
-    pass' "$out" 2>/dev/null)
+  add_reasons_from "$out"
   [[ -n "$REASONS" ]] || add_reason "compare.py tps-preflight failed (run.log)"
   v="$(json_get "$out" verdict)"
   end_run "${v:-INVALID}"
@@ -1908,6 +1917,20 @@ tps_baseline_body() {
 # and one set of prompts against another. Replayed prompts would leave the
 # second out and void honest runs. An ICI run keeps I1, C1 and I2 on one set,
 # so its calibration replays one.
+#
+# A launch that is not a measurement refuses the whole calibration: the ruler
+# does not choose which launches of the incumbent count. So compare.py is
+# asked after every launch, and the run ends at the one that broke it, with
+# that launch's own reason. The launches after it could change nothing.
+tps_calibrate_so_far() {    # N, then the --launch arguments so far
+  local n="$1" out="$RESULTS_DIR/calibration-so-far.json"
+  shift
+  py "$BENCH_ROOT/compare.py" tps-calibrate --so-far "$@" --out "$out" && return 0
+  add_reasons_from "$out"
+  add_reason "the calibration stopped at launch $n of $CALIBRATE_LAUNCHES"
+  end_run INVALID
+}
+
 tps_calibrate_body() {
   copy_engines
   pool_step
@@ -1919,15 +1942,16 @@ tps_calibrate_body() {
   record_image_digest
   isolation_probe "$ENTRY_EXP"
   stamps_step
-  local i args=(tps-calibrate --stamps "$RESULTS_DIR/stamps.json"
-                --out "$RESULTS_DIR/calibration.json")
+  local i launches=() args=(tps-calibrate --stamps "$RESULTS_DIR/stamps.json"
+                            --out "$RESULTS_DIR/calibration.json")
   for i in $(seq 1 "$CALIBRATE_LAUNCHES"); do
     [[ "$T_DESIGN" == "ici" ]] || DRAW_SEED=$(( SEED_BASE + 1000 * i ))
     tps_launch_one "K$i" incumbent "$ENTRY_EXP" "$ENTRY_IMAGE"
-    args+=(--launch "$RESULTS_DIR/launches/K$i/launch.json")
+    launches+=(--launch "$RESULTS_DIR/launches/K$i/launch.json")
+    tps_calibrate_so_far "$i" "${launches[@]}"
     [[ "$T_DESIGN" == "ici" ]] || { POOL_EXCLUDE=(); retire_prompts; }
   done
-  if ! py "$BENCH_ROOT/compare.py" "${args[@]}"; then
+  if ! py "$BENCH_ROOT/compare.py" "${args[@]}" ${launches[@]+"${launches[@]}"}; then
     add_reason "compare.py refused the calibration (run.log)"
     end_run INVALID
   fi

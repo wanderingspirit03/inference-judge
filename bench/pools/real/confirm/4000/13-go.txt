@@ -1,0 +1,344 @@
+This is the package that runs the bale ledger at the Harrowgate Materials Recovery Facility. Could you first explain how it works, then give me an honest code review (bugs, concurrency problems, API design, anything that will bite us in production), and then write table-driven tests for the exported functions? I would like the tests to be runnable as they are.
+
+```go
+// Package balelog keeps the ledger of baled recyclables at the Harrowgate
+// Materials Recovery Facility, grades each bale from the optical sorter
+// readings, and plans which bales go on which outbound truck.
+package balelog
+
+import (
+	"errors"
+	"fmt"
+	"sort"
+	"strconv"
+	"strings"
+	"sync"
+	"time"
+)
+
+// Material is the kind of recyclable in a bale.
+type Material string
+
+const (
+	PET       Material = "PET"
+	HDPE      Material = "HDPE"
+	Cardboard Material = "CARDBOARD"
+	Aluminium Material = "ALUMINIUM"
+	Glass     Material = "GLASS"
+)
+
+// Grade is the quality class of a bale as sold to the buyer.
+type Grade int
+
+const (
+	GradeA Grade = iota
+	GradeB
+	GradeC
+	Reject
+)
+
+func (g Grade) String() string {
+	switch g {
+	case GradeA:
+		return "A"
+	case GradeB:
+		return "B"
+	case GradeC:
+		return "C"
+	default:
+		return "REJECT"
+	}
+}
+
+// Bale is one compressed block of a single material.
+type Bale struct {
+	ID               string
+	Material         Material
+	WeightKg         float64
+	ContaminationPct float64
+	CreatedAt        time.Time
+	Grade            Grade
+}
+
+// limits holds the contamination ceilings, in percent, for grades A, B and C.
+// Anything above the C ceiling is rejected.
+var limits = map[Material][3]float64{
+	PET:       {2.0, 5.0, 9.0},
+	HDPE:      {2.5, 6.0, 10.0},
+	Cardboard: {4.0, 8.0, 15.0},
+	Aluminium: {1.0, 3.0, 6.0},
+	Glass:     {3.0, 7.0, 12.0},
+}
+
+var (
+	ErrUnknownMaterial = errors.New("balelog: unknown material")
+	ErrBadReading      = errors.New("balelog: malformed sensor reading")
+	ErrDuplicateBale   = errors.New("balelog: bale already recorded")
+	ErrNoSuchBale      = errors.New("balelog: no such bale")
+	ErrTruckTooSmall   = errors.New("balelog: truck capacity below the smallest bale")
+)
+
+// GradeFor returns the grade for a given material and contamination level.
+func GradeFor(m Material, contaminationPct float64) (Grade, error) {
+	l, ok := limits[m]
+	if !ok {
+		return Reject, fmt.Errorf("%w: %q", ErrUnknownMaterial, m)
+	}
+	switch {
+	case contaminationPct <= l[0]:
+		return GradeA, nil
+	case contaminationPct <= l[1]:
+		return GradeB, nil
+	case contaminationPct <= l[2]:
+		return GradeC, nil
+	}
+	return Reject, nil
+}
+
+// ParseReading converts one line from the sorter log into a Bale. The
+// format is "id,timestamp,material,weight_kg,contamination_pct", for
+// example "B-10492,2026-10-02T06:14:05Z,PET,412.5,3.2".
+func ParseReading(line string) (Bale, error) {
+	parts := strings.Split(strings.TrimSpace(line), ",")
+	if len(parts) != 5 {
+		return Bale{}, fmt.Errorf("%w: want 5 fields, got %d", ErrBadReading, len(parts))
+	}
+	ts, err := time.Parse(time.RFC3339, parts[1])
+	if err != nil {
+		return Bale{}, fmt.Errorf("%w: timestamp: %v", ErrBadReading, err)
+	}
+	w, err := strconv.ParseFloat(parts[3], 64)
+	if err != nil || w <= 0 {
+		return Bale{}, fmt.Errorf("%w: weight %q", ErrBadReading, parts[3])
+	}
+	c, err := strconv.ParseFloat(parts[4], 64)
+	if err != nil || c < 0 || c > 100 {
+		return Bale{}, fmt.Errorf("%w: contamination %q", ErrBadReading, parts[4])
+	}
+	m := Material(strings.ToUpper(parts[2]))
+	g, err := GradeFor(m, c)
+	if err != nil {
+		return Bale{}, err
+	}
+	return Bale{
+		ID:               parts[0],
+		Material:         m,
+		WeightKg:         w,
+		ContaminationPct: c,
+		CreatedAt:        ts,
+		Grade:            g,
+	}, nil
+}
+
+// Ledger is the in-memory record of bales waiting for collection.
+type Ledger struct {
+	mu    sync.Mutex
+	bales map[string]Bale
+}
+
+// NewLedger returns an empty ledger.
+func NewLedger() *Ledger {
+	return &Ledger{bales: make(map[string]Bale)}
+}
+
+// Add records a bale. It fails if the ID is already present.
+func (l *Ledger) Add(b Bale) error {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	if _, exists := l.bales[b.ID]; exists {
+		return fmt.Errorf("%w: %s", ErrDuplicateBale, b.ID)
+	}
+	l.bales[b.ID] = b
+	return nil
+}
+
+// Remove deletes a bale, for example once it is loaded on a truck.
+func (l *Ledger) Remove(id string) error {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	if _, ok := l.bales[id]; !ok {
+		return fmt.Errorf("%w: %s", ErrNoSuchBale, id)
+	}
+	delete(l.bales, id)
+	return nil
+}
+
+// Get returns a copy of the bale with the given ID.
+func (l *Ledger) Get(id string) (Bale, error) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	b, ok := l.bales[id]
+	if !ok {
+		return Bale{}, fmt.Errorf("%w: %s", ErrNoSuchBale, id)
+	}
+	return b, nil
+}
+
+// Len returns the number of bales in the ledger.
+func (l *Ledger) Len() int {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return len(l.bales)
+}
+
+// TotalsByMaterial returns the total weight in kilograms for each material,
+// leaving out rejected bales.
+func (l *Ledger) TotalsByMaterial() map[Material]float64 {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	out := make(map[Material]float64)
+	for _, b := range l.bales {
+		if b.Grade == Reject {
+			continue
+		}
+		out[b.Material] += b.WeightKg
+	}
+	return out
+}
+
+// Snapshot returns all bales sorted by creation time, oldest first. Bales
+// created at the same instant are ordered by ID so the result is stable.
+func (l *Ledger) Snapshot() []Bale {
+	l.mu.Lock()
+	out := make([]Bale, 0, len(l.bales))
+	for _, b := range l.bales {
+		out = append(out, b)
+	}
+	l.mu.Unlock()
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].CreatedAt.Equal(out[j].CreatedAt) {
+			return out[i].ID < out[j].ID
+		}
+		return out[i].CreatedAt.Before(out[j].CreatedAt)
+	})
+	return out
+}
+
+// IngestLog reads sorter lines into the ledger. Blank lines and lines that
+// start with '#' are skipped. It returns how many bales were added and the
+// errors found, one per bad line, without stopping at the first one.
+func (l *Ledger) IngestLog(text string) (int, []error) {
+	var errs []error
+	added := 0
+	for n, line := range strings.Split(text, "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		b, err := ParseReading(line)
+		if err != nil {
+			errs = append(errs, fmt.Errorf("line %d: %w", n+1, err))
+			continue
+		}
+		if err := l.Add(b); err != nil {
+			errs = append(errs, fmt.Errorf("line %d: %w", n+1, err))
+			continue
+		}
+		added++
+	}
+	return added, errs
+}
+
+// Regrade recomputes the grade of a bale after a manual inspection found a
+// different contamination level. It returns the new grade.
+func (l *Ledger) Regrade(id string, contaminationPct float64) (Grade, error) {
+	if contaminationPct < 0 || contaminationPct > 100 {
+		return Reject, fmt.Errorf("%w: contamination %v", ErrBadReading, contaminationPct)
+	}
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	b, ok := l.bales[id]
+	if !ok {
+		return Reject, fmt.Errorf("%w: %s", ErrNoSuchBale, id)
+	}
+	g, err := GradeFor(b.Material, contaminationPct)
+	if err != nil {
+		return Reject, err
+	}
+	b.ContaminationPct = contaminationPct
+	b.Grade = g
+	l.bales[id] = b
+	return g, nil
+}
+
+// Stale returns the IDs of bales that have waited longer than maxAge at the
+// moment now, oldest first. The yard supervisor uses it to find bales that
+// are in danger of getting wet or being contaminated by weather.
+func (l *Ledger) Stale(now time.Time, maxAge time.Duration) []string {
+	var ids []string
+	for _, b := range l.Snapshot() {
+		if now.Sub(b.CreatedAt) > maxAge {
+			ids = append(ids, b.ID)
+		}
+	}
+	return ids
+}
+
+// GradeCounts returns how many bales there are of each grade.
+func (l *Ledger) GradeCounts() map[Grade]int {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	out := make(map[Grade]int)
+	for _, b := range l.bales {
+		out[b.Grade]++
+	}
+	return out
+}
+
+// Load is the set of bales chosen for one outbound truck.
+type Load struct {
+	Bales    []Bale
+	WeightKg float64
+}
+
+// PlanTruck picks bales of one material for a truck with the given payload
+// limit in kilograms. It takes better grades first, then older bales, and
+// skips any bale that would push the load over the limit. Rejected bales are
+// never loaded. The ledger is not changed; the caller removes the bales once
+// the truck has actually left.
+func (l *Ledger) PlanTruck(m Material, capacityKg float64) (Load, error) {
+	candidates := make([]Bale, 0)
+	for _, b := range l.Snapshot() {
+		if b.Material == m && b.Grade != Reject {
+			candidates = append(candidates, b)
+		}
+	}
+	sort.SliceStable(candidates, func(i, j int) bool {
+		return candidates[i].Grade < candidates[j].Grade
+	})
+	var load Load
+	smallest := 0.0
+	for i, b := range candidates {
+		if i == 0 || b.WeightKg < smallest {
+			smallest = b.WeightKg
+		}
+		if load.WeightKg+b.WeightKg > capacityKg {
+			continue
+		}
+		load.Bales = append(load.Bales, b)
+		load.WeightKg += b.WeightKg
+	}
+	if len(candidates) > 0 && capacityKg < smallest {
+		return Load{}, ErrTruckTooSmall
+	}
+	return load, nil
+}
+
+// Summary renders the ledger as a short text report for the shift manager.
+func (l *Ledger) Summary() string {
+	totals := l.TotalsByMaterial()
+	names := make([]string, 0, len(totals))
+	for m := range totals {
+		names = append(names, string(m))
+	}
+	sort.Strings(names)
+	var sb strings.Builder
+	fmt.Fprintf(&sb, "Bales in ledger: %d\n", l.Len())
+	for _, n := range names {
+		fmt.Fprintf(&sb, "%-10s %9.1f kg\n", n, totals[Material(n)])
+	}
+	return sb.String()
+}
+```
+
+Some context. The ledger is shared by three goroutines in the real service: one reads the sorter log every few seconds and calls IngestLog, one is the HTTP handler that serves Summary and Snapshot to the shift manager's screen, and one runs when a truck arrives, calling PlanTruck and then Remove for each bale on the load. A typical day has about 250 to 400 bales. Trucks carry between 18,000 and 24,000 kilograms. The buyer pays by grade, and the plant manager, Oswin Delacroix-Hart, wants to be sure that a bale can never be loaded twice or sold with the wrong grade.

@@ -1,0 +1,44 @@
+I'm a new harbour assistant and these are my notes from the induction lecture on landings, fees and quotas. I have a test at the end of the week. Please make me a study guide from them with clear worked examples that go through each calculation step by step, and then a quiz of 12 to 15 questions with full answers. Use the same numbers and rules as in my notes wherever you can.
+
+Induction lecture 3: Landings, dues and quota (Skerrow Haven Harbour Authority)
+Speaker: Harbour Master Orla Bannerman-Fisk
+
+1. What the authority does
+
+The Authority owns the quays, the fish market hall, the ice plant and the fuel berth at Skerrow Haven. We do not own the boats and we do not buy the fish. We rent space, supply services and collect fees, and we keep the records that the fisheries office needs. The harbour handles about 140 registered vessels, from 8 metre inshore boats to a few 24 metre trawlers, and lands around 5,200 tonnes of fish and shellfish a year.
+
+2. Berths and tides
+
+The harbour dries out. At low tide the inner basin is mud, so large boats can enter or leave only within about 2 hours either side of high water. The harbour keeps a tide table, and the pilot book gives the height of the tide above chart datum. The sill at the entrance is 3.2 metres above chart datum. A boat needs a clearance of at least 0.5 metres under the keel at the sill. The depth of water over the sill is the tide height minus 3.2 metres, and it must be at least the boat's draught plus 0.5 metres.
+
+Worked example 1. The trawler Marguerite draws 2.6 metres. Required water over the sill = 2.6 + 0.5 = 3.1 metres. Required tide height = 3.2 + 3.1 = 6.3 metres above chart datum. If high water tonight is 7.1 metres, there is 7.1 - 6.3 = 0.8 metres to spare, and the boat can cross the sill for as long as the tide stays above 6.3 metres.
+
+3. Landing procedure
+
+A skipper must give notice of arrival at least 2 hours before landing, giving the species and the estimated weight. When the boat is alongside, the market staff weigh each box on the certified scales, record the species, size grade and the box number on the landing declaration, and the declaration is signed by the skipper. The Authority sends the declaration data to the fisheries office within 24 hours. Boats may not land fish between 22:00 and 05:00 without the permission of the harbour master. Fish landed without a declaration are not allowed to enter the market and the harbour master must report the matter.
+
+Boxes are standard 40 litre boxes. A full box of whitefish holds about 30 kilograms of fish plus 8 kilograms of ice. Weights in the declaration are net weights of fish, so the ice must be deducted. An empty box weighs 1.5 kilograms. The scales are checked every Monday with a 20 kilogram test weight, and the reading must be within 50 grams.
+
+Worked example 2. A boat lands 64 boxes of haddock. The scales show a mean gross weight of 40.2 kilograms per box. Net weight per box = 40.2 - 8 (ice) - 1.5 (box) = 30.7 kilograms. Total net weight = 64 x 30.7 = 1,964.8 kilograms.
+
+4. Dues and charges
+
+The Authority charges landing dues of 2.5 percent of the first sale value of the fish, paid by the seller. A boat that sells through the market hall also pays a market fee of 1.2 percent of the sale value. Boats under 12 metres get a 20 percent discount on landing dues, but not on the market fee. Berthing is charged per metre of vessel length per day at 0.85 pounds, with the first 24 hours free for boats that land at least 500 kilograms of fish. Ice is sold at 118 pounds a tonne.
+
+Worked example 3. The 11 metre boat Kittiwake sells 1,964.8 kilograms of haddock through the market at an average price of 2.40 pounds per kilogram. Sale value = 1,964.8 x 2.40 = 4,715.52 pounds. Landing dues before discount = 2.5 percent x 4,715.52 = 117.89 pounds. The 20 percent discount applies, so the dues are 117.89 x 0.8 = 94.31 pounds. The market fee is 1.2 percent x 4,715.52 = 56.59 pounds. Total payable to the Authority = 94.31 + 56.59 = 150.90 pounds.
+
+5. Ice and cold chain
+
+The ice plant makes flake ice at up to 12 tonnes a day. The rule of thumb is 1 kilogram of ice for every 3.75 kilograms of fish for a landing that will be sold within 12 hours, and 1 kilogram of ice for every 2 kilograms of fish if the fish will be held for more than 24 hours. Fish must be kept at between 0 and 4 degrees. The market hall chiller is checked twice a day and the temperatures are logged. If the temperature rises above 6 degrees for more than 30 minutes, the stock in the chiller must be examined by the market inspector before it is sold.
+
+Worked example 4. A trawler plans to hold 3,000 kilograms of cod for 30 hours before sale. Ice needed = 3,000 / 2 = 1,500 kilograms. At 118 pounds a tonne, the ice costs 1.5 x 118 = 177 pounds.
+
+6. Quota
+
+Each vessel has a monthly quota for each regulated species, set by the fisheries office. The Authority does not set quota but must refuse a landing if the vessel has no quota left for that species and tell the fisheries office. A vessel's quota use is the total of its net landed weights for the month.
+
+Worked example 5. The Marguerite has a monthly cod quota of 18 tonnes. By the 20th she has landed 14.6 tonnes, and she lands another 2.9 tonnes. The total is 14.6 + 2.9 = 17.5 tonnes, which is 17.5 / 18 = 97.2 percent of the quota. She has 0.5 tonnes remaining. If she lands 0.7 tonnes more, she will be 0.2 tonnes over, and the landing must be refused for that amount, or reported.
+
+7. Safety on the quay
+
+Hard hats and high visibility vests are required on the fish market floor. Nobody may stand under a crane load. Fuel berth smoking is banned. A lifebuoy and a throw line must be at every 50 metres of quay edge. A person in the water is to be reported at once on the harbour radio on channel 16, and the harbour master must be called immediately.

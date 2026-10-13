@@ -1,0 +1,141 @@
+Below is our third-quarter operations report for the Redcliffe cement plant, which I put together for the board pack. I need a section-by-section summary a director could read in ten minutes, followed by your recommendations: what the board should decide, what management should do in the next ninety days, and which numbers worry you most. Please also point out anywhere the report contradicts itself or leaves something unexplained.
+
+REDCLIFFE CEMENT WORKS
+Quarterly Operations Report, Q3 (July to September)
+Prepared by: Operations Office, for the Plant Manager, Gideon Hartwell
+
+1. Executive summary
+
+Q3 was a quarter of two halves. July and August were the best two consecutive months of the year for clinker output. In September, Kiln 2 was stopped for eleven days after a failure of the refractory lining in the burning zone, and this took the quarter below budget. Clinker production for the quarter was 336,600 tonnes against a budget of 345,000 tonnes (minus 2.4 percent). Cement shipments were 402,000 tonnes against 410,000 (minus 2.0 percent). Heat consumption per tonne of clinker was above target, the alternative fuel rate was below target, and the plant recorded two lost-time injuries, both in September. Emissions were within permit limits on every monthly average, with one short exceedance of the dust limit in August. The EBITDA for the quarter was 7.9 million against a budget of 8.8 million.
+
+2. Production
+
+Clinker production by month and kiln, in tonnes:
+
+| Month | Kiln 1 | Kiln 2 | Total | Budget |
+|---|---|---|---|---|
+| July | 68,500 | 49,900 | 118,400 | 115,000 |
+| August | 70,200 | 51,700 | 121,900 | 115,000 |
+| September | 69,700 | 26,600 | 96,300 | 115,000 |
+| Quarter | 208,400 | 128,200 | 336,600 | 345,000 |
+
+Kiln 1 ran for 91 of 92 days with one short stop of 14 hours in August for a cooler grate repair. Kiln 2 ran for 81 of 92 days. During the Kiln 2 outage from 4 to 15 September, Kiln 1 was run at its maximum feed rate and averaged about 2,400 tonnes a day, roughly 190 tonnes a day above its July average but well short of the 2,550 tonnes a day it has reached in trials, because the raw mill was limited by a hot-gas fan issue that is discussed in section 6. Kiln 2 averaged only 1,400 tonnes a day on the 19 days it ran in September, against 1,610 in July, because of the slow restart and a reduced feed rate for the first week while the new lining was conditioned.
+
+Clinker stocks at the end of June were 41,000 tonnes. By the end of September they were 29,500 tonnes, which is nine days of cement production. The clinker stock was drawn down to cover shipments in September and has not been rebuilt since. Cement production (clinker plus gypsum, limestone and slag) was 409,000 tonnes against 415,000 budgeted, and the cement mills ran at 91 percent availability.
+
+3. Energy and fuels
+
+Thermal energy consumption averaged 3,520 megajoules per tonne of clinker for the quarter against a target of 3,450. The difference is partly due to the restart of Kiln 2 after the lining repair, which consumed extra fuel in the heating-up period, and partly due to lower preheater efficiency on Kiln 1 caused by build-up in the cyclones in July.
+
+The alternative fuel rate (the share of kiln heat from non-fossil and waste-derived fuels) was 31 percent against a target of 35 percent. Alternative fuel was limited in three ways: a supplier of shredded packaging waste delivered 22 percent below contract in August; the new feeding line for biomass pellets on Kiln 2 was not available during the outage; and a batch of 480 tonnes of derived fuel failed the chlorine specification on delivery and was returned.
+
+Fuel mix for the quarter, as a share of kiln heat:
+
+| Fuel | Share |
+|---|---|
+| Coal and petcoke | 69% |
+| Shredded packaging waste | 14% |
+| Biomass pellets | 9% |
+| Dried sewage sludge | 5% |
+| Waste oil and solvents | 3% |
+
+Electrical consumption was 98 kilowatt-hours per tonne of cement against a target of 96. The cement mill with the older roller press accounted for most of the excess. Peak-tariff electricity represented 11 percent of consumption and cost 1.3 million, which is higher than last year because kiln restarts were scheduled during peak hours.
+
+4. Environment and compliance
+
+Monthly average emissions from the main stacks (milligrams per normal cubic metre, with the permit limit in brackets):
+
+| Parameter | July | August | September | Limit |
+|---|---|---|---|---|
+| Dust | 11 | 14 | 12 | 20 |
+| Nitrogen oxides | 610 | 640 | 655 | 800 |
+| Sulphur dioxide | 180 | 195 | 210 | 400 |
+| Hydrogen chloride | 4 | 5 | 4 | 10 |
+
+On 19 August a bag-filter compartment on Kiln 1 failed and for 38 minutes the half-hour average for dust exceeded the daily limit, reaching 31 milligrams. The compartment was isolated and replaced the next day. The event was reported to the regulator within the permitted time. No notice or fine has been issued. Continuous monitoring availability was 99.1 percent.
+
+The annual compliance inspection took place on 22 September. Two minor observations were made: the labelling of two waste oil tanks, and the calibration record for one dust monitor. Both have been closed. The carbon dioxide inventory for the quarter is 262,000 tonnes, which is 0.78 tonnes per tonne of clinker, in line with the year-to-date figure.
+
+5. Health and safety
+
+There were two lost-time injuries in the quarter, both in September, compared with none in Q2. The first was a contractor who suffered a fractured wrist when a hot kiln inspection door slipped during the Kiln 2 outage; the second was an employee who sprained an ankle on a wet stairway at the packing plant. The lost-time injury frequency rate for the rolling twelve months is now 1.8 per million hours, against a target of 1.0. The number of near misses reported rose from 41 in Q2 to 63, which management considers a positive sign of better reporting.
+
+During the Kiln 2 outage, 140 contractors worked on site under a permit-to-work system. Two permits were found to have been signed before isolation had been verified. Both were stopped, and the supervisors involved have been retrained. The investigation of the first injury concluded that the door latch had not been inspected since the previous shutdown and that the inspection task was missing from the shutdown checklist.
+
+Training hours were 2,310 in the quarter, equivalent to 11.7 hours for every person on the payroll.
+
+6. Maintenance and capital projects
+
+The failure of the Kiln 2 refractory lining on 3 September was found when a hot spot appeared on the kiln shell at 02:40. The kiln was stopped, cooled for 36 hours, and 14 metres of bricks in the burning zone were replaced. The bricks had been installed in April, a month earlier than planned, in a previous short stop, and were from a batch with a higher alumina content than specified. The supplier has accepted that the batch did not meet specification and has offered a credit of 118,000. The direct cost of the repair was 640,000 including contractors. The lost production was about 22,000 tonnes of clinker.
+
+Capital projects in the quarter:
+
+| Project | Budget | Spent to date | Status |
+|---|---|---|---|
+| Biomass feeding line, Kiln 2 | 1.9m | 1.7m | Commissioned September; not yet proven |
+| Raw mill hot-gas fan replacement | 0.8m | 0.3m | Delivery delayed to November |
+| Cement mill 3 roller press overhaul | 2.4m | 0.4m | Planned for the Q1 shutdown |
+| Packing plant dust extraction | 0.6m | 0.6m | Complete |
+| New weighbridge and truck queuing system | 0.5m | 0.2m | In progress |
+
+The raw mill fan is the main reason Kiln 1 could not exceed its rate during the outage. The fan was ordered in June, and the manufacturer has moved delivery from September to November.
+
+7. Quality
+
+The 28-day compressive strength of the main product averaged 54.2 megapascals against a specification minimum of 52.5, and the standard deviation was 1.6. Three of 92 daily samples were below the minimum, all in the second week of September when Kiln 1 was running at a high feed rate and the burnability of the raw mix changed. Customer complaints about quality fell from 9 to 6. Two were about colour variation in the white-grey product used for architectural panels and have been traced to petcoke ash variability.
+
+8. Sales and logistics
+
+Cement shipments of 402,000 tonnes were split between bulk by road (58 percent), bags on pallets (27 percent), bulk by rail (12 percent) and export by barge (3 percent). The average net price was 87.50 per tonne, 1.2 percent below budget, because the product mix shifted towards the bagged product with higher discounts and because two large infrastructure contracts began at lower prices than quoted.
+
+Delivery performance (orders delivered on the day promised) was 93 percent against a target of 95. The loading queue at the weighbridge exceeded 45 minutes on eleven days; the new queuing system is expected to cut this. The rail wagon supplier cancelled 18 wagons in August, which moved 4,100 tonnes onto trucks at a higher cost.
+
+9. Finance
+
+Revenue was 35.2 million against a budget of 36.1 million. Variable costs were close to budget in total, but with an adverse mix: fuel was 0.9 million above budget in total because of the lower alternative fuel rate and heat consumption, and power was 0.3 million above. Fixed costs were 0.2 million below budget. EBITDA was 7.9 million against 8.8 million budgeted; the largest items in the shortfall were the Kiln 2 outage (about 1.1 million after the supplier credit, counting lost margin and repair costs), the fuel overrun, and the price shortfall. The year-to-date EBITDA is now 3.1 percent below budget.
+
+10. People
+
+Headcount at the end of the quarter was 198 against a budget of 205. Seven positions are vacant, five of them in maintenance, including two electricians. Overtime hours in maintenance were 31 percent above plan. Voluntary turnover over the last twelve months is 7.4 percent. A new apprenticeship intake of eight starts in October.
+
+11. Main risks
+
+- A second refractory failure before the planned shutdown in February. Kiln 2 has the shortened lining life from the faulty batch.
+- Continued shortage of alternative fuel, which affects both cost and carbon performance.
+- Delay in the raw mill fan, which limits Kiln 1 and the clinker stock rebuild before winter, when demand for cement falls but kiln maintenance concentrates.
+- Safety: two serious permit-to-work lapses during the outage and a trend of contractor-related injuries.
+
+12. Outlook for Q4
+
+Clinker production in Q4 is budgeted at 340,000 tonnes. With the clinker stock at 29,500 tonnes, the plant needs to make up the gap on shipments from stock. Management plans to bring forward the cement mill 3 overhaul only if the fan arrives on time. Price increases of 2.5 percent for bagged cement come into effect on 1 November.
+
+13. Appendix A: timeline of the Kiln 2 lining failure
+
+| Date and time | Event |
+|---|---|
+| 3 Sept, 02:40 | Shell scanner alarm: hot spot of 410 degrees Celsius at 22 metres from the kiln outlet |
+| 3 Sept, 03:15 | Shift manager reduces feed by 30 percent and calls the maintenance superintendent |
+| 3 Sept, 05:50 | Hot spot reaches 470 degrees; decision to stop the kiln |
+| 3 Sept, 06:30 | Kiln stopped; feed and fuel off; barring (slow turning) started |
+| 4 Sept to 5 Sept | Cooling for 36 hours; permit-to-work scope agreed; contractors mobilised |
+| 6 Sept to 12 Sept | Removal of damaged bricks and installation of 14 metres of new lining |
+| 13 Sept to 14 Sept | Drying and heating-up on gas, following the supplier's schedule |
+| 15 Sept, 11:20 | Kiln fed and clinker production restarted |
+| 15 Sept to 22 Sept | Reduced feed rate while the lining is conditioned |
+
+The count of eleven days in this report runs from the date of stop for repair, 4 September, to the restart on 15 September. The hours between the first alarm on 3 September and the stop are counted as production at a reduced rate.
+
+14. Appendix B: key performance scorecard
+
+| Indicator | Q2 actual | Q3 actual | Q3 target |
+|---|---|---|---|
+| Clinker production (tonnes) | 331,900 | 336,600 | 345,000 |
+| Cement shipments (tonnes) | 397,500 | 402,000 | 410,000 |
+| Heat consumption (MJ per tonne clinker) | 3,490 | 3,520 | 3,450 |
+| Alternative fuel rate | 33% | 31% | 35% |
+| Electricity (kWh per tonne cement) | 97 | 98 | 96 |
+| Lost-time injuries (count) | 0 | 2 | 0 |
+| Delivery on the day promised | 94% | 93% | 95% |
+| Quality complaints | 9 | 6 | 5 |
+| Headcount | 200 | 198 | 205 |
+| EBITDA (million) | 8.3 | 7.9 | 8.8 |

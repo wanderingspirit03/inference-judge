@@ -1,0 +1,1 @@
+Draft a troubleshooting manual for the volunteers at our community radio station covering the most common studio problems: dead air, a humming microphone, a frozen playout computer and a dropped link to the hilltop transmitter.

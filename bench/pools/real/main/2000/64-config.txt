@@ -1,0 +1,162 @@
+We run a small parent portal for our network of kindergartens (daily reports, pick-up authorisations, photos) and the whole setup was put together by a contractor who has left. Please audit these files: list the problems you find from most to least serious, explain in plain language why each matters (we hold data about small children, so privacy matters a lot), and then give me corrected versions of the Dockerfile, the compose file and the deploy workflow.
+
+--- Dockerfile ---
+
+FROM python:latest
+
+WORKDIR /app
+COPY . /app
+
+RUN apt-get update && apt-get install -y curl vim git
+RUN pip install -r requirements.txt
+
+ENV FLASK_ENV=development
+ENV SECRET_KEY=littlesprouts2024
+ENV DATABASE_URL=postgresql://portal:portal@db:5432/portal
+
+EXPOSE 5000
+CMD ["python", "app.py"]
+
+--- docker-compose.yml ---
+
+version: "3"
+services:
+  web:
+    build: .
+    ports:
+      - "80:5000"
+    environment:
+      - DEBUG=1
+      - PHOTO_DIR=/photos
+      - SMTP_PASSWORD=Sprout$mail2024
+    volumes:
+      - ./:/app
+      - /srv/photos:/photos
+    depends_on:
+      - db
+    restart: always
+
+  db:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: portal
+      POSTGRES_PASSWORD: portal
+      POSTGRES_DB: portal
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+
+  backup:
+    image: postgres
+    command: sh -c "while true; do pg_dump -h db -U portal portal > /backup/dump.sql; sleep 86400; done"
+    volumes:
+      - /srv/backup:/backup
+
+volumes:
+  dbdata:
+
+--- .github/workflows/deploy.yml ---
+
+name: deploy
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+      - name: Install
+        run: pip install -r requirements.txt
+      - name: Test
+        run: pytest || true
+      - name: Deploy
+        run: |
+          echo "${{ secrets.DEPLOY_KEY }}" > key.pem
+          chmod 600 key.pem
+          ssh -o StrictHostKeyChecking=no -i key.pem deploy@portal.example.org "cd /srv/portal && git pull && docker-compose up -d --build"
+          echo "Deployed with password ${{ secrets.DB_PASSWORD }}"
+
+--- nginx.conf (on the host, in front of the containers) ---
+
+server {
+    listen 80;
+    server_name portal.example.org;
+
+    location / {
+        proxy_pass http://127.0.0.1:80;
+    }
+
+    location /photos/ {
+        alias /srv/photos/;
+        autoindex on;
+    }
+}
+
+--- requirements.txt ---
+
+flask
+flask-sqlalchemy
+psycopg2
+gunicorn
+pillow==8.1.0
+requests==2.19.0
+pytest
+
+--- config.py ---
+
+import os
+
+
+class Config:
+    SECRET_KEY = os.environ.get("SECRET_KEY", "dev")
+    SQLALCHEMY_DATABASE_URI = os.environ["DATABASE_URL"]
+    PHOTO_DIR = os.environ.get("PHOTO_DIR", "/photos")
+    MAX_CONTENT_LENGTH = None
+    SESSION_COOKIE_SECURE = False
+    SESSION_COOKIE_HTTPONLY = False
+    PERMANENT_SESSION_LIFETIME = 60 * 60 * 24 * 365
+
+--- /etc/cron.d/portal-cleanup ---
+
+# remove photos older than two years
+0 3 * * * root find /srv/photos -mtime +730 -delete
+
+--- scripts/restore.sh (written but never run) ---
+
+#!/bin/bash
+# restore the latest dump into the running database
+docker exec -i portal_db_1 psql -U portal portal < /srv/backup/dump.sql
+
+--- /etc/cron.d/portal-health ---
+
+*/5 * * * * root curl -s http://localhost > /dev/null || echo "portal down" | mail -s alert ops@example.org
+
+--- /etc/ssh/sshd_config (changed lines) ---
+
+PermitRootLogin yes
+PasswordAuthentication yes
+AllowUsers deploy root admin
+
+--- Facts about the setup ---
+
+- The portal is used by about 1,100 parents across 7 kindergartens. Staff upload photos of children to the daily reports, and parents see only their own child's photos.
+- The server is a single virtual machine at a hosting company. It has a public IP address and the firewall is open on all ports because "it was easier".
+- The nginx file above is on the same machine as the containers. TLS has never been set up; staff were told to ask parents to use the "http" link.
+- Nobody has ever restored a backup. The backup service writes to the same dump.sql every day, and the host disk has 14 GB free.
+- The photo folder /srv/photos is 41 GB and is not included in any backup. There are no photo thumbnails, and the portal sends the full-size images.
+- The deploy runs on every push to the main and develop branches and on pull requests, including pull requests from outside contributors, because the repository is public.
+- The Python version used in production is whatever the "latest" tag was on the day the image was last built, which was in March.
+- The app writes logs to the console only. When the container restarts, the logs are lost.
+- A file called .env.production, which contains the real database and mail passwords, was committed to the repository in 2024 and is still in its history.
+- The deploy key in the repository secrets belongs to a personal account of the contractor who left, and nobody knows what else it can open.
+- Parents are told by the kindergartens that photos are deleted after two years, and the cron job above is how that is supposed to happen.
+- Two kindergartens share one staff login each, and the passwords are on a sticker behind the reception desk. There is no second factor and no way to see who uploaded a photo.
+- The hosting contract is renewed each year by one person, the network's office manager, who has no technical background and wants to understand the risks in plain language before the next board meeting in November.

@@ -1,0 +1,1 @@
+I am a pharmacist at a hospital and we keep running short of a few common drugs. Write a detailed guide to setting up a stock policy for the pharmacy, with reorder rules, safety stock, shortages, audits and a worked example.

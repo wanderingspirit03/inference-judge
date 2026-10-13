@@ -1,0 +1,44 @@
+I own a small hotel and I have just been sent this partner agreement by a booking startup called Stayloop. I'm not a lawyer and I need to decide by Friday whether to sign. Could you explain it to me clause by clause in plain language, and tell me which clauses carry real risk for a hotel like mine (22 rooms, family owned) and what I should try to negotiate?
+
+PARTNER HOTEL AGREEMENT
+
+between Stayloop Travel Ltd ("Stayloop"), registered in Eastmarch, and the hotel named in the signature block ("the Hotel").
+
+1. Purpose. Stayloop operates an online marketplace on which travellers can search for and book rooms. The Hotel wishes to list its rooms on the marketplace, and Stayloop agrees to display them and to take bookings on the Hotel's behalf under these terms.
+
+2. Listing and content. The Hotel will give Stayloop accurate descriptions, photographs, room types, facilities and house rules. The Hotel grants Stayloop a non-exclusive, worldwide licence to use this content to promote the Hotel on the marketplace and in advertising, including on third-party websites. Stayloop may edit photographs for size and quality. The Hotel confirms that it owns or controls the rights to everything it supplies.
+
+3. Rates and availability. The Hotel sets its own rates and availability through the Stayloop extranet. The Hotel agrees that the rate shown on the marketplace for any room and date will be no higher than the rate the Hotel offers on its own website, by telephone or through any other online agency for the same room, dates and conditions ("rate parity"). If Stayloop finds a lower public rate elsewhere, it may reduce the displayed rate to match it, and the Hotel will honour that rate.
+
+4. Commission. For every confirmed booking, the Hotel will pay Stayloop a commission of 17 percent of the room price excluding taxes. Where a guest books through a promotion labelled "Stayloop Boost", the commission rises to 22 percent for that booking. Commission is due on the room price actually paid by the guest, and also on the price of any breakfast or other service included in the rate. It is not due on services the guest buys separately at the Hotel.
+
+5. Payment. Guests pay the Hotel directly at check-out unless the booking was prepaid. For prepaid bookings, Stayloop collects payment and pays the Hotel the room price less commission within 45 days after the guest's departure. For other bookings, Stayloop will send a monthly commission invoice, and the Hotel will pay it within 14 days. Overdue amounts carry interest of 1.5 percent per month. Stayloop may set off any amount the Hotel owes against any amount Stayloop owes the Hotel.
+
+6. Cancellations and changes. The Hotel will apply the cancellation policy that it entered in the extranet. Where Stayloop's standard "free cancellation" label is used, guests may cancel without charge up to 48 hours before arrival. If the Hotel cancels a confirmed booking, or cannot honour it, the Hotel will find the guest equivalent or better accommodation nearby at the Hotel's cost and will pay Stayloop a handling fee of 150 euros per affected booking. If a guest does not arrive and has not cancelled, the Hotel may charge the first night, and commission is still due on that night.
+
+7. Reviews. Only guests who have completed a stay may post reviews. Stayloop may display, rank and summarise reviews in its own way and is not obliged to remove a review unless it breaks Stayloop's published content rules. The Hotel may post one public reply to each review. Stayloop may use review scores in deciding how prominently to display the Hotel in search results.
+
+8. Visibility and ranking. Stayloop decides how the Hotel appears in search results. Ranking may depend on price, review scores, conversion, cancellation rates, commission level and participation in promotions. Stayloop does not guarantee a minimum number of bookings or any placement.
+
+9. Guest data. Stayloop will pass on the details needed to host the guest. Each party is responsible for its own use of guest data under applicable data protection law. The Hotel will not use guest contact details from Stayloop bookings to market to the guest directly outside the stay, nor to encourage the guest to book directly in the future. Stayloop may keep and use booking data, including prices and occupancy, for analytics and to improve its services, and may share anonymised data with partners.
+
+10. Exclusivity and non-circumvention. For 24 months after a guest's first booking through Stayloop, the Hotel will pay commission on any later booking made by the same guest at the Hotel by any channel, unless the guest has made a separate booking through another independent agency in the meantime. The Hotel will keep a record of the guests concerned and will let Stayloop audit this record once a year.
+
+11. Liability. Stayloop is only a platform and is not responsible for the Hotel's services, safety or accuracy of the Hotel's information. The Hotel is liable to guests and to Stayloop for any loss arising from a failure to honour a booking or from inaccurate content. Stayloop's total liability to the Hotel in any year is limited to the commission it received from the Hotel in the previous three months. The Hotel will indemnify Stayloop against third-party claims arising from the Hotel's content or its premises.
+
+12. Term and termination. The agreement runs for an initial period of 24 months from signature and then renews automatically for successive periods of 12 months unless one party gives written notice at least 90 days before the end of the period. Either party may end the agreement at once for a serious breach not corrected within 14 days of notice. Stayloop may suspend the Hotel's listing immediately if it believes the Hotel has breached rate parity, or if review scores fall below 6.0 out of 10 for two consecutive months. If the Hotel ends the agreement during the initial period without cause, it will pay Stayloop an early termination fee equal to the commission earned in the previous six months.
+
+13. Changes. Stayloop may change the commission rates, promotion rules, or these terms by giving 30 days' notice by email. If the Hotel does not object in writing in that period, it is treated as having accepted the change. If the Hotel objects, Stayloop may end the agreement without liability.
+
+14. Confidentiality. The commission rates and the contents of this agreement are confidential and may not be shared with other hotels, agencies or the press, except to the Hotel's professional advisers.
+
+15. Governing law and disputes. This agreement is governed by the law of Eastmarch. Disputes will be settled by arbitration in the city of Eastmarch Port in English, under the rules of a recognised commercial arbitration centre, by a single arbitrator. The costs of the arbitration are shared equally unless the arbitrator decides otherwise.
+
+16. Insurance. The Hotel will keep public liability insurance of at least 2 million euros per claim for the whole term and will give Stayloop a copy of the certificate on request. If the certificate lapses, Stayloop may suspend the listing until a new one is supplied, and bookings lost during the suspension remain at the Hotel's risk.
+
+17. Force majeure. Neither party is liable for failing to perform because of events outside its reasonable control, such as flood, fire, strikes, government orders or failure of public networks. This does not excuse the Hotel from refunding prepaid amounts for bookings it cannot honour, and it does not excuse either party from paying money already due.
+
+18. Entire agreement. This agreement replaces all earlier discussions and emails between the parties. Any term printed on the Hotel's own forms or confirmation emails does not apply. If a clause is found to be unenforceable, the others remain in force.
+
+Signed for Stayloop Travel Ltd: ______________________  Date: __________
+Signed for the Hotel: ______________________  Date: __________

@@ -1,0 +1,151 @@
+I'm Rosalind Achebe-Lund, network coordinator for the Fenmark Weather Observation Network, and the thread below has been going for four days without anyone actually deciding anything. Please draft the single reply I should send to everyone on it, settling every open point in a clear and diplomatic way (where the thread gives me no answer, make a sensible proposal and say it is a proposal), and then give me a separate action list with an owner and a deadline for each item.
+
+---
+
+From: Tobiah Ramsgate <t.ramsgate@example.org>
+To: Rosalind Achebe-Lund; Imelda Voss-Karlsen; Ngozi Fairweather; Piers Hallowell
+Cc: Yusuf Delacroix-Ngata
+Date: Mon 6 October, 08:47
+Subject: Station 14 (Thornby Heath): wind data wrong since the storm
+
+Hi all,
+
+I went up to Thornby Heath on Saturday after the storm on Thursday night. The mast is still standing, but the anemometer is spinning freely and the wind speed record has been flat at 0.0 since 02:10 on Friday. The wind direction vane is also stuck pointing roughly south-west. Temperature, humidity and pressure look normal. I think the cups or the bearing were damaged, or the cable has been pulled. I did not have a replacement with me. We have one spare anemometer in the store, the older model, which as far as I know reads about 3 per cent high when compared with the current model. Can someone confirm whether we should fit that one, or wait for a new unit? A new unit is around 480 pounds, with ten days' delivery.
+
+Tobiah
+
+---
+
+From: Imelda Voss-Karlsen <i.vosskarlsen@example.org>
+To: Tobiah Ramsgate; Rosalind Achebe-Lund; Ngozi Fairweather; Piers Hallowell
+Cc: Yusuf Delacroix-Ngata
+Date: Mon 6 October, 10:15
+Subject: Re: Station 14 (Thornby Heath): wind data wrong since the storm
+
+Tobiah, thanks for going up so quickly. A few things from my side.
+
+First, Thornby Heath is one of the 11 stations we submit to the national archive, so the flat-lined wind record has to be flagged as suspect from 02:10 on Friday 3 October, and we cannot swap in an older instrument without recording the change. If we fit the old anemometer, we need to enter the serial number and the 3 per cent offset in the station log and apply the correction in processing, otherwise the archive will see a step change.
+
+Second, the storm reached 71 knots gusts at the coast on Thursday night. Several other stations will have taken damage that has not been spotted yet. Can we do a quick check of the raw data for all 23 stations for flat-lines and stuck values, before we start ordering things?
+
+Third, I would be very reluctant to fit the old unit permanently. I would rather fit it as a temporary measure and order a new one at once.
+
+Imelda
+
+---
+
+From: Piers Hallowell <p.hallowell@example.org>
+To: Rosalind Achebe-Lund; Imelda Voss-Karlsen; Tobiah Ramsgate; Ngozi Fairweather
+Cc: Yusuf Delacroix-Ngata
+Date: Mon 6 October, 13:02
+Subject: Re: Station 14 (Thornby Heath): wind data wrong since the storm
+
+Just to be clear on budget: we have 2,150 pounds left in the equipment line for this financial year, which ends on 31 March. Rosalind, you will remember that 1,200 of that was earmarked for the new rain gauge at Ashby Moor (station 19), which has been giving doubtful readings during heavy rain, and 400 is committed to the annual calibration of the reference thermometers. That leaves 550 pounds. One anemometer at 480 leaves 70. If more than one station has been damaged we will not be able to pay for everything out of the equipment line, and I would need to ask the trustees for a contingency payment. The next trustees' meeting is on Tuesday 21 October and papers go out on Tuesday 14 October.
+
+I also want to flag that Thornby Heath is on land owned by the Hallam Estate, and our access agreement requires 48 hours' notice to the estate manager before any visit. Tobiah, did you give notice on Saturday?
+
+Piers
+
+---
+
+From: Tobiah Ramsgate <t.ramsgate@example.org>
+To: Piers Hallowell; Rosalind Achebe-Lund; Imelda Voss-Karlsen; Ngozi Fairweather
+Cc: Yusuf Delacroix-Ngata
+Date: Mon 6 October, 14:20
+Subject: Re: Station 14 (Thornby Heath): wind data wrong since the storm
+
+Piers, I did phone the estate office on Friday afternoon and spoke to a woman there, but I did not follow up in writing, sorry. I will email them today so that it is on record. On the question of the older anemometer, I have the serial number: it is FM-A-0217, and I do have the comparison sheet from 2022 showing it read 2.9 per cent high against the reference.
+
+Tobiah
+
+---
+
+From: Ngozi Fairweather <n.fairweather@example.org>
+To: Rosalind Achebe-Lund; Imelda Voss-Karlsen; Piers Hallowell; Tobiah Ramsgate
+Cc: Yusuf Delacroix-Ngata
+Date: Tue 7 October, 09:31
+Subject: Re: Station 14 (Thornby Heath): wind data wrong since the storm
+
+Hello everyone,
+
+I ran the flat-line check Imelda asked for, on the last 96 hours of 10-minute data from all 23 stations. Results:
+
+- Station 14 (Thornby Heath): wind speed flat at 0.0 since 02:10 on Friday. Known.
+- Station 6 (Quarry Lane): pressure reads 1,009.1 hPa constantly from Friday 18:00 to now, which cannot be right since the other stations show a change of 11 hPa over the same time. Probably a logger fault or a blocked port.
+- Station 21 (Saltmarsh Point): no data at all since 01:40 on Friday. The station is solar powered and I suspect the battery. This one is unresponsive on the modem as well.
+- Station 9 (Greywell Farm): rainfall total is 0.0 for the whole period although neighbouring stations recorded 18 to 26 mm during the storm. Possibly a blocked gauge.
+
+So four stations affected, not one. I can take Quarry Lane and Greywell Farm on Thursday if someone gives me the okay to be there.
+
+I should also mention that firmware version 4.2 for the loggers is out. It fixes the clock drift problem we saw in August, but it needs a physical visit to each station with a laptop, about 40 minutes per station. I would like to schedule this together with the storm repairs, so that we do not visit twice. This is a lot of visits and I would rather not do them all in the same fortnight.
+
+Ngozi
+
+---
+
+From: Yusuf Delacroix-Ngata <y.delacroixngata@example.org>
+To: Rosalind Achebe-Lund; Imelda Voss-Karlsen; Ngozi Fairweather; Piers Hallowell; Tobiah Ramsgate
+Date: Tue 7 October, 11:48
+Subject: Re: Station 14 (Thornby Heath): wind data wrong since the storm
+
+Hi all, I was only copied in, but since the storm is the subject, I should say that Dr Marguerite Oyelowo's team at the university have just asked us for access to the raw 10-minute data from stations 3, 6, 14 and 21 for their coastal flooding study. They would like it by the end of this month. They are also asking whether they could publish the data in their paper. We have never had a formal data-sharing agreement for research use of the raw record, only the open hourly data on the website. I told her I would ask the coordinator.
+
+Two of those stations, 14 and 21, are the ones that are now broken, so any data they get will include gaps. I wanted to make sure that is clear to them.
+
+Yusuf
+
+---
+
+From: Imelda Voss-Karlsen <i.vosskarlsen@example.org>
+To: Ngozi Fairweather; Rosalind Achebe-Lund; Piers Hallowell; Tobiah Ramsgate; Yusuf Delacroix-Ngata
+Date: Tue 7 October, 15:05
+Subject: Re: Station 14 (Thornby Heath): wind data wrong since the storm
+
+Ngozi, thank you, this is exactly what I was worried about. Some thoughts.
+
+On the firmware: I am against a mass rollout in the same weeks as storm repairs. If a logger is updated and then the sensor fails, we will not know which change caused the problem. I propose we do the firmware only at stations where we are already making a repair visit, and leave the others until the end of November, once the repairs are done and the network is stable. That would mean stations 14, 6, 21 and 9 in October and the other 19 in November.
+
+On the station 21 power fault: if it is the battery, that is likely to cost 160 pounds for a new 12 volt unit plus a regulator at 45. Please do not buy these without checking with Piers first, I know the budget is tight.
+
+On Yusuf's point: we do have the open data licence for the hourly data, but the 10-minute data are not covered. Whoever replies should be careful not to promise something that the trustees have not agreed. My suggestion is that we give the university the hourly data immediately, with the flagged gaps, and say the raw data question will go to the trustees.
+
+Imelda
+
+---
+
+From: Piers Hallowell <p.hallowell@example.org>
+To: Rosalind Achebe-Lund; Imelda Voss-Karlsen; Ngozi Fairweather; Tobiah Ramsgate; Yusuf Delacroix-Ngata
+Date: Wed 8 October, 08:20
+Subject: Re: Station 14 (Thornby Heath): wind data wrong since the storm
+
+Putting numbers on it. If the four problems all need new parts, the worst case is: anemometer 480, battery 160 plus regulator 45 for Saltmarsh Point, a replacement pressure sensor for Quarry Lane at about 210, and a rain gauge tipping mechanism for Greywell Farm at about 95. That is 990 pounds. We have 550 uncommitted. So the shortfall would be 440 if everything goes wrong, and it is 480 + 205 = 685 minus 550 = 135 short even for the cheaper scenario where Quarry Lane and Greywell turn out to be only a cleaning job. If we also lose Ashby Moor's gauge budget, then we cannot replace the gauge at Ashby Moor this winter.
+
+I am happy to put a request to the trustees for up to 500 pounds, but I need Rosalind's recommendation by Tuesday 14 October to get it into the papers. Tobiah and Ngozi, please can you also send me mileage claims for the visits so I can include them.
+
+Piers
+
+---
+
+From: Tobiah Ramsgate <t.ramsgate@example.org>
+To: Rosalind Achebe-Lund; Imelda Voss-Karlsen; Ngozi Fairweather; Piers Hallowell; Yusuf Delacroix-Ngata
+Date: Wed 8 October, 17:34
+Subject: Re: Station 14 (Thornby Heath): wind data wrong since the storm
+
+Quick one. I can take the spare anemometer back up to Thornby Heath on Saturday 11 October if the estate manager confirms in writing, and fit it as a temporary unit. I will also check the cable and the vane. If the cable is damaged I will bring it back and we will know it is not the anemometer. I am away from 18 to 26 October, so if the new unit is ordered now, someone else will have to fit it, or it would have to wait until 27 October. Ngozi, I can show you how to do the station 14 swap when we meet on Saturday if you are free.
+
+Tobiah
+
+---
+
+From: Ngozi Fairweather <n.fairweather@example.org>
+To: Rosalind Achebe-Lund; Imelda Voss-Karlsen; Piers Hallowell; Tobiah Ramsgate; Yusuf Delacroix-Ngata
+Date: Thu 9 October, 12:10
+Subject: Re: Station 14 (Thornby Heath): wind data wrong since the storm
+
+Update from the field. I went to Quarry Lane this morning and the pressure port was blocked by a wasp nest, nothing more. I cleaned it and the reading changed straight away, so that one costs nothing. Greywell Farm is not yet done because the farmer was out and I did not want to go onto the land without notice; I will go tomorrow, Friday 10 October, with a spare funnel and a cleaning kit.
+
+My worry is Saltmarsh Point. The station is at the end of a tidal causeway, and high tide on Saturday is at 11:40, which means the safe crossing window is roughly 14:00 to 17:30. Our lone-working rule says nobody goes to a remote station alone, so I need a second person, and Tobiah will be at Thornby Heath on Saturday. Could Piers or Yusuf come? Alternatively we wait until Tuesday 14 October, when the window is early in the morning. Either way I would like it agreed that nobody crosses the causeway on their own.
+
+Finally, a reminder that Ashby Moor (station 19) is still unresolved. If the rain gauge there is giving doubtful readings, the question is whether we buy the replacement gauge now or wait until we know how much the storm repairs cost. I do not want that to be decided by default.
+
+Ngozi

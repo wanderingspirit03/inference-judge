@@ -1,0 +1,171 @@
+Could you do a careful code review of this Python module and then write a complete pytest suite for it? It plans the order in which hull blocks are lifted into the dock at our shipyard, and it also checks crane limits. I suspect there are bugs in the dependency handling and in the crane check, and I'd like you to say which problems are serious and which are only style.
+
+```python
+"""block_plan.py - hull block erection planning for Dunmore Slipway.
+
+A hull is built from blocks. A block can only be lifted into the dock when all
+blocks it rests on are already in place. Each lift needs a crane that can
+carry the block's weight at the required radius.
+"""
+
+import heapq
+from collections import defaultdict, deque
+
+
+class PlanError(Exception):
+    pass
+
+
+class Block:
+    def __init__(self, name, weight_t, radius_m, hours, rests_on=None):
+        self.name = name
+        self.weight_t = weight_t
+        self.radius_m = radius_m
+        self.hours = hours
+        self.rests_on = rests_on or []
+
+    def __repr__(self):
+        return "Block(%s)" % self.name
+
+
+class Crane:
+    def __init__(self, name, curve):
+        # curve: list of (radius_m, max_weight_t), sorted by radius
+        self.name = name
+        self.curve = curve
+        self.free_at = 0
+
+    def capacity_at(self, radius):
+        last = None
+        for r, w in self.curve:
+            if radius <= r:
+                if last is None:
+                    return w
+                lr, lw = last
+                return lw + (w - lw) * (radius - lr) / (r - lr)
+            last = (r, w)
+        return 0
+
+    def can_lift(self, block):
+        return block.weight_t <= self.capacity_at(block.radius_m)
+
+
+def build_graph(blocks):
+    by_name = {}
+    for b in blocks:
+        by_name[b.name] = b
+    children = defaultdict(list)
+    indegree = {}
+    for b in blocks:
+        indegree[b.name] = len(b.rests_on)
+        for dep in b.rests_on:
+            if dep not in by_name:
+                raise PlanError("unknown block " + dep)
+            children[dep].append(b.name)
+    return by_name, children, indegree
+
+
+def erection_order(blocks):
+    """Return block names in an order that respects what rests on what."""
+    by_name, children, indegree = build_graph(blocks)
+    queue = deque(n for n, d in indegree.items() if d == 0)
+    order = []
+    while queue:
+        name = queue.popleft()
+        order.append(name)
+        for child in children[name]:
+            indegree[child] -= 1
+            if indegree[child] == 0:
+                queue.append(child)
+    if len(order) != len(blocks):
+        raise PlanError("circular dependency")
+    return order
+
+
+def assign_cranes(blocks, cranes, start=0):
+    """Greedy schedule: take blocks in dependency order, give each to the
+    crane that becomes free first and is able to lift it.
+
+    Returns a list of (block name, crane name, start hour, end hour).
+    """
+    by_name, children, indegree = build_graph(blocks)
+    done_at = {}
+    ready = []
+    for n, d in indegree.items():
+        if d == 0:
+            heapq.heappush(ready, (by_name[n].weight_t, n))
+    schedule = []
+    for c in cranes:
+        c.free_at = start
+
+    while ready:
+        weight, name = heapq.heappop(ready)
+        block = by_name[name]
+        usable = [c for c in cranes if c.can_lift(block)]
+        if not usable:
+            raise PlanError("no crane can lift " + name)
+        crane = min(usable, key=lambda c: c.free_at)
+        earliest = max([done_at[d] for d in block.rests_on] + [crane.free_at])
+        end = earliest + block.hours
+        crane.free_at = end
+        done_at[name] = end
+        schedule.append((name, crane.name, earliest, end))
+        for child in children[name]:
+            indegree[child] -= 1
+            if indegree[child] == 0:
+                heapq.heappush(ready, (by_name[child].weight_t, child))
+    return schedule
+
+
+def total_duration(schedule):
+    if not schedule:
+        return 0
+    return max(end for _, _, _, end in schedule) - min(s for _, _, s, _ in schedule)
+
+
+def critical_path(blocks):
+    """Longest chain of dependent lifts, measured in hours."""
+    by_name, children, indegree = build_graph(blocks)
+    best = {}
+    for name in erection_order(blocks):
+        block = by_name[name]
+        prior = max([best[d][0] for d in block.rests_on], default=0)
+        via = None
+        for d in block.rests_on:
+            if best[d][0] == prior:
+                via = d
+        best[name] = (prior + block.hours, via)
+    end = max(best, key=lambda n: best[n][0])
+    path = [end]
+    while best[path[-1]][1] is not None:
+        path.append(best[path[-1]][1])
+    return list(reversed(path)), best[end][0]
+
+
+def overweight_report(blocks, cranes):
+    """List blocks that no crane can lift, with the heaviest crane capacity."""
+    lines = []
+    for b in blocks:
+        if not any(c.can_lift(b) for c in cranes):
+            best = max(c.capacity_at(b.radius_m) for c in cranes)
+            lines.append("%s: %.1f t at %.1f m, best crane %.1f t"
+                         % (b.name, b.weight_t, b.radius_m, best))
+    return lines
+
+
+if __name__ == "__main__":
+    blocks = [
+        Block("keel-1", 85, 20, 6),
+        Block("keel-2", 90, 20, 6, ["keel-1"]),
+        Block("bottom-p", 60, 28, 5, ["keel-1"]),
+        Block("bottom-s", 60, 28, 5, ["keel-1"]),
+        Block("engine-room", 140, 22, 9, ["keel-2", "bottom-p", "bottom-s"]),
+    ]
+    cranes = [
+        Crane("Goliath", [(15, 200), (25, 150), (35, 90)]),
+        Crane("Mobile", [(10, 80), (20, 60), (30, 40)]),
+    ]
+    for row in assign_cranes(blocks, cranes):
+        print(row)
+    print(critical_path(blocks))
+```

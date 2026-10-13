@@ -1,0 +1,182 @@
+This is the module our youth orchestra uses to track rehearsal attendance, rotate seating and work out the termly fees. Could you give it a thorough code review, pointing out bugs, risky assumptions and things that should be done differently, and then write a full set of unit tests with pytest? Please say which of your tests you expect to fail on the current code and why.
+
+```python
+"""Rehearsal tracking for the Brindlecombe Youth Orchestra."""
+
+import csv
+import datetime
+from collections import defaultdict
+
+SECTIONS = ["strings", "woodwind", "brass", "percussion"]
+
+BASE_FEE = 85.0          # pounds per term
+SIBLING_DISCOUNT = 0.10  # 10 percent off for each additional sibling
+INSTRUMENT_HIRE = 24.5   # pounds per term, for a hired instrument
+MIN_ATTENDANCE = 0.75    # members below this are flagged
+
+
+class Member:
+    def __init__(self, member_id, name, section, family, hires_instrument=False):
+        self.member_id = member_id
+        self.name = name
+        self.section = section
+        self.family = family
+        self.hires_instrument = hires_instrument
+
+
+class Rehearsal:
+    def __init__(self, date, kind="weekly", present=[]):
+        self.date = date
+        self.kind = kind          # "weekly", "sectional" or "concert"
+        self.present = present    # list of member ids
+
+    def mark(self, member_id):
+        if member_id not in self.present:
+            self.present.append(member_id)
+
+
+class Orchestra:
+    def __init__(self):
+        self.members = {}
+        self.rehearsals = []
+
+    def add_member(self, member):
+        if member.section not in SECTIONS:
+            raise ValueError("unknown section " + member.section)
+        self.members[member.member_id] = member
+
+    def remove_member(self, member_id):
+        del self.members[member_id]
+
+    def add_rehearsal(self, rehearsal):
+        self.rehearsals.append(rehearsal)
+
+    def attendance_rate(self, member_id):
+        """Share of rehearsals this member attended."""
+        attended = 0
+        for r in self.rehearsals:
+            if member_id in r.present:
+                attended += 1
+        return attended / len(self.rehearsals)
+
+    def flagged_members(self):
+        flagged = []
+        for member_id, member in self.members.items():
+            if self.attendance_rate(member_id) < MIN_ATTENDANCE:
+                flagged.append(member.name)
+        return flagged
+
+    def section_report(self):
+        """Average attendance rate for each section."""
+        totals = defaultdict(list)
+        for member_id, member in self.members.items():
+            totals[member.section].append(self.attendance_rate(member_id))
+        report = {}
+        for section, rates in totals.items():
+            report[section] = round(sum(rates) / len(rates), 2)
+        return report
+
+    def rehearsals_between(self, start, end):
+        return [r for r in self.rehearsals if start <= r.date <= end]
+
+    def rotate_seating(self, section, week):
+        """Rotate the order of players in a section by `week` places so that
+        nobody sits at the front of the section every week."""
+        players = [m for m in self.members.values() if m.section == section]
+        players.sort(key=lambda m: m.name)
+        shift = week % len(players)
+        return [p.name for p in players[shift:] + players[:shift]]
+
+
+def family_fees(orchestra):
+    """Termly fee for every family. The first child pays the full fee and
+    each further sibling gets the sibling discount. Instrument hire is not
+    discounted."""
+    by_family = defaultdict(list)
+    for m in orchestra.members.values():
+        by_family[m.family].append(m)
+
+    fees = {}
+    for family, kids in by_family.items():
+        total = 0.0
+        for i, kid in enumerate(kids):
+            fee = BASE_FEE
+            if i > 0:
+                fee = fee * (1 - SIBLING_DISCOUNT) ** i
+            if kid.hires_instrument:
+                fee += INSTRUMENT_HIRE
+            total += fee
+        fees[family] = total
+    return fees
+
+
+def concert_roster(orchestra, rate_floor=MIN_ATTENDANCE):
+    """Members who have attended enough rehearsals to play in the concert,
+    grouped by section."""
+    roster = {section: [] for section in SECTIONS}
+    for member_id, member in orchestra.members.items():
+        if orchestra.attendance_rate(member_id) >= rate_floor:
+            roster[member.section].append(member.name)
+    for names in roster.values():
+        names.sort()
+    return roster
+
+
+def late_payers(fees, payments):
+    """Families that have paid less than they owe. `payments` maps family to
+    the amount paid so far."""
+    owing = {}
+    for family, due in fees.items():
+        paid = payments.get(family, 0)
+        if paid < due:
+            owing[family] = due - paid
+    return owing
+
+
+def summarise_term(orchestra):
+    """One line of text per section for the newsletter."""
+    lines = []
+    report = orchestra.section_report()
+    for section in SECTIONS:
+        count = len([m for m in orchestra.members.values() if m.section == section])
+        rate = report.get(section, 0)
+        lines.append("%s: %d players, %d%% attendance" % (section.title(), count, rate * 100))
+    return "\n".join(lines)
+
+
+def term_dates(first_monday, weeks=12, half_term_week=6):
+    """Return the rehearsal dates for a term, skipping half term."""
+    dates = []
+    for w in range(1, weeks + 1):
+        if w == half_term_week:
+            continue
+        dates.append(first_monday + datetime.timedelta(weeks=w))
+    return dates
+
+
+def load_members(path):
+    """Read members from a CSV file with the columns id, name, section,
+    family, hire (yes or no)."""
+    orchestra = Orchestra()
+    with open(path) as f:
+        for row in csv.DictReader(f):
+            member = Member(
+                int(row["id"]),
+                row["name"],
+                row["section"].lower(),
+                row["family"],
+                row["hire"] == "yes",
+            )
+            orchestra.add_member(member)
+    return orchestra
+
+
+def write_invoice_file(orchestra, path):
+    fees = family_fees(orchestra)
+    with open(path, "w") as f:
+        writer = csv.writer(f)
+        writer.writerow(["family", "amount"])
+        for family in sorted(fees):
+            writer.writerow([family, "%.2f" % fees[family]])
+    return len(fees)
+```

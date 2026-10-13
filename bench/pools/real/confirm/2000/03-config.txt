@@ -1,0 +1,185 @@
+We run the rating-list site for the Norland Chess Federation on a single small server, and the deploy and backup setup below was put together by three different volunteers over the years. Please audit it: list the problems in order of seriousness, explain the fix for each, and give me a corrected version of every file.
+
+**Dockerfile**
+
+```dockerfile
+FROM python:latest
+
+WORKDIR /app
+COPY . /app
+
+RUN pip install -r requirements.txt
+RUN apt-get update && apt-get install -y cron postgresql-client curl
+
+ENV DATABASE_URL=postgres://ratings:chessmate2019@db:5432/ratings
+ENV SECRET_KEY=nf-ratings-secret-key
+ENV DEBUG=true
+
+EXPOSE 8000
+CMD python manage.py runserver 0.0.0.0:8000
+```
+
+**docker-compose.yml**
+
+```yaml
+version: "3"
+services:
+  web:
+    build: .
+    ports:
+      - "80:8000"
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+    restart: always
+  db:
+    image: postgres
+    environment:
+      POSTGRES_USER: ratings
+      POSTGRES_PASSWORD: chessmate2019
+      POSTGRES_DB: ratings
+    ports:
+      - "5432:5432"
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+volumes:
+  dbdata:
+```
+
+**backup.sh** (run from root's crontab at 03:00 every night)
+
+```bash
+#!/bin/bash
+cd /home/deploy/ratings
+DATE=`date +%Y%m%d`
+docker exec ratings_db_1 pg_dump -U ratings ratings > /backups/ratings_$DATE.sql
+cp /backups/ratings_$DATE.sql /mnt/usb/
+find /backups -name "*.sql" -mtime +7 -exec rm {} \;
+echo "backup done" | mail -s "backup" secretary@example.org
+```
+
+**deploy.sh** (run by hand by whoever is on duty)
+
+```bash
+#!/bin/bash
+git pull
+docker-compose build
+docker-compose down
+docker-compose up -d
+python manage.py migrate
+python manage.py collectstatic
+```
+
+**.github/workflows/ci.yml**
+
+```yaml
+name: ci
+on:
+  push:
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.6
+      - run: pip install -r requirements.txt
+      - run: python manage.py test
+        env:
+          DATABASE_URL: postgres://ratings:chessmate2019@localhost:5432/ratings
+      - name: deploy
+        if: github.ref == 'refs/heads/main'
+        run: |
+          sshpass -p "$DEPLOY_PASSWORD" ssh -o StrictHostKeyChecking=no deploy@ratings.example.org "cd ratings && ./deploy.sh"
+        env:
+          DEPLOY_PASSWORD: ${{ secrets.DEPLOY_PASSWORD }}
+```
+
+**requirements.txt**
+
+```
+Django
+psycopg2
+gunicorn
+requests
+```
+
+**nginx/ratings.conf** (installed by hand on the host, outside Docker, by the volunteer who set up the server)
+
+```nginx
+server {
+    listen 80;
+    server_name ratings.example.org;
+
+    location /static/ {
+        alias /home/deploy/ratings/static/;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_read_timeout 300;
+        client_max_body_size 200M;
+    }
+}
+```
+
+**crontab** (root)
+
+```
+0 3 * * * /home/deploy/ratings/backup.sh
+30 4 1 * * docker exec ratings_web_1 python manage.py build_rating_list
+0 5 * * 0 apt-get update && apt-get -y upgrade && reboot
+```
+
+**.env.example** (the file new volunteers are told to copy)
+
+```
+DATABASE_URL=postgres://ratings:chessmate2019@db:5432/ratings
+SECRET_KEY=nf-ratings-secret-key
+DEBUG=true
+ALLOWED_HOSTS=*
+EMAIL_HOST=smtp.example.org
+EMAIL_PASSWORD=sendme2019
+```
+
+**ratings/settings.py** (excerpt, the part that reads the environment)
+
+```python
+import os
+
+SECRET_KEY = os.environ.get("SECRET_KEY", "dev-key")
+DEBUG = os.environ.get("DEBUG", "true") == "true"
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "*").split(",")
+STATIC_ROOT = "/app/static"
+LOGGING = {
+    "version": 1,
+    "handlers": {"file": {"class": "logging.FileHandler", "filename": "/app/logs/site.log"}},
+    "root": {"handlers": ["file"], "level": "DEBUG"},
+}
+```
+
+**check_disk.sh** (written after the outage; run from the same root crontab every ten minutes, which is not shown above)
+
+```bash
+#!/bin/bash
+USED=$(df / | tail -1 | awk '{print $5}' | tr -d '%')
+if [ $USED -gt 90 ]; then
+    echo "disk is $USED percent full on ratings server" | mail -s "DISK" secretary@example.org
+fi
+```
+
+**restore.sh** (kept in the secretary's notes; it has never been tested)
+
+```bash
+#!/bin/bash
+LATEST=`ls /backups/*.sql | tail -1`
+docker exec -i ratings_db_1 psql -U ratings ratings < $LATEST
+```
+
+**logrotate** There is no logrotate entry. The web container writes its log to /app/logs/site.log, which is inside the bind-mounted project folder and has grown to 31 GB.
+
+Some context that may matter. The site publishes the monthly rating list on the first of each month and the list is read by about 4,000 players, with a spike on that day. Tournament directors upload results through a web form from Thursday to Sunday evenings. The server has 4 GB of memory and 60 GB of disk, and the USB drive is plugged into it permanently. We have had one outage where the disk filled up, and once a tournament director's results were lost because the database container was recreated during a deploy on a Saturday. The treasurer would like to keep running costs at zero, so please do not suggest a managed cloud database.

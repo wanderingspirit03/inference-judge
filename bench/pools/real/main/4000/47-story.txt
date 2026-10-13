@@ -1,0 +1,138 @@
+Here are the first four chapters of a short story I'm working on. Please continue it for as long as you can, at least the next two chapters and ideally the ending, in the same close third person, past tense, dry and slightly rueful voice. Keep the characters and the facts I've established, let the Halloran Arms matter to the plot, and don't resolve everything neatly.
+
+THE LAST ROOM IN SKELLIGAN BAY
+
+1.
+
+The first thing Marit Osei learned about hotels was that they were all lying about the pillows.
+
+She learned it in the second month of Nestwell's existence, in a rented room above a bicycle shop in the east end of the city, where three people and a whiteboard did what the investor deck called "building the future of independent stays" and what Leif, the other founder, called "being polite to spreadsheets." The company's idea was simple enough to fit on a beer mat. There were thousands of small hotels, guesthouses and inns that took their bookings by telephone, by email, or on a website last updated by a nephew. There were millions of travellers who did not want to book through the big platforms, which took eighteen percent and offered nothing in return but a ranking. Nestwell would take six percent and give the small hotels a booking page that worked, a calendar that did not double-book, and a way to say, truthfully, what the rooms were like.
+
+The truth was the difficult part. Marit had assumed it would be the software.
+
+"Listen to this one," Leif said, reading from his laptop with the flat voice he used for quoting other people's prose. "'Our rooms are furnished with hypoallergenic goose-down pillows of the highest quality.' It's a guesthouse in Dunmore Cross. They're forty pounds a night."
+
+"And?"
+
+"And I phoned them, pretending to be a customer, and the woman said the pillows come from the cash and carry. She said they were nice and bouncy. She said the word goose might have been her husband's idea."
+
+Marit looked at the whiteboard, where the problem had been written three days earlier in her own handwriting: WHAT DO GUESTS WANT TO KNOW? Under it, in a different pen, someone had added: THE TRUTH. And under that, in Leif's tidy capitals: WHICH TRUTH?
+
+The third member of the team, a quiet developer named Anselm who communicated mostly in pull requests, had built the first version of the booking page in nine days. It was clean and fast and it showed a hotel's rooms the way a good friend would describe them. There was a field for the number of steps to the front door. There was a field for whether the shower was over the bath. There was a field, which Marit had insisted on and which Leif had called "a lawsuit with a text box", for the worst thing about the room. A guesthouse in Dunmore Cross would say, in its own words, that the window looked onto the bins but that the bins were collected on Tuesdays and it was a Friday.
+
+That field was the reason the first fourteen hotels signed up, and the reason forty others did not.
+
+2.
+
+By March they had sixty-one hotels, an office with a door, and a number called the repeat rate, which Leif had learned to say in a hushed tone. It meant the share of guests who booked a second time through Nestwell. It was thirty-four percent. The large platforms, Leif said, were probably at eleven.
+
+The investor was a woman named Philippa Strand who ran a small fund out of an office with a view of a car park, and who had said yes to Nestwell in forty minutes. She came to the office once a month, brought biscuits that nobody ate, and asked questions that sounded gentle and were not.
+
+"What happens," she said in March, sitting in the only good chair, "when you have a bad hotel?"
+
+"We don't have bad hotels," said Leif.
+
+"You have sixty-one hotels. One of them is bad. Or will be. A hotel is a building full of people who are tired, and sooner or later one of them has a morning when the boiler goes and the cook leaves and a guest posts something awful. What does Nestwell do?"
+
+Marit had thought about this at three in the morning many times and had never reached a satisfying answer. She said, "We tell the truth about it."
+
+"To whom?"
+
+"To the next guest."
+
+Philippa looked at her for a moment, in the particular way of someone deciding whether an answer is brave or stupid. "That's the product," she said. "It is also the risk. If you tell the truth about one of your own hotels and it ruins them, you will have ruined a customer. If you don't, you're one more platform. I'd like to be in the first company. I'm just telling you that it costs money."
+
+She left the biscuits. That night, Anselm ate all of them without comment, and Leif, who had been thinking about the repeat rate, said, "She's wrong, you know. The truth is a feature. It's the only feature we have."
+
+Marit did not tell him that she had been thinking about the Halloran Arms.
+
+Instead she opened the dashboard and looked at the thing she looked at every evening, the list of guest comments that the system flagged for human reading. There were four that week. A hotel in a market town had a guest who disliked the carpet. A guesthouse by a railway line had been described as "exactly as noisy as promised, which I respect." A third was a complaint about parking, written in capitals. The fourth was from a man who said only that he had been very happy and that his wife had cried at breakfast, which Anselm had flagged as probable sarcasm and Marit, reading it again, thought was not.
+
+She marked all four as read. It was a small ritual and it did not help. Every comment was a hotel, and every hotel was a person with a mortgage, and the thing she had built was a lens that made all of them a little larger than they wished to be.
+
+
+The Halloran Arms was in Skelligan Bay, a village on the north coast with one street, one chip shop and a ferry that ran when the weather allowed. It had eleven rooms, a bar with a fire, and a landlord named Declan Abara who had signed up to Nestwell in the first week and whose reviews, on the whole, were the best the company had. Guests wrote that the beds were soft, the breakfast was enormous, and Mr Abara remembered their names. In the "worst thing" field, Declan had written: "The road is long and the signal is bad. If you want to be left alone, this is the place."
+
+There was only one other thing in the file, a note Marit had added herself after a phone call in January. It said: "Dec. mentioned the roof. Said it was nothing. Ask again in spring."
+
+It was spring. She had not asked.
+
+3.
+
+The ferry did not run on the day Marit went to Skelligan Bay, so she drove, which took five hours instead of two and a half, and arrived in the village at a quarter past four with the light already going yellow on the water.
+
+The Halloran Arms looked better than its photographs. This surprised her, because Nestwell's photographs were taken by Anselm, who had no gift for flattery. The building was long and low and painted the colour of old cream, with a slate roof, and a hand-lettered sign swinging by the door. In the bar, a fire was lit though it was April and warm. Behind the counter stood a man in his sixties with a grey beard and the forearms of someone who had carried a lot of barrels, polishing a glass that was already clean.
+
+"You're the girl from the internet," he said.
+
+"Marit. We spoke in January."
+
+"I know who you are. You wrote me a very nice email about pillows." Declan Abara put the glass down. "Will you eat? There's a fish pie. It's the only thing in the kitchen, but it's a good one."
+
+She ate the fish pie, which was a good one, and a young woman named Saoirse, who turned out to be Declan's niece and who worked every job in the building, brought her tea without being asked. The bar filled slowly with the tired, cheerful people of a village evening: two men from the harbour, a retired teacher, a couple on a walking holiday who had booked through Nestwell and recognised the logo on Marit's jacket.
+
+"You're the people with the honest page," the woman said. "We chose you because of the bit about the bins. We thought, anyone who says that must be telling the truth about the rest."
+
+"And was it?"
+
+"The bins were exactly as described," the woman said happily. "There was a seagull on one."
+
+Marit laughed, and felt something loosen in her chest, and was surprised by how tightly it had been held. It was the repeat rate. It was Philippa's question. It was the sixty-one hotels, any one of which might at any moment turn out to be a lie. And here was a woman with a muddy coat saying that a seagull on a bin was proof of integrity, and Marit could have wept.
+
+She waited until the bar had thinned out and then went to find Declan in the kitchen, where he was scraping a pan.
+
+"The roof," she said.
+
+He did not turn around. "Ah."
+
+"In January you said it was nothing."
+
+"I said it was nothing to worry about, which is a different sentence." He set the pan down. He had the manner, she noticed, of a man who had practised this conversation in the mirror. "There's a leak above room nine. I've had a man look. He says it's the whole north slope. He says it's the timbers and not the slates, which means new timbers, which means scaffolding, which means the best part of sixty thousand. I have eleven thousand. I have a bank manager who is very fond of me and very unable."
+
+"When?"
+
+"The man says one more bad winter. Maybe two. I say the Lord is generous with winters." He smiled, and it was not a joke. "I haven't told the others. Saoirse knows. I'm not asking you to put it on the page."
+
+Marit stood in the warm, fishy air of the kitchen, and in her mind she saw the worst-thing field, the little box that Leif called a lawsuit, and what she saw in it was not the Halloran Arms' roof but the line from Philippa's mouth: it costs money. If she wrote that the Halloran Arms had a failing roof, the booking page would be honest, and for the next three months every other guest would see it and think twice. If she did not write it, she would have a company whose entire product was a promise that she was now ready to break for a man who made good fish pie.
+
+"I'm not going to ask you to say anything," she said. "Not yet."
+
+"That's kind."
+
+"It isn't kind. It's me not having worked out what I think." She pushed her hair out of her eyes. "Can I see room nine?"
+
+It was at the end of the upstairs corridor, a clean, white, cold room with a blue quilt and a view of the bay. A bucket stood in the corner under a brown stain the shape of Ireland, and the sound of the sea came through the glass. Marit stood in it for some time. She thought, absurdly, of the woman in Dunmore Cross and her bouncy pillows, and of how little it had taken to make a lie, and how little to make a truth.
+
+When she came back down, Saoirse was waiting at the foot of the stairs with her arms folded.
+
+"Uncle Declan says you're not going to put it on the website."
+
+"He says I haven't decided."
+
+"There's a difference?" Saoirse said. "Because from where I'm standing it looks like a company that tells everyone to be honest, and then gets very quiet when the honest thing is expensive." She said it without heat, in the voice of someone who had been told for years to be pleasant to visitors and had finally lost patience with the habit. "My uncle's going to lose this place. You know that. The only question is whether the next hundred guests know it before they book, or after."
+
+Outside, the ferry horn sounded across the water, late, long and low, as if the sea itself had decided to weigh in.
+
+4.
+
+She was given room four, which had no stain and no bucket and the kind of bed that makes a person suspicious of her own exhaustion. At eleven she sat on the quilt with her shoes still on and phoned Leif, who answered on the first ring, as he always did, as if he slept beside the phone.
+
+"How is it?" he said. "Is it good? Tell me it's good. Tell me they have a great story. Philippa will want a case study."
+
+"It's good," Marit said. "It's the best one we have. The roof's going."
+
+There was a silence in which she could hear him sit up. "Going how?"
+
+She told him: the timbers, the sixty thousand, the eleven, the bank manager who was fond and unable. She told him about the bucket and Saoirse and the seagull on the bin. She did not tell him that she had stood in room nine for a long time, or that she had thought about the woman with the muddy coat, because these things sounded, said aloud, like a person looking for a reason.
+
+"Right," said Leif, in the voice he used for problems that had numbers in them. "So we put it on the page. We say, honestly, there is a roof issue, the owner is repairing it, and, I don't know, we add a donation button. People love a donation button. We could do a fund. We take nothing. Six percent of nothing. We'd be the platform that saved a pub."
+
+"And if they don't give?"
+
+"Then the page says the roof's failing and the bookings drop and Declan goes under in the winter instead of in two years." He stopped. "I'm not saying that's what we do. I'm saying that's the shape of it."
+
+"You said the truth was a feature," Marit said.
+
+"It is." He sounded, for the first time that week, tired. "It's also, apparently, a very expensive thing to be right about."
+
+When she put the phone down the room was dark and the sea was still arguing with the glass. Somewhere below her, the fire in the bar had been banked, and she could hear Declan's slow tread crossing the floor, checking the doors one by one, a man making sure that a house he might lose was safe for the night.

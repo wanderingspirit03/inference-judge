@@ -1,0 +1,147 @@
+I need a review of this database design, including whether the indexes make sense, and I would like the slow queries rewritten with an explanation of why each rewrite is better. This is the schema for our haulage and blasting records at Greywacke Ridge quarry, running on PostgreSQL. The weighbridge report takes almost a minute now and the planners keep complaining about the monthly tonnage query.
+
+```sql
+CREATE TABLE sites (
+    site_id      serial PRIMARY KEY,
+    name         text NOT NULL,
+    permit_no    text NOT NULL,
+    max_daily_t  integer NOT NULL
+);
+
+CREATE TABLE products (
+    product_id   serial PRIMARY KEY,
+    code         text NOT NULL,
+    description  text,
+    price_per_t  numeric(8,2) NOT NULL
+);
+
+CREATE TABLE customers (
+    customer_id  serial PRIMARY KEY,
+    name         text NOT NULL,
+    account_ref  text,
+    credit_limit numeric(10,2) DEFAULT 0
+);
+
+CREATE TABLE trucks (
+    truck_id     serial PRIMARY KEY,
+    plate        text NOT NULL,
+    haulier      text,
+    tare_kg      integer NOT NULL
+);
+
+CREATE TABLE loads (
+    load_id      bigserial PRIMARY KEY,
+    site_id      integer REFERENCES sites(site_id),
+    product_id   integer REFERENCES products(product_id),
+    customer_id  integer REFERENCES customers(customer_id),
+    truck_id     integer REFERENCES trucks(truck_id),
+    gross_kg     integer NOT NULL,
+    weighed_at   timestamp NOT NULL,
+    ticket_no    text,
+    status       text DEFAULT 'open'
+);
+
+CREATE TABLE blasts (
+    blast_id     serial PRIMARY KEY,
+    site_id      integer REFERENCES sites(site_id),
+    fired_at     timestamp NOT NULL,
+    holes        integer,
+    explosive_kg numeric(8,1),
+    fired_by     text,
+    notes        text
+);
+
+CREATE TABLE complaints (
+    complaint_id serial PRIMARY KEY,
+    blast_id     integer REFERENCES blasts(blast_id),
+    received_at  timestamp NOT NULL,
+    postcode     text,
+    description  text,
+    resolved     boolean DEFAULT false
+);
+
+CREATE INDEX idx_loads_weighed ON loads (weighed_at);
+CREATE INDEX idx_loads_status ON loads (status);
+CREATE INDEX idx_blasts_fired ON blasts (fired_at);
+```
+
+Here are the queries that hurt.
+
+```sql
+-- 1. Monthly tonnage by product for the permit return
+SELECT p.code,
+       to_char(l.weighed_at, 'YYYY-MM') AS month,
+       sum(l.gross_kg - t.tare_kg) / 1000.0 AS net_tonnes
+FROM loads l
+JOIN products p ON p.product_id = l.product_id
+JOIN trucks t ON t.truck_id = l.truck_id
+WHERE to_char(l.weighed_at, 'YYYY') = '2026'
+GROUP BY p.code, to_char(l.weighed_at, 'YYYY-MM')
+ORDER BY month, p.code;
+
+-- 2. Customers over their credit limit this month
+SELECT c.name,
+       (SELECT sum((l.gross_kg - t.tare_kg) / 1000.0 * p.price_per_t)
+          FROM loads l
+          JOIN trucks t ON t.truck_id = l.truck_id
+          JOIN products p ON p.product_id = l.product_id
+         WHERE l.customer_id = c.customer_id
+           AND l.weighed_at >= date_trunc('month', now())) AS owed
+FROM customers c
+WHERE (SELECT sum((l.gross_kg - t.tare_kg) / 1000.0 * p.price_per_t)
+         FROM loads l
+         JOIN trucks t ON t.truck_id = l.truck_id
+         JOIN products p ON p.product_id = l.product_id
+        WHERE l.customer_id = c.customer_id
+          AND l.weighed_at >= date_trunc('month', now())) > c.credit_limit;
+
+-- 3. Days we went over the permit's daily limit
+SELECT s.name, l.weighed_at::date AS day, sum(l.gross_kg - t.tare_kg) / 1000 AS tonnes
+FROM loads l, sites s, trucks t
+WHERE l.site_id = s.site_id AND l.truck_id = t.truck_id
+GROUP BY s.name, s.max_daily_t, l.weighed_at::date
+HAVING sum(l.gross_kg - t.tare_kg) / 1000 > s.max_daily_t;
+
+-- 4. Blasts with unresolved complaints in the last 90 days
+SELECT b.blast_id, b.fired_at, count(*)
+FROM blasts b
+LEFT JOIN complaints c ON c.blast_id = b.blast_id
+WHERE c.resolved = false
+  AND b.fired_at > now() - interval '90 days'
+GROUP BY b.blast_id, b.fired_at;
+
+-- 5. Open tickets older than a week
+SELECT * FROM loads WHERE status = 'open' AND ticket_no LIKE '%GR%'
+  AND weighed_at < now() - interval '7 days';
+
+-- 6. Busiest haulier per product over the last quarter
+SELECT p.code, t.haulier, count(*) AS trips
+FROM loads l
+JOIN products p ON p.product_id = l.product_id
+JOIN trucks t ON t.truck_id = l.truck_id
+WHERE l.weighed_at >= now() - interval '3 months'
+GROUP BY p.code, t.haulier
+HAVING count(*) = (
+    SELECT max(c) FROM (
+        SELECT count(*) AS c
+        FROM loads l2
+        JOIN trucks t2 ON t2.truck_id = l2.truck_id
+        WHERE l2.product_id = l.product_id
+          AND l2.weighed_at >= now() - interval '3 months'
+        GROUP BY t2.haulier
+    ) x
+);
+
+-- 7. Explosive used per tonne shipped, by site and month
+SELECT s.name,
+       to_char(b.fired_at, 'YYYY-MM') AS month,
+       sum(b.explosive_kg) AS explosive,
+       (SELECT sum(l.gross_kg) / 1000.0 FROM loads l
+         WHERE l.site_id = b.site_id
+           AND to_char(l.weighed_at, 'YYYY-MM') = to_char(b.fired_at, 'YYYY-MM')) AS shipped_t
+FROM blasts b
+JOIN sites s ON s.site_id = b.site_id
+GROUP BY s.name, b.site_id, to_char(b.fired_at, 'YYYY-MM');
+```
+
+For scale, the loads table has about 4.1 million rows and grows by roughly 1,800 a day across three sites. Blasts number a few thousand and complaints a few hundred. Almost every load is eventually marked closed, so the open status is rare. The permit return is filed once a month, but the credit check runs every time a driver reaches the weighbridge.

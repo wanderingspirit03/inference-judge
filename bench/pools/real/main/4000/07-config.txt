@@ -1,0 +1,361 @@
+I look after the small software setup at Tallow Lane Brewing, a craft brewery with about 25 staff. We have a service that reads fermentation tank temperatures and a nightly backup job, and I put the files below together over a couple of years without much review. Please audit them: list the problems you find, ranked by how much they could hurt us, explain each fix in plain terms, and then give me corrected versions of every file. I am not a full-time operations person, so tell me if something is a matter of taste rather than a real risk.
+
+File 1: Dockerfile for the tank monitor
+
+```dockerfile
+FROM python:latest
+
+WORKDIR /app
+COPY . /app
+
+RUN apt-get update && apt-get install -y curl vim git build-essential libpq-dev
+RUN pip install -r requirements.txt
+RUN pip install gunicorn
+
+ENV FLASK_ENV=development
+ENV DB_PASSWORD=brew2020!
+ENV PORT=8000
+
+EXPOSE 8000
+EXPOSE 22
+
+CMD gunicorn -w 4 -b 0.0.0.0:$PORT monitor.app:app
+```
+
+File 2: docker-compose.yml on the server in the brewery office
+
+```yaml
+version: "3"
+
+services:
+  monitor:
+    build: .
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_HOST=db
+      - DB_USER=postgres
+      - DB_PASSWORD=brew2020!
+      - ALERT_WEBHOOK=https://chat.example.org/hooks/tallow-lane-alerts
+    volumes:
+      - .:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - db
+
+  db:
+    image: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: brew2020!
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+
+volumes:
+  dbdata:
+```
+
+File 3: nightly backup script, run from cron at 02:00 as root (`0 2 * * * /opt/brew/backup.sh`)
+
+```bash
+#!/bin/bash
+
+BACKUP_DIR=/mnt/usb/backups
+DATE=`date +%Y-%m-%d`
+DB_PASSWORD=brew2020!
+
+cd /opt/brew
+
+echo "Starting backup $DATE" >> /var/log/brew-backup.log
+
+docker exec brew_db_1 pg_dump -U postgres brewdata > $BACKUP_DIR/brewdata-$DATE.sql
+
+tar -czf $BACKUP_DIR/config-$DATE.tar.gz /opt/brew/*.yml /opt/brew/.env /etc/cron.d/*
+
+rm -rf $BACKUP_DIR/brewdata-`date -d "30 days ago" +%Y-%m-%d`.sql
+
+if [ $? -ne 0 ]; then
+  curl -X POST -d "backup failed" https://chat.example.org/hooks/tallow-lane-alerts
+fi
+
+chmod 777 $BACKUP_DIR/*
+
+echo "Done" >> /var/log/brew-backup.log
+```
+
+File 4: deployment script run by hand from the office laptop whenever we release
+
+```bash
+#!/bin/bash
+set -e
+
+SERVER=brew-office.example.org
+ssh root@$SERVER "cd /opt/brew && git pull && docker-compose down && docker-compose up -d --build"
+echo "deployed"
+curl -s http://$SERVER:8000/health || echo "health check failed but continuing"
+```
+
+File 5: GitHub-style CI workflow in `.github/workflows/ci.yml`
+
+```yaml
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      - run: pip install -r requirements.txt
+      - run: pip install pytest
+      - run: pytest || true
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@master
+      - name: Log in and push image
+        run: |
+          docker login registry.example.org -u tallowlane -p ${{ secrets.REGISTRY_PASSWORD }}
+          docker build -t registry.example.org/tallowlane/monitor:latest .
+          docker push registry.example.org/tallowlane/monitor:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy
+        run: |
+          echo "${{ secrets.DEPLOY_KEY }}" > key.pem
+          chmod 600 key.pem
+          ssh -i key.pem -o StrictHostKeyChecking=no root@brew-office.example.org "cd /opt/brew && docker-compose pull && docker-compose up -d"
+```
+
+File 6: `/etc/cron.d/brew`, the cron file on the server
+
+```
+# brew jobs
+0 2 * * * root /opt/brew/backup.sh
+*/5 * * * * root curl -s http://localhost:8000/poll >> /var/log/brew-poll.log 2>&1
+0 6 1 * * root docker system prune -af
+30 3 * * 0 root apt-get -y upgrade && reboot
+```
+
+File 7: the monitor's `.env` file, which is also in the repository, shown here as it appears
+
+```
+TANK_COUNT=14
+TEMP_ALERT_HIGH=21.5
+TEMP_ALERT_LOW=2.0
+SENSOR_POLL_SECONDS=300
+SMTP_HOST=mail.example.org
+SMTP_USER=alerts@example.org
+SMTP_PASSWORD=hops-and-barley
+ADMIN_TOKEN=tl-admin-7731
+```
+
+File 8: `setup.sh`, run once on a fresh server to set it up
+
+```bash
+#!/bin/bash
+apt-get update
+apt-get install -y docker.io docker-compose nginx ufw fail2ban cron
+useradd -m brew
+echo "brew:tallow123" | chpasswd
+usermod -aG sudo brew
+usermod -aG docker brew
+
+mkdir -p /opt/brew /mnt/usb/backups
+git clone https://git.example.org/tallowlane/brew-monitor.git /opt/brew
+chown -R brew:brew /opt/brew
+
+ufw allow 22
+ufw allow 80
+ufw allow 8000
+ufw allow 5432
+ufw allow 3000
+ufw --force enable
+
+cp /opt/brew/deploy/nginx.conf /etc/nginx/sites-enabled/default
+systemctl restart nginx
+cp /opt/brew/deploy/brew.cron /etc/cron.d/brew
+cd /opt/brew && docker-compose up -d
+```
+
+File 9: `deploy/nginx.conf`, the reverse proxy for the dashboard
+
+```nginx
+server {
+    listen 80 default_server;
+    server_name _;
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_set_header Host $host;
+    }
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:8000/;
+    }
+
+    location /admin/ {
+        proxy_pass http://127.0.0.1:8000/admin/;
+    }
+}
+```
+
+File 10: `deploy/alerts.yml`, the alert rules for the dashboard stack
+
+```yaml
+groups:
+  - name: tanks
+    rules:
+      - alert: TankTooWarm
+        expr: tank_temperature_celsius > 21.5
+        for: 2h
+        labels:
+          severity: page
+        annotations:
+          summary: "Tank {{ $labels.tank }} is above 21.5 C"
+      - alert: TankTooCold
+        expr: tank_temperature_celsius < 2.0
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Tank {{ $labels.tank }} is below 2.0 C"
+      - alert: SensorSilent
+        expr: time() - tank_last_reading_timestamp_seconds > 3600
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "No reading from {{ $labels.tank }} for an hour"
+```
+
+File 11: `tanks.yml`, read by the monitor at start-up
+
+```yaml
+poll_seconds: 300
+retries: 0
+timeout_seconds: 60
+tanks:
+  - id: FV1
+    name: Fermenter 1
+    sensor: 10.0.4.11
+    volume_litres: 2000
+    target_c: 19.0
+  - id: FV2
+    name: Fermenter 2
+    sensor: 10.0.4.12
+    volume_litres: 2000
+    target_c: 19.0
+  - id: FV3
+    name: Fermenter 3
+    sensor: 10.0.4.13
+    volume_litres: 1000
+    target_c: 12.0
+  - id: BT1
+    name: Bright tank 1
+    sensor: 10.0.4.21
+    volume_litres: 2000
+    target_c: 3.0
+  - id: BT2
+    name: Bright tank 2
+    sensor: 10.0.4.22
+    volume_litres: 1000
+    target_c: 3.0
+notify:
+  email: brewers@example.org
+  chat: true
+  quiet_hours: "22:00-06:00"
+```
+
+File 12: `/etc/systemd/system/sensor-gateway.service`, the small program that talks to the tank probes
+
+```ini
+[Unit]
+Description=Tank sensor gateway
+
+[Service]
+ExecStart=/usr/bin/python3 /opt/brew/gateway/gateway.py --bind 0.0.0.0 --port 9100
+Restart=on-failure
+User=root
+
+[Install]
+WantedBy=multi-user.target
+```
+
+File 13: `/etc/logrotate.d/brew`
+
+```
+/var/log/brew-*.log {
+    weekly
+    rotate 520
+    missingok
+}
+```
+
+File 14: `restore.sh`, which I wrote after the second incident and have never actually run
+
+```bash
+#!/bin/bash
+# usage: restore.sh 2025-03-14
+DATE=$1
+docker-compose down
+docker volume rm brew_dbdata
+docker-compose up -d db
+sleep 5
+cat /mnt/usb/backups/brewdata-$DATE.sql | docker exec -i brew_db_1 psql -U postgres
+docker-compose up -d
+```
+
+File 15: `requirements.txt` and `Makefile`
+
+```
+flask
+psycopg2
+requests
+pyyaml
+gunicorn==19.9.0
+```
+
+```makefile
+.PHONY: run test deploy clean
+
+run:
+	docker-compose up --build
+
+test:
+	pytest -x
+
+deploy:
+	./deploy.sh
+
+clean:
+	docker-compose down -v
+	rm -rf __pycache__ *.pyc
+	docker system prune -af --volumes
+```
+
+Some context that may help. The tank monitor reads our fermentation and conditioning tanks (the example in `tanks.yml` shows five, the real file lists all fourteen) and sends a message to our staff chat if a tank goes above 21.5 degrees or below 2.0 degrees. A warm ferment that goes unnoticed overnight can ruin a batch worth several thousand pounds, so the alert path matters far more than anything else here. The server is a single small machine in the office, not in a data centre, with a USB drive for backups. Only three people use it. We have had two incidents: once the backup drive filled up and backups quietly stopped for six weeks, and once a restart on Sunday night left the monitor down until Monday afternoon because the database container came up after the application and the application did not retry.
+
+Because the brewery cannot afford a long outage, I would also like to know the smallest changes that give us the most safety, in case I only have one evening to spend, and which of the problems would be worth a more careful redesign later.

@@ -1,0 +1,94 @@
+I wrote this little module for our archaeology field school to log finds from the trenches. Could you explain what each part does, propose a refactoring that would make it easier to maintain, and write tests for it (Vitest is fine)? Please point out any bugs as you go.
+
+```typescript
+export type Material = "pottery" | "bone" | "metal" | "stone" | "glass";
+
+export interface Find {
+  id: string;
+  trench: string;
+  layer: number;
+  material: Material;
+  weightG: number;
+  depthCm: number;
+  foundAt: Date;
+  notes?: string;
+}
+
+const REQUIRED_PREFIX: Record<Material, string> = {
+  pottery: "PT",
+  bone: "BN",
+  metal: "MT",
+  stone: "ST",
+  glass: "GL",
+};
+
+let counter = 0;
+
+export function makeId(trench: string, material: Material): string {
+  counter++;
+  return `${trench.toUpperCase()}-${REQUIRED_PREFIX[material]}-${counter.toString().padStart(4, "0")}`;
+}
+
+export function logFind(
+  list: Find[],
+  trench: string,
+  layer: number,
+  material: Material,
+  weightG: number,
+  depthCm: number,
+  notes?: string
+): Find {
+  if (weightG < 0) throw new Error("negative weight");
+  if (depthCm < 0 || depthCm > 400) throw new Error("depth out of range");
+  const find: Find = {
+    id: makeId(trench, material),
+    trench,
+    layer,
+    material,
+    weightG,
+    depthCm,
+    foundAt: new Date(),
+    notes,
+  };
+  list.push(find);
+  return find;
+}
+
+export function totalsByMaterial(list: Find[]): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const f of list) {
+    out[f.material] = (out[f.material] || 0) + f.weightG;
+  }
+  return out;
+}
+
+export function findsInLayer(list: Find[], trench: string, layer: number): Find[] {
+  return list.filter((f) => f.trench == trench && f.layer == layer);
+}
+
+export function deepest(list: Find[]): Find | undefined {
+  let best: Find | undefined;
+  for (const f of list) {
+    if (!best || f.depthCm > best.depthCm) best = f;
+  }
+  return best;
+}
+
+export function toCsv(list: Find[]): string {
+  const header = "id,trench,layer,material,weightG,depthCm,foundAt,notes";
+  const rows = list.map(
+    (f) =>
+      [f.id, f.trench, f.layer, f.material, f.weightG, f.depthCm, f.foundAt.toISOString(), f.notes ?? ""].join(",")
+  );
+  return [header, ...rows].join("\n");
+}
+
+export function dailySummary(list: Find[], day: Date): string {
+  const same = list.filter((f) => f.foundAt.getDate() === day.getDate());
+  const totals = totalsByMaterial(same);
+  const lines = Object.keys(totals).map((m) => `${m}: ${totals[m]} g`);
+  return `${same.length} finds on ${day.toDateString()}\n${lines.join("\n")}`;
+}
+```
+
+Some background: students work in teams of four per trench, and each team has a tablet that runs this code in a browser page. The students type notes freely, and last season some notes contained commas and quotation marks, which broke the CSV import into the university database. We also had two teams who both recorded finds called "A1-PT-0007", and the field school runs for six weeks, from June into July. At the end of each day the supervisor prints the daily summary for every trench.

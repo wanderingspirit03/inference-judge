@@ -1,0 +1,105 @@
+These are my notes from Module 3 of the trainee course at Marlow & Pike Solar. I have my written assessment next week. Could you turn them into a proper study guide with worked examples for each topic, and then write a quiz of at least twelve questions with full answers so I can test myself? Please point out anywhere my notes look wrong or unclear.
+
+MODULE 3: SIZING AND STRINGING A DOMESTIC ROOF SYSTEM
+Lecturer: Ines Valdarno. Two main sessions, Tuesday and Thursday, plus an optional evening class.
+
+SESSION 1 - HOW MUCH SYSTEM DOES THE HOUSE NEED?
+
+1. Start with the customer, not the roof
+- First question is always annual electricity use in kWh, from twelve months of bills. Do not use one bill. A house that is empty in August looks very different from one with a teenager at home.
+- Typical home in our area: 3,800 kWh per year. A house with an electric car: add 2,000 to 3,000 kWh.
+- Ines says the roof sets the limit, but the bills set the target. If the target is bigger than the roof can carry, say so honestly and do not oversell.
+
+2. Rule of thumb for yield
+- In our region one kilowatt peak (kWp) of panels facing south at 35 degrees makes about 950 kWh per year.
+- Other directions lose some of that. Table she gave us (percent of the best case):
+  - South, 35 degrees: 100
+  - South-east or south-west, 35 degrees: 95
+  - East or west, 35 degrees: 85
+  - South, flat roof (10 degrees): 91
+  - North, 35 degrees: 60 (we do not usually fit this)
+- Shading takes more off. Light shading from a chimney in the morning: knock off 5. A tree that shades the array through the middle of the day: 15 to 25, and we should think about optimisers.
+
+3. Worked example 1 (done in class)
+- Customer: Mr Adeyemi-Roche. Uses 4,200 kWh a year. Roof faces south-west at 35 degrees, no shading.
+- Yield per kWp = 950 x 0.95 = 902.5 kWh per year.
+- To cover 100 percent of use: 4,200 / 902.5 = 4.65 kWp.
+- We do not size to 100 percent, because the house does not use power when the sun shines. Ines suggests aiming for 80 to 90 percent of annual use for a normal family out at work. At 85 percent: 4,200 x 0.85 = 3,570 kWh, which needs 3,570 / 902.5 = 3.96 kWp, so we round to 4.0 kWp.
+- Panel choice: 400 W panels. 4,000 / 400 = 10 panels.
+- Estimated output: 4.0 x 902.5 = 3,610 kWh per year.
+
+4. Self-consumption and export
+- Self-consumption means the share of solar output used in the house at the time it is made. Without a battery a typical family uses about 35 percent. With a 5 kWh battery about 60 percent. With a 10 kWh battery about 75 percent.
+- Example 1 again, no battery: 3,610 x 0.35 = 1,264 kWh used in the house and 3,610 - 1,264 = 2,346 kWh exported.
+- Money: the customer pays 28 pence for each unit bought and is paid 12 pence for each unit exported. Saving = 1,264 x 0.28 = 353.92 pounds. Export income = 2,346 x 0.12 = 281.52 pounds. Total benefit = 635.44 pounds per year.
+- Installed cost quoted for 4.0 kWp with no battery: 6,400 pounds. Simple payback = 6,400 / 635.44 = 10.07 years. Ines said we should say "about ten years" and not "10.07 years", because bills and tariffs change.
+
+5. Roof checks before we promise anything
+- Structure: rafter size and spacing, condition of the tiles and battens, and weight. A panel and rail weigh about 12 to 15 kg per square metre. NOTE for myself: I wrote 15 kg per panel in class, but the slides say 18 kg per panel and about 11 kg per square metre once the load is spread out. The slides are right.
+- Space: each 400 W panel is 1.76 m by 1.13 m. Keep 0.4 m clear from the ridge and 0.3 m from the edges for access and wind.
+- Wind and snow loads come from the site survey. Ask for the structural engineer if the roof is old or the rafters are under 100 mm deep.
+
+SESSION 2 - STRINGS, INVERTERS AND SAFETY
+
+6. Electrical basics we need
+- Voltage (V), current (A), power (W) = V x A.
+- Panels in series add voltage and keep the same current. Panels in parallel add current and keep the same voltage.
+- A group of panels in series is called a string.
+- Panel data for the 400 W panels we use (at standard conditions): Voc (open circuit voltage) 41.2 V, Vmp (voltage at max power) 34.5 V, Isc (short circuit current) 12.3 A, Imp 11.6 A.
+- Check: 34.5 x 11.6 = 400.2 W. Good.
+
+7. Why temperature matters
+- Cold makes voltage go UP. On a frosty bright morning the string voltage is higher than the label says. The panel loses 0.27 percent of voltage per degree Celsius above 25, and gains the same below 25.
+- Coldest design temperature for our region: minus 10 degrees. That is 35 degrees below 25.
+- Voc at minus 10 = 41.2 x (1 + 0.0027 x 35) = 41.2 x 1.0945 = 45.09 V.
+- Hot roofs make voltage go DOWN. Hottest design cell temperature: 70 degrees, that is 45 above 25. Vmp at 70 = 34.5 x (1 - 0.0027 x 45) = 34.5 x 0.8785 = 30.31 V.
+
+8. Matching the string to the inverter
+- Inverter in the worked example: 4.0 kW single phase string inverter. Max input voltage 600 V. MPPT range 120 V to 550 V. Start voltage 150 V. Max input current 16 A per input.
+- Rule A: the cold Voc of the whole string must stay below the max input voltage. 600 / 45.09 = 13.3 so at most 13 panels per string.
+- Rule B: the hot Vmp of the string must stay above the bottom of the MPPT range. 120 / 30.31 = 3.96 so at least 4 panels. In practice we want a safety margin and the start voltage matters too: 150 / 30.31 = 4.9, so at least 5.
+- Rule C: the current must stay below the max input current. Isc 12.3 A is below 16 A. Fine.
+- Our 10 panels in one string: cold Voc = 450.9 V (under 600), hot Vmp = 303.1 V (well inside 120 to 550). One string works.
+- Ines asked us what happens if the roof is split in two faces. Answer: use two strings on two separate inputs (two MPPT trackers), because panels facing different ways peak at different times and one tracker cannot serve both. For example 6 panels on the south-west face and 4 on the north-west face would be two strings.
+
+9. Cables and protection
+- DC cable: 4 mm squared, double insulated, solar-rated. Keep the voltage drop on the DC side below 1 percent and on the AC side below 1 percent.
+- Voltage drop (rough) = 2 x length x current x resistance per metre. 4 mm squared copper is 0.0046 ohm per metre. Example: 20 m run, 11.6 A. Drop = 2 x 20 x 11.6 x 0.0046 = 2.13 V. Compared with a string at about 345 V (10 x 34.5) that is 2.13 / 345 = 0.62 percent, which passes.
+- A DC isolator next to the inverter, and one at the array if the cable run is longer than 30 m.
+- AC side: a 20 A breaker on a dedicated circuit for a 4 kW inverter, 4 mm squared cable if the run is under 20 m. 4,000 W / 230 V = 17.4 A so a 20 A breaker is fine.
+- Earth: all metal frames bonded with 6 mm squared green and yellow cable. The earth bond is checked on the final test sheet.
+
+10. Safety on the roof
+- Work at height rules: scaffold for any roof edge over 2 m from the ground, and we never work alone on a roof.
+- DC cannot be switched off while the sun shines. Cover the panels with the black cloth bags if you must work on live connections, but treat every connector as live anyway.
+- Never unplug a connector under load. Turn off the AC and DC isolators first, wait five minutes for the inverter to discharge, then check with the meter.
+- Fire services need to see a label at the meter, one at the consumer unit and one at the inverter saying "solar PV installed".
+
+11. Testing before handover
+- Open circuit voltage of each string: should be within 5 percent of the calculated value for the day's temperature.
+- Insulation resistance test at 1,000 V DC: must be over 1 megohm.
+- Earth continuity: under 0.5 ohm between any frame and the main earth.
+- Then switch on, watch the inverter start, and record power after ten minutes. Compare with expected output from irradiance. If you get less than 85 percent of expected, look for shading, a loose connector, or a wrongly set country code on the inverter.
+
+SESSION 3 (OPTIONAL EVENING CLASS) - BATTERIES AND PAPERWORK
+
+12. Does a battery pay?
+- Same house as example 1 (Mr Adeyemi-Roche, 4.0 kWp, 3,610 kWh per year). Add a 5 kWh battery, which lifts self-consumption from 35 to 60 percent.
+- Used in the house: 3,610 x 0.60 = 2,166 kWh. Exported: 3,610 - 2,166 = 1,444 kWh.
+- Saving = 2,166 x 0.28 = 606.48 pounds. Export income = 1,444 x 0.12 = 173.28 pounds. Total = 779.76 pounds per year.
+- Extra benefit from the battery = 779.76 - 635.44 = 144.32 pounds per year.
+- The battery costs 2,900 pounds fitted, so on savings alone it pays back in 2,900 / 144.32 = 20.1 years. Ines said most batteries are guaranteed for ten years, so on these numbers it does not pay for itself unless the customer has a time-of-use tariff, expects prices to rise a lot, or values having power in a cut.
+- Her advice: never promise the customer that a battery will "pay for itself". Say what it does (shifts use to the evening and gives some backup) and show the numbers.
+
+13. Choosing a battery size
+- Look at evening use. A family that uses 8 kWh between 5pm and midnight does not need a 15 kWh battery. A 5 to 7 kWh battery will be full most days in summer and half full in winter.
+- Check that the battery inverter can deliver enough power. A 3 kW output will run lights, fridge and TV but not an electric shower at the same time.
+- Backup mode needs a separate small consumer unit for the circuits that must stay on. That is extra cost and extra labour, and many customers do not know about it until after the quote.
+
+14. Paperwork and the grid
+- Systems up to 3.68 kW per phase can be connected on a "notify after" basis: we tell the network operator within 28 days of commissioning. Bigger systems, like our 4.0 kW example, need permission BEFORE we connect, which takes up to 45 days. This is the most common cause of delay in our jobs.
+- The customer receives: an electrical installation certificate, the commissioning sheet with the string test results, the inverter and panel warranty papers, the roof penetration warranty, and a one-page "how to read your inverter" guide.
+- We keep our own copy of all of it for seven years.
+- Registration for the export payment is done by the customer, but we help them with the form and the meter reading on the day.
+
+Things Ines said would definitely be in the assessment: the yield table, the string voltage maths with temperature, the rule A/B/C check, and the three tests before handover.

@@ -1,0 +1,453 @@
+This is the matchmaking package for our co-op shooter, written by a developer who has since left the studio, and I have inherited it with no tests. Please explain how it works piece by piece, review it carefully for bugs, race conditions and design problems (rank them by how likely they are to hurt players), and write table-driven tests for it in the standard testing package. Show the code for any fixes you recommend.
+
+```go
+// Package matchmaker groups waiting players into balanced matches.
+package matchmaker
+
+import (
+	"errors"
+	"fmt"
+	"sort"
+	"sync"
+	"time"
+)
+
+// Region identifies the data centre a player prefers.
+type Region string
+
+// Mode is the kind of game a player wants to join.
+type Mode string
+
+const (
+	ModeSquad   Mode = "squad"   // 4 players
+	ModeRaid    Mode = "raid"    // 8 players
+	ModeDuel    Mode = "duel"    // 2 players
+	maxPartyLen      = 4
+)
+
+// ModeSize returns how many players a match of the given mode needs.
+func ModeSize(m Mode) int {
+	switch m {
+	case ModeDuel:
+		return 2
+	case ModeSquad:
+		return 4
+	case ModeRaid:
+		return 8
+	}
+	return 0
+}
+
+// Ticket is one request to be matched. A party of friends shares one ticket.
+type Ticket struct {
+	ID       string
+	PlayerIDs []string
+	Rating   int
+	Region   Region
+	Mode     Mode
+	Enqueued time.Time
+}
+
+// Size is the number of players on the ticket.
+func (t *Ticket) Size() int { return len(t.PlayerIDs) }
+
+// Match is a group of tickets that will play together.
+type Match struct {
+	ID      string
+	Mode    Mode
+	Region  Region
+	Tickets []*Ticket
+	Created time.Time
+}
+
+// AverageRating returns the mean rating across all players in the match.
+func (m *Match) AverageRating() float64 {
+	total, count := 0, 0
+	for _, t := range m.Tickets {
+		total += t.Rating * t.Size()
+		count += t.Size()
+	}
+	if count == 0 {
+		return 0
+	}
+	return float64(total) / float64(count)
+}
+
+// Config tunes the queue.
+type Config struct {
+	BaseWindow   int           // rating difference allowed immediately
+	WidenPerStep int           // extra allowed difference per step
+	StepEvery    time.Duration // how long between each widening
+	MaxWindow    int           // upper bound for the window
+	MaxWait      time.Duration // tickets older than this are expired
+}
+
+// DefaultConfig returns the values used in production.
+func DefaultConfig() Config {
+	return Config{
+		BaseWindow:   75,
+		WidenPerStep: 50,
+		StepEvery:    10 * time.Second,
+		MaxWindow:    600,
+		MaxWait:      3 * time.Minute,
+	}
+}
+
+var (
+	ErrDuplicate    = errors.New("matchmaker: ticket already queued")
+	ErrBadMode      = errors.New("matchmaker: unknown mode")
+	ErrPartyTooBig  = errors.New("matchmaker: party too large for mode")
+	ErrNotFound     = errors.New("matchmaker: ticket not found")
+	ErrEmptyTicket  = errors.New("matchmaker: ticket has no players")
+)
+
+// Queue holds waiting tickets and builds matches.
+type Queue struct {
+	mu      sync.Mutex
+	cfg     Config
+	tickets map[string]*Ticket
+	byPlayer map[string]string
+	now     func() time.Time
+	nextID  int
+	onMatch func(*Match)
+	expired int
+}
+
+// New creates a queue. If now is nil, time.Now is used.
+func New(cfg Config, now func() time.Time, onMatch func(*Match)) *Queue {
+	if now == nil {
+		now = time.Now
+	}
+	return &Queue{
+		cfg:      cfg,
+		tickets:  make(map[string]*Ticket),
+		byPlayer: make(map[string]string),
+		now:      now,
+		onMatch:  onMatch,
+	}
+}
+
+// Add puts a ticket into the queue.
+func (q *Queue) Add(t *Ticket) error {
+	size := ModeSize(t.Mode)
+	if size == 0 {
+		return ErrBadMode
+	}
+	if t.Size() == 0 {
+		return ErrEmptyTicket
+	}
+	if t.Size() > maxPartyLen || t.Size() > size {
+		return ErrPartyTooBig
+	}
+
+	q.mu.Lock()
+	defer q.mu.Unlock()
+
+	if _, ok := q.tickets[t.ID]; ok {
+		return ErrDuplicate
+	}
+	for _, p := range t.PlayerIDs {
+		if _, busy := q.byPlayer[p]; busy {
+			return fmt.Errorf("%w: player %s", ErrDuplicate, p)
+		}
+	}
+	t.Enqueued = q.now()
+	q.tickets[t.ID] = t
+	for _, p := range t.PlayerIDs {
+		q.byPlayer[p] = t.ID
+	}
+	return nil
+}
+
+// Cancel removes a ticket, for example when the player leaves the lobby.
+func (q *Queue) Cancel(id string) error {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+	t, ok := q.tickets[id]
+	if !ok {
+		return ErrNotFound
+	}
+	q.remove(t)
+	return nil
+}
+
+// remove deletes a ticket from both indexes. The caller holds the lock.
+func (q *Queue) remove(t *Ticket) {
+	delete(q.tickets, t.ID)
+	for _, p := range t.PlayerIDs {
+		delete(q.byPlayer, p)
+	}
+}
+
+// Len returns the number of waiting tickets.
+func (q *Queue) Len() int {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+	return len(q.tickets)
+}
+
+// window returns the rating difference allowed for a ticket that has waited d.
+func (q *Queue) window(d time.Duration) int {
+	if q.cfg.StepEvery <= 0 {
+		return q.cfg.MaxWindow
+	}
+	steps := int(d / q.cfg.StepEvery)
+	w := q.cfg.BaseWindow + steps*q.cfg.WidenPerStep
+	if w > q.cfg.MaxWindow {
+		w = q.cfg.MaxWindow
+	}
+	return w
+}
+
+func abs(n int) int {
+	if n < 0 {
+		return -n
+	}
+	return n
+}
+
+// compatible reports whether two tickets may share a match.
+func (q *Queue) compatible(a, b *Ticket, at time.Time) bool {
+	if a.Mode != b.Mode || a.Region != b.Region {
+		return false
+	}
+	wa := q.window(at.Sub(a.Enqueued))
+	wb := q.window(at.Sub(b.Enqueued))
+	allowed := wa
+	if wb < wa {
+		allowed = wb
+	}
+	return abs(a.Rating-b.Rating) <= allowed
+}
+
+// Tick expires old tickets and forms as many matches as it can.
+// It returns the matches created during this call.
+func (q *Queue) Tick() []*Match {
+	q.mu.Lock()
+	now := q.now()
+
+	var pending []*Ticket
+	for _, t := range q.tickets {
+		if now.Sub(t.Enqueued) > q.cfg.MaxWait {
+			q.remove(t)
+			q.expired++
+			continue
+		}
+		pending = append(pending, t)
+	}
+
+	sort.Slice(pending, func(i, j int) bool {
+		return pending[i].Enqueued.Before(pending[j].Enqueued)
+	})
+
+	var matches []*Match
+	used := make(map[string]bool)
+
+	for _, seed := range pending {
+		if used[seed.ID] {
+			continue
+		}
+		size := ModeSize(seed.Mode)
+		group := []*Ticket{seed}
+		filled := seed.Size()
+
+		for _, cand := range pending {
+			if filled == size {
+				break
+			}
+			if used[cand.ID] || cand.ID == seed.ID {
+				continue
+			}
+			if filled+cand.Size() > size {
+				continue
+			}
+			if !q.compatible(seed, cand, now) {
+				continue
+			}
+			ok := true
+			for _, g := range group {
+				if !q.compatible(g, cand, now) {
+					ok = false
+					break
+				}
+			}
+			if ok {
+				group = append(group, cand)
+				filled += cand.Size()
+			}
+		}
+
+		if filled != size {
+			continue
+		}
+		q.nextID++
+		m := &Match{
+			ID:      fmt.Sprintf("m-%d", q.nextID),
+			Mode:    seed.Mode,
+			Region:  seed.Region,
+			Tickets: group,
+			Created: now,
+		}
+		for _, g := range group {
+			used[g.ID] = true
+			q.remove(g)
+		}
+		matches = append(matches, m)
+	}
+	q.mu.Unlock()
+
+	if q.onMatch != nil {
+		for _, m := range matches {
+			q.onMatch(m)
+		}
+	}
+	return matches
+}
+
+// Stats is a snapshot of queue health for the dashboard.
+type Stats struct {
+	Waiting     int
+	Expired     int
+	OldestWait  time.Duration
+	ByMode      map[Mode]int
+}
+
+// Snapshot returns the current statistics.
+func (q *Queue) Snapshot() Stats {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+	s := Stats{
+		Waiting: len(q.tickets),
+		Expired: q.expired,
+		ByMode:  make(map[Mode]int),
+	}
+	now := q.now()
+	for _, t := range q.tickets {
+		s.ByMode[t.Mode] += t.Size()
+		if w := now.Sub(t.Enqueued); w > s.OldestWait {
+			s.OldestWait = w
+		}
+	}
+	return s
+}
+
+// Spread returns the difference between the highest and lowest ticket rating in a match.
+func (m *Match) Spread() int {
+	if len(m.Tickets) == 0 {
+		return 0
+	}
+	lo, hi := m.Tickets[0].Rating, m.Tickets[0].Rating
+	for _, t := range m.Tickets[1:] {
+		if t.Rating < lo {
+			lo = t.Rating
+		}
+		if t.Rating > hi {
+			hi = t.Rating
+		}
+	}
+	return hi - lo
+}
+```
+
+A second file in the same package, balance.go, splits a finished match into two teams for the duel and raid modes:
+
+```go
+package matchmaker
+
+import "sort"
+
+// Team is one side of a match.
+type Team struct {
+	Tickets []*Ticket
+	Players int
+	Total   int // sum of rating * players
+}
+
+// Average is the mean per-player rating of the team.
+func (t *Team) Average() float64 {
+	if t.Players == 0 {
+		return 0
+	}
+	return float64(t.Total) / float64(t.Players)
+}
+
+func (t *Team) add(tk *Ticket) {
+	t.Tickets = append(t.Tickets, tk)
+	t.Players += tk.Size()
+	t.Total += tk.Rating * tk.Size()
+}
+
+// SplitTeams divides the tickets of a match into two teams of equal player
+// count, keeping every party together. It places the largest and highest rated
+// tickets first and gives each to the team that is currently weaker, as long
+// as that team still has room. It returns false if no even split exists.
+func SplitTeams(m *Match) (*Team, *Team, bool) {
+	total := 0
+	for _, tk := range m.Tickets {
+		total += tk.Size()
+	}
+	if total%2 != 0 {
+		return nil, nil, false
+	}
+	half := total / 2
+
+	order := make([]*Ticket, len(m.Tickets))
+	copy(order, m.Tickets)
+	sort.Slice(order, func(i, j int) bool {
+		if order[i].Size() != order[j].Size() {
+			return order[i].Size() > order[j].Size()
+		}
+		return order[i].Rating > order[j].Rating
+	})
+
+	a, b := &Team{}, &Team{}
+	for _, tk := range order {
+		canA := a.Players+tk.Size() <= half
+		canB := b.Players+tk.Size() <= half
+		switch {
+		case canA && canB:
+			if a.Average() <= b.Average() {
+				a.add(tk)
+			} else {
+				b.add(tk)
+			}
+		case canA:
+			a.add(tk)
+		case canB:
+			b.add(tk)
+		default:
+			return nil, nil, false
+		}
+	}
+	return a, b, true
+}
+
+// Imbalance returns the absolute difference between the two team averages.
+func Imbalance(a, b *Team) float64 {
+	d := a.Average() - b.Average()
+	if d < 0 {
+		d = -d
+	}
+	return d
+}
+
+// PartyPenalty returns an extra rating added to a party when it is compared
+// with solo players: coordinated groups perform better than their ratings
+// suggest. A solo player gets zero, a duo 10, a trio 25, a full squad 40.
+func PartyPenalty(size int) int {
+	switch size {
+	case 2:
+		return 10
+	case 3:
+		return 25
+	case 4:
+		return 40
+	}
+	return 0
+}
+
+// EffectiveRating is the rating the matcher should use for a ticket.
+func EffectiveRating(t *Ticket) int {
+	return t.Rating + PartyPenalty(t.Size())
+}
+```

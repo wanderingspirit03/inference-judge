@@ -1,0 +1,143 @@
+I run the back office for a coworking operator with five sites, and our reporting database has gotten slow. Can you review the design of this schema, tell me which indexes are missing or useless, and rewrite the six queries at the bottom so they run faster? Please explain each rewrite so I can tell the person who maintains the dashboards what changed and why.
+
+```sql
+-- Tablewise Workspaces: members, desks, bookings, invoices
+-- PostgreSQL 15
+
+CREATE TABLE site (
+    site_id      serial PRIMARY KEY,
+    name         text NOT NULL,
+    city         text NOT NULL,
+    opened_on    date NOT NULL
+);
+
+CREATE TABLE member (
+    member_id    serial PRIMARY KEY,
+    full_name    text NOT NULL,
+    email        text NOT NULL,
+    company      text,
+    plan         text NOT NULL,           -- 'flex', 'fixed', 'team', 'day-pass'
+    joined_on    date NOT NULL,
+    left_on      date,
+    home_site_id integer REFERENCES site(site_id)
+);
+
+CREATE TABLE desk (
+    desk_id      serial PRIMARY KEY,
+    site_id      integer NOT NULL REFERENCES site(site_id),
+    label        text NOT NULL,
+    kind         text NOT NULL,           -- 'hot', 'fixed', 'office', 'room'
+    seats        integer NOT NULL DEFAULT 1,
+    monthly_rate numeric(10,2)
+);
+
+CREATE TABLE booking (
+    booking_id   serial PRIMARY KEY,
+    member_id    integer NOT NULL REFERENCES member(member_id),
+    desk_id      integer NOT NULL REFERENCES desk(desk_id),
+    starts_at    timestamp NOT NULL,
+    ends_at      timestamp NOT NULL,
+    status       text NOT NULL,           -- 'confirmed', 'cancelled', 'no-show', 'used'
+    created_at   timestamp NOT NULL DEFAULT now(),
+    note         text
+);
+
+CREATE TABLE invoice (
+    invoice_id   serial PRIMARY KEY,
+    member_id    integer NOT NULL REFERENCES member(member_id),
+    issued_on    date NOT NULL,
+    due_on       date NOT NULL,
+    paid_on      date,
+    total        numeric(10,2) NOT NULL,
+    currency     text NOT NULL DEFAULT 'EUR'
+);
+
+CREATE TABLE invoice_line (
+    line_id      serial PRIMARY KEY,
+    invoice_id   integer NOT NULL REFERENCES invoice(invoice_id),
+    description  text NOT NULL,
+    quantity     numeric(8,2) NOT NULL,
+    unit_price   numeric(10,2) NOT NULL,
+    booking_id   integer REFERENCES booking(booking_id)
+);
+
+CREATE INDEX idx_member_email ON member (email);
+CREATE INDEX idx_member_company ON member (company);
+CREATE INDEX idx_member_plan_left ON member (plan, left_on);
+CREATE INDEX idx_booking_status ON booking (status);
+CREATE INDEX idx_booking_created ON booking (created_at);
+CREATE INDEX idx_invoice_member ON invoice (member_id);
+CREATE INDEX idx_invoice_paid ON invoice (paid_on);
+
+-- Size today: member ~ 4,100 rows, desk ~ 310, booking ~ 2.3 million,
+-- invoice ~ 58,000, invoice_line ~ 410,000.
+
+-- Query 1: occupancy of each site for last month
+SELECT s.name,
+       count(*) AS bookings,
+       sum(extract(epoch FROM (b.ends_at - b.starts_at)) / 3600) AS hours
+FROM booking b
+JOIN desk d ON d.desk_id = b.desk_id
+JOIN site s ON s.site_id = d.site_id
+WHERE to_char(b.starts_at, 'YYYY-MM') = to_char(now() - interval '1 month', 'YYYY-MM')
+  AND b.status IN ('confirmed', 'used')
+GROUP BY s.name
+ORDER BY hours DESC;
+
+-- Query 2: members with unpaid invoices more than 30 days overdue
+SELECT m.full_name, m.email, m.company,
+       (SELECT sum(i.total) FROM invoice i
+         WHERE i.member_id = m.member_id AND i.paid_on IS NULL
+           AND i.due_on < current_date - 30) AS overdue_total
+FROM member m
+WHERE m.member_id IN (
+    SELECT member_id FROM invoice
+    WHERE paid_on IS NULL AND due_on < current_date - 30
+)
+ORDER BY overdue_total DESC;
+
+-- Query 3: members who joined this year and never made a booking
+SELECT m.member_id, m.full_name, m.joined_on
+FROM member m
+WHERE extract(year FROM m.joined_on) = extract(year FROM now())
+  AND m.member_id NOT IN (SELECT member_id FROM booking)
+ORDER BY m.joined_on;
+
+-- Query 4: revenue per site per plan, invoiced last quarter
+SELECT s.name, m.plan, sum(l.quantity * l.unit_price) AS revenue
+FROM invoice_line l
+JOIN invoice i ON i.invoice_id = l.invoice_id
+JOIN member m ON m.member_id = i.member_id
+JOIN site s ON s.site_id = m.home_site_id
+WHERE i.issued_on >= date_trunc('quarter', now() - interval '3 months')
+  AND i.issued_on < date_trunc('quarter', now())
+GROUP BY s.name, m.plan
+ORDER BY s.name, revenue DESC;
+
+-- Query 5: the ten busiest meeting rooms by hours booked this year,
+-- with how often they were cancelled or not used
+SELECT d.label, s.name AS site,
+       sum(extract(epoch FROM (b.ends_at - b.starts_at)) / 3600)
+           FILTER (WHERE b.status IN ('confirmed', 'used')) AS hours_booked,
+       count(*) FILTER (WHERE b.status = 'cancelled') AS cancelled,
+       count(*) FILTER (WHERE b.status = 'no-show') AS no_shows
+FROM desk d
+JOIN site s ON s.site_id = d.site_id
+JOIN booking b ON b.desk_id = d.desk_id
+WHERE d.kind = 'room'
+  AND date_part('year', b.starts_at) = date_part('year', now())
+GROUP BY d.label, s.name
+ORDER BY hours_booked DESC
+LIMIT 10;
+
+-- Query 6: for each member, the date of their latest booking, used for
+-- the "we miss you" email to anyone silent for 60 days
+SELECT m.member_id, m.email,
+       (SELECT max(b.starts_at) FROM booking b
+         WHERE b.member_id = m.member_id) AS last_booking
+FROM member m
+WHERE m.left_on IS NULL
+  AND m.plan <> 'day-pass'
+  AND (SELECT max(b.starts_at) FROM booking b
+        WHERE b.member_id = m.member_id) < now() - interval '60 days';
+```

@@ -1,0 +1,318 @@
+Below is the scheduling module our maintenance crew at the Highmoor wind farm uses to decide which turbines to visit each day. It works, but nobody on the team fully understands it any more. Could you explain what each part does, propose a sensible refactoring (I think it does too much in one place), and write tests for it? I would use Vitest, but any clear test approach is fine.
+
+```ts
+// scheduler.ts - daily turbine service planning for the Highmoor wind farm
+
+export type Severity = "info" | "minor" | "major" | "critical";
+
+export interface Turbine {
+  id: string;
+  name: string;
+  ratedKw: number;
+  lat: number;
+  lon: number;
+  lastServiceAt: Date;
+  serviceIntervalDays: number;
+  needsCrane: boolean;
+}
+
+export interface Alarm {
+  turbineId: string;
+  code: string;
+  severity: Severity;
+  raisedAt: Date;
+  clearedAt?: Date;
+}
+
+export interface Technician {
+  id: string;
+  name: string;
+  certifications: string[];
+  maxHoursPerDay: number;
+  baseLat: number;
+  baseLon: number;
+}
+
+export interface WindForecast {
+  date: string; // YYYY-MM-DD
+  maxGustMs: number;
+  avgSpeedMs: number;
+  lightning: boolean;
+}
+
+export interface Job {
+  turbineId: string;
+  kind: "inspection" | "repair" | "scheduled";
+  priority: number;
+  estimatedHours: number;
+  requiredCert: string;
+  reason: string;
+}
+
+export interface Assignment {
+  technicianId: string;
+  turbineId: string;
+  startOffsetHours: number;
+  job: Job;
+}
+
+export interface DayPlan {
+  date: string;
+  assignments: Assignment[];
+  deferred: { job: Job; why: string }[];
+}
+
+const SEVERITY_WEIGHT: Record<Severity, number> = {
+  info: 1,
+  minor: 3,
+  major: 8,
+  critical: 20,
+};
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+const GUST_LIMIT_CLIMB = 12;
+const AVG_LIMIT_CLIMB = 9;
+
+export function distanceKm(aLat: number, aLon: number, bLat: number, bLon: number): number {
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const R = 6371;
+  const dLat = toRad(bLat - aLat);
+  const dLon = toRad(bLon - aLon);
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(aLat)) * Math.cos(toRad(bLat)) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+
+export function daysOverdue(t: Turbine, today: Date): number {
+  const due = t.lastServiceAt.getTime() + t.serviceIntervalDays * DAY_MS;
+  return Math.floor((today.getTime() - due) / DAY_MS);
+}
+
+export function openAlarms(alarms: Alarm[], turbineId: string): Alarm[] {
+  return alarms.filter((a) => a.turbineId === turbineId && !a.clearedAt);
+}
+
+export function alarmScore(alarms: Alarm[]): number {
+  let score = 0;
+  for (const a of alarms) {
+    score += SEVERITY_WEIGHT[a.severity];
+  }
+  return score;
+}
+
+export function buildJobs(turbines: Turbine[], alarms: Alarm[], today: Date): Job[] {
+  const jobs: Job[] = [];
+  for (const t of turbines) {
+    const open = openAlarms(alarms, t.id);
+    const score = alarmScore(open);
+    const overdue = daysOverdue(t, today);
+
+    if (open.some((a) => a.severity === "critical")) {
+      jobs.push({
+        turbineId: t.id,
+        kind: "repair",
+        priority: 100 + score,
+        estimatedHours: t.needsCrane ? 8 : 5,
+        requiredCert: "hv-electrical",
+        reason: `critical alarm ${open.find((a) => a.severity === "critical")!.code}`,
+      });
+    } else if (score >= 8) {
+      jobs.push({
+        turbineId: t.id,
+        kind: "inspection",
+        priority: 50 + score,
+        estimatedHours: 3,
+        requiredCert: "rope-access",
+        reason: `${open.length} open alarms, score ${score}`,
+      });
+    }
+
+    if (overdue >= 0) {
+      jobs.push({
+        turbineId: t.id,
+        kind: "scheduled",
+        priority: 20 + Math.min(overdue, 60) / 2,
+        estimatedHours: t.ratedKw > 3000 ? 6 : 4,
+        requiredCert: "rope-access",
+        reason: overdue === 0 ? "service due today" : `service ${overdue} days overdue`,
+      });
+    }
+  }
+  return jobs.sort((a, b) => b.priority - a.priority);
+}
+
+export function weatherAllows(job: Job, forecast: WindForecast): string | null {
+  if (forecast.lightning) return "lightning forecast";
+  const needsClimb = job.requiredCert === "rope-access" || job.kind === "repair";
+  if (needsClimb && forecast.maxGustMs > GUST_LIMIT_CLIMB) {
+    return `gusts ${forecast.maxGustMs} m/s over climbing limit`;
+  }
+  if (needsClimb && forecast.avgSpeedMs > AVG_LIMIT_CLIMB) {
+    return `mean wind ${forecast.avgSpeedMs} m/s over climbing limit`;
+  }
+  return null;
+}
+
+export function planDay(
+  date: string,
+  jobs: Job[],
+  turbines: Turbine[],
+  technicians: Technician[],
+  forecast: WindForecast,
+): DayPlan {
+  const plan: DayPlan = { date, assignments: [], deferred: [] };
+  const hoursUsed = new Map<string, number>();
+  const turbineById = new Map(turbines.map((t) => [t.id, t]));
+  const busyTurbines = new Set<string>();
+
+  for (const job of jobs) {
+    const weather = weatherAllows(job, forecast);
+    if (weather) {
+      plan.deferred.push({ job, why: weather });
+      continue;
+    }
+    if (busyTurbines.has(job.turbineId)) {
+      plan.deferred.push({ job, why: "turbine already has a job today" });
+      continue;
+    }
+    const turbine = turbineById.get(job.turbineId);
+    if (!turbine) {
+      plan.deferred.push({ job, why: "unknown turbine" });
+      continue;
+    }
+
+    const candidates = technicians
+      .filter((tech) => tech.certifications.includes(job.requiredCert))
+      .filter((tech) => (hoursUsed.get(tech.id) ?? 0) + job.estimatedHours <= tech.maxHoursPerDay);
+
+    if (candidates.length === 0) {
+      plan.deferred.push({ job, why: "no certified technician with enough hours" });
+      continue;
+    }
+
+    candidates.sort((a, b) => {
+      const da = distanceKm(a.baseLat, a.baseLon, turbine.lat, turbine.lon);
+      const db = distanceKm(b.baseLat, b.baseLon, turbine.lat, turbine.lon);
+      return da - db;
+    });
+
+    const chosen = candidates[0];
+    const start = hoursUsed.get(chosen.id) ?? 0;
+    plan.assignments.push({
+      technicianId: chosen.id,
+      turbineId: job.turbineId,
+      startOffsetHours: start,
+      job,
+    });
+    hoursUsed.set(chosen.id, start + job.estimatedHours);
+    busyTurbines.add(job.turbineId);
+  }
+  return plan;
+}
+
+export function formatPlan(plan: DayPlan, technicians: Technician[]): string {
+  const names = new Map(technicians.map((t) => [t.id, t.name]));
+  const lines: string[] = [`Plan for ${plan.date}`];
+  if (plan.assignments.length === 0) {
+    lines.push("  no work scheduled");
+  }
+  for (const a of plan.assignments) {
+    const start = 7 + a.startOffsetHours;
+    const hh = String(Math.floor(start)).padStart(2, "0");
+    const mm = String(Math.round((start % 1) * 60)).padStart(2, "0");
+    lines.push(
+      `  ${hh}:${mm} ${names.get(a.technicianId) ?? a.technicianId} -> ${a.turbineId}: ${a.job.kind} (${a.job.reason})`,
+    );
+  }
+  for (const d of plan.deferred) {
+    lines.push(`  deferred ${d.job.turbineId} ${d.job.kind}: ${d.why}`);
+  }
+  return lines.join("\n");
+}
+
+export function planWeek(
+  startDate: Date,
+  turbines: Turbine[],
+  alarms: Alarm[],
+  technicians: Technician[],
+  forecasts: WindForecast[],
+): DayPlan[] {
+  const plans: DayPlan[] = [];
+  for (let i = 0; i < forecasts.length; i++) {
+    const day = new Date(startDate.getTime() + i * DAY_MS);
+    const jobs = buildJobs(turbines, alarms, day);
+    plans.push(planDay(forecasts[i].date, jobs, turbines, technicians, forecasts[i]));
+  }
+  return plans;
+}
+
+export interface WeekSummary {
+  totalAssignments: number;
+  totalDeferred: number;
+  hoursByTechnician: Record<string, number>;
+  deferredByReason: Record<string, number>;
+  repeatedDeferrals: string[];
+}
+
+export function summariseWeek(plans: DayPlan[]): WeekSummary {
+  const summary: WeekSummary = {
+    totalAssignments: 0,
+    totalDeferred: 0,
+    hoursByTechnician: {},
+    deferredByReason: {},
+    repeatedDeferrals: [],
+  };
+  const deferralCount = new Map<string, number>();
+
+  for (const plan of plans) {
+    summary.totalAssignments += plan.assignments.length;
+    summary.totalDeferred += plan.deferred.length;
+
+    for (const a of plan.assignments) {
+      const prev = summary.hoursByTechnician[a.technicianId] ?? 0;
+      summary.hoursByTechnician[a.technicianId] = prev + a.job.estimatedHours;
+    }
+    for (const d of plan.deferred) {
+      summary.deferredByReason[d.why] = (summary.deferredByReason[d.why] ?? 0) + 1;
+      const key = `${d.job.turbineId}:${d.job.kind}`;
+      deferralCount.set(key, (deferralCount.get(key) ?? 0) + 1);
+    }
+  }
+
+  for (const [key, count] of deferralCount) {
+    if (count >= 3) summary.repeatedDeferrals.push(key);
+  }
+  summary.repeatedDeferrals.sort();
+  return summary;
+}
+
+export function craneJobs(plan: DayPlan, turbines: Turbine[]): string[] {
+  const needsCrane = new Set(turbines.filter((t) => t.needsCrane).map((t) => t.id));
+  return plan.assignments
+    .filter((a) => needsCrane.has(a.turbineId) && a.job.kind === "repair")
+    .map((a) => a.turbineId);
+}
+
+export function nearestTurbines(from: Turbine, turbines: Turbine[], count: number): Turbine[] {
+  return turbines
+    .filter((t) => t.id !== from.id)
+    .map((t) => ({ t, d: distanceKm(from.lat, from.lon, t.lat, t.lon) }))
+    .sort((x, y) => x.d - y.d)
+    .slice(0, count)
+    .map((x) => x.t);
+}
+
+export function utilisation(plan: DayPlan, technicians: Technician[]): Record<string, number> {
+  const result: Record<string, number> = {};
+  for (const tech of technicians) {
+    const hours = plan.assignments
+      .filter((a) => a.technicianId === tech.id)
+      .reduce((sum, a) => sum + a.job.estimatedHours, 0);
+    result[tech.id] = tech.maxHoursPerDay === 0 ? 0 : hours / tech.maxHoursPerDay;
+  }
+  return result;
+}
+```
+
+Some background for the review. Technicians start their shift at 07:00 and the farm has 24 turbines; on a normal day we have four technicians, but two of them hold the high-voltage certificate. A turbine needing a crane cannot be worked on if the crane contractor has not been booked, but the module does not know about that and the planners handle it by hand. We have had two complaints from the crew: that the plan sends one person to a distant turbine while another technician sits closer, and that a job planned for a Monday appears again, unchanged, on Tuesday when it was not completed, which they say makes the weekly plan look much busier than it is. I would like to know whether either complaint is a bug in this code or a design choice that should change.

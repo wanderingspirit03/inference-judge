@@ -1,0 +1,129 @@
+Soy la responsable de calidad de Clínicas Dentales Almendral y necesito un plan de pruebas completo para la especificación que pego debajo. Por favor, organízalo por funcionalidad, con casos de prueba numerados (precondiciones, pasos, resultado esperado y prioridad), incluye casos límite y de error, y al final añade una lista de los puntos de la especificación que son ambiguos o se contradicen y que habría que aclarar antes de empezar a probar.
+
+---
+
+ESPECIFICACIÓN DE PRODUCTO
+Sistema de citas y recordatorios "Almendral Citas", versión 2.0
+Autora: Beatriz Quintanilla Ferrer (producto)
+Revisores: Gonzalo Arriaga (operaciones clínicas), Soledad Barrionuevo (atención al paciente), Raimundo Cuesta (tecnología)
+Estado: aprobada para desarrollo
+
+1. Contexto y objetivos
+
+Clínicas Dentales Almendral es una cadena de 14 clínicas repartidas en tres provincias, con 62 sillones dentales y unos 38.000 pacientes activos. Hasta ahora las citas se gestionan por teléfono y en una agenda local de cada clínica, lo que provoca citas duplicadas, huecos sin cubrir y un 17 % de ausencias sin aviso. La versión 2.0 de Almendral Citas permite que el paciente pida, cambie y cancele sus citas por internet, que el personal gestione la agenda de forma centralizada y que el sistema envíe recordatorios automáticos. El objetivo es reducir las ausencias sin aviso al 8 % en seis meses y reducir un 30 % las llamadas de recepción dedicadas a gestionar citas.
+
+2. Usuarios y roles
+
+- Paciente: puede reservar, modificar y cancelar sus propias citas y las de sus hijos menores de 16 años registrados como dependientes.
+- Recepcionista: gestiona la agenda de su clínica y puede crear, mover y cancelar citas de cualquier paciente de esa clínica.
+- Dentista o higienista: consulta su propia agenda y puede bloquear horas.
+- Gerente de clínica: además de lo anterior, configura horarios, festivos y tipos de tratamiento de su clínica.
+- Administrador central: configura los parámetros comunes de la cadena y consulta informes de todas las clínicas.
+
+3. Requisitos funcionales
+
+3.1 Registro e inicio de sesión
+
+RF-01. El paciente se registra con correo electrónico, teléfono móvil, nombre completo, fecha de nacimiento y número de documento de identidad. El correo debe ser único. La contraseña debe tener al menos 10 caracteres, con al menos una letra y un número.
+RF-02. El sistema envía un correo de confirmación con un enlace válido durante 24 horas. Hasta que el paciente lo confirme no puede reservar.
+RF-03. Tras 5 intentos fallidos de inicio de sesión consecutivos, la cuenta se bloquea durante 15 minutos.
+RF-04. Un paciente puede registrar hasta 4 dependientes menores de 16 años. Al cumplir 16 años, el dependiente deja de aparecer y debe crear su propia cuenta; el sistema avisa al titular con 30 días de antelación.
+
+3.2 Reserva de citas
+
+RF-05. El paciente elige clínica, tipo de tratamiento, profesional (o "cualquiera") y ve los huecos disponibles de los próximos 60 días.
+RF-06. Cada tipo de tratamiento tiene una duración fija: revisión (20 minutos), limpieza (40 minutos), empaste (45 minutos), endodoncia (90 minutos), ortodoncia de seguimiento (30 minutos), primera visita (60 minutos).
+RF-07. Un paciente nuevo, es decir, sin ninguna cita anterior en la cadena, solo puede reservar "primera visita".
+RF-08. El paciente no puede tener más de 3 citas futuras activas al mismo tiempo. Los dependientes cuentan por separado.
+RF-09. No se puede reservar con menos de 2 horas de antelación en la web. La recepción puede reservar sin límite de antelación.
+RF-10. Si dos usuarios intentan reservar el mismo hueco, solo uno lo consigue; el otro recibe un mensaje y se le ofrecen los tres huecos más cercanos. El hueco elegido queda retenido 5 minutos mientras el paciente completa la reserva.
+RF-11. Las endodoncias solo se pueden reservar en las clínicas que tengan un sillón con microscopio (a día de hoy, 6 de las 14).
+
+3.3 Modificación y cancelación
+
+RF-12. El paciente puede mover o cancelar una cita hasta 24 horas antes de su hora de inicio. Con menos de 24 horas, solo puede cancelar llamando a la clínica.
+RF-13. Al mover una cita se mantiene el mismo tratamiento y la misma duración. Si el nuevo hueco no está libre, la cita original no se modifica.
+RF-14. Una cita cancelada libera el hueco de inmediato y se ofrece a la lista de espera (ver 3.5).
+RF-15. Si un paciente falta a una cita sin avisar, la recepción la marca como "no presentado". Tras 2 citas "no presentado" en 12 meses, el paciente deja de poder reservar por internet y debe llamar a la clínica. Un gerente puede levantar esta restricción.
+RF-16. Si un profesional se pone enfermo, el gerente puede cancelar todas sus citas de un día. Cada paciente afectado recibe un mensaje con una propuesta de tres huecos alternativos y dispone de 48 horas para elegir uno antes de que la cita se anule definitivamente.
+
+3.4 Recordatorios
+
+RF-17. El sistema envía un recordatorio por correo 72 horas antes de la cita y un mensaje SMS 24 horas antes. Si el paciente tiene desactivadas las notificaciones por SMS, se envía un segundo correo.
+RF-18. Los mensajes incluyen la dirección de la clínica, el nombre del profesional, el tipo de tratamiento y enlaces para confirmar, mover o cancelar. Los enlaces caducan cuando se alcanza el límite de 24 horas antes de la cita.
+RF-19. Si el paciente pulsa "confirmar", la cita pasa a estado "confirmada". Las citas no confirmadas 24 horas antes se pueden llamar por teléfono; la recepción dispone de una lista diaria de citas sin confirmar.
+RF-20. Las citas que se reservan con menos de 72 horas de antelación solo reciben el recordatorio por SMS. Las que se reservan con menos de 24 horas no reciben recordatorio.
+RF-21. Las horas de los mensajes se muestran en la zona horaria de la clínica.
+
+3.5 Lista de espera
+
+RF-22. Si no hay huecos en los 60 días siguientes, el paciente puede apuntarse a la lista de espera de una clínica y tratamiento, y elegir los días de la semana y la franja (mañana o tarde).
+RF-23. Cuando se libera un hueco compatible, el sistema envía un SMS al primer paciente de la lista y le reserva el hueco durante 15 minutos. Si no responde, pasa al siguiente.
+RF-24. Un paciente puede estar en la lista de espera de un máximo de 2 clínicas a la vez. Las citas conseguidas por lista de espera cuentan para el límite de 3 citas de RF-08.
+
+3.6 Gestión de la agenda por el personal
+
+RF-25. La agenda diaria muestra, para cada sillón, las citas con color según su estado: reservada, confirmada, en curso, finalizada, no presentada, cancelada.
+RF-26. El gerente define el horario semanal de cada profesional, con descansos, y los días festivos de la clínica. No se pueden dar huecos en festivos.
+RF-27. Un profesional o la recepción puede bloquear una franja (reunión, formación). Si ya hay citas en esa franja, el sistema muestra la lista y pide confirmación; al confirmar, esas citas siguen el flujo de RF-16.
+RF-28. La recepción puede crear una "sobrecita" (cita que se solapa con otra), pero solo con permiso del gerente. Se registra quién la creó y por qué.
+
+3.7 Informes
+
+RF-31. El gerente de clínica puede ver un informe diario y mensual con el número de citas por estado, la ocupación de cada sillón (minutos con paciente dividido entre minutos de horario) y la tasa de "no presentado".
+RF-32. El administrador central puede ver los mismos datos agregados por clínica y por provincia, y exportarlos en formato CSV. La exportación no incluye nombres de pacientes, solo identificadores internos.
+RF-33. El informe de ocupación excluye los festivos y los bloqueos de los profesionales del cálculo de minutos de horario.
+RF-34. Cada lunes a las 7:00 el sistema envía a cada gerente un resumen por correo de la semana anterior: citas atendidas, ausencias, cancelaciones con menos de 24 horas y huecos que han quedado sin cubrir.
+
+3.8 Notas y preferencias del paciente
+
+RF-35. El paciente puede indicar su preferencia de contacto (correo, SMS o ambos), su idioma y si necesita ayuda de accesibilidad, como acceso para silla de ruedas. Esta información se muestra a la recepción al abrir la cita.
+RF-36. La recepción puede añadir una nota interna a una cita, con un máximo de 500 caracteres. Las notas no son visibles para el paciente.
+RF-37. Si el paciente marca que es una urgencia (dolor intenso, golpe o inflamación) al reservar, el sistema no muestra los huecos normales sino un mensaje con el teléfono de la clínica y, si hay un hueco de urgencia libre ese mismo día, lo ofrece. Los huecos de urgencia son 2 por clínica y día, de 20 minutos, y no están disponibles para la reserva normal.
+RF-38. Un profesional puede marcar a un paciente como "requiere sedación". En ese caso, el sistema solo ofrece huecos en las clínicas y con los profesionales autorizados para sedación, y la duración de cualquier tratamiento aumenta 30 minutos.
+
+3.9 Gestión de datos de las clínicas
+
+RF-39. Cada clínica tiene un nombre, una dirección, un teléfono, un horario general y una lista de sillones con sus características (por ejemplo, microscopio, rayos X, sedación).
+RF-40. Si el gerente cambia el horario general de la clínica, las citas ya reservadas fuera del nuevo horario no se cancelan automáticamente: el sistema las lista y el gerente decide si aplicar RF-16.
+RF-41. Se puede dar de baja a un profesional con una fecha efectiva. A partir de esa fecha no se ofrecen huecos con él, y sus citas futuras siguen el flujo de RF-16.
+
+4. Pagos y facturación
+
+RF-29. La reserva web no exige pago, salvo la primera visita, que requiere una fianza de 15 euros que se descuenta del importe final. La fianza se devuelve si el paciente cancela con más de 24 horas de antelación y no se devuelve si no se presenta.
+RF-30. Las fianzas se cobran con tarjeta mediante un proveedor de pagos externo. El sistema no guarda los datos de la tarjeta.
+
+5. Requisitos no funcionales
+
+RNF-01. Disponibilidad del 99,5 % en horario de clínica (de 8:00 a 21:00, de lunes a sábado).
+RNF-02. La búsqueda de huecos debe responder en menos de 2 segundos para el 95 % de las consultas, con hasta 300 usuarios simultáneos.
+RNF-03. Todos los datos personales se cifran en tránsito y en reposo y se cumple el reglamento europeo de protección de datos. El paciente puede descargar sus datos y solicitar su eliminación; los datos clínicos se conservan según la ley.
+RNF-04. La interfaz debe funcionar en los dos últimos navegadores principales de móvil y escritorio, y cumplir el nivel AA de accesibilidad.
+RNF-05. El sistema está disponible en español y en inglés. Los mensajes se envían en el idioma elegido por el paciente.
+
+6. Integraciones
+
+El sistema se integra con el programa clínico existente (historial del paciente) mediante una interfaz de lectura: al crear un paciente, se comprueba si ya existe en el historial por su documento de identidad y, en ese caso, se asocia y se considera "paciente existente" aunque no tenga citas anteriores. Esta integración es de solo lectura. Si el programa clínico no responde en 3 segundos, el registro continúa y se marca al paciente como "pendiente de verificación".
+
+7. Fuera de alcance
+
+Teleconsulta, historial clínico, facturación completa, aplicaciones móviles nativas y pagos de tratamientos.
+
+8. Estados de una cita y transiciones permitidas
+
+| Estado | Transiciones permitidas | Quién puede provocarlas |
+|---|---|---|
+| Reservada | Confirmada, Cancelada, No presentada | Paciente, recepción, sistema |
+| Confirmada | En curso, Cancelada, No presentada | Paciente, recepción |
+| En curso | Finalizada | Profesional |
+| Finalizada | (ninguna) | |
+| No presentada | Reservada (solo por corrección de recepción) | Recepción, gerente |
+| Cancelada | (ninguna; se crea una cita nueva) | |
+
+Una cita en estado "En curso" no puede cancelarse ni moverse. El paso a "No presentada" solo puede hacerse a partir de 15 minutos después de la hora de inicio. El sistema pasa automáticamente a "Cancelada" las citas afectadas por RF-16 cuyo plazo de 48 horas ha vencido, y registra el motivo.
+
+9. Cuestiones pendientes de decisión
+
+1. ¿Los dependientes pueden ser "pacientes nuevos" aunque el titular ya tenga historial?
+2. ¿Qué ocurre con las citas de pacientes cuyo correo rebota?
+3. ¿La restricción por faltas se aplica por clínica o a toda la cadena?

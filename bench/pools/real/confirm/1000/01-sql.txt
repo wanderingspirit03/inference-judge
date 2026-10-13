@@ -1,0 +1,90 @@
+Can you review this schema and these queries for our tram depot maintenance database? I'd like a critique of the design, a list of the indexes we are missing, and rewritten versions of the three queries with an explanation of why each rewrite is faster or more correct.
+
+```sql
+CREATE TABLE tram (
+    tram_id        INTEGER PRIMARY KEY,
+    fleet_number   VARCHAR(10) NOT NULL,
+    model          VARCHAR(40) NOT NULL,
+    commissioned   DATE NOT NULL,
+    status         VARCHAR(20) NOT NULL DEFAULT 'in_service'
+);
+
+CREATE TABLE depot_track (
+    track_id       INTEGER PRIMARY KEY,
+    track_name     VARCHAR(20) NOT NULL,
+    capacity       INTEGER NOT NULL
+);
+
+CREATE TABLE work_order (
+    order_id       INTEGER PRIMARY KEY,
+    tram_id        INTEGER NOT NULL REFERENCES tram(tram_id),
+    track_id       INTEGER REFERENCES depot_track(track_id),
+    opened_at      TIMESTAMP NOT NULL,
+    closed_at      TIMESTAMP,
+    category       VARCHAR(30) NOT NULL,
+    description    TEXT,
+    priority       INTEGER NOT NULL DEFAULT 3
+);
+
+CREATE TABLE mechanic (
+    mechanic_id    INTEGER PRIMARY KEY,
+    full_name      VARCHAR(80) NOT NULL,
+    certification  VARCHAR(30),
+    active         BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+CREATE TABLE work_assignment (
+    order_id       INTEGER NOT NULL REFERENCES work_order(order_id),
+    mechanic_id    INTEGER NOT NULL REFERENCES mechanic(mechanic_id),
+    hours_logged   NUMERIC(5,2) NOT NULL DEFAULT 0,
+    PRIMARY KEY (order_id, mechanic_id)
+);
+
+CREATE TABLE part_used (
+    part_use_id    INTEGER PRIMARY KEY,
+    order_id       INTEGER NOT NULL REFERENCES work_order(order_id),
+    part_code      VARCHAR(20) NOT NULL,
+    quantity       INTEGER NOT NULL,
+    unit_cost      NUMERIC(10,2) NOT NULL
+);
+```
+
+Query 1: open orders per tram, used on the morning dashboard.
+
+```sql
+SELECT t.fleet_number,
+       (SELECT COUNT(*) FROM work_order w
+         WHERE w.tram_id = t.tram_id AND w.closed_at IS NULL) AS open_orders
+FROM tram t
+WHERE t.status <> 'retired'
+ORDER BY open_orders DESC;
+```
+
+Query 2: monthly parts cost per tram model for the finance team.
+
+```sql
+SELECT t.model,
+       TO_CHAR(w.opened_at, 'YYYY-MM') AS month,
+       SUM(p.quantity * p.unit_cost) AS parts_cost
+FROM work_order w, tram t, part_used p
+WHERE w.tram_id = t.tram_id
+  AND p.order_id = w.order_id
+  AND EXTRACT(YEAR FROM w.opened_at) = 2026
+GROUP BY t.model, TO_CHAR(w.opened_at, 'YYYY-MM')
+ORDER BY month, t.model;
+```
+
+Query 3: mechanics with more than 40 logged hours this week on orders for trams that are still on a depot track.
+
+```sql
+SELECT m.full_name, SUM(a.hours_logged) AS hours
+FROM mechanic m
+JOIN work_assignment a ON a.mechanic_id = m.mechanic_id
+JOIN work_order w ON w.order_id = a.order_id
+WHERE w.track_id IN (SELECT track_id FROM depot_track)
+  AND w.opened_at >= DATE_TRUNC('week', CURRENT_TIMESTAMP)
+GROUP BY m.full_name
+HAVING SUM(a.hours_logged) > 40;
+```
+
+A few facts that matter: we have 62 trams, roughly 90,000 work orders so far, and about 400 new orders a week. The part_used table has around 700,000 rows. The dashboard query runs every few minutes on a small server and is the one people complain about.

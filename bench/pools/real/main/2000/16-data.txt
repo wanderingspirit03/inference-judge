@@ -1,0 +1,40 @@
+Below is a table of repair requests from our housing association for the third quarter, with a short description. I need to present a written analysis to the tenants' committee next week: what the data shows, which patterns matter most, any caveats about how reliable it is, and what we should do next. Please write it as a proper report rather than bullet points alone, and include the numbers you are relying on.
+
+Context: Larchfield Housing Association manages 1,840 homes in five estates. The repairs team logs every request. "Days to complete" is the number of calendar days from the tenant's first report to the repair being marked complete. The target is 3 days for emergency repairs, 14 days for urgent ones and 28 days for routine ones. "Repeat" means a request for the same fault in the same home within 60 days of an earlier completed one. Satisfaction is the tenant's score from 1 to 5 on a text-message survey sent after completion; only some tenants reply. The contractor for plumbing changed on 1 August.
+
+| Estate | Homes | Category | Requests | Avg days to complete | % within target | Repeat requests | Avg satisfaction | Survey replies |
+|---|---|---|---|---|---|---|---|---|
+| Ashby Court | 420 | Plumbing | 212 | 17.4 | 61 | 29 | 3.6 | 71 |
+| Ashby Court | 420 | Heating | 148 | 9.8 | 83 | 11 | 4.1 | 64 |
+| Ashby Court | 420 | Damp and mould | 96 | 31.2 | 42 | 24 | 2.9 | 38 |
+| Ashby Court | 420 | Electrical | 64 | 6.1 | 91 | 3 | 4.4 | 30 |
+| Ashby Court | 420 | Doors and windows | 119 | 21.5 | 66 | 14 | 3.8 | 40 |
+| Brindle Row | 310 | Plumbing | 158 | 12.9 | 74 | 15 | 3.9 | 59 |
+| Brindle Row | 310 | Heating | 131 | 8.2 | 88 | 7 | 4.3 | 52 |
+| Brindle Row | 310 | Damp and mould | 52 | 24.8 | 56 | 10 | 3.2 | 19 |
+| Brindle Row | 310 | Electrical | 47 | 5.4 | 94 | 2 | 4.5 | 22 |
+| Brindle Row | 310 | Doors and windows | 73 | 18.0 | 71 | 6 | 4.0 | 28 |
+| Cobbler's Yard | 260 | Plumbing | 101 | 14.2 | 70 | 12 | 3.7 | 33 |
+| Cobbler's Yard | 260 | Heating | 90 | 10.5 | 80 | 8 | 4.0 | 35 |
+| Cobbler's Yard | 260 | Damp and mould | 71 | 35.6 | 33 | 21 | 2.6 | 26 |
+| Cobbler's Yard | 260 | Electrical | 38 | 6.9 | 89 | 2 | 4.3 | 15 |
+| Cobbler's Yard | 260 | Doors and windows | 55 | 23.1 | 62 | 7 | 3.5 | 18 |
+| Dunmere Gardens | 540 | Plumbing | 247 | 15.8 | 66 | 33 | 3.5 | 88 |
+| Dunmere Gardens | 540 | Heating | 205 | 9.1 | 85 | 14 | 4.2 | 93 |
+| Dunmere Gardens | 540 | Damp and mould | 133 | 29.7 | 45 | 31 | 3.0 | 47 |
+| Dunmere Gardens | 540 | Electrical | 82 | 5.8 | 92 | 4 | 4.4 | 41 |
+| Dunmere Gardens | 540 | Doors and windows | 146 | 19.9 | 68 | 15 | 3.9 | 57 |
+| Eastlake Close | 310 | Plumbing | 115 | 11.6 | 77 | 9 | 4.0 | 44 |
+| Eastlake Close | 310 | Heating | 97 | 7.9 | 90 | 5 | 4.5 | 40 |
+| Eastlake Close | 310 | Damp and mould | 34 | 19.3 | 68 | 4 | 3.7 | 14 |
+| Eastlake Close | 310 | Electrical | 29 | 5.1 | 96 | 1 | 4.6 | 13 |
+| Eastlake Close | 310 | Doors and windows | 50 | 16.4 | 74 | 4 | 4.1 | 20 |
+
+Extra notes from the repairs manager, Octavia Brennan-Hale:
+
+- The plumbing contractor changed from Tidewater Services to Corbel Plumbing on 1 August. Before that, the quarter's July plumbing jobs averaged 19 days on all estates. After the change, August and September averaged 13 days.
+- Damp and mould requests rose after the heavy rain in late August. About a third of the requests in that category were inspections, not repairs, and the jobs are marked complete when the inspection report is filed, not when the cause is fixed.
+- Ashby Court and Cobbler's Yard share the same older construction, with solid walls and no cavity insulation. The other three estates were built after 1985.
+- Eastlake Close was refurbished with new heating in 2023.
+- The satisfaction survey is sent by text message, and 14 percent of tenants have no mobile number on file.
+- We have one damp specialist on the team, who covers all five estates.

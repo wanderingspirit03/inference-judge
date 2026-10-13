@@ -1,0 +1,1 @@
+Write a Python program, with unit tests, that simulates a recycling plant sorting line where mixed items arrive on a conveyor and are routed to bins for paper, glass, metal and plastic. Explain the design and how to run it.

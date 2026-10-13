@@ -1,0 +1,46 @@
+Can you pick this design apart for me, suggest a couple of other ways we could solve the same problem, and write an implementation plan with steps and rough timings? It is for the maturing store at our cheese dairy and I have to present it to the partners on Thursday.
+
+# Design: Maturing store tracker for Brindle Hollow Dairy
+
+Author: Owen Tregear. Status: draft 1.
+
+## Problem
+
+We mature about 1,900 wheels at a time in three rooms: the cave (cheddar, 11 degrees), the blue room (12 degrees, high humidity) and the warm room (washed rinds, 14 degrees). Each wheel has to be turned, brushed or washed on a schedule that depends on the type and age. Today this lives on a whiteboard in each room and in Owen's head. Twice this year a batch of washed rinds was missed for four days and had to be sold as seconds. Customers also ask us on the phone which wheel is ready, and the answer takes ten minutes of walking.
+
+## Proposal
+
+Every wheel gets a printed label with a QR code at the time it is made. The cheesemaker scans the label with a shared tablet whenever she handles a wheel. A small web application records the scan and the action (turned, brushed, washed, sampled, sold). The application knows the schedule for each cheese type and shows, for each room, the list of wheels due today and the list that are overdue.
+
+A single server in the dairy office runs the application with a SQLite database. The tablet connects over the dairy wifi. There is no cloud component. Backups are copied nightly to a USB disk that Owen takes home on Fridays.
+
+## Data
+
+- Batch: id, cheese type, date made, milk source, starting weight, number of wheels.
+- Wheel: id, batch id, room, shelf, current weight, status.
+- Event: wheel id, time, action, person, notes.
+- Schedule: cheese type, age in days, action, interval in days.
+
+Wheel weights are entered by hand once a month so that we can track moisture loss. The application flags any wheel that has lost more than 12 percent of its starting weight in its first 60 days.
+
+## Ordering and sales
+
+When a customer orders, the office staff searches for wheels of the right type that have reached the age marked as ready, and reserves them. A reserved wheel shows a green tag on the list so that nobody turns or cuts it by accident. Selling a wheel moves it to sold and removes it from every list.
+
+## Rollout
+
+Weeks 1 to 2: build the batch and wheel screens. Weeks 3 to 4: add the schedule engine. Week 5: print labels for the cave only and trial it for a month alongside the whiteboard. Then extend to the other rooms. Owen builds it himself in the evenings with help from his nephew, who studies computing.
+
+## Risks
+
+1. Labels may peel in humid rooms. We will test them in the blue room for two weeks first.
+2. If the server fails the team will have no list. The whiteboard stays until the trial finishes.
+3. The tablet has a single login, so we cannot say who turned which wheel.
+
+## Cost
+
+Label printer and rolls 380, tablet 290, server 450, labels in the first year about 120. Total about 1,240, plus Owen's time.
+
+## Questions for the partners
+
+Should customers be able to see ready dates through a public page? Who is responsible if a scheduled action is missed because the tablet was out of charge? Do we keep event history after a wheel is sold, and for how long?

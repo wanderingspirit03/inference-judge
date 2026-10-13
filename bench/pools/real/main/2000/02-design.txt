@@ -1,0 +1,73 @@
+Here is a design doc from our wind farm maintenance team for a new job-planning tool. Please give me a critique of the design, describe the realistic alternatives we should weigh, and then write an implementation plan with phases and the main risks. Be blunt about anything you think will not work offshore.
+
+# Design: Crew Job Planner for the Harrowmoor Wind Farm
+
+Author: Isaac Brennan. Reviewers: Lotte Haverkamp, Samir Doshi. Status: draft 3.
+
+## 1. Background
+
+Harrowmoor has 48 turbines in two arrays, North (28) and South (20), about 14 km from the harbour at Skerrowick. Four crews of three technicians work 12-hour shifts, two days on and two days off. Today, planned maintenance lives in a spreadsheet maintained by Lotte, and unplanned faults arrive by radio and are written on a whiteboard in the control room. Twice in the last quarter two crews were sent to the same turbine because the whiteboard and the spreadsheet disagreed. Once a crew arrived at a turbine whose torque wrench certificate had expired, and the job was abandoned after a three-hour transfer.
+
+## 2. Goals
+
+- One list of jobs, visible to the control room and to every crew vessel.
+- A job is only assignable to a crew that holds the required certificates and carries the required tools.
+- Weather limits are checked before a crew is dispatched.
+- The tool keeps working with no connection for up to 12 hours.
+
+Non-goals: spare parts ordering, payroll, and replacing the turbine vendor's own fault monitoring system.
+
+## 3. Proposed architecture
+
+A single web application with a PostgreSQL database in the company data centre at Skerrowick. Crew tablets run the same application as an installable web app that caches its pages and stores edits locally until a connection returns. Jobs are created in three ways: a yearly generator creates planned jobs from the maintenance calendar, the control room creates unplanned jobs by hand, and a nightly import reads fault codes from the vendor's export file.
+
+Dispatch works like this. The control room selects a job, and the system lists crews that are on shift, hold the needed certificates, and have the tools on their vessel. The system reads the marine forecast every hour from a public forecast service. If the forecast wave height at the turbine exceeds 1.5 m or the wind exceeds 12 m/s at hub height during the planned window, the job is shown in amber and cannot be dispatched without a note from the duty manager.
+
+## 4. Data model
+
+Tables: turbine, crew, technician, certificate, tool, vessel_tool, job, job_assignment, job_note. A job has a status of planned, ready, dispatched, in progress, completed or abandoned. Each job_assignment links one job to one crew for a time window. Certificates have an expiry date, and the dispatch screen disables any crew whose certificate expires before the end of the window.
+
+Conflict handling: when the tablet comes back online, edits are merged by last write wins on each field of the job, using the timestamp from the tablet clock.
+
+## 5. Offline behaviour
+
+The tablet stores the next 48 hours of jobs for its crew and the full certificate list. Notes, photos and status changes are queued. Photos are stored in the browser's local storage and uploaded when a connection returns. We expect about 25 photos per shift at 3 MB each.
+
+## 6. Security
+
+Technicians sign in with a four-digit PIN printed on their badge. The control room uses single sign-on. The database is not exposed to the internet. Tablet traffic goes through the existing site VPN.
+
+## 6a. Communication with vessels
+
+Each crew vessel has a satellite terminal with a link that is usually around 2 Mbit/s but drops out during heavy rain and when the vessel is in the lee of a turbine tower. The harbour has a normal fibre line. Tablets sync whenever a link is available, and the sync sends only changed records, not whole tables. The control room sees a "last seen" time for each tablet, and a crew that has not synced for more than 30 minutes is shown in grey. Radio stays the primary channel for safety messages. The application never replaces the radio call before a crew boards a turbine, and the doc deliberately does not propose that.
+
+## 6b. Notifications
+
+When a fault with severity "stop" arrives from the nightly import, the duty manager gets an email. Because the import runs once a night, a fault that appears at 06:00 is not seen until the next day. We accept this for now because the vendor's own system already alerts the control room by phone for stop faults. The planner is for scheduling work, not for alarms.
+
+## 6c. Reporting
+
+At the end of each shift the crew lead closes the jobs on the tablet. The system produces a one-page shift report with the jobs done, the hours spent, the parts used and any abandoned jobs with the reason. Lotte currently writes this by hand and estimates it takes her two hours per week. The reports are also the source for the annual regulatory return, which requires the total number of maintenance hours per turbine.
+
+## 7. Rollout
+
+Month 1: build the job list and certificate checks, with Lotte entering data by hand. Month 2: add the weather rule and the tablet app. Month 3: trial on the South array with one crew. Month 4: all crews, retire the whiteboard. The estimated effort is 2 developers for 4 months.
+
+## 7a. Cost
+
+Two developers for four months is about 150,000 in salary cost. Hosting uses the existing server, so there is no new infrastructure spend. Sixteen rugged tablets at 700 each come to 11,200. We expect to save the two hours a week Lotte spends on shift reports, and the cost of aborted transfers. A vessel transfer costs about 1,800 in fuel and crew time, and we had three aborted transfers last year for any reason, so the direct saving from certificate checks is modest. The main benefit is safety and fewer duplicated visits.
+
+## 7b. Alternatives considered
+
+We looked at buying a commercial work-order product. It would cost about 40,000 a year for our size, and its offline mode does not store certificates. We also considered extending the spreadsheet with a shared online version. That would not enforce certificate or tool checks, so we ruled it out.
+
+## 8. Open questions
+
+- Who owns the tool inventory when a vessel is refitted?
+- Do we need the app to work on the crew's own phones?
+- Samir asks whether the vendor's export file will change when the turbines are upgraded next spring.
+- Lotte asks whether abandoned jobs should reduce the crew's planned hours.
+
+## 9. Success measures
+
+Zero double-dispatches. Zero aborted transfers caused by expired certificates. Whiteboard retired by the end of month 4. Dispatch time from fault report to crew assignment under 10 minutes, measured by the job timestamps.

@@ -1,0 +1,37 @@
+I need to reply on this thread as the project lead at our solar panel installation company. Please draft a detailed reply that settles every open point, and then give me a separate list of actions with an owner and a date for each.
+
+---
+**From:** Marta Eklund <marta.eklund@example.org>
+**To:** Ivo Petrov, Salma Rahimi
+**Date:** Mon, 5 Oct 2026, 08:14
+**Subject:** Hallberg barn roof, install date and scaffolding
+
+Hi both, the Hallbergs called again. They want the panels on the barn roof before the first frost, and they asked if 19 October still holds. I told them I would confirm today. Two things bother me. The scaffolding firm says they can only deliver on the 21st, and Salma mentioned that the inverter might be late. Can someone tell me where we stand? Marta
+
+---
+**From:** Salma Rahimi <salma.rahimi@example.org>
+**Date:** Mon, 5 Oct 2026, 09:02
+**Subject:** Re: Hallberg barn roof, install date and scaffolding
+
+Marta, the inverter is the 10 kW model and the supplier now says 26 October, not the 14th. They offered a 8 kW model from stock instead, but that would mean cutting the array from 28 panels to 22, otherwise it would clip on sunny days. The 8 kW unit is 640 cheaper. I have not told the customer. Also, the roof survey has a note I only just read: two rafters on the north side are rotten, and the engineer wants them replaced before we load the roof. Salma
+
+---
+**From:** Ivo Petrov <ivo.petrov@example.org>
+**Date:** Mon, 5 Oct 2026, 10:35
+**Subject:** Re: Hallberg barn roof, install date and scaffolding
+
+Two points from me. Rafters: my carpenter can do it in two days but not before 12 October, and he needs to know by Wednesday. It is about 1,900 for materials and labour, which was not in the quote. Second, the crew. Jonas is out until the 16th with a broken wrist, so on the 19th we would have four people, and for a 28-panel roof I prefer five. I could borrow Femi from the Lindqvist job if that one finishes on time. Also, the electrician's grid-connection visit has not been booked. The grid operator needs three weeks' notice and I think nobody has sent the form. Ivo
+
+---
+**From:** Marta Eklund <marta.eklund@example.org>
+**Date:** Mon, 5 Oct 2026, 11:20
+**Subject:** Re: Hallberg barn roof, install date and scaffolding
+
+Thanks. So my questions are: which date do we promise, who pays the 1,900 for the rafters, do we go with the smaller inverter or wait, and who sends the grid form today? I don't want to promise a date we will break. The Hallbergs are lovely but they have a long memory. Also, our price promise to them was a fixed 31,400 including installation. Marta
+
+---
+**From:** Salma Rahimi <salma.rahimi@example.org>
+**Date:** Mon, 5 Oct 2026, 11:48
+**Subject:** Re: Hallberg barn roof, install date and scaffolding
+
+One more thing: the fixed price was written before the roof survey, and the contract says hidden defects found by survey are to be agreed with the customer in writing. So we can ask them for the rafters, but we have to do it politely and quickly. Salma

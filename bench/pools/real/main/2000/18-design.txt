@@ -1,0 +1,69 @@
+Here is a design document from our water utility for a new leak-detection service. Please critique it honestly, suggest the main alternatives we should compare it with, and then give me an implementation plan with phases, staffing and the risks. I'm especially unsure about the alerting logic and the data volumes, so please check those closely.
+
+# Design: Night-flow Leak Detection Service (NLDS)
+
+Author: Philippa Underhill-Okoye. Reviewers: Gustav Linnemann, Rashida Mbeki. Status: draft 2, for architecture review.
+
+## 1. Problem
+
+Aldermere Water supplies about 94,000 homes through 212 district metered areas (DMAs). Each DMA has an inlet flow meter and a pressure logger that reports every 15 minutes. Leaks are currently found in two ways: customer calls, and a monthly spreadsheet exercise in which an analyst compares the minimum night flow (between 02:00 and 04:00) of each DMA with its value in the previous month. Last year the average time from a leak starting to a repair crew arriving was 19 days. The regulator has set a target of 7 days by the end of next year.
+
+## 2. Goals and non-goals
+
+Goals: detect a significant new leak in a DMA within 48 hours of its start; provide the dispatch team with a ranked list of the DMAs most likely to hold a new leak; reduce false alarms to no more than 5 per week across the network.
+
+Non-goals: locating the leak on the street (a separate acoustic survey does that), customer-side leaks, and billing.
+
+## 3. Inputs
+
+- DMA inlet flow in cubic metres per hour, every 15 minutes, from the telemetry platform's export (a CSV file dropped into a storage bucket every hour).
+- Pressure at the average-zone-point logger, every 15 minutes.
+- A table of DMA properties: number of connections, length of mains, percentage of non-domestic use, and the last known leakage level.
+- A calendar of events that affect flow, such as flushing, planned shutdowns and mains refilling after repairs. This calendar is currently a shared spreadsheet filled in by crews, on a best-effort basis.
+
+Data volume: 212 DMAs x 96 readings x 2 signals per day, about 41,000 rows a day, or 15 million a year.
+
+## 4. Approach
+
+For each DMA, the service computes the night flow each day as the minimum of the 1-hour rolling mean between 02:00 and 04:00. It then calculates a baseline from the previous 28 days, using the median. A DMA is flagged when the night flow exceeds the baseline by more than the larger of 2.5 cubic metres per hour or 3 times the DMA's own standard deviation of night flow over the baseline period. The pressure is used to correct for changes in demand: when the average pressure on the night differs from the baseline by more than 4 metres of head, the night flow is scaled using a fixed exponent of 1.15.
+
+A flag becomes an alert when the same DMA is flagged on two consecutive nights. Alerts go to the dispatch team's work queue as a ticket with the DMA name, the estimated extra flow, the date it began, and a link to a chart.
+
+## 5. Architecture
+
+A scheduled job runs every hour, reads new files from the bucket, loads them into PostgreSQL, and recomputes the night flow for the current day. A second job runs at 06:00 to compute the baseline and the flags. The services run as containers on the utility's existing Kubernetes cluster. A small web page shows each DMA's last 60 days of night flow with the baseline and alert markers. There is no machine learning in the first version.
+
+## 6. Failure handling
+
+If a DMA's data has more than 8 missing readings in the night window, that day is skipped and not counted towards an alert. If the telemetry export is more than 3 hours late, the on-call analyst receives an email. An alert that has been open for more than 5 days with no repair visit is escalated to the network manager.
+
+## 7. Event calendar
+
+A flag is suppressed if the event calendar lists a flush, a shutdown or a refill for the DMA on that day or the day before. Because the calendar is incomplete, we estimate that 1 in 4 such events is missing, and the analysts will mark such alerts as false by hand. A button on the ticket allows them to do this.
+
+## 7a. Data quality
+
+Flow meters drift, and some of the older electromagnetic meters under-read by up to 3 percent. A step change in a DMA's baseline that follows a meter replacement would look like a leak (or a leak repair). The service therefore reads a table of meter work orders and ignores the three nights after any meter service on that DMA. Readings that are exactly zero for more than an hour on a DMA with more than 100 connections are treated as telemetry faults and removed. For 14 of the 212 DMAs, the inlet is fed by two meters, and the service sums them; if one meter fails, the day is skipped.
+
+## 7b. Dispatch integration
+
+The work queue used by the dispatch team has a REST interface that accepts a JSON ticket. The service posts a ticket when an alert is created, and updates the same ticket once a day with the new estimate of extra flow until the ticket is closed. When a crew closes a ticket with the code "no leak found", the service records this as a false alert, and the DMA's threshold is raised by 10 percent for the next 28 days. After two such codes in 60 days, the DMA is excluded from automatic alerts and moved to a manual weekly review. Tickets are never created outside office hours; alerts raised overnight are batched and sent at 07:30.
+
+## 7c. Security and access
+
+The service only reads from the telemetry bucket and writes to its own database and the work queue. Credentials come from the cluster's secret store. The web page is available only on the internal network and uses the staff single sign-on. Analysts can override alerts; the dispatchers can only view them.
+
+## 8. Rollout and measures
+
+Pilot on 20 DMAs for 8 weeks, comparing alerts with the monthly spreadsheet method and with actual crew findings. If at least 70 percent of alerts lead to a confirmed leak, extend to all 212 DMAs. Measures: time from leak start to repair, alerts per week, share of alerts confirmed, number of manual overrides.
+
+## 9. Risks and open points
+
+- Seasonal change in demand, for instance in the school holidays and during the summer, may move the baseline faster than 28 days can follow.
+- Large industrial users in some DMAs have night shifts that change from week to week.
+- Rashida asks who is accountable when an alert is ignored.
+- Gustav asks whether the 15-minute interval is fine enough to detect bursts that last under an hour.
+
+## 10. Staffing
+
+One data engineer for 3 months, one hydraulic analyst at 50 percent for 6 months, and part of a front-end developer for the web page. Philippa estimates the total cost at 95,000.

@@ -1,0 +1,106 @@
+Our board meets on Thursday and I need to brief them without reading all of this out loud. Could you go through the Q3 operations review below section by section, give me a short summary of each, and then write a list of recommendations in order of priority, saying what each one costs us if we ignore it?
+
+QUARTERLY OPERATIONS REVIEW, Q3 (July to September)
+Ashgrove Valley Water Authority
+Prepared by: Operations Directorate, for the Board of Governors
+Status: final draft, figures reconciled to the end of September
+
+1. Executive summary
+
+The third quarter was the hottest on our records for the catchment, and demand reflected it. Average daily production was 61.4 megalitres per day (Ml/d), 7.8 percent above the same quarter last year and 4.1 percent above our own forecast. Peak day demand reached 83.9 Ml/d on 17 August, which is 96 percent of the combined rated capacity of our two treatment works. No restrictions were imposed, but we came within eleven days of the trigger in our drought plan for a hosepipe notice, and the Carrow reservoir ended the quarter at 58 percent of useable storage against a seasonal norm of 71 percent.
+
+Compliance with drinking water standards held at 99.96 percent across 4,812 regulatory samples. Two samples failed: one for coliforms at a customer tap in Denby Row, traced to a defective internal fitting, and one for turbidity at the Millbrook service reservoir outlet, described under incidents below. Leakage fell to 18.2 Ml/d from 19.6 Ml/d in Q2, helped by the new pressure management zones, but we remain above the target of 17.0 Ml/d agreed with the regulator for the year end. Customer contacts rose 12 percent, driven by low pressure complaints during the heat. Operating cost was 2.1 percent over budget, almost entirely from electricity and chemicals, and capital delivery reached 71 percent of the year to date plan.
+
+Three matters need a board decision: whether to approve early procurement of the Millbrook filter refurbishment, whether to fund a second summer standby pumping contract, and whether to adopt the revised leakage recovery plan described in section 4.
+
+2. Supply and demand
+
+Production by source for the quarter was as follows.
+
+| Source | Q3 volume (Ml/d avg) | Share | Change vs Q3 last year |
+|---|---|---|---|
+| Carrow reservoir (Hale treatment works) | 34.9 | 56.8% | +9.2% |
+| River Ainsley abstraction (Millbrook works) | 21.3 | 34.7% | +6.1% |
+| Boreholes (Thornby and Eastfield) | 5.2 | 8.5% | +4.0% |
+| Total | 61.4 | 100% | +7.8% |
+
+The river abstraction licence allows an annual average of 24.0 Ml/d and a daily maximum of 31.0 Ml/d. We touched 29.7 Ml/d on 17 August. The licence has a hands-off flow condition of 6.5 cubic metres per second at the Ainsley gauge, and flow fell to 7.1 on 22 August, so we reduced abstraction by 4 Ml/d for three days to stay clear of the limit. This put extra draw on Carrow, which explains the 9.2 percent rise there.
+
+Demand per head was 148 litres per person per day, up from 141. Household metered consumption rose 6.5 percent, and non-household demand rose 3.0 percent, mostly from horticulture and the two food processing sites on the Hale road. The unmetered household estimate remains a weakness: about 9 percent of connections still have no meter, and we assume they use 14 percent more than metered neighbours, a figure last tested four years ago.
+
+3. Treatment and water quality
+
+Hale works ran at an average of 82 percent of its 42 Ml/d capacity and Millbrook at 78 percent of its 36 Ml/d capacity. Chemical use per megalitre treated rose 5.4 percent because warm raw water increased algal load and coagulant dose. Alum dosing at Hale averaged 31 mg/l against 24 mg/l in Q3 last year. The new dissolved air flotation train at Hale, commissioned in May, handled the algal peak well and kept filter run lengths above 60 hours throughout.
+
+Millbrook was less fortunate. Its rapid gravity filters are original 1994 equipment, and on 3 and 4 September the combined filtered water turbidity crept up to 0.31 NTU at the works outlet, over the internal action level of 0.20 and briefly over the regulatory limit of 0.30 at one reading. The cause was a failed underdrain nozzle set in filter 4, which let media pass into the clearwater tank in small amounts. The filter was isolated within three hours of the alarm, and the sample failure at the service reservoir was recorded as a single exceedance. No boil notice was needed because chlorine contact and subsequent samples showed no risk, and the regulator accepted our report without enforcement action. An inspection of the other five filters found nozzle wear in filters 2 and 6 as well.
+
+Taste and odour contacts, mostly geosmin related, numbered 214, against 96 last year. Granular activated carbon dosing at Hale was started in July and cut complaints by half within three weeks.
+
+4. Network performance and leakage
+
+The network comprises 2,310 kilometres of mains and 71,400 connections. Bursts on mains were 392 in the quarter, against 351 last year, with a sharp cluster in cast iron mains in the Denby and Orchard Hill zones as clay soils dried and shrank. Average time from report to repair was 19.5 hours for mains and 31 hours for communication pipes, both within our service standard of 24 and 48 hours.
+
+Leakage by component, in Ml/d:
+
+| Component | Q2 | Q3 | Target year end |
+|---|---|---|---|
+| Distribution mains | 9.8 | 9.1 | 8.4 |
+| Communication pipes | 5.6 | 5.3 | 4.9 |
+| Customer supply pipes | 3.1 | 2.9 | 2.8 |
+| Trunk mains and reservoirs | 1.1 | 0.9 | 0.9 |
+| Total | 19.6 | 18.2 | 17.0 |
+
+Four new pressure management zones went live in July, covering 11,200 connections, and the average zone pressure fell by 6.3 metres with no rise in low pressure complaints inside those zones. The low pressure complaints that did rise were in zones with older mains and no pressure control, where peak demand simply outran capacity. We also completed 61 percent of planned acoustic loggers, with 480 of 790 installed. Logger deployment slipped because the supplier delivered 140 units late and with a faulty battery batch.
+
+To close the gap of 1.2 Ml/d to target by March, the leakage recovery plan proposes three actions: finishing logger installation by mid-November, a dedicated find-and-fix crew of six on nights through the winter, and replacing 9.5 kilometres of the worst cast iron mains in Denby and Orchard Hill, which together account for 22 percent of bursts on 6 percent of the network. The crew and logger work are covered by existing budget. The main replacement needs 3.4 million in capital that is not currently allocated.
+
+5. Capital programme
+
+The capital programme for the year is 46.8 million. Spend to the end of September was 19.6 million against a plan of 27.6 million, or 71 percent. The shortfall is concentrated in three projects.
+
+| Project | Budget (m) | Spend to date (m) | Plan to date (m) | Status |
+|---|---|---|---|---|
+| Hale DAF train and sludge handling | 11.2 | 10.4 | 10.6 | Complete, final account open |
+| Eastfield borehole replacement | 4.1 | 1.2 | 2.6 | Late: drilling rig delay, 7 weeks |
+| Millbrook filter refurbishment | 8.5 | 0.7 | 3.0 | Not started: awaiting board approval |
+| Trunk main renewal, Ainsley crossing | 6.3 | 3.1 | 4.1 | Late: consent for river works |
+| Mains renewal, general | 9.4 | 3.3 | 5.0 | Late: contractor labour |
+| Meter replacement | 7.3 | 0.9 | 2.3 | Late: smart meter supply |
+
+The meter project illustrates the supply chain problem. We ordered 12,000 smart meters in March; 3,100 arrived by the end of September. The contractor has promised the balance by end of December, but we have no remedy in the contract for further slippage beyond a small delay payment. Mains renewal is delayed because our framework contractor lost two gangs to a competing utility and has told us it can deliver only 70 percent of the planned length this year.
+
+Millbrook is the item the board is asked to decide. The refurbishment replaces all six filter underdrains, media and control valves. Design is complete and the contractor can start in January if we place an early works order of 0.9 million before the end of October. Waiting for the normal budget cycle in December would push the work into next summer, when the works would again run near capacity and have one filter out of service at a time.
+
+6. Customer service
+
+Total contacts were 38,900, up 12 percent. The split was billing 41 percent, supply interruptions and low pressure 29 percent, water quality 12 percent, metering 9 percent and other 9 percent. Calls answered within 30 seconds were 81 percent against a target of 85, and the abandonment rate peaked at 14 percent during the week of 11 August when a burst on the Orchard Hill trunk main interrupted supply to 3,800 properties for between four and nine hours.
+
+Satisfaction with supply interruption handling was 74 percent, compared with 82 percent for the year to date overall. Customers' strongest complaint was a lack of updates: text messages were sent on only 58 percent of unplanned interruptions because the text system required a manual trigger. The system has been changed to trigger automatically from the incident log, effective 20 September, and early results show 91 percent of affected customers now receive a message within thirty minutes.
+
+Complaints that escalated to formal stage numbered 63, down from 71. The ombudsman upheld none. The largest category was property damage after bursts, where three claims totalled 46,000.
+
+7. Finance
+
+Operating expenditure was 24.7 million against a budget of 24.2 million, an overspend of 0.5 million. Electricity cost 0.38 million more than budget because of higher pumping hours and the end of a fixed price contract in July. Chemicals were 0.21 million over, from the dosing increases already described. These were offset in part by vacancies, which saved 0.19 million, although the vacancies also contributed to the delays in repair of communication pipes late in the quarter.
+
+Income from charges was 0.3 percent above plan, thanks to volume. Bad debt was 2.4 percent of billing, flat. The treasury position is unchanged: 62 percent of debt is at fixed rates, and the next refinancing date is June. The board should note that the full-year forecast now shows a 0.9 million operating overspend if hot, dry conditions continue into October and electricity prices stay where they are.
+
+8. Health, safety and people
+
+There were two lost time injuries, both minor: a strained back during a valve exercise and a laceration at the Thornby borehole. The lost time injury rate is 0.9 per 100,000 hours, against 1.4 last year. Contractor near misses rose to 17 from 9, and 11 of them involve vehicles and plant on trench sites. Staff turnover was 11 percent annualised, with the hardest roles to fill being network technicians and treatment process controllers. The authority has 19 open vacancies, eight of them in network operations.
+
+Training completion for confined space entry stands at 88 percent against a target of 100, with 14 staff overdue. Overdue staff have been barred from confined space work until training is complete.
+
+9. Environment and regulation
+
+Energy use rose to 0.61 kilowatt hours per cubic metre delivered, from 0.57, because the heat pushed more water through the high lift pumps at Hale and because the Thornby boreholes ran for 1,940 hours against 1,310 last year. Our carbon target for the year is a 6 percent reduction against the baseline, and the quarter's performance leaves us 2 percent above baseline for the year to date. The authority's roof solar array at Millbrook generated 412 megawatt hours, which covered 9 percent of that site's use. A proposal for a second array over the Hale sludge lagoons has been costed at 1.6 million with a payback of eleven years, and is not in the current capital plan.
+
+Three regulatory items are open. The first is the abstraction licence review for the Ainsley, which the environment regulator opened on 1 September. Its draft position suggests lowering the daily maximum from 31.0 to 28.0 Ml/d from 2028 unless we can show a reduction in demand or a new source. Had the lower limit applied this August, we would have exceeded it on four days. The second is the annual drinking water report, which we filed on time on 15 July. The third is the leakage commitment: if we miss the 17.0 Ml/d year end target, the regulator's published method implies a financial penalty of roughly 0.6 million for each 0.5 Ml/d of shortfall, so a gap of 1.2 Ml/d would cost about 1.4 million.
+
+The pollution incident record is clean. There were no category 1 or 2 events, and one category 3 event, a 400 litre discharge of backwash water to a field drain at Thornby on 29 July, which was contained and reported within two hours. Public complaints about construction noise at the Ainsley crossing numbered 9, all dealt with by agreed working hours.
+
+10. Outlook
+
+The coming quarter carries four risks. First, Carrow will not recover until autumn rain arrives, and a dry October would put the reservoir below 50 percent going into winter, which has implications for next summer. Second, Millbrook has no spare filter capacity, so another failure at the works could cut output by up to 15 percent. Third, the smart meter delay will push back the demand data we need to refine the unmetered household estimate. Fourth, the contractor shortage affects every capital project that needs trench work, and the authority has not yet pursued a second framework supplier.
+
+The directorate asks the board to approve the early works order for Millbrook, to fund a second summer standby pumping contract for a one-off cost of 0.28 million, and to approve the leakage recovery plan including the 3.4 million for cast iron main replacement.

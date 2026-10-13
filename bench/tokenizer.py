@@ -19,6 +19,7 @@ Interface (all a caller needs):
   tok.tokens(text) -> list[str]   the tokens of `text` as text, no special tokens
   tok.count(text) -> int          len(tok.tokens(text))
   tok.fit(text, n) -> str         `text` cut or padded to exactly n tokens
+  tok.plain(text) -> str          `text` without the tokenizer's special tokens
   tok.name, tok.fingerprint()     what to stamp into a summary (sha256)
 """
 from __future__ import annotations
@@ -36,6 +37,8 @@ class Tokenizer(Protocol):
     def count(self, text: str) -> int: ...
 
     def fit(self, text: str, n: int) -> str: ...
+
+    def plain(self, text: str) -> str: ...
 
     def fingerprint(self) -> str: ...
 
@@ -58,6 +61,9 @@ class WhitespaceTokenizer:
         while len(words) < n:              # pad by repeating the text itself
             words = words + words
         return " ".join(words[:max(0, n)])
+
+    def plain(self, text: str) -> str:
+        return text                        # no special tokens
 
     def fingerprint(self) -> str:
         return hashlib.sha256(b"ws-tokenizer-v1").hexdigest()
@@ -82,6 +88,8 @@ class HFTokenizer:
         self.path = str(path)
         self.name = self.path
         self._tok = _HF.from_file(self.path)
+        self._special = {i for i, t in self._tok.get_added_tokens_decoder().items()
+                         if t.special}
 
     def _ids(self, text: str) -> list[int]:
         return self._tok.encode(text, add_special_tokens=False).ids
@@ -102,6 +110,12 @@ class HFTokenizer:
         while len(ids) < n:
             ids = ids + ids
         return self._tok.decode(ids[:max(0, n)])
+
+    def plain(self, text: str) -> str:
+        ids = self._ids(text)
+        if not self._special.intersection(ids):
+            return text                    # as it came, not a re-decoding
+        return self._tok.decode(ids, skip_special_tokens=True)
 
     def fingerprint(self) -> str:
         return hashlib.sha256(Path(self.path).read_bytes()).hexdigest()

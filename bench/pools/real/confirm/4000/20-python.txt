@@ -1,0 +1,396 @@
+Could you do a thorough code review of this module and then write a complete set of unit tests for it (pytest is fine)? It's used by the trust's volunteer rota and maintenance tracker for the lighthouse sites, and I'm worried about edge cases around dates and the tide-dependent boat trips. Please point out real bugs, not just style.
+
+```python
+"""keeper.py - maintenance and visit planning for the Skerrymoor Lighthouse Trust.
+
+Tracks lighthouses, maintenance tasks, volunteer shifts and boat trips to the
+island sites. All times are naive local times of the trust's home region.
+"""
+
+from __future__ import annotations
+
+import csv
+import io
+import math
+from dataclasses import dataclass, field
+from datetime import date, datetime, timedelta
+from enum import Enum
+from typing import Dict, Iterable, List, Optional, Tuple
+
+
+class Access(Enum):
+    ROAD = "road"
+    BOAT = "boat"
+    CAUSEWAY = "causeway"
+
+
+class Priority(Enum):
+    LOW = 1
+    NORMAL = 2
+    HIGH = 3
+    URGENT = 4
+
+
+@dataclass
+class Lighthouse:
+    name: str
+    access: Access
+    max_visitors: int
+    lamp_hours_since_service: float = 0.0
+    last_painted: Optional[date] = None
+
+    def needs_lamp_service(self, limit: float = 1500.0) -> bool:
+        return self.lamp_hours_since_service > limit
+
+    def years_since_painted(self, today: date) -> Optional[float]:
+        if self.last_painted is None:
+            return None
+        return (today - self.last_painted).days / 365.25
+
+
+@dataclass
+class Task:
+    title: str
+    site: str
+    priority: Priority
+    due: date
+    estimate_hours: float
+    done: bool = False
+    depends_on: List[str] = field(default_factory=list)
+
+    def is_overdue(self, today: date) -> bool:
+        return not self.done and self.due < today
+
+    def days_late(self, today: date) -> int:
+        if not self.is_overdue(today):
+            return 0
+        return (today - self.due).days
+
+
+@dataclass
+class Volunteer:
+    name: str
+    max_hours_per_week: float = 12.0
+    skills: List[str] = field(default_factory=list)
+    unavailable: List[date] = field(default_factory=list)
+
+    def can_work_on(self, day: date) -> bool:
+        return day not in self.unavailable
+
+
+@dataclass
+class Shift:
+    volunteer: str
+    site: str
+    start: datetime
+    end: datetime
+
+    @property
+    def hours(self) -> float:
+        return (self.end - self.start).seconds / 3600
+
+    def overlaps(self, other: "Shift") -> bool:
+        if self.volunteer != other.volunteer:
+            return False
+        return self.start < other.end and other.start < self.end
+
+
+def week_start(day: date) -> date:
+    """Return the Monday of the week containing ``day``."""
+    return day - timedelta(days=day.weekday())
+
+
+def weekly_hours(shifts: Iterable[Shift], volunteer: str, day: date) -> float:
+    start = week_start(day)
+    end = start + timedelta(days=7)
+    total = 0.0
+    for shift in shifts:
+        if shift.volunteer != volunteer:
+            continue
+        if start <= shift.start.date() <= end:
+            total += shift.hours
+    return total
+
+
+def can_assign(
+    shifts: List[Shift],
+    volunteer: Volunteer,
+    candidate: Shift,
+) -> Tuple[bool, str]:
+    """Check whether ``candidate`` may be added for ``volunteer``."""
+    if not volunteer.can_work_on(candidate.start.date()):
+        return False, "volunteer unavailable on that day"
+    for existing in shifts:
+        if existing.overlaps(candidate):
+            return False, "overlaps an existing shift"
+    current = weekly_hours(shifts, volunteer.name, candidate.start.date())
+    if current + candidate.hours > volunteer.max_hours_per_week:
+        return False, "weekly hour limit exceeded"
+    return True, "ok"
+
+
+def order_tasks(tasks: List[Task], today: date) -> List[Task]:
+    """Sort tasks: overdue first, then by priority, then by due date."""
+
+    def key(task: Task):
+        return (
+            0 if task.is_overdue(today) else 1,
+            -task.priority.value,
+            task.due,
+        )
+
+    return sorted([t for t in tasks if not t.done], key=key)
+
+
+def ready_tasks(tasks: List[Task]) -> List[Task]:
+    """Tasks that are not done and whose dependencies are all done."""
+    done_titles = {t.title for t in tasks if t.done}
+    ready = []
+    for task in tasks:
+        if task.done:
+            continue
+        if all(dep in done_titles for dep in task.depends_on):
+            ready.append(task)
+    return ready
+
+
+def find_dependency_cycle(tasks: List[Task]) -> Optional[List[str]]:
+    """Return one dependency cycle as a list of titles, or None."""
+    graph: Dict[str, List[str]] = {t.title: list(t.depends_on) for t in tasks}
+    visiting: List[str] = []
+    finished = set()
+
+    def visit(node: str) -> Optional[List[str]]:
+        if node in finished:
+            return None
+        if node in visiting:
+            return visiting[visiting.index(node):] + [node]
+        visiting.append(node)
+        for nxt in graph.get(node, []):
+            found = visit(nxt)
+            if found:
+                return found
+        visiting.pop()
+        finished.add(node)
+        return None
+
+    for title in graph:
+        found = visit(title)
+        if found:
+            return found
+    return None
+
+
+def total_estimate(tasks: Iterable[Task], site: Optional[str] = None) -> float:
+    return sum(
+        t.estimate_hours
+        for t in tasks
+        if not t.done and (site is None or t.site == site)
+    )
+
+
+def boat_window(
+    high_water: datetime,
+    hours_before: float = 1.5,
+    hours_after: float = 1.0,
+) -> Tuple[datetime, datetime]:
+    """Landing window around high water for island sites."""
+    return (
+        high_water - timedelta(hours=hours_before),
+        high_water + timedelta(hours=hours_after),
+    )
+
+
+def causeway_open(high_water: datetime, moment: datetime) -> bool:
+    """Causeway is passable from 3h after high water until 3h before the next."""
+    tide_cycle = timedelta(hours=12, minutes=25)
+    elapsed = (moment - high_water) % tide_cycle
+    return timedelta(hours=3) <= elapsed <= tide_cycle - timedelta(hours=3)
+
+
+def plan_visit(
+    site: Lighthouse,
+    moment: datetime,
+    high_water: datetime,
+    party_size: int,
+) -> Tuple[bool, str]:
+    if party_size > site.max_visitors:
+        return False, "party too large"
+    if site.access is Access.BOAT:
+        opens, closes = boat_window(high_water)
+        if not (opens <= moment <= closes):
+            return False, "outside boat landing window"
+    elif site.access is Access.CAUSEWAY:
+        if not causeway_open(high_water, moment):
+            return False, "causeway closed"
+    return True, "ok"
+
+
+def split_into_groups(visitors: List[str], max_size: int) -> List[List[str]]:
+    """Split visitors into the smallest number of near-equal groups."""
+    if max_size <= 0:
+        raise ValueError("max_size must be positive")
+    if not visitors:
+        return []
+    count = math.ceil(len(visitors) / max_size)
+    base, extra = divmod(len(visitors), count)
+    groups = []
+    index = 0
+    for i in range(count):
+        size = base + (1 if i < extra else 0)
+        groups.append(visitors[index:index + size])
+        index += size
+    return groups
+
+
+def parse_shift_csv(text: str) -> List[Shift]:
+    """Parse rows of volunteer,site,start,end with ISO timestamps."""
+    reader = csv.DictReader(io.StringIO(text))
+    shifts = []
+    for row in reader:
+        shifts.append(
+            Shift(
+                volunteer=row["volunteer"].strip(),
+                site=row["site"].strip(),
+                start=datetime.fromisoformat(row["start"]),
+                end=datetime.fromisoformat(row["end"]),
+            )
+        )
+    return shifts
+
+
+def repaint_schedule(
+    sites: Iterable[Lighthouse],
+    today: date,
+    interval_years: float = 5.0,
+) -> List[Tuple[str, date]]:
+    """Return (site, due_date) for sites due for repainting within a year."""
+    result = []
+    for site in sites:
+        if site.last_painted is None:
+            continue
+        due = site.last_painted + timedelta(days=int(interval_years * 365))
+        if due <= today + timedelta(days=365):
+            result.append((site.name, due))
+    return sorted(result, key=lambda pair: pair[1])
+
+
+def project_lamp_hours(
+    site: Lighthouse,
+    nightly_hours: float,
+    days: int,
+) -> float:
+    """Estimate lamp hours after ``days`` more nights of operation."""
+    return site.lamp_hours_since_service + nightly_hours * days
+
+
+def days_until_lamp_service(
+    site: Lighthouse,
+    nightly_hours: float,
+    limit: float = 1500.0,
+) -> int:
+    """Whole nights left before the lamp service limit is reached."""
+    remaining = limit - site.lamp_hours_since_service
+    if remaining <= 0:
+        return 0
+    return int(remaining / nightly_hours)
+
+
+def volunteer_load(
+    shifts: Iterable[Shift],
+    volunteers: Iterable[Volunteer],
+    day: date,
+) -> Dict[str, float]:
+    """Hours worked this week and the share of each volunteer's limit used."""
+    shifts = list(shifts)
+    report = {}
+    for volunteer in volunteers:
+        hours = weekly_hours(shifts, volunteer.name, day)
+        report[volunteer.name] = round(hours / volunteer.max_hours_per_week, 2)
+    return report
+
+
+def find_conflicts(shifts: List[Shift]) -> List[Tuple[Shift, Shift]]:
+    """Return every pair of overlapping shifts for the same volunteer."""
+    conflicts = []
+    for i, first in enumerate(shifts):
+        for second in shifts[i + 1:]:
+            if first.overlaps(second):
+                conflicts.append((first, second))
+    return conflicts
+
+
+def best_volunteer(
+    volunteers: List[Volunteer],
+    task: Task,
+    shifts: List[Shift],
+    required_skill: Optional[str] = None,
+) -> Optional[Volunteer]:
+    """Pick the available volunteer with the most spare hours this week."""
+    best = None
+    best_spare = -1.0
+    for volunteer in volunteers:
+        if required_skill and required_skill not in volunteer.skills:
+            continue
+        if not volunteer.can_work_on(task.due):
+            continue
+        spare = volunteer.max_hours_per_week - weekly_hours(
+            shifts, volunteer.name, task.due
+        )
+        if spare > best_spare:
+            best, best_spare = volunteer, spare
+    return best
+
+
+def tasks_to_csv(tasks: Iterable[Task]) -> str:
+    """Serialise tasks to CSV with a header row."""
+    buffer = io.StringIO()
+    writer = csv.writer(buffer)
+    writer.writerow(["title", "site", "priority", "due", "estimate_hours", "done"])
+    for task in tasks:
+        writer.writerow(
+            [
+                task.title,
+                task.site,
+                task.priority.name,
+                task.due.isoformat(),
+                task.estimate_hours,
+                "yes" if task.done else "no",
+            ]
+        )
+    return buffer.getvalue()
+
+
+def visitor_report(visits: List[Tuple[str, int]]) -> Dict[str, float]:
+    """Given (site, party_size) pairs, return the average party size per site."""
+    totals: Dict[str, List[int]] = {}
+    for site, size in visits:
+        totals.setdefault(site, []).append(size)
+    return {site: sum(sizes) / len(sizes) for site, sizes in totals.items()}
+
+
+def next_working_day(day: date, closed_days: Iterable[date] = ()) -> date:
+    """Next date after ``day`` that is not a weekend and not in ``closed_days``."""
+    closed = set(closed_days)
+    candidate = day + timedelta(days=1)
+    while candidate.weekday() >= 5 or candidate in closed:
+        candidate += timedelta(days=1)
+    return candidate
+
+
+def summarise(tasks: List[Task], today: date) -> Dict[str, object]:
+    open_tasks = [t for t in tasks if not t.done]
+    overdue = [t for t in open_tasks if t.is_overdue(today)]
+    average_late = (
+        sum(t.days_late(today) for t in overdue) / len(overdue) if overdue else 0
+    )
+    return {
+        "open": len(open_tasks),
+        "overdue": len(overdue),
+        "average_days_late": round(average_late, 1),
+        "hours_remaining": total_estimate(tasks),
+        "completion_rate": round(
+            (len(tasks) - len(open_tasks)) / len(tasks) * 100, 1
+        ),
+    }
+```

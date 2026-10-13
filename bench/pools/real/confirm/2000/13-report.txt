@@ -1,0 +1,45 @@
+Please read this post-cruise report from our research vessel and give me a section-by-section summary, then a list of recommendations for the operations board, ordered by priority and with the reasoning behind each. I have to present it on Thursday to people who have not read the report.
+
+# RV Calder Sound: Cruise CS-26-07 Post-Cruise Report
+
+Cruise dates: 14 September to 2 October 2026. Chief scientist: Dr. Imogen Faraday. Master: Captain Leif Haugland. Report prepared by the Marine Operations Office, 7 October 2026.
+
+## 1. Purpose and summary
+
+CS-26-07 was a 19-day cruise in the Skarra Basin to service three seabed moorings, collect water and sediment samples along a 240 km transect, and survey the habitat of a cold-water coral reef with the remotely operated vehicle (ROV) Tern. The vessel sailed from Alderport with 12 scientists, 3 technicians and 14 crew. Of 19 days, 15 were used at sea on science stations, 2 were spent in transit and 2 were lost to weather. All three moorings were recovered and redeployed, 61 of 64 planned water stations were completed and 8 of the 10 planned ROV dives were carried out. The budget was exceeded by 9.4%, mainly because of fuel and a repair to the ROV winch.
+
+## 2. Operations
+
+Departure was delayed by 14 hours because a hydraulic hose on the main crane had to be replaced. Weather was good from 14 to 22 September, with winds under 20 knots. From 23 to 24 September a low-pressure system brought winds of 40 to 45 knots and waves over 5 metres; no work was possible and the vessel took shelter in the lee of Skarra Island. Station work resumed on 25 September. The ship's dynamic positioning system worked well throughout, holding position within 3 metres during all ROV dives. The vessel returned to Alderport on 2 October at 06:40, 18 hours after the planned time because of the head wind.
+
+## 3. Science results
+
+**Moorings.** Mooring M1 was recovered with all instruments. Mooring M2 had lost its upper current meter, which had been fouled by fishing gear; the data stop on 11 January. Mooring M3 returned a full 14-month record. All three were redeployed with new batteries. **Water sampling.** The conductivity-temperature-depth (CTD) rosette was deployed 61 times. A fault in the water-bottle trigger in the first week affected 3 casts, which were repeated. 1,116 water samples were collected for nutrient and carbon analysis. **ROV.** Eight dives totalling 52 hours of bottom time were completed. Two dives were cancelled after the winch fault on 29 September. The survey covered 3.4 square kilometres of reef and recorded live coral colonies on 71% of the video transects. **Sediment.** 38 cores were taken; 5 had to be discarded because of disturbed layers.
+
+## 4. Equipment and technical issues
+
+The main crane hose failure on departure was the first of four equipment events. On 19 September the echosounder lost its signal for 6 hours and was reset by the electronics technician. On 29 September the ROV winch brake slipped during recovery of the vehicle and the tether was damaged; the vehicle itself was not hurt. The repair, using a spare slip ring and 140 metres of new cable, took 38 hours and cost 21,600 pounds. On 30 September the laboratory freezer failed overnight and the temperature rose to minus 9 degrees for about five hours. The scientific team judged that the samples inside were not affected, but this will be confirmed by the laboratory. The vessel's maintenance log records that the winch brake had been due for inspection in July.
+
+## 5. Safety and health
+
+There were no lost-time injuries. Two near-misses were reported: a wave struck the working deck on 23 September while a technician was securing a CTD frame; and a gas bottle was found to be unsecured on the lower deck. A scientist had to be treated for severe seasickness and recovered after two days. The crew conducted a fire drill and a man-overboard drill in the first week. Both were judged satisfactory, although the muster time for the second drill was 11 minutes, against a target of 8.
+
+## 6. Environment
+
+Fuel use was 412 tonnes, 7% above the plan, because of the weather and the extra transit. The vessel discharged no waste at sea except food waste, which was macerated and released more than 12 nautical miles from land. No spills occurred. The ROV did not touch the coral during any of its dives, according to the pilot's log.
+
+## 7. Finance
+
+The approved budget was 986,000 pounds. The actual cost was 1,078,700 pounds, an overspend of 92,700 pounds, or 9.4%. The overspend consisted of fuel (38,500 pounds), the winch repair (21,600 pounds), extra port and crew costs due to delays (19,200 pounds) and the cost of replacement instruments (13,400 pounds). These four items account for the whole overspend. The grant providers have been told that the overspend will be met from the operations reserve.
+
+## 8. Crew and people
+
+Feedback from the scientific party was positive about the ship's cabins and the cook. Several scientists said that the deck work briefing on the first day was too short, and that laboratory space was cramped when all 12 scientists were working. Two crew members left the vessel in Alderport, giving notice on health grounds. The chief engineer has asked for a spare winch brake assembly to be kept on board in future.
+
+## 9. Data management and lessons learned
+
+All CTD, mooring and echosounder data were copied to two portable drives and to the shore server by the end of the cruise; the ROV video (about 11 terabytes) was copied to the shore archive on 5 October and verified by checksum. The team's debrief identified four lessons. First, the weather window in late September is unreliable, and future cruises to the basin should carry two spare days. Second, the crane and winch inspections should be tied to the cruise calendar so that none falls due during a cruise. Third, the sample freezer needs a temperature alarm that reaches the bridge, because the failure was only discovered the next morning by a technician. Fourth, a second ROV pilot should be trained, because one pilot worked 11-hour days for the eight dives and the master considered this near the limit of safe fatigue.
+
+## 10. Outstanding items
+
+The freezer's repair estimate is awaited. The M2 mooring data gap needs a decision on whether to redeploy a second current meter at a cost of 17,000 pounds. The two cancelled ROV dives have to be rescheduled, ideally in the spring cruise. The operations board meets on 15 October.

@@ -1,0 +1,81 @@
+Could you audit these files from our ski resort's snow-reporting service? I want a list of the problems you find, ordered by how serious they are, an explanation of each fix, and then a corrected version of every file.
+
+`Dockerfile`
+
+```dockerfile
+FROM python:latest
+WORKDIR /app
+COPY . .
+RUN pip install -r requirements.txt
+ENV SENSOR_PASSWORD=alpine2025
+EXPOSE 8080
+USER root
+CMD python server.py
+```
+
+`docker-compose.yml`
+
+```yaml
+version: "3"
+services:
+  snowreport:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_HOST=db
+      - DB_PASSWORD=snowpass
+    depends_on:
+      - db
+    restart: always
+  db:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: snowpass
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+```
+
+`.github/workflows/deploy.yml`
+
+```yaml
+name: deploy
+on:
+  push:
+    branches: [main, develop]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: install
+        run: pip install -r requirements.txt
+      - name: test
+        run: pytest || true
+      - name: deploy
+        run: |
+          echo "$SSH_KEY" > key.pem
+          chmod 777 key.pem
+          ssh -i key.pem -o StrictHostKeyChecking=no deploy@lifts.example.org "cd /srv/snowreport && git pull && docker-compose up -d --build"
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_KEY }}
+```
+
+`backup.sh`
+
+```bash
+#!/bin/bash
+cd /srv/snowreport
+DATE=`date +%Y%m%d`
+docker exec snowreport_db_1 pg_dump -U postgres snowdb > /backups/snow_$DATE.sql
+rm -rf /backups/snow_$(date -d "7 days ago" +%Y%m%d).sql
+if [ $? = 0 ]; then
+  curl -X POST https://hooks.example.org/notify -d "backup ok"
+fi
+```
+
+Background: the service collects readings from about 30 weather stations on the slopes, publishes the snow depth page that guests check each morning, and feeds the lift operations screen. It is deployed to a single virtual machine at the resort. Backups run from cron every night at 02:00, and the deployment runs every time someone pushes to main or develop. Last winter the page went down for four hours after a deploy because the new image would not start, and nobody noticed until guests complained. We also once lost a day of readings when the disk filled up.
+
+Constraints: we have one person, Elin, who looks after this part time, so I would rather have a few simple safeguards than a complicated setup. Staying on the single virtual machine is fine for now, but I want secrets out of the repository, a way to roll back a bad deploy quickly, and an alert when the page stops answering. Please also tell me which of the problems could expose the database to the public internet.

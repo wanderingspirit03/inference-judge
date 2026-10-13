@@ -1,0 +1,51 @@
+Could you write the reply I should send to this thread? I'm Karim, head of IT for the school district, and I need one message that settles each open point (including the ones where I have to say no), plus a clear list of actions with owners and dates.
+
+---
+From: Joanna Whitlock (Principal, Ashgrove Primary)
+To: Karim Haddad
+Cc: Pieter Lindgren, Susan Obi
+Date: Mon 19 Oct, 08:02
+Subject: Chromebooks for Year 5 and a broken wifi
+
+Karim, two things. First, the 30 Chromebooks you promised for Year 5 have not arrived, and the maths programme starts on 2 November. Second, the wifi in the east wing has dropped out three times this week during lessons. Teachers are going back to paper. Can you tell me what is happening and when it will be fixed?
+
+Joanna
+
+---
+From: Pieter Lindgren (Network technician)
+To: Karim Haddad, Joanna Whitlock
+Cc: Susan Obi
+Date: Mon 19 Oct, 10:30
+Subject: Re: Chromebooks for Year 5 and a broken wifi
+
+Karim, I looked at the east wing logs. The access point in room E4 is rebooting every few hours, and it is the oldest one (bought 2018). It also carries more devices than the others since the library moved. I have a spare in the cupboard at the depot. I can swap it on Wednesday after 4 pm, but I need the caretaker to let me in. The longer-term fix is a second access point in the corridor, about 380 pounds for the unit plus cabling.
+
+Pieter
+
+---
+From: Susan Obi (Finance officer)
+To: Karim Haddad, Pieter Lindgren, Joanna Whitlock
+Date: Mon 19 Oct, 13:15
+Subject: Re: Chromebooks for Year 5 and a broken wifi
+
+Just so everybody knows: the Chromebook order (30 units at 219 pounds, 6,570 total) was approved in September from the technology budget, which has 2,900 pounds left this year after that. The supplier said delivery would take 4 to 6 weeks from 28 September, so I would expect them between 26 October and 9 November. The access point cannot come from the same budget, and the school would need to ask the district for the extra 380. Karim, I need your sign-off by Friday for any new spend.
+
+Susan
+
+---
+From: Joanna Whitlock
+To: Karim Haddad, Pieter Lindgren, Susan Obi
+Date: Mon 19 Oct, 15:48
+Subject: Re: Chromebooks for Year 5 and a broken wifi
+
+Thank you all. Two follow-ups. Can we borrow 30 laptops from another school in the meantime so the maths programme starts on time? Also, Year 5 teachers want the laptops set up with the maths app and the district filter before the children touch them, and last time that took two weeks. Who does the setup this time?
+
+Joanna
+
+---
+From: Karim Haddad
+To: Joanna Whitlock, Pieter Lindgren, Susan Obi
+Date: Mon 19 Oct, 16:20
+Subject: Re: Chromebooks for Year 5 and a broken wifi
+
+Reading this tonight. Notes for myself: Westfield School has a trolley of 32 older laptops that they said they might lend, but I haven't asked them. Setup usually takes a technician about 10 minutes per device, and Pieter is the only technician until Nov 3.

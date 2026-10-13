@@ -1,0 +1,35 @@
+These are my notes from a lecture on food cost control in a restaurant group, from the hospitality management course I'm taking. Please turn them into a study guide with worked examples for each formula, and then write a quiz of at least ten questions with full answers.
+
+**Lecture 6: Controlling food cost across multiple sites**
+
+*Why it matters.* For a restaurant group, food cost is usually 28 to 35 percent of sales. A single point of difference across a group with 4 million in annual food sales is 40,000. The lecturer said most groups lose their margin through waste and portioning, not through supplier prices.
+
+*Key formula 1: actual food cost percentage.*
+Cost of goods sold (COGS) = opening stock + purchases - closing stock.
+Food cost % = COGS / food sales x 100.
+Example from class: opening stock 12,000; purchases 41,000; closing stock 10,500; food sales 150,000. COGS = 42,500, so food cost = 28.3%.
+
+*Key formula 2: theoretical (ideal) food cost.*
+This is what the food should have cost if every plate were made exactly to the recipe. Multiply each dish's recipe cost by the number sold and add them up. The gap between actual and theoretical is called the variance. A variance above 2 points means something is wrong: over-portioning, waste, theft or wrong recipe costs.
+
+*Key formula 3: menu price from target cost.*
+Menu price = recipe cost / target food cost %.
+Example: a risotto costs 3.60 to make and the target is 30%. Price = 3.60 / 0.30 = 12.00. The lecturer then reminded us that prices must also look sensible, so 12.00 may become 11.90 or 12.50.
+
+*Key formula 4: yield percentage.*
+Yield % = usable weight / purchased weight x 100.
+Example: 10 kg of whole salmon gives 6.2 kg of fillets, so yield is 62%. If the salmon costs 14 per kg, the real cost per usable kg is 14 / 0.62 = 22.58. Many chefs forget this and cost the dish at the purchase price.
+
+*Key formula 5: stock turnover.*
+Turnover = COGS / average stock. With COGS 42,500 and average stock of 11,250, turnover is 3.8 times a month. Fresh fish and herbs should turn over much faster than dry goods; the lecturer's target for the whole group was at least 4 times a month.
+
+*Controls used in a multi-site group.*
+1. Weekly stock counts on the same day at every site, by someone who does not order the food.
+2. Central purchasing for the top 20 items, local purchasing for fresh produce.
+3. Standard recipe cards with photos and portion weights.
+4. Waste log with reasons: spoilage, plate waste, prep error, staff meal.
+5. A monthly league table of food cost variance by site, shared with all head chefs.
+
+*Common mistakes.* Counting stock only monthly; ignoring staff meals; costing recipes once and never updating when prices rise; comparing sites that sell very different menu mixes; blaming the kitchen for a variance caused by wrong sales coding at the till.
+
+*Homework.* Calculate the food cost percentage for a site with opening stock 8,200, purchases 29,400, closing stock 9,100 and sales 105,000, and explain two likely causes if the theoretical cost is 26%.

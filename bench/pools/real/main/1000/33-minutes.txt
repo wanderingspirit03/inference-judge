@@ -1,0 +1,39 @@
+These are the minutes from yesterday's kickoff meeting. Can you turn them into a full project plan: work packages, owners, dates, dependencies, risks with mitigations, and the decisions still needed? Fill in sensible details where the notes are vague, but say where you assumed something.
+
+MEETING NOTES: Cold Chain Upgrade Project Kickoff
+Company: Veldmark Pharmaceutical Wholesale. Date: Tuesday 2 June, 14:00 to 15:30. Location: Warehouse office B.
+Present: Rosalind Achterberg (Operations Director, sponsor), Piet Lindqvist (Warehouse Manager), Hana Moravec (Quality and Compliance), Tobias Wren (IT), Judith Okeke (Finance), Samir Delacroix (Transport Lead).
+Notes by: Judith.
+
+1. Why we are doing this
+Rosalind opened by saying that we lost two pallets of insulin pens in July last year after a refrigeration unit failed overnight, a loss of 38,000, and the regulator's inspector noted in March that our temperature records for the 2 to 8 C store are kept partly on paper. The board has approved a budget of 240,000 for a cold chain upgrade and wants it complete before the next inspection window, which opens on 1 February.
+
+2. Scope as discussed
+- Replace the three oldest cold room compressors in the main 2 to 8 C store (Piet says they are 14 years old).
+- Install wireless temperature sensors in all cold rooms, in 12 of our 19 delivery vans, and in the dispatch area, with alarms by text message to the duty manager.
+- Replace the paper logs with a system that stores readings every five minutes and produces the reports the regulator asks for.
+- Fit a backup generator connection for the cold store. Not agreed whether to buy a generator or to rent one on a contract.
+- Staff training for 31 warehouse and driver staff.
+
+3. Discussion
+Hana said the new system must be validated before it counts as an official record, and that validation takes at least six weeks of documented testing; she wants to start with the sensors in September. Tobias worried about the warehouse Wi-Fi, which has dead spots near the back of the cold store, and thinks a survey is needed first. He would prefer a sensor system that does not depend on the Wi-Fi at all. Piet said the compressor replacement means shutting down sections of the cold store one at a time and moving stock, which can only be done in the quiet weeks in late August and early November. He does not want any shutdown in October because of the flu vaccine delivery peak. Samir said that van sensors cannot be installed while vans are out, and the vans are all in use on weekdays, so work should happen over weekends, with two vans at a time.
+
+Judith asked about money: 240,000 includes a 10 percent contingency, but nobody had yet priced the generator. A rough figure from a supplier last year was 45,000 to buy or 1,800 per month to rent. Rosalind said she would rather not decide on this before the compressors are done.
+
+4. Decisions
+- Project name: "Cold Chain 2.0".
+- Rosalind is the sponsor, Piet the project lead, Hana owns validation.
+- The sensor supplier will be chosen from the three quotes Tobias already has, by 19 June.
+- No work in the cold store in October.
+
+5. Open items and actions
+- Tobias to run a Wi-Fi survey of the cold store (no date given).
+- Judith to ask the insurer whether the upgrade lowers premiums.
+- Hana to find out what the regulator requires for validation of a new monitoring system.
+- Samir to list which 12 vans get sensors.
+- Rosalind to decide on the generator.
+
+6. Risks raised
+Delivery times for compressors are reported as 8 to 10 weeks. A key warehouse supervisor, Elias, retires in September. The regulator might visit earlier than February.
+
+Next meeting: Tuesday 16 June, 14:00.

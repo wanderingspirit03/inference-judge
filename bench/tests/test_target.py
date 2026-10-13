@@ -202,6 +202,51 @@ def test_ruler_hash_moves_with_every_ruler_file_and_the_target(tmp_path):
     assert target.ruler_hash(root, t) != before
 
 
+def test_ruler_hash_covers_the_data_files_the_target_names(tmp_path):
+    """The requests and the quality prompts are part of what is measured: a
+    pool edited after the lock is a different ruler."""
+    root, _ = ruler_tree(tmp_path)
+    data = {"main.jsonl": "metric.prompt_pool", "confirm.jsonl": "metric.confirm_pool",
+            "prompts.jsonl": "reference.prompts", "tasks.jsonl": "reference.tasks"}
+    (root / "pools").mkdir()
+    spec = cpu_mock()
+    for name, key in data.items():
+        section, field = key.split(".")
+        (root / "pools" / name).write_text(f'{{"id": "{name}"}}\n')
+        # one absolute path, the rest relative to the bench root
+        spec[section][field] = str(root / "pools" / name) if name == "main.jsonl" \
+            else f"pools/{name}"
+    t = write(tmp_path, spec, "with-pools.yaml")
+    h = hashlib.sha256()
+    files = [root / n for n in target.RULER_FILES] + [t] + [root / "pools" / n for n in data]
+    for f in sorted(files, key=lambda p: p.name):
+        h.update(f.name.encode() + b"\0" + f.read_bytes() + b"\0")
+    before = target.ruler_hash(root, t)
+    assert before == h.hexdigest()
+    for name in data:
+        f = root / "pools" / name
+        old = f.read_bytes()
+        f.write_bytes(old + b'{"id": "one more"}\n')
+        assert target.ruler_hash(root, t) != before, name
+        f.write_bytes(old)
+    assert target.ruler_hash(root, t) == before
+    # without the target file the hash covers the code alone, as before
+    assert target.ruler_hash(root) == target.ruler_hash(root, None) != before
+
+
+def test_ruler_hash_skips_a_named_data_file_that_is_not_there(tmp_path):
+    """A target names its pools by their path on the box. Where that path does
+    not exist (a laptop), the hash is the code and the target file."""
+    root, t = ruler_tree(tmp_path)
+    spec = cpu_mock()
+    spec["metric"]["prompt_pool"] = "/nonexistent/pools/main.jsonl"
+    named = write(tmp_path, spec, "cpu-mock.yaml")
+    h = hashlib.sha256()
+    for f in sorted([root / n for n in target.RULER_FILES] + [named], key=lambda p: p.name):
+        h.update(f.name.encode() + b"\0" + f.read_bytes() + b"\0")
+    assert target.ruler_hash(root, named) == h.hexdigest()
+
+
 def test_ruler_files_cover_the_contract_list():
     assert set(target.RULER_FILES) == {
         "harness.py", "metrics.py", "compare.py", "quality2.py",
@@ -398,6 +443,39 @@ def test_chat_template_kwargs_are_part_of_the_target_hash(tmp_path):
     assert target.target_hash(target.load_target(write(tmp_path, t))) != before
 
 
+def test_metric_extra_body_reaches_the_shell_as_json(tmp_path):
+    t = cpu_mock()
+    assert shell_eval(tmp_path, t, '"[$T_EXTRA_BODY]"') == ["[]"]
+    t["metric"]["extra_body"] = {}
+    assert shell_eval(tmp_path, t, '"[$T_EXTRA_BODY]"') == ["[]"]
+    t["metric"]["extra_body"] = {"min_tokens": 512}
+    assert shell_eval(tmp_path, t, '"$T_EXTRA_BODY"') == ['{"min_tokens":512}']
+    for bad in ("min_tokens=512", ["min_tokens"], {1: 512}):
+        t["metric"]["extra_body"] = bad
+        with pytest.raises(target.TargetError, match=r"metric\.extra_body"):
+            target.load_target(write(tmp_path, t))
+
+
+def test_metric_extra_body_is_part_of_the_target_hash(tmp_path):
+    t = cpu_mock()
+    before = target.target_hash(target.load_target(write(tmp_path, t)))
+    t["metric"]["extra_body"] = {"min_tokens": 512}
+    assert target.target_hash(target.load_target(write(tmp_path, t))) != before
+
+
+def test_metric_isl_tol_reaches_the_shell_and_the_target_hash(tmp_path):
+    t = cpu_mock()
+    before = target.target_hash(target.load_target(write(tmp_path, t)))
+    assert shell_eval(tmp_path, t, '"[$T_ISL_TOL]"') == ["[]"]    # the harness's own
+    t["metric"]["isl_tol"] = 0.25
+    assert shell_eval(tmp_path, t, '"$T_ISL_TOL"') == ["0.25"]
+    assert target.target_hash(target.load_target(write(tmp_path, t))) != before
+    for bad in (-0.1, 1, 1.5, "0.3", True):
+        t["metric"]["isl_tol"] = bad
+        with pytest.raises(target.TargetError, match=r"metric\.isl_tol"):
+            target.load_target(write(tmp_path, t))
+
+
 def test_compile_cache_is_a_seed_and_a_mount_point(tmp_path):
     t = cpu_mock()
     assert shell_eval(tmp_path, t, '"[$T_CACHE_SEED]" "[$T_CACHE_MOUNT]"') == ["[]", "[]"]
@@ -462,19 +540,23 @@ def test_host_devices_are_named_in_the_seal_notes(tmp_path):
 def test_gemma_target_is_the_agreed_shape():
     t = target.load_target(TARGETS / "v6e4-gemma4-26b-tps.yaml")
     e, m = t["engine"], t["metric"]
-    assert t["runnable"] is False
+    assert t["runnable"] is True                     # served on a real v6e-4
     assert e["sources"] == ["tpu_inference", "vllm"]
     assert e["compile_cache"] == {"seed": "/opt/bench/cache/v6e4-gemma4-26b-tps",
                                   "mount": "/root/.cache/vllm"}
     assert t["model"]["local_dir"] == "/opt/models/gemma-4-26b-a4b-it"
     assert t["model"]["tokenizer"].startswith("/opt/models/gemma-4-26b-a4b-it/")
-    # the strong seal is the default: nothing privileged, no host network, and
-    # the chips, which are host devices, named
-    assert target.seal_notes(t) == ["device /dev/vfio/vfio"] + [
-        f"device /dev/vfio/{i}" for i in range(4)]
+    # the only launch seen to reach the chips; every result names it as weaker
+    assert target.seal_notes(t) == ["privileged", "network=host"]
     assert not any("accel" in str(p) for p in t.get("probes", {}).values())
     assert "compile_cache" not in t                  # the stale top-level block
-    assert isinstance(m["isl"], list) and max(m["isl"]) <= 8192 and m["osl"] == 512
+    # whole requests, each under its own size, and a whole 512-token answer
+    assert m["isl"] == [100, 1000, 2000, 4000] and m["osl"] == 512
+    assert m["prompt_pool"] == "/opt/bench/pools/gemma4-real-main.jsonl"
+    assert m["confirm_pool"] == "/opt/bench/pools/gemma4-real-confirm.jsonl"
+    assert 0 < m["isl_tol"] < 0.5                    # a size stays in one padded shape
+    # the server shows special tokens, so the ruler's count of an answer is whole
+    assert m["extra_body"] == {"skip_special_tokens": False}
     assert m["concurrency"] == [1] and m["screen_window_s"] > 0
     assert t["provision"]["cache_disk"] == {
         "label": "gemma4-cache", "mount": "/mnt/gemma4-cache",

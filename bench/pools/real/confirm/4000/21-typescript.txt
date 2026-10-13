@@ -1,0 +1,392 @@
+I inherited this TypeScript module from a colleague who left. It handles production orders for the wooden-toy workshop. Can you explain what each part does, propose a refactoring (I think the pricing and scheduling code is tangled), and write a set of tests for the parts that matter most? Please be specific about which functions are risky.
+
+```typescript
+// orders.ts - production orders for Tumblewick Toys
+// Handles order intake, material requirements, pricing and batch scheduling.
+
+export type ToyKind = "puzzle" | "train" | "blocks" | "doll" | "rattle";
+
+export interface Material {
+  sku: string;
+  name: string;
+  unit: "m" | "kg" | "pcs" | "l";
+  stock: number;
+  unitCost: number;
+}
+
+export interface BomLine {
+  sku: string;
+  quantity: number;
+}
+
+export interface Product {
+  id: string;
+  name: string;
+  kind: ToyKind;
+  bom: BomLine[];
+  minutesPerUnit: number;
+  basePrice: number;
+  safetyTested: boolean;
+}
+
+export interface OrderLine {
+  productId: string;
+  quantity: number;
+}
+
+export interface Order {
+  id: string;
+  customer: string;
+  country: string;
+  lines: OrderLine[];
+  placedAt: Date;
+  dueAt: Date;
+  rush?: boolean;
+  status: "new" | "scheduled" | "in_production" | "shipped" | "cancelled";
+}
+
+export interface Shortage {
+  sku: string;
+  needed: number;
+  available: number;
+}
+
+export interface PricedLine {
+  productId: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+}
+
+export interface Quote {
+  lines: PricedLine[];
+  subtotal: number;
+  discount: number;
+  shipping: number;
+  vat: number;
+  total: number;
+}
+
+const VAT_RATES: Record<string, number> = {
+  GB: 0.2,
+  DE: 0.19,
+  FR: 0.2,
+  IE: 0.23,
+  NO: 0,
+};
+
+const SHIPPING_TABLE: Array<{ maxWeightKg: number; price: number }> = [
+  { maxWeightKg: 2, price: 5.5 },
+  { maxWeightKg: 10, price: 12 },
+  { maxWeightKg: 30, price: 28 },
+];
+
+export class OrderError extends Error {
+  constructor(message: string, public readonly code: string) {
+    super(message);
+    this.name = "OrderError";
+  }
+}
+
+export function findProduct(products: Product[], id: string): Product {
+  const product = products.find((p) => p.id === id);
+  if (!product) {
+    throw new OrderError(`Unknown product ${id}`, "UNKNOWN_PRODUCT");
+  }
+  return product;
+}
+
+export function validateOrder(order: Order, products: Product[]): string[] {
+  const problems: string[] = [];
+  if (order.lines.length === 0) {
+    problems.push("Order has no lines");
+  }
+  for (const line of order.lines) {
+    if (!Number.isInteger(line.quantity) || line.quantity <= 0) {
+      problems.push(`Invalid quantity for ${line.productId}`);
+    }
+    const product = products.find((p) => p.id === line.productId);
+    if (!product) {
+      problems.push(`Unknown product ${line.productId}`);
+    } else if (!product.safetyTested && order.country !== "NO") {
+      problems.push(`${product.name} has no safety certificate`);
+    }
+  }
+  if (order.dueAt < order.placedAt) {
+    problems.push("Due date is before order date");
+  }
+  if (!(order.country in VAT_RATES)) {
+    problems.push(`Cannot ship to ${order.country}`);
+  }
+  return problems;
+}
+
+export function materialRequirements(
+  order: Order,
+  products: Product[]
+): Map<string, number> {
+  const needs = new Map<string, number>();
+  for (const line of order.lines) {
+    const product = findProduct(products, line.productId);
+    for (const part of product.bom) {
+      const current = needs.get(part.sku) ?? 0;
+      needs.set(part.sku, current + part.quantity * line.quantity);
+    }
+  }
+  return needs;
+}
+
+export function findShortages(
+  needs: Map<string, number>,
+  materials: Material[]
+): Shortage[] {
+  const shortages: Shortage[] = [];
+  needs.forEach((needed, sku) => {
+    const material = materials.find((m) => m.sku === sku);
+    const available = material ? material.stock : 0;
+    if (available < needed) {
+      shortages.push({ sku, needed, available });
+    }
+  });
+  return shortages.sort((a, b) => a.sku.localeCompare(b.sku));
+}
+
+export function reserveMaterials(
+  needs: Map<string, number>,
+  materials: Material[]
+): Material[] {
+  return materials.map((m) => {
+    const used = needs.get(m.sku) ?? 0;
+    return { ...m, stock: m.stock - used };
+  });
+}
+
+export function lineCost(product: Product, materials: Material[]): number {
+  let cost = 0;
+  for (const part of product.bom) {
+    const material = materials.find((m) => m.sku === part.sku);
+    if (material) {
+      cost += material.unitCost * part.quantity;
+    }
+  }
+  return cost;
+}
+
+export function volumeDiscount(quantity: number): number {
+  if (quantity >= 500) return 0.15;
+  if (quantity >= 200) return 0.1;
+  if (quantity >= 50) return 0.05;
+  return 0;
+}
+
+export function shippingFor(totalWeightKg: number, country: string): number {
+  const band = SHIPPING_TABLE.find((b) => totalWeightKg <= b.maxWeightKg);
+  const base = band ? band.price : 28 + Math.ceil(totalWeightKg - 30) * 1.2;
+  const surcharge = country === "GB" ? 0 : 6;
+  return base + surcharge;
+}
+
+export function priceOrder(
+  order: Order,
+  products: Product[],
+  weightPerUnitKg = 0.4
+): Quote {
+  const lines: PricedLine[] = [];
+  let totalQuantity = 0;
+  for (const line of order.lines) {
+    const product = findProduct(products, line.productId);
+    const total = product.basePrice * line.quantity;
+    lines.push({
+      productId: product.id,
+      quantity: line.quantity,
+      unitPrice: product.basePrice,
+      total,
+    });
+    totalQuantity += line.quantity;
+  }
+  const subtotal = lines.reduce((sum, l) => sum + l.total, 0);
+  const discount = subtotal * volumeDiscount(totalQuantity);
+  const rushFee = order.rush ? subtotal * 0.1 : 0;
+  const shipping = shippingFor(totalQuantity * weightPerUnitKg, order.country);
+  const taxable = subtotal - discount + rushFee + shipping;
+  const vat = taxable * (VAT_RATES[order.country] ?? 0.2);
+  return {
+    lines,
+    subtotal,
+    discount,
+    shipping,
+    vat,
+    total: taxable + vat,
+  };
+}
+
+export interface Batch {
+  productId: string;
+  quantity: number;
+  orderIds: string[];
+  minutes: number;
+}
+
+export function buildBatches(
+  orders: Order[],
+  products: Product[],
+  maxBatchSize = 100
+): Batch[] {
+  const wanted = new Map<string, { quantity: number; orderIds: string[] }>();
+  for (const order of orders) {
+    if (order.status === "cancelled" || order.status === "shipped") continue;
+    for (const line of order.lines) {
+      const entry = wanted.get(line.productId) ?? { quantity: 0, orderIds: [] };
+      entry.quantity += line.quantity;
+      entry.orderIds.push(order.id);
+      wanted.set(line.productId, entry);
+    }
+  }
+  const batches: Batch[] = [];
+  wanted.forEach((entry, productId) => {
+    const product = findProduct(products, productId);
+    let remaining = entry.quantity;
+    while (remaining > 0) {
+      const size = Math.min(remaining, maxBatchSize);
+      batches.push({
+        productId,
+        quantity: size,
+        orderIds: entry.orderIds,
+        minutes: size * product.minutesPerUnit + 30,
+      });
+      remaining -= size;
+    }
+  });
+  return batches;
+}
+
+export interface Slot {
+  day: string;
+  batches: Batch[];
+  minutesUsed: number;
+}
+
+export function scheduleBatches(
+  batches: Batch[],
+  startDate: Date,
+  minutesPerDay = 450
+): Slot[] {
+  const slots: Slot[] = [];
+  const day = new Date(startDate.getTime());
+  let current: Slot = { day: day.toISOString().slice(0, 10), batches: [], minutesUsed: 0 };
+  for (const batch of [...batches].sort((a, b) => b.minutes - a.minutes)) {
+    if (current.minutesUsed + batch.minutes > minutesPerDay && current.batches.length > 0) {
+      slots.push(current);
+      do {
+        day.setDate(day.getDate() + 1);
+      } while (day.getDay() === 0 || day.getDay() === 6);
+      current = { day: day.toISOString().slice(0, 10), batches: [], minutesUsed: 0 };
+    }
+    current.batches.push(batch);
+    current.minutesUsed += batch.minutes;
+  }
+  if (current.batches.length > 0) slots.push(current);
+  return slots;
+}
+
+export function isLate(order: Order, slots: Slot[]): boolean {
+  const lastDay = slots
+    .filter((s) => s.batches.some((b) => b.orderIds.includes(order.id)))
+    .map((s) => s.day)
+    .sort()
+    .pop();
+  if (!lastDay) return false;
+  return new Date(lastDay) > order.dueAt;
+}
+
+export function formatQuote(quote: Quote, currency = "GBP"): string {
+  const fmt = new Intl.NumberFormat("en-GB", { style: "currency", currency });
+  const rows = quote.lines.map(
+    (l) => `${l.productId} x${l.quantity} @ ${fmt.format(l.unitPrice)} = ${fmt.format(l.total)}`
+  );
+  rows.push(`Subtotal: ${fmt.format(quote.subtotal)}`);
+  if (quote.discount > 0) rows.push(`Discount: -${fmt.format(quote.discount)}`);
+  rows.push(`Shipping: ${fmt.format(quote.shipping)}`);
+  rows.push(`VAT: ${fmt.format(quote.vat)}`);
+  rows.push(`Total: ${fmt.format(quote.total)}`);
+  return rows.join("\n");
+}
+
+export interface RestockSuggestion {
+  sku: string;
+  name: string;
+  toOrder: number;
+  estimatedCost: number;
+}
+
+export function suggestRestock(
+  materials: Material[],
+  upcoming: Order[],
+  products: Product[],
+  safetyFactor = 1.2
+): RestockSuggestion[] {
+  const total = new Map<string, number>();
+  for (const order of upcoming) {
+    if (order.status === "cancelled" || order.status === "shipped") continue;
+    materialRequirements(order, products).forEach((qty, sku) => {
+      total.set(sku, (total.get(sku) ?? 0) + qty);
+    });
+  }
+  const suggestions: RestockSuggestion[] = [];
+  for (const material of materials) {
+    const needed = (total.get(material.sku) ?? 0) * safetyFactor;
+    if (needed > material.stock) {
+      const toOrder = Math.ceil(needed - material.stock);
+      suggestions.push({
+        sku: material.sku,
+        name: material.name,
+        toOrder,
+        estimatedCost: toOrder * material.unitCost,
+      });
+    }
+  }
+  return suggestions;
+}
+
+export function cancelOrder(
+  order: Order,
+  materials: Material[],
+  products: Product[]
+): { order: Order; materials: Material[] } {
+  if (order.status === "shipped") {
+    throw new OrderError("Shipped orders cannot be cancelled", "ALREADY_SHIPPED");
+  }
+  let restored = materials;
+  if (order.status === "scheduled" || order.status === "in_production") {
+    const needs = materialRequirements(order, products);
+    restored = materials.map((m) => ({
+      ...m,
+      stock: m.stock + (needs.get(m.sku) ?? 0),
+    }));
+  }
+  return { order: { ...order, status: "cancelled" }, materials: restored };
+}
+
+export function utilisation(slots: Slot[], minutesPerDay = 450): number {
+  if (slots.length === 0) return 0;
+  const used = slots.reduce((sum, s) => sum + s.minutesUsed, 0);
+  return Math.round((used / (slots.length * minutesPerDay)) * 1000) / 10;
+}
+
+export function marginReport(
+  order: Order,
+  products: Product[],
+  materials: Material[]
+): Array<{ productId: string; margin: number; marginPct: number }> {
+  return order.lines.map((line) => {
+    const product = findProduct(products, line.productId);
+    const cost = lineCost(product, materials);
+    const margin = product.basePrice - cost;
+    return {
+      productId: product.id,
+      margin: margin * line.quantity,
+      marginPct: product.basePrice === 0 ? 0 : (margin / product.basePrice) * 100,
+    };
+  });
+}
+```

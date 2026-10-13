@@ -1,0 +1,146 @@
+I run customer support at a small tea importer and I have a backlog of twelve tickets this morning. Please write an individual, complete reply to each one, in a warm and professional tone, using the order details and our policies listed at the top. Where a ticket needs something we cannot promise, say so plainly and offer the best alternative.
+
+OUR POLICIES (Sorrel & Fern Tea Traders)
+- Orders ship from our warehouse in 2 working days. Standard delivery takes 3 to 5 working days within the country and 7 to 12 abroad. Shipping is free over 45 within the country and over 90 abroad.
+- Returns: unopened tins and pouches can be returned within 30 days for a full refund of the goods (the customer pays the return postage). Opened items cannot be returned unless faulty or wrong.
+- Damaged or wrong items: we replace or refund in full, including postage, with no return needed if the item is worth under 25. A photo is required.
+- Subscriptions: billed on the 1st of each month, can be paused or cancelled any time before the 28th of the previous month. Cancelling after that date means the next box is still sent.
+- Gift vouchers are valid for 24 months and cannot be exchanged for cash.
+- Our tea is stored in a cool dry warehouse; best-before dates are printed on the base of each tin or the back of each pouch. Customs duties abroad are the customer's responsibility.
+- Refunds go back to the original payment method and take 5 to 7 working days.
+
+---
+
+TICKET 4417
+Customer: Imelda Strachan-Okoye
+Order: SF-88213, placed 28 September, 3 items: Silver Needle white tea 100 g, Smoked Lapsang 250 g, Ginger and Lemongrass blend 80 g. Total 41.40 plus 4.95 shipping.
+Subject: Order not here yet
+
+Hello, I ordered nearly two weeks ago and nothing has come. The tracking page says "in transit" since the 1st of October with no update. I have a friend coming to stay on Saturday and I wanted to serve the Silver Needle. Can you tell me where my parcel is? I am quite worried it is lost.
+
+---
+
+TICKET 4418
+Customer: Bartholomew Nyquist
+Order: SF-88301, placed 2 October, 1 item: Gift voucher 60.
+Subject: Voucher code does not work
+
+I bought a voucher for my mother's birthday. The code you sent, ending in 4F7, says "invalid code" when she types it at checkout. She has tried three times. I paid 60 and I am embarrassed. Please send a new code or tell me what she is doing wrong. She is using the code on the website, with no spaces.
+
+Internal note from the warehouse: voucher codes are case sensitive and the email shows them in capitals, but the code was generated with a lower case letter in the middle. Voucher is active and unused.
+
+---
+
+TICKET 4419
+Customer: Wilhelmina Torvald
+Order: SF-87950, placed 14 September, 2 items: Darjeeling First Flush 100 g, Assam Breakfast 500 g. Total 52.80, free shipping.
+Subject: Tea tastes stale
+
+I got the Assam Breakfast and it smells flat and dusty, nothing like the one I got last year. I have already used about a third of the bag. The best-before date is next March so it should not be old. I want my money back for that bag (about 21) and I would like to know what went wrong.
+
+---
+
+TICKET 4420
+Customer: Cassius Delacroix-Hewitt
+Order: SF-88407, placed 5 October, abroad delivery, 4 items totalling 118.00 with 14.50 shipping. Delivery address in a country outside our home market.
+Subject: Charged extra at the door!
+
+The courier asked me for 23.40 in customs charges before they would hand over the parcel. Nobody told me about this at checkout! I refused the parcel and it is going back to you. I want a full refund including the shipping and an apology. This is false advertising.
+
+Internal note: our checkout shows a line "Duties and taxes may apply on delivery" under the shipping options, but it is easy to miss. The parcel is currently on its way back, expected in about 10 days.
+
+---
+
+TICKET 4421
+Customer: Philippa Aldous
+Subscription: Monthly Discovery Box, 29.00 a month, since March.
+Subject: Please cancel
+
+I cancelled my subscription on the 29th of September through your website and got a confirmation email, but today I see I have been charged for October and the box has shipped. I did not authorise this. I want a refund and I want to be sure I am not charged next month.
+
+Internal note: cancellation record shows the request on 29 September at 21:14. The October box was billed on 1 October and shipped on 2 October. The billing deadline is the 28th.
+
+---
+
+TICKET 4422
+Customer: Ottoline Pemberton-Raj
+Order: SF-88120, placed 1 October, 1 item: Tea tasting set (6 sampler tins) 36.00 plus 4.95 shipping.
+Subject: Damaged tins in the set
+
+The box arrived crushed on one side and two of the six tins have dents with small tears in the seal. I took photos, attached. I do not want to drink from these. I would like a replacement set as it is a gift for a colleague who retires on the 23rd.
+
+Internal note: the photos show two dented tins, one with a torn seal. The sampler set is in stock, 14 sets available. A replacement ships in 2 working days with 3 to 5 days delivery.
+
+---
+
+TICKET 4423
+Customer: Leopold Quennell
+Order: SF-88290, placed 1 October, 2 items: Jasmine Pearls 100 g, Genmaicha 250 g. Total 33.70 plus 4.95 shipping.
+Subject: Changed my mind, return?
+
+I opened the Genmaicha and tried a cup, but I do not like the taste, it is too toasty for me. I have not opened the Jasmine Pearls. Can I send both back for a full refund? I am within the 30 days. Please tell me how to do it and who pays the postage.
+
+---
+
+TICKET 4424
+Customer: Rosalind Achterberg
+Order: SF-88377, placed 4 October, 1 item: Matcha ceremonial grade 30 g, 27.50 plus 4.95 shipping.
+Subject: Wrong item sent and a question about allergies
+
+I received a tin of Hojicha instead of the matcha I ordered. I would like the right item. Also, I have a nut allergy. Is your Hojicha or any of your other teas processed in a place that handles nuts? I need to know before I drink any more of your products, and before I order again. Please be very specific.
+
+Internal note: the warehouse confirms a picking error, matcha in stock (22 tins). Product information sheet says: "Packed in a facility that also handles almonds and hazelnuts, used in our flavoured blends. Pure teas are packed on a separate line but share a building and cleaning schedule." The Hojicha is a pure tea.
+
+---
+
+TICKET 4425
+Customer: Evander Mbeki-Sorensen
+Order: SF-88055, placed 20 September, 3 items: Earl Grey Reserve 250 g, Rooibos Vanilla 250 g, bamboo tea strainer. Total 49.20, free shipping.
+Subject: Stuck on the website, then a long complaint
+
+First, I tried to leave a review for the Earl Grey on your site three times and it keeps logging me out. Second, and more important, I have been buying from you for four years and the Earl Grey Reserve is not what it used to be. The bergamot is much weaker, and it costs 2.50 more than it did last spring. Has the recipe changed? If you have swapped suppliers I think you should say so. I am not asking for a refund, I would just like an honest answer, and I would like to know if you plan to bring back the old blend.
+
+Internal note: the Earl Grey Reserve supplier changed in June because the previous estate stopped exporting. The new batch has natural oil of bergamot at a lower concentration. The price rose 2.50 per 250 g on 1 July because of the supplier cost. The product page does not mention the change. The review login problem is known; the web team says it affects people using a certain older browser and a fix is due next week. Reviews can also be sent by email.
+
+---
+
+TICKET 4426
+Customer: Henrietta Voss-Adeyemi
+Order: SF-88460, placed 6 October, 5 items, 84.00 plus 4.95 shipping. Includes Keemun Mao Feng 100 g, Tie Guan Yin 100 g, Dragon Well 100 g, a cast iron teapot 0.8 L (32.00) and a pack of paper filters.
+Subject: Can I change my address and add a tin?
+
+I made a mistake and typed my old address. The order was placed yesterday and I have not had a shipping email yet. Please change the address to: 14 Linden Walk, Millford, the same country. Also, can I add a second Dragon Well 100 g to the same parcel? I will pay the difference. And one more thing: the teapot is for my father, who is 80 and has weak hands. Is it very heavy when full? I have no idea what an 0.8 litre iron pot weighs.
+
+Internal note: the order is in "picking" status and has not been packed. The address can still be changed; adding an item needs a new order line, which we can do by hand. Dragon Well 100 g costs 14.50, so shipping stays free as the total is over 45. Teapot weighs 1.3 kg empty, about 2.1 kg full.
+
+---
+
+TICKET 4427
+Customer: Magnus Ravenscroft
+Order: SF-87702, placed 2 September, 1 item: Gift voucher 25, sent directly to a recipient by email.
+Subject: Refund my voucher
+
+I bought this voucher as a present and the person has said she is moving abroad and will not use it. I want my 25 back. It has been less than 60 days. Your website says "no cash exchange", but I did not exchange it for cash, I am asking you to cancel my purchase. I will dispute the card payment if you do not do this.
+
+Internal note: the voucher has not been used. Its balance is 25. Terms say vouchers are valid for 24 months, are not refundable, and cannot be exchanged for cash. The voucher can be transferred to another person by email at no cost.
+
+---
+
+TICKET 4428
+Customer: Zenobia Whitlock
+Order: SF-88502, placed 7 October, 2 items: Oolong Sampler 5 x 20 g (22.00) and a ceramic gaiwan (18.50). Total 40.50 plus 4.95 shipping.
+Subject: Do you ship to my office, and which tea for a client gift?
+
+I would like to send this order to my office, but there is a staffed reception that signs for parcels from 8:00 to 18:00, so can you deliver in that window? Also, I am thinking of buying about 15 gift sets for my firm's clients next month. Do you give a discount for a quantity like that, and can you include a printed card with our logo? We would like them delivered by 20 November. If you cannot do the printed card, please say what you can offer.
+
+Internal note: the carrier does not give a delivery window for standard parcels, but the customer can choose the office address, and reception signatures are accepted. We have a corporate price list: 10 percent off from 10 gift sets, 15 percent off from 25. Printed cards are not offered, but a plain card with a handwritten message is included free, and a card with a printed message (text only, no logo) costs 0.60 each. Gift sets of the oolong sampler type take 4 working days to prepare in that quantity, and the last order date for 20 November delivery is 9 November.
+
+---
+
+SUMMARY OF CONTEXT FOR THE REPLIES
+- Sign every reply as "Mirela, Customer Care, Sorrel & Fern Tea Traders".
+- The shipping carrier is Keldane Parcels. Tracking links look like keldane.example.org/track/ followed by the parcel number. Our customer service email is care@sorrelfern.example.org and the phone is open Monday to Friday, 9:00 to 16:30.
+- For ticket 4417, the carrier's own system shows the parcel scanned at the regional depot on 1 October and not since. The carrier's lost-parcel process starts after 10 working days without a scan, and we can start a trace now. We can resend a replacement parcel by express delivery (1 to 2 working days) at our cost if the customer wishes. The Silver Needle is in stock; there are 9 tins of 100 g.
+- For ticket 4419, the Assam Breakfast batch was packed in July. We have had one other comment about it this month. Warehouse says to ask for a photo of the bag and the batch code printed beside the best-before date. The staff can replace it from a fresh batch.
+- For ticket 4421, the company's practice is to refund once when a cancellation was made before the 28th, even if the system did not stop the October charge, and the box has shipped.
+- For ticket 4423, the Genmaicha was opened and is not faulty. The Jasmine Pearls tin is unopened. The return postage is paid by the customer, about 3.80 for a small parcel in the country. The refund for the Jasmine Pearls would be 16.20.

@@ -1,0 +1,127 @@
+Our seed bank's nightly backup has been "working" for two years, but last week a restore test failed and nobody can say why. Please audit these files like a careful sysadmin: list every problem you find in order of seriousness, explain why each one matters for us, and then give me a corrected version of the script and the timer files. I'm not a shell expert, so keep the explanations clear.
+
+Context: Fernhollow Seed Bank keeps its accession records (about 48,000 rows) in a PostgreSQL database on the host `vault01`, and scanned packet photos in /srv/seedphotos (roughly 90 GB). The backup copies both to the NAS at /mnt/nas/backups and to an offsite bucket.
+
+--- /usr/local/bin/seedbackup.sh ---
+
+#!/bin/bash
+# nightly backup for seed bank
+# written by Odile, 2023
+
+DB=accessions
+USER=seedadmin
+PASS=Gr33nhouse2023
+DEST=/mnt/nas/backups
+DATE=`date +%d-%m-%Y`
+LOG=/var/log/seedbackup.log
+KEEP=14
+
+echo "backup started $DATE" >> $LOG
+
+cd $DEST
+
+# dump the database
+PGPASSWORD=$PASS pg_dump -U $USER $DB > $DEST/db-$DATE.sql
+if [ $? -ne 0 ]
+then
+  echo "dump failed" >> $LOG
+fi
+
+# compress it
+gzip $DEST/db-$DATE.sql
+
+# photos
+rsync -av --delete /srv/seedphotos/ $DEST/photos/ >> $LOG 2>&1
+
+# keep only the last $KEEP days of dumps
+find $DEST -name "db-*.sql.gz" -mtime +$KEEP -exec rm {} \;
+
+# offsite copy
+export AWS_ACCESS_KEY_ID=AKIAEXAMPLE0000FERN
+export AWS_SECRET_ACCESS_KEY=example-secret-not-real-0000
+aws s3 sync $DEST s3://fernhollow-offsite-2023 --quiet
+
+# check free space
+FREE=`df $DEST | tail -1 | awk '{print $4}'`
+if [ $FREE -lt 50000000 ]
+then
+  echo "low space" | mail -s "backup space" admin@example.org
+fi
+
+echo "backup finished" >> $LOG
+
+--- /etc/systemd/system/seedbackup.service ---
+
+[Unit]
+Description=Seed bank nightly backup
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=/usr/local/bin/seedbackup.sh
+
+--- /etc/systemd/system/seedbackup.timer ---
+
+[Unit]
+Description=Run seed backup every night
+
+[Timer]
+OnCalendar=*-*-* 02:00:00
+Persistent=false
+
+[Install]
+WantedBy=timers.target
+
+--- /etc/logrotate.d/seedbackup ---
+
+/var/log/seedbackup.log {
+    weekly
+    rotate 4
+    compress
+}
+
+--- /etc/cron.d/seedphotos-sync (older file, still present on vault01) ---
+
+# sync photos to the NAS every night
+0 2 * * * root rsync -a --delete /srv/seedphotos/ /mnt/nas/backups/photos/
+
+--- /etc/fstab (relevant line) ---
+
+//nas01.example.org/backups  /mnt/nas/backups  cifs  credentials=/root/.nascreds,file_mode=0777,dir_mode=0777,vers=2.0  0  0
+
+--- /etc/postgresql/16/main/pg_hba.conf (relevant lines) ---
+
+local   all             postgres                                peer
+local   accessions      seedadmin                               scram-sha-256
+host    accessions      seedadmin       10.20.0.0/16            scram-sha-256
+
+--- /usr/local/bin/seedrestore-check.sh (written by Wilhelmina last week, run by hand) ---
+
+#!/bin/bash
+LATEST=$(ls -t /mnt/nas/backups/db-*.sql.gz | head -1)
+echo "Checking $LATEST"
+createdb -U seedadmin restoretest
+gunzip -c $LATEST | psql -U seedadmin restoretest
+psql -U seedadmin restoretest -c "select count(*) from accessions;"
+dropdb -U seedadmin restoretest
+
+--- /etc/cron.monthly/seedtidy (added by Odile in 2024) ---
+
+#!/bin/sh
+# clear old thumbnails and tidy the database
+cd /srv/seedphotos
+find . -name "*thumb*" -mtime +30 -exec rm -f {} \;
+vacuumdb -U seedadmin --all --analyze
+
+Notes from the restore test (Thursday, done by Wilhelmina):
+- The newest dump file db-12-10-2026.sql.gz was only 20 KB. The ones from a few weeks ago are around 310 MB.
+- When she unpacked it, it contained a single line: "pg_dump: error: connection to server on socket failed: FATAL: password authentication failed for user seedadmin".
+- The log says "backup started 12-10-2026", then "dump failed", then the rsync output, then "backup finished". Nobody read it.
+- The NAS had been remounted after a power cut on the 3rd and was mounted read-only for a while. The photos folder on it has not changed since then, and the rsync lines in the log show "Read-only file system" errors for those days.
+- The database password was changed by the IT contractor last month, and he told Odile, who has since left.
+- The offsite bucket has no lifecycle rules and is now 1.9 TB, though the live data is about 90 GB plus 15 GB of dumps.
+- The sync of the whole backup folder goes up every night, including dumps that are removed locally. Because the sync does not use the delete flag, the bucket keeps every dump ever made.
+- The server's clock is set to local time. In March 2026 the timer fired twice on the night the clocks changed, according to Wilhelmina.
+- We also have a cron file that does the same rsync of the photos at 02:00 as the timer does, so the two jobs run at the same moment.
+- Nobody has a record of where the offsite bucket credentials were created, and the same key pair is also used by the website upload form.
+- The monthly tidy job is meant to remove thumbnails only. Last month Wilhelmina noticed that a few full size photos with the word "thumb" in the file name, such as 4471-thumbnail-study.tif, went missing.

@@ -1,0 +1,62 @@
+Please critique the design below, suggest at least two realistic alternatives to the main approach, and then give me an implementation plan with phases, owners and what we should test first. I am the new software lead and I need to know whether to trust this before we order the hardware.
+
+# Design: Automated Dome Control and Observing Queue, Harrowfield Observatory
+
+Author: M. Teasdale. Status: draft 3, for review. Last edited: 4 March.
+
+## 1. Background
+
+Harrowfield Observatory runs one 0.8 m reflector under a rotating dome, used by volunteers on about 90 nights a year and by two university groups on a booked basis. Today an observer drives everything by hand: opens the dome slit, points the telescope, starts the camera, and watches the sky for cloud. About 30 percent of booked nights are lost or shortened for lack of someone to close the dome. The board has approved a budget of 41,000 for automation.
+
+## 2. Goals
+
+1. Run a night's observing list without a person present, with the dome closing itself safely on bad weather or lost communication.
+2. Let remote observers submit targets through a simple web form, with a queue that respects booked time.
+3. Keep the telescope usable by hand at any moment, with a physical key switch that disables all automation.
+
+## 3. Architecture
+
+A small industrial controller (the "dome PLC") sits on the dome ring and owns the slit motor, the rotation motor, the azimuth encoder and the rain sensor. It enforces the safety rules in hardware logic and does not trust the computer. A rack PC in the control room (the "observatory host") runs the software described here and talks to the PLC over a serial line at 9600 baud using a simple text protocol.
+
+The host runs four processes:
+
+- **Scheduler**: reads the queue from a local database, picks the next target by priority and altitude, and issues commands.
+- **Telescope driver**: slews the mount and reports pointing.
+- **Dome service**: keeps the dome slit aligned with the telescope, polling position once per second and sending rotate commands to the PLC.
+- **Weather guard**: reads the cloud sensor, rain sensor, wind meter and a humidity probe every 10 seconds and publishes a single status: SAFE, WARN or UNSAFE.
+
+All four processes communicate through a message broker on the same machine. The queue database is SQLite on the host's local disk. The web form is served from the same host and is reachable from the internet.
+
+## 4. Safety behaviour
+
+When Weather guard publishes UNSAFE, the scheduler stops the current exposure, parks the telescope, and asks the dome service to close the slit. If the PLC does not confirm closure within four minutes, the host sends an email and a text message to the duty list.
+
+The PLC also closes the slit by itself if the rain sensor is wet, or if it has received no heartbeat from the host for 90 seconds. This rule protects against a crashed host.
+
+Opening the dome requires SAFE for ten continuous minutes, a sun altitude below minus 12 degrees, and the key switch in the AUTO position.
+
+## 5. Queue and booking rules
+
+Booked groups own fixed time windows. Inside a window, only that group's targets run. Outside all windows, volunteer targets run by priority, then submission time. A target is skipped if it is below 30 degrees altitude or within 20 degrees of the moon. Each target has an exposure plan of up to 40 frames.
+
+## 6. Cost estimate
+
+| Item | Cost |
+|---|---|
+| Dome PLC, wiring, enclosure | 6,800 |
+| Slit motor and limit switches | 4,900 |
+| Cloud, rain and wind sensors | 3,700 |
+| Rack PC and uninterruptible power supply | 3,100 |
+| Installation by electrician | 5,500 |
+| Contingency (15 percent) | 3,500 |
+| Total | 27,500 |
+
+The remaining 13,500 is reserved for a second year.
+
+## 7. Timeline
+
+Procurement April to May, installation June, supervised trial nights July to August, first unattended nights in September.
+
+## 8. Open questions
+
+- Who is on the duty list overnight, and who answers if nobody replies?

@@ -9,9 +9,13 @@ command line and nothing else; none of them parses YAML or assumes a GPU.
 
 - **CPU mock** (`targets/cpu-mock.yaml`): the judge and the loop run end to end on a laptop,
   including the whole procedure in `local_box/`.
-- **TPU (Google Cloud v6e)**: the model server of `targets/v6e4-gemma4-26b-tps.yaml` was brought up by
-  hand on a v6e-4. `tpu.sh`, bootstrap and a judged run have not yet been run on real TPU hardware.
-  That target is still `runnable: false`, and its sealed launch is marked "NOT PROVEN" in the file.
+- **TPU (Google Cloud v6e)**: on 2026-10-13, on one on-demand v6e-4, `tpu.sh` and bootstrap ran to the
+  end with `targets/v6e4-gemma4-26b-tps.yaml`, and the judge measured a baseline and a 10-launch
+  calibration. The chip gate passed only with `--network host --privileged`, so that target is
+  `runnable: true` with a weaker seal than a full one. Since then `tpu.sh` has changed to make the
+  cache directories on a new disk and to accept the newer Hub folder layout; those changes are tested
+  with fakes only. No research loop has run on a TPU, and nothing has been measured there with the
+  current speed pool and judge.
 - **GPU (NVIDIA)**: built and tested on a laptop with fakes. It has never run on real hardware (see
   "The GPU path").
 - **Coding agents.** Three adapters ship in `research/adapters/`: `claude` (Claude Code), `codex`

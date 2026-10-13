@@ -1,0 +1,336 @@
+I wrote this module for our vineyard to track grape blocks, harvest lots and tank fermentations. It works on my laptop but I am nervous about handing it to the cellar team. Please do a thorough code review, covering bugs, edge cases, design problems and anything unsafe, and then write a full set of unit tests with pytest for it.
+
+```python
+"""cellarbook.py - harvest lots, tank fermentations and simple cellar reports
+for the Wrenfield Hill vineyard.
+"""
+
+import csv
+import json
+import math
+import os
+from dataclasses import dataclass, field
+from datetime import date, datetime, timedelta
+
+BRIX_TO_ALCOHOL = 0.59
+MAX_FERMENT_TEMP = 32.0
+MIN_FERMENT_TEMP = 8.0
+VALID_VARIETIES = {"pinot noir", "chardonnay", "riesling", "meunier", "bacchus"}
+
+
+class CellarError(Exception):
+    pass
+
+
+@dataclass
+class Block:
+    name: str
+    variety: str
+    hectares: float
+    planted: int
+    rows: int = 0
+
+    def vines_estimate(self, vines_per_ha=4400):
+        return int(self.hectares * vines_per_ha)
+
+    def age(self, today=None):
+        today = today or date.today()
+        return today.year - self.planted
+
+
+@dataclass
+class HarvestLot:
+    lot_id: str
+    block: str
+    picked_on: date
+    kilos: float
+    brix: float
+    ph: float
+    notes: list = field(default_factory=list)
+
+    def potential_alcohol(self):
+        return round(self.brix * BRIX_TO_ALCOHOL, 1)
+
+    def is_ripe(self, minimum_brix=19.0):
+        return self.brix >= minimum_brix
+
+
+@dataclass
+class TankReading:
+    when: datetime
+    temp_c: float
+    brix: float
+
+
+class Tank:
+    def __init__(self, tank_id, capacity_litres):
+        self.tank_id = tank_id
+        self.capacity = capacity_litres
+        self.contents = []
+        self.readings = []
+        self.volume = 0
+
+    def fill(self, lot, litres):
+        if self.volume + litres > self.capacity:
+            raise CellarError("tank %s would overflow" % self.tank_id)
+        self.contents.append((lot.lot_id, litres))
+        self.volume += litres
+
+    def add_reading(self, reading):
+        if reading.temp_c > MAX_FERMENT_TEMP or reading.temp_c < MIN_FERMENT_TEMP:
+            self.readings.append(reading)
+            return False
+        self.readings.append(reading)
+        return True
+
+    def fermentation_rate(self):
+        """Average drop in brix per day between first and last reading."""
+        if len(self.readings) < 2:
+            return 0
+        first = self.readings[0]
+        last = self.readings[-1]
+        days = (last.when - first.when).days
+        return (first.brix - last.brix) / days
+
+    def is_stuck(self, threshold=0.3):
+        return self.fermentation_rate() < threshold
+
+    def days_to_dry(self, target_brix=0.0):
+        rate = self.fermentation_rate()
+        if rate <= 0:
+            return None
+        remaining = self.readings[-1].brix - target_brix
+        return math.ceil(remaining / rate)
+
+
+class Cellar:
+    def __init__(self, path="cellar.json"):
+        self.path = path
+        self.blocks = {}
+        self.lots = {}
+        self.tanks = {}
+        if os.path.exists(path):
+            self.load()
+
+    def add_block(self, block):
+        if block.variety not in VALID_VARIETIES:
+            raise CellarError("unknown variety: " + block.variety)
+        self.blocks[block.name] = block
+
+    def register_lot(self, lot):
+        if lot.block not in self.blocks:
+            raise CellarError("no such block " + lot.block)
+        if lot.lot_id in self.lots:
+            raise CellarError("duplicate lot " + lot.lot_id)
+        self.lots[lot.lot_id] = lot
+        return lot
+
+    def add_tank(self, tank):
+        self.tanks[tank.tank_id] = tank
+
+    def total_harvest(self, year=None):
+        total = 0
+        for lot in self.lots.values():
+            if year is None or lot.picked_on.year == year:
+                total += lot.kilos
+        return total
+
+    def yield_per_hectare(self, block_name, year):
+        block = self.blocks[block_name]
+        kilos = 0
+        for lot in self.lots.values():
+            if lot.block == block_name and lot.picked_on.year == year:
+                kilos += lot.kilos
+        return kilos / block.hectares
+
+    def lots_by_variety(self):
+        result = {}
+        for lot in self.lots.values():
+            variety = self.blocks[lot.block].variety
+            result.setdefault(variety, []).append(lot)
+        return result
+
+    def average_brix(self, variety):
+        lots = self.lots_by_variety().get(variety, [])
+        weighted = sum(l.brix * l.kilos for l in lots)
+        weight = sum(l.kilos for l in lots)
+        return weighted / weight
+
+    def press_plan(self, tank_id, kilos_per_litre=1.4):
+        tank = self.tanks[tank_id]
+        plan = []
+        for lot_id, litres in tank.contents:
+            lot = self.lots[lot_id]
+            plan.append({
+                "lot": lot_id,
+                "kilos": round(litres * kilos_per_litre, 1),
+                "block": lot.block,
+            })
+        return plan
+
+    def stuck_tanks(self):
+        return [t.tank_id for t in self.tanks.values() if t.is_stuck()]
+
+    def save(self):
+        data = {
+            "blocks": [vars(b) for b in self.blocks.values()],
+            "lots": [
+                {**vars(l), "picked_on": l.picked_on.isoformat()}
+                for l in self.lots.values()
+            ],
+        }
+        with open(self.path, "w") as handle:
+            json.dump(data, handle)
+
+    def load(self):
+        with open(self.path) as handle:
+            data = json.load(handle)
+        for b in data["blocks"]:
+            self.blocks[b["name"]] = Block(**b)
+        for l in data["lots"]:
+            l["picked_on"] = date.fromisoformat(l["picked_on"])
+            self.lots[l["lot_id"]] = HarvestLot(**l)
+
+
+def import_lots_csv(cellar, filename):
+    """Columns: lot_id, block, picked_on (YYYY-MM-DD), kilos, brix, ph."""
+    added = []
+    with open(filename) as handle:
+        reader = csv.DictReader(handle)
+        for row in reader:
+            lot = HarvestLot(
+                lot_id=row["lot_id"],
+                block=row["block"],
+                picked_on=datetime.strptime(row["picked_on"], "%Y-%m-%d").date(),
+                kilos=float(row["kilos"]),
+                brix=float(row["brix"]),
+                ph=float(row["ph"]),
+            )
+            cellar.register_lot(lot)
+            added.append(lot.lot_id)
+    return added
+
+
+def picking_schedule(cellar, start, per_day_kilos=3500):
+    """Spread blocks over days, ripest first, and return a list of tuples."""
+    ripe = sorted(cellar.lots.values(), key=lambda l: l.brix, reverse=True)
+    day = start
+    used = 0
+    schedule = []
+    for lot in ripe:
+        if used + lot.kilos > per_day_kilos:
+            day = day + timedelta(days=1)
+            used = 0
+        used += lot.kilos
+        schedule.append((day, lot.lot_id))
+    return schedule
+
+
+def sulphur_addition(litres, free_so2_target_mg_l, current_mg_l, potassium_metabisulphite_strength=0.57):
+    """Grams of metabisulphite to bring free SO2 up to target."""
+    needed = free_so2_target_mg_l - current_mg_l
+    grams = needed * litres / 1000 / potassium_metabisulphite_strength
+    return round(grams, 1)
+
+
+def acidity_report(lots):
+    low = [l.lot_id for l in lots if l.ph > 3.6]
+    high = [l.lot_id for l in lots if l.ph < 3.0]
+    return {"too_low_acidity": low, "too_high_acidity": high}
+
+
+def monthly_summary(cellar, year):
+    summary = {}
+    for lot in cellar.lots.values():
+        if lot.picked_on.year != year:
+            continue
+        key = lot.picked_on.strftime("%B")
+        summary[key] = summary.get(key, 0) + lot.kilos
+    return summary
+
+
+def print_report(cellar, year):
+    print("Harvest report for", year)
+    print("Total kilos:", cellar.total_harvest(year))
+    for name in cellar.blocks:
+        print(name, round(cellar.yield_per_hectare(name, year), 1), "kg/ha")
+    for month, kilos in monthly_summary(cellar, year).items():
+        print(month, kilos)
+    stuck = cellar.stuck_tanks()
+    if stuck:
+        print("WARNING stuck tanks:", ", ".join(stuck))
+
+
+@dataclass
+class Barrel:
+    barrel_id: str
+    litres: float
+    filled_on: date
+    wine_lot: str
+    toast: str = "medium"
+    uses: int = 0
+
+    def months_aged(self, today=None):
+        today = today or date.today()
+        return (today.year - self.filled_on.year) * 12 + (today.month - self.filled_on.month)
+
+    def oak_influence(self):
+        """Rough score from 0 to 1: new barrels give more, old ones almost none."""
+        if self.uses >= 5:
+            return 0.0
+        return round(1.0 - self.uses * 0.2, 2)
+
+
+def blend_lots(lots, proportions):
+    """Return kilos-weighted brix and ph for a blend given {lot_id: fraction}."""
+    total = sum(proportions.values())
+    if abs(total - 1.0) > 0.001:
+        raise CellarError("proportions must add up to 1, got %s" % total)
+    by_id = {l.lot_id: l for l in lots}
+    brix = 0.0
+    ph = 0.0
+    for lot_id, share in proportions.items():
+        lot = by_id[lot_id]
+        brix += lot.brix * share
+        ph += lot.ph * share
+    return {"brix": round(brix, 2), "ph": round(ph, 2)}
+
+
+def export_readings_csv(tank, filename):
+    with open(filename, "w", newline="") as handle:
+        writer = csv.writer(handle)
+        writer.writerow(["tank", "when", "temp_c", "brix"])
+        for r in tank.readings:
+            writer.writerow([tank.tank_id, r.when.isoformat(), r.temp_c, r.brix])
+    return len(tank.readings)
+
+
+def bottling_run(litres, bottle_ml=750, loss_percent=2.5):
+    """How many bottles and cases (of 6) a volume of wine yields."""
+    usable = litres * (1 - loss_percent / 100)
+    bottles = int(usable * 1000 // bottle_ml)
+    cases = bottles // 6
+    return {"bottles": bottles, "cases": cases, "spare": bottles % 6}
+
+
+def frost_risk(forecast_lows, bud_burst):
+    """Return the dates on which a frost below -1 C falls after bud burst."""
+    risky = []
+    for day, low in forecast_lows.items():
+        if day >= bud_burst and low < -1.0:
+            risky.append(day)
+    return sorted(risky)
+
+
+def cost_per_bottle(cellar, year, labour, overhead, bottles):
+    kilos = cellar.total_harvest(year)
+    grape_cost = kilos * 1.85
+    return round((grape_cost + labour + overhead) / bottles, 2)
+
+
+if __name__ == "__main__":
+    c = Cellar()
+    c.add_block(Block("Long Meadow", "pinot noir", 2.4, 2009, 31))
+    c.add_block(Block("Chapel Slope", "chardonnay", 1.8, 2014, 22))
+    print_report(c, date.today().year)
+```

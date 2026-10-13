@@ -1,0 +1,61 @@
+Below is our quarterly review for the Clearwater Hearing Clinic. I have to present it to the board on Monday and I haven't had time to read it properly. Could you give me a section-by-section summary, flag the numbers that don't seem to add up or that worry you, and finish with a list of recommendations in order of priority?
+
+CLEARWATER HEARING CLINIC
+QUARTERLY OPERATIONS REVIEW, Q3
+Prepared by: Marguerite Oyelaran, clinic manager
+Distribution: Board of trustees, lead audiologists
+
+1. Executive summary
+
+The clinic saw 1,946 patients in the quarter, up 6 percent from Q2 (1,836). Revenue was 612,400, which is 4 percent above plan, driven by the hearing-aid fitting service. The waiting time for a first assessment fell from 11 weeks to 8 weeks. Patient satisfaction stayed high at 4.6 out of 5. The main concerns are a rise in returns of one hearing-aid model, a staffing gap in the paediatric service, and a supplier price increase effective next quarter.
+
+2. Patient volumes
+
+New patient assessments were 702 (Q2: 655). Follow-up appointments were 1,244 (Q2: 1,181). Of the new patients, 61 percent were aged over 65, 34 percent were between 18 and 65, and 5 percent were children. The did-not-attend rate was 7.8 percent, against a target of 6 percent and 8.9 percent in Q2. The reminder text message pilot, which began in July in the Eastgate branch, reduced non-attendance there to 5.1 percent, while the Millford branch, which did not use reminders, stayed at 10.2 percent.
+
+The clinic offered 2,150 appointment slots in the quarter. Utilisation was therefore 90.5 percent. Evening sessions on Tuesday and Thursday were 98 percent full, while Friday afternoons were 71 percent full.
+
+3. Clinical outcomes
+
+3.1 Hearing-aid fittings. We fitted 538 devices (Q2: 497). Of these, 319 were behind-the-ear models, 164 were receiver-in-canal models and 55 were custom in-the-ear models. The follow-up check at six weeks showed that 87 percent of patients reported improved speech understanding in noise, up from 84 percent.
+
+3.2 Returns. The return rate within 60 days was 9.7 percent overall (52 devices), against 7.0 percent in Q2. Thirty-one of the 52 returns were of the Aria R2 receiver-in-canal model, which has a return rate of 18.9 percent among the 164 receiver-in-canal fittings. The reported reasons for these 31 returns were feedback whistling (14), moisture damage to the receiver (9), discomfort (5) and no reason given (3). The supplier has been notified and has promised a technical visit in October.
+
+3.3 Tinnitus service. Forty-four patients were enrolled in the sound therapy programme. Twenty-nine completed the twelve-week course, and 22 of them reported a clinically meaningful reduction in the tinnitus handicap score. The programme has a waiting list of 17 patients.
+
+4. Paediatric service
+
+The paediatric audiologist, Dr Anselm Karlsson, will be on extended leave from 14 November. The clinic currently has 96 children on its active caseload, and 23 are due for review during his absence. We have asked the regional children's hospital whether it can accept referrals for the period, but it has not yet confirmed. Recruiting a locum has been difficult: we advertised in August and received one application, which did not meet the requirements for paediatric registration.
+
+5. Finance
+
+Revenue by line in thousands: assessments 148.2, hearing-aid sales and fittings 331.5, repairs and servicing 64.1, batteries and accessories 41.3, tinnitus programme 27.3. Total 612.4. The plan for the quarter was 589.0.
+
+Expenditure was 571.9, which is 5 percent above the planned 544.0. Staff costs were 354.0, equipment and supplies 148.7 (of which hearing-aid purchases 119.2), premises 41.6 and other costs 27.6. The operating surplus was therefore 40.5, against a planned surplus of 45.0.
+
+Three items explain most of the overspend, 23.2 of the 27.9. A one-off repair to the sound booth cost 9.8. Overtime in August to clear the assessment backlog cost 7.4. The new patient record software licence started two months earlier than budgeted, at a cost of 6.0.
+
+6. Staffing
+
+The clinic employs 14 full-time equivalent staff. In the quarter, one receptionist left and was replaced after a four-week gap. Sickness absence was 3.1 percent, up from 2.4 percent. The mandatory infection control training was completed by 12 of 15 eligible staff. All audiologists have current registration. The student placement programme took three trainee audiologists from the university for six weeks each.
+
+7. Quality and complaints
+
+We received 17 complaints (Q2: 12). Nine concerned waiting times for fittings, four were about billing, three about the behaviour of staff on the telephone, and one about the Aria R2 device. All were acknowledged within two working days. Fifteen were resolved within the 20-day target. Two remain open: one billing dispute where the patient says that a service plan was cancelled but is still being charged, and one dispute about a warranty claim on a device damaged by moisture. There were no serious incidents. One near miss was reported: a battery was given to a patient in the wrong size. It was caught at the desk.
+
+8. Supplier and costs
+
+Our main hearing-aid supplier has announced a price increase of 5.5 percent on all devices from 1 January, and a new minimum order quantity of 40 units a quarter. At the current volume of about 540 devices a quarter, the cost increase is estimated at 6.6 per quarter in thousands, if the mix does not change. The second supplier we use for the entry-level range offered a 3 percent discount if we commit to 200 units a quarter, which is about 37 percent of our volume.
+
+9. Plans for next quarter
+
+- Extend the text reminder pilot to Millford from 1 October.
+- Open two extra Friday evening sessions to relieve the Tuesday and Thursday peak.
+- Hold a technical review of the Aria R2 returns with the supplier.
+- Confirm cover for the paediatric service before 14 November.
+- Complete the infection control training for the remaining three staff.
+- Decide on the second supplier offer before 1 December.
+
+10. Risks
+
+The main risks are the paediatric cover gap, a further rise in returns if the Aria R2 issue is not solved, and a cash flow squeeze in the first quarter of next year when the supplier price rise and the new minimum order take effect together with the winter fall in appointments, which has historically been about 8 percent.

@@ -157,16 +157,27 @@ class Vm:
         p.write_bytes(b"not a real tar")
         return p
 
-    def put_hf_cache(self, files: dict[str, bytes]) -> Path:
-        """The Hugging Face hub layout: blobs named by hash, snapshot entries are symlinks to them."""
-        hub = self.mnt / "artifacts" / "gemma4-hf" / "models--google--gemma-4-26B-A4B-it"
+    def put_hf_cache(self, files: dict[str, bytes], shared_store: bool = False) -> Path:
+        """The Hugging Face hub layout: blobs named by hash, snapshot entries are symlinks to them.
+
+        shared_store is the layout newer huggingface_hub releases write: the hash-named
+        blob is itself a link into one store at the root of the cache, <cache>/blobs/<xx>/<name>.
+        """
+        cache = self.mnt / "artifacts" / "gemma4-hf"
+        hub = cache / "models--google--gemma-4-26B-A4B-it"
         snap = hub / "snapshots" / REV
         (hub / "blobs").mkdir(parents=True)
         snap.mkdir(parents=True)
         for rel, data in files.items():
             name = hashlib.sha256(data).hexdigest() if len(data) > 100 else hashlib.sha1(
                 b"blob %d\0" % len(data) + data).hexdigest()
-            (hub / "blobs" / name).write_bytes(data)
+            if shared_store:
+                stored = hashlib.blake2b(data, digest_size=32).hexdigest()     # the store's own name, not the hash we check
+                (cache / "blobs" / stored[:2]).mkdir(parents=True, exist_ok=True)
+                (cache / "blobs" / stored[:2] / stored).write_bytes(data)
+                (hub / "blobs" / name).symlink_to(Path("..") / ".." / "blobs" / stored[:2] / stored)
+            else:
+                (hub / "blobs" / name).write_bytes(data)
             (snap / rel).parent.mkdir(parents=True, exist_ok=True)
             (snap / rel).symlink_to(Path("..") / ".." / "blobs" / name)
         return hub
@@ -238,6 +249,33 @@ def test_a_missing_disk_tells_the_operator_how_to_attach_it(vm):
     r = vm.run("tpu_mount_disk")
     assert r.returncode == 1 and "gemma4-cache" in r.stderr and "attach-disk" in r.stderr
     assert vm.fstab.read_text() == ""
+
+
+def test_a_missing_disk_also_says_how_to_label_a_new_one(vm):
+    (vm.fake / "label").write_text("")                    # attached, but never formatted: no label to find
+    r = vm.run("tpu_mount_disk")
+    assert r.returncode == 1
+    assert "mkfs.ext4 -L gemma4-cache" in r.stderr and "lsblk" in r.stderr and "erases" in r.stderr
+    assert vm.log("mount") == []                          # the step never formats or mounts anything itself
+
+
+def test_mounting_makes_the_cache_directories_a_new_disk_lacks(vm):
+    r = vm.run("tpu_mount_disk")
+    assert r.returncode == 0, said(r)
+    for sub in ("artifacts/gemma4-hf", "artifacts/gemma4-vllm"):
+        assert (vm.mnt / sub).is_dir()
+        assert f"{vm.mnt}/{sub}" in r.stdout              # said once, so an empty cache is no surprise
+    r = vm.run("tpu_mount_disk")
+    assert r.returncode == 0 and "gemma4-vllm" not in r.stdout
+
+
+def test_mounting_leaves_a_filled_cache_alone(vm):
+    kept = vm.mnt / "artifacts" / "gemma4-vllm" / "xla" / "a.bin"
+    kept.parent.mkdir(parents=True)
+    kept.write_bytes(b"compiled")
+    r = vm.run("tpu_mount_disk")
+    assert r.returncode == 0, said(r)
+    assert kept.read_bytes() == b"compiled" and "gemma4-vllm" not in r.stdout
 
 
 # ------------------------------------------------------------------ the image
@@ -425,6 +463,53 @@ def test_a_snapshot_entry_that_points_outside_the_blobs_is_refused(vm):
     assert r.returncode == 1 and "outside" in r.stderr and "config.json" in r.stderr
 
 
+def test_a_cache_with_a_shared_blob_store_is_linked_and_hash_checked(vm):
+    hub = vm.put_hf_cache(FILES, shared_store=True)
+    r = vm.run("tpu_models")
+    assert r.returncode == 0, said(r)
+    d = model_dir(vm)
+    assert sorted(p.name for p in d.iterdir()) == sorted(FILES)
+    assert not any(p.is_symlink() for p in d.rglob("*"))
+    for name, data in FILES.items():
+        assert (d / name).read_bytes() == data
+    big = "model-00001-of-00002.safetensors"
+    named = hub / "blobs" / hashlib.sha256(FILES[big]).hexdigest()
+    assert named.is_symlink() and (d / big).stat().st_ino == named.stat().st_ino   # linked to the stored file
+    manifest = (d.parent / "gemma-4-26b-a4b-it.sha256").read_text().splitlines()
+    assert f"sha256 {named.name} {big}" in manifest       # checked against the hash name, not the store's name
+    assert any(l.startswith("gitsha1 ") and l.endswith(" config.json") for l in manifest)
+    assert "OK 4/4 files verified" in r.stdout and "not verified" not in said(r)
+
+
+def test_a_damaged_file_in_the_shared_store_fails_the_hash_check(vm):
+    hub = vm.put_hf_cache(FILES, shared_store=True)
+    named = hub / "blobs" / hashlib.sha256(FILES["model-00001-of-00002.safetensors"]).hexdigest()
+    named.resolve().write_bytes(os.urandom(4096))         # same names, other bytes
+    r = vm.run("tpu_models")
+    assert r.returncode == 1 and "hash mismatch: model-00001-of-00002.safetensors" in r.stdout
+
+
+def test_a_blob_link_that_leaves_the_cache_is_refused(vm):
+    hub = vm.put_hf_cache(FILES, shared_store=True)
+    outside = vm.root / "elsewhere.bin"
+    outside.write_bytes(FILES["model-00001-of-00002.safetensors"])
+    named = hub / "blobs" / hashlib.sha256(FILES["model-00001-of-00002.safetensors"]).hexdigest()
+    named.unlink()
+    named.symlink_to(outside)
+    r = vm.run("tpu_models")
+    assert r.returncode == 1 and "outside" in r.stderr and "model-00001-of-00002.safetensors" in r.stderr
+
+
+def test_a_snapshot_entry_that_skips_the_hash_named_blob_is_refused(vm):
+    hub = vm.put_hf_cache(FILES, shared_store=True)
+    snap = hub / "snapshots" / REV
+    stored = (snap / "config.json").resolve()             # the store's file: its name is no hash of the content
+    (snap / "config.json").unlink()
+    (snap / "config.json").symlink_to(stored)
+    r = vm.run("tpu_models")
+    assert r.returncode == 1 and "config.json" in r.stderr and "refusing" in r.stderr
+
+
 def test_a_missing_revision_is_an_error_naming_it(vm):
     vm.put_hf_cache(FILES)
     t = yaml.safe_load(vm.target.read_text())
@@ -432,6 +517,13 @@ def test_a_missing_revision_is_an_error_naming_it(vm):
     vm.target.write_text(yaml.safe_dump(t))
     r = vm.run("tpu_models")
     assert r.returncode == 1 and "0" * 40 in r.stderr
+
+
+def test_a_disk_without_the_model_says_how_to_download_it(vm):
+    r = vm.run("tpu_models")                              # a new disk: no Hugging Face cache at all
+    assert r.returncode == 1
+    assert "snapshot_download" in r.stderr and "google/gemma-4-26B-A4B-it" in r.stderr
+    assert f'revision="{REV}"' in r.stderr and f'cache_dir="{vm.mnt}/artifacts/gemma4-hf"' in r.stderr
 
 
 # ----------------------------------------------------------- the compile seed
@@ -467,6 +559,15 @@ def test_a_rerun_adds_to_the_seed_and_never_takes_from_it(vm):
 def test_a_disk_without_a_compile_cache_is_an_error(vm):
     r = vm.run("tpu_compile_seed")
     assert r.returncode == 1 and "no compile cache" in r.stderr
+
+
+def test_a_new_disk_gives_an_empty_seed_and_the_first_launch_compiles(vm):
+    assert vm.run("tpu_mount_disk").returncode == 0       # makes the empty cache directory on the disk
+    r = vm.run("tpu_compile_seed")
+    assert r.returncode == 0, said(r)
+    seed = vm.root / "bench-cache"
+    assert seed.is_dir() and not any(seed.iterdir())
+    assert "first launch compiles" in r.stdout
 
 
 # ------------------------------------------------------------- engine sources

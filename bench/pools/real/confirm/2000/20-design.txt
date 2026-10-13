@@ -1,0 +1,82 @@
+Here is a design document our furnace team wrote for a new kiln monitoring system at Tarnside Glassworks. Can you critique it honestly, suggest at least two alternative approaches we should have considered, and then give me an implementation plan I can take to the next planning meeting? I am the plant engineer and I have to sign it off, but I am not a software person, so explain the risks in terms I can act on.
+
+# Design: Kiln Watch, continuous temperature and energy monitoring
+
+Author: Imogen Pryce (furnace systems). Reviewers: Dalton Reeve (plant engineer), Sunita Marsh (production manager). Status: draft 3.
+
+## 1. Background
+
+Tarnside runs one regenerative melting furnace (Furnace 1, container glass, 140 tonnes per day) and four annealing lehrs. Today an operator walks the line every two hours and writes thermocouple readings from the local displays on a clipboard. The numbers are typed into a spreadsheet at the end of the shift. This has three problems. First, a lehr that drifts out of its annealing curve between walks produces stressed bottles that are only found at the cold-end inspection, hours later. Second, we cannot show the gas supplier or the auditor any trend finer than two hours. Third, the furnace crown temperature is the number that most affects refractory life, and nobody sees it for long stretches of the night shift.
+
+In the last twelve months we scrapped roughly 3.1 percent of output for annealing defects, of which we estimate about a third could have been caught by earlier warning. Gas consumption was 8 percent above the contract baseline in February, and we could not explain it.
+
+## 2. Goals
+
+- Record temperature at every existing thermocouple at least once every 10 seconds.
+- Record gas flow and electric boost power every 10 seconds.
+- Alert the shift supervisor within 60 seconds when a lehr zone leaves its tolerance band for more than 90 seconds.
+- Keep one year of full-resolution history and five years of one-minute averages.
+- Show the supervisor a single screen with the state of the furnace and all four lehrs.
+
+## 3. Non-goals
+
+- Closed-loop control. Kiln Watch only observes. The existing control cabinets stay in charge of heating.
+- Replacing the existing local displays.
+- Predicting defects with machine learning. This may be a later phase.
+
+## 4. Proposed architecture
+
+Each of the five areas gets a small edge box (a fanless industrial computer) mounted in the control cabinet. The box reads the thermocouples through an analog input module over Modbus, polls the gas flow meter and the boost transformer over Modbus TCP, and buffers readings in a local queue on disk. Every 10 seconds the box sends a batch to a central server in the office server room over the plant network. The central server runs a time series database, an alert service and a web dashboard. Alerts go by SMS and by email to the supervisor on duty, who is looked up in a rota table.
+
+Edge boxes keep up to 72 hours of readings if the network is down and forward them in order when it returns. Timestamps are taken at the edge box, which is synchronised to the central server by NTP.
+
+### 4.1 Data model
+
+One measurement record is: area, sensor id, timestamp, value, unit and quality flag. Tolerance bands are stored per sensor with a lower and upper limit and a hold time. Bands for the lehrs follow the annealing schedule for the product currently running, so a band changes when the product changes. The product schedule is entered by the supervisor on the dashboard at each job change.
+
+### 4.2 Alerting
+
+The alert service evaluates each sensor every 10 seconds against the band for the active product. A breach starts a timer. If the value stays outside the band for the hold time, an alert is raised. Alerts are acknowledged on the dashboard; an unacknowledged alert repeats every 5 minutes and, after 15 minutes, goes to the plant engineer as well. When a value returns inside the band for 60 seconds the alert clears.
+
+### 4.3 Dashboard
+
+The dashboard is a web page served from the central server and shown on a wall display in the control room and on supervisors' tablets. It shows a plan view of the furnace and lehrs with colour-coded zones, a 12-hour trend per zone, current gas use against the daily target, and the list of open alerts.
+
+## 5. Hardware and cost
+
+| Item | Quantity | Unit cost | Total |
+|---|---|---|---|
+| Edge box with Modbus interfaces | 5 | 1,150 | 5,750 |
+| Analog input modules (8 channel thermocouple) | 12 | 420 | 5,040 |
+| Central server with mirrored disks | 1 | 3,900 | 3,900 |
+| Wall display and two tablets | 1 set | 1,800 | 1,800 |
+| Cabling and cabinet work | 1 lot | 4,500 | 4,500 |
+| Installation labour (contractor) | 1 lot | 6,000 | 6,000 |
+| Total | | | 27,000 |
+
+Software is written in house by Imogen with about 60 days of effort, using open source components. There is no budget line for support after go-live.
+
+## 6. Rollout
+
+Phase 1 (weeks 1 to 4): install on Lehr 3 only, run in parallel with the clipboard. Phase 2 (weeks 5 to 8): extend to the remaining lehrs. Phase 3 (weeks 9 to 12): furnace crown, regenerators and gas. The clipboard round stops only after four weeks of clean parallel running on all areas.
+
+## 7. Security and safety
+
+The edge boxes sit on the plant network, which shares a switch with the office network. Access to the dashboard is by a shared supervisor login. The system has no write path to the control cabinets. Modbus polling is read-only, and the polling accounts are configured with read function codes only.
+
+## 8. Risks identified so far
+
+1. Thermocouple cold-junction drift may make logged values differ from the local displays. Mitigation: calibrate at install against a reference.
+2. Operators may forget to enter the product schedule, leaving the wrong band active. Mitigation: a reminder at job change.
+3. SMS gateway outage. Mitigation: email fallback.
+4. A single central server is a single point of failure for alerting. Mitigation: nightly backups.
+
+## 9. Open questions
+
+- Who owns the system after go-live, and who is on call when an alert fires at 3 a.m.?
+- Should one year of full-resolution history be kept on the server disks or archived?
+- Do we need the auditor to approve the data before it is used as evidence of gas consumption?
+
+## 10. Success measure
+
+After six months, scrap for annealing defects falls below 2.3 percent and the gas overrun against baseline is explained within a day of occurring.

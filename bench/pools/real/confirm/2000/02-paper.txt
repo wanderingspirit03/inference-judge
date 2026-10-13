@@ -1,0 +1,59 @@
+Here is the methods and results section of a manuscript our league analyst wants to submit to a regional sports science journal. Please write a detailed peer review as a careful referee would: strengths, major concerns, minor points, and a clear recommendation with the changes you would require.
+
+**Title:** Does a rest week after a cup match reduce injuries in amateur football? Evidence from the Tarrowby Sunday League, 2022 to 2025
+
+**2. Methods**
+
+*2.1 Setting and participants.* The Tarrowby Sunday League is an amateur football league with 24 men's clubs in three divisions. Players are unpaid, train once or twice a week, and play on Sunday mornings. Over the four seasons from 2022/23 to 2025/26 the league registered 1,102 distinct players. Players were included in the analysis for every season in which they appeared in at least five league matches. This gave 1,634 player-seasons.
+
+*2.2 Exposure.* Each club has a knockout cup competition that runs alongside the league. In seasons when a club reached the cup quarter-final or beyond, it played up to four extra matches in a period of six weeks. League rules allow a club to request a "rest week", meaning that the league fixture following a cup match is postponed by seven days. Clubs requested a rest week after 61 of the 212 cup matches played in the study period. We define a rest-week match-pair as a cup match followed by a league fixture that was postponed, and a no-rest pair as a cup match followed by a league fixture played the next Sunday.
+
+*2.3 Outcome.* An injury was any event recorded on the league's incident form in which a player left the pitch and did not return, or missed the next league fixture because of a physical complaint. Forms are completed by the referee and countersigned by a club captain. We counted injuries in the league fixture following each cup match. Total exposure was 5,860 player-matches in the rest-week group and 12,903 in the no-rest group.
+
+*2.4 Statistical analysis.* We compared injury incidence between the groups using Poisson regression with the log of player-matches as an offset. We adjusted for division, player age band (under 25, 25 to 34, 35 and over) and whether the cup match had gone to extra time. Standard errors were clustered by club. We report incidence rate ratios (IRR) with 95% confidence intervals. All tests were two-sided at the 5% level. We did not register a protocol before collecting data.
+
+**3. Results**
+
+*3.1 Descriptive findings.* In the rest-week group there were 47 injuries (8.0 per 1,000 player-matches). In the no-rest group there were 163 injuries (12.6 per 1,000 player-matches). Players in the rest-week group were slightly older on average (mean 31.4 years against 29.8 years). Matches that went to extra time made up 18% of the cup matches in the rest-week group and 9% in the no-rest group.
+
+*3.2 Main result.* The unadjusted IRR for rest week against no rest was 0.63 (95% CI 0.46 to 0.87). After adjustment the IRR was 0.68 (95% CI 0.49 to 0.94, p = 0.02). We therefore conclude that a rest week reduces the risk of injury by about one third.
+
+*3.3 Subgroups.* The effect was larger in players aged 35 and over (IRR 0.51, 95% CI 0.30 to 0.86) than in players under 25 (IRR 0.84, 95% CI 0.52 to 1.36). A test of interaction between age band and rest week gave p = 0.19. The effect was similar across divisions.
+
+*3.4 Sensitivity analysis.* When the 14 injuries that occurred in the first ten minutes of a match were excluded, the IRR was 0.71 (95% CI 0.51 to 0.99). When we restricted the analysis to clubs that requested a rest week at least once and also played at least once without one, there were 9 clubs, and the IRR was 0.66 (95% CI 0.38 to 1.14).
+
+*3.5 Missing data.* Incident forms were missing for 22 league fixtures, all from the 2022/23 season, because one club secretary lost the paper records. These fixtures were excluded from the analysis.
+
+*3.6 Injury types.* Table 1 shows the injuries by body region and group, as recorded on the incident forms.
+
+| Region | Rest week (n = 47) | No rest (n = 163) |
+|---|---|---|
+| Hamstring or thigh | 14 | 58 |
+| Ankle or foot | 12 | 39 |
+| Knee | 7 | 28 |
+| Head or face | 5 | 14 |
+| Shoulder or arm | 4 | 9 |
+| Other or unspecified | 5 | 15 |
+
+Hamstring and thigh injuries were the most common type in both groups, making up 30% of injuries with rest and 36% without.
+
+*3.7 Club-level description.* Table 2 shows the clubs that contributed most of the cup matches, with how often each requested a rest week.
+
+| Club | Division | Cup matches | Rest weeks requested | Injuries after cup match |
+|---|---|---|---|---|
+| Harbour Rovers | 1 | 21 | 14 | 7 |
+| Millgate Athletic | 1 | 19 | 3 | 14 |
+| Thornfield United | 2 | 17 | 9 | 8 |
+| Saltmarsh Wanderers | 2 | 16 | 0 | 13 |
+| Old Grammarians | 1 | 15 | 11 | 5 |
+| Brickworks FC | 3 | 14 | 1 | 12 |
+
+The other 18 clubs played 110 cup matches between them. Clubs in the first division requested a rest week after 29% of cup matches and clubs in the third division after 22%. Harbour Rovers and Old Grammarians together accounted for 25 of the 61 rest weeks, and their squads are the oldest in the league, with a mean age of 34.6 years. Saltmarsh Wanderers never requested a rest week, and the club's captain told us that its pitch is the only artificial surface in the league.
+
+**4. Discussion (as drafted by the author)**
+
+Our results suggest that a seven-day postponement after a cup match is associated with a lower rate of injury in the following league match. The size of the association is consistent with laboratory studies showing that muscle function takes several days to recover after a full match. We recommend that the league make a rest week compulsory after any cup match that goes to extra time, and that clubs be encouraged to request one after every cup match. We estimate that this would prevent about 40 injuries across the league each season. The finding is especially relevant for older players, who showed the largest reduction.
+
+**5. Limitations (as drafted by the author)**
+
+The study is observational and clubs chose whether to request a rest week. The league has no data on training load or on injuries that occurred in training. Results may not apply to professional or youth football.

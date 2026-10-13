@@ -1,0 +1,27 @@
+Necesito una revisión por pares detallada de este fragmento de un artículo que enviaremos a una revista de comunicación local. Por favor señala los problemas de diseño, de análisis estadístico y de interpretación, indica qué debería añadirse y propón una recomendación final (aceptar, revisión menor, revisión mayor o rechazar) con tus razones.
+
+Título: Programación participativa y fidelización de la audiencia en una radio comunitaria rural: un estudio cuasi-experimental
+
+3. Método
+
+3.1 Contexto. Radio Valle Claro es una emisora comunitaria sin ánimo de lucro que emite en frecuencia modulada desde un municipio de unos 6.400 habitantes y cubre otros once pueblos pequeños. Funciona con 38 voluntarios. Hasta 2022 la programación la decidía un comité de cuatro personas. En enero de 2023 se introdujo un sistema de programación participativa: cualquier vecino podía proponer un programa, y las propuestas se votaban en una asamblea trimestral abierta.
+
+3.2 Diseño. Comparamos la audiencia y la participación antes y después del cambio. El periodo previo abarcó de enero a diciembre de 2022 y el periodo posterior de enero a diciembre de 2023. Como comparación utilizamos otra emisora comunitaria de una zona cercana, Radio Peña Alta, que no cambió su sistema de programación. Reconocemos que las emisoras no fueron asignadas al azar.
+
+3.3 Medidas. La audiencia se midió con una encuesta telefónica realizada en febrero de cada año a una muestra de hogares seleccionados de la guía telefónica pública. Se preguntó si el encuestado había escuchado la emisora la semana anterior (variable de audiencia semanal) y cuántas horas aproximadas (variable de horas). La participación se midió con el número de llamadas y mensajes recibidos en antena, contados por los técnicos de la emisora.
+
+3.4 Muestra. En 2022 respondieron 412 hogares de 1.050 contactados para Valle Claro (39 por ciento) y 190 de 520 para Peña Alta (37 por ciento). En 2023 respondieron 388 de 1.020 (38 por ciento) para Valle Claro y 171 de 500 (34 por ciento) para Peña Alta.
+
+3.5 Análisis. Comparamos proporciones mediante pruebas de chi cuadrado y medias con pruebas t. Consideramos significativo un valor p inferior a 0,05.
+
+4. Resultados
+
+4.1 Audiencia semanal. En Valle Claro la proporción de hogares que escuchó la emisora pasó del 31,8 por ciento (131 de 412) en 2022 al 40,5 por ciento (157 de 388) en 2023 (chi cuadrado = 6,9; p = 0,009). En Peña Alta pasó del 28,4 por ciento (54 de 190) al 29,2 por ciento (50 de 171), una diferencia no significativa (p = 0,87). La diferencia de diferencias fue de 7,9 puntos porcentuales a favor de Valle Claro.
+
+4.2 Horas de escucha. Entre los oyentes de Valle Claro, la media semanal subió de 5,1 horas (DE = 3,8) a 6,3 horas (DE = 4,2); t = 2,5, p = 0,013.
+
+4.3 Participación en antena. Las llamadas y mensajes en Valle Claro aumentaron de 1.130 en 2022 a 2.460 en 2023, un incremento del 118 por ciento. En Peña Alta se registraron 640 y 610 respectivamente.
+
+5. Discusión
+
+Los resultados muestran que la programación participativa aumentó la audiencia, la escucha y la participación en Valle Claro. La ausencia de cambios en Peña Alta indica que el efecto se debe al nuevo sistema. Concluimos que las emisoras comunitarias deberían adoptar de forma generalizada este modelo para recuperar a su público. Entre las limitaciones señalamos el uso de una sola emisora de comparación y de una encuesta telefónica que puede no llegar a hogares sin teléfono fijo.

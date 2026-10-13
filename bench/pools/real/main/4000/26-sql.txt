@@ -1,0 +1,279 @@
+We run a chain of eleven bakeries (Crumb & Ember) on a PostgreSQL database that I inherited from a contractor. The reports on the head office dashboard are getting slow and the numbers sometimes disagree between reports. Could you review the schema design, say which indexes we are missing or which ones are useless, and rewrite each of the seven queries at the bottom so that they are correct and faster? Please explain every change you make and why.
+
+```sql
+-- Crumb & Ember: operational database (PostgreSQL 15)
+
+CREATE TABLE shops (
+    shop_id        serial PRIMARY KEY,
+    name           text NOT NULL,
+    city           text NOT NULL,
+    opened_on      date NOT NULL,
+    has_cafe       boolean DEFAULT false,
+    manager_name   text
+);
+
+CREATE TABLE products (
+    product_id     serial PRIMARY KEY,
+    sku            text NOT NULL,
+    name           text NOT NULL,
+    category       text NOT NULL,          -- 'bread', 'pastry', 'cake', 'drink', 'sandwich'
+    unit_price     numeric(8,2) NOT NULL,
+    unit_cost      numeric(8,2),
+    is_active      boolean DEFAULT true,
+    shelf_life_hours integer
+);
+
+CREATE TABLE ingredients (
+    ingredient_id  serial PRIMARY KEY,
+    name           text NOT NULL,
+    unit           text NOT NULL,          -- 'kg', 'l', 'each'
+    supplier_id    integer,
+    cost_per_unit  numeric(8,3)
+);
+
+CREATE TABLE recipes (
+    recipe_id      serial PRIMARY KEY,
+    product_id     integer NOT NULL REFERENCES products(product_id),
+    ingredient_id  integer NOT NULL REFERENCES ingredients(ingredient_id),
+    quantity       numeric(8,3) NOT NULL    -- per batch of 12 units
+);
+
+CREATE TABLE suppliers (
+    supplier_id    serial PRIMARY KEY,
+    name           text NOT NULL,
+    contact_email  text,
+    payment_days   integer DEFAULT 30
+);
+
+CREATE TABLE customers (
+    customer_id    serial PRIMARY KEY,
+    loyalty_number text,
+    first_name     text,
+    last_name      text,
+    email          text,
+    joined_on      date,
+    home_shop_id   integer REFERENCES shops(shop_id)
+);
+
+CREATE TABLE sales (
+    sale_id        bigserial PRIMARY KEY,
+    shop_id        integer NOT NULL REFERENCES shops(shop_id),
+    customer_id    integer REFERENCES customers(customer_id),
+    sold_at        timestamp NOT NULL,
+    payment_method text NOT NULL,          -- 'card', 'cash', 'app'
+    total_amount   numeric(10,2) NOT NULL,
+    discount_code  text
+);
+
+CREATE TABLE sale_items (
+    sale_item_id   bigserial PRIMARY KEY,
+    sale_id        bigint NOT NULL REFERENCES sales(sale_id),
+    product_id     integer NOT NULL REFERENCES products(product_id),
+    quantity       integer NOT NULL,
+    unit_price     numeric(8,2) NOT NULL,
+    line_discount  numeric(8,2) DEFAULT 0
+);
+
+CREATE TABLE production_batches (
+    batch_id       bigserial PRIMARY KEY,
+    shop_id        integer NOT NULL REFERENCES shops(shop_id),
+    product_id     integer NOT NULL REFERENCES products(product_id),
+    baked_at       timestamp NOT NULL,
+    units_baked    integer NOT NULL,
+    baker_name     text
+);
+
+CREATE TABLE waste_log (
+    waste_id       bigserial PRIMARY KEY,
+    shop_id        integer NOT NULL REFERENCES shops(shop_id),
+    product_id     integer NOT NULL REFERENCES products(product_id),
+    logged_at      timestamp NOT NULL,
+    units_wasted   integer NOT NULL,
+    reason         text                    -- 'unsold', 'burnt', 'dropped', 'expired', 'other'
+);
+
+CREATE TABLE ingredient_deliveries (
+    delivery_id    bigserial PRIMARY KEY,
+    shop_id        integer NOT NULL REFERENCES shops(shop_id),
+    ingredient_id  integer NOT NULL REFERENCES ingredients(ingredient_id),
+    delivered_on   date NOT NULL,
+    quantity       numeric(10,3) NOT NULL,
+    invoice_total  numeric(10,2)
+);
+
+CREATE TABLE staff_shifts (
+    shift_id       bigserial PRIMARY KEY,
+    shop_id        integer NOT NULL REFERENCES shops(shop_id),
+    employee_name  text NOT NULL,
+    role           text NOT NULL,          -- 'baker', 'counter', 'cafe', 'manager'
+    shift_start    timestamp NOT NULL,
+    shift_end      timestamp NOT NULL,
+    hourly_rate    numeric(6,2) NOT NULL
+);
+
+CREATE TABLE discount_codes (
+    code           text PRIMARY KEY,
+    description    text,
+    percent_off    numeric(5,2),
+    valid_from     date,
+    valid_to       date
+);
+
+CREATE TABLE shop_targets (
+    shop_id        integer REFERENCES shops(shop_id),
+    month_start    date,
+    revenue_target numeric(12,2),
+    labour_budget  numeric(12,2)
+);
+
+-- Indexes created so far
+CREATE INDEX idx_sales_shop ON sales (shop_id);
+CREATE INDEX idx_sales_customer ON sales (customer_id);
+CREATE INDEX idx_sales_sold_at ON sales (sold_at);
+CREATE INDEX idx_sales_total ON sales (total_amount);
+CREATE INDEX idx_sale_items_sale ON sale_items (sale_id);
+CREATE INDEX idx_waste_shop ON waste_log (shop_id);
+CREATE INDEX idx_batches_shop ON production_batches (shop_id);
+CREATE INDEX idx_customers_email ON customers (email);
+CREATE INDEX idx_products_name ON products (name);
+CREATE INDEX idx_products_category ON products (category);
+
+-- Approximate row counts today
+--   shops                11
+--   products             214
+--   ingredients          168
+--   recipes              1,340
+--   customers            86,000
+--   sales                9.4 million (about 14,000 a day, growing)
+--   sale_items           27 million
+--   production_batches   410,000
+--   waste_log            880,000
+--   ingredient_deliveries 96,000
+--   staff_shifts         190,000
+--   discount_codes       64
+--   shop_targets         about 130 (one row per shop per month)
+
+-- ---------------------------------------------------------------------
+-- QUERY 1: daily revenue per shop for last month (head office dashboard)
+-- ---------------------------------------------------------------------
+SELECT s.name,
+       DATE(sa.sold_at) AS day,
+       SUM(sa.total_amount) AS revenue,
+       COUNT(*) AS receipts
+FROM sales sa
+JOIN shops s ON s.shop_id = sa.shop_id
+JOIN sale_items si ON si.sale_id = sa.sale_id
+WHERE sa.sold_at >= date_trunc('month', now()) - interval '1 month'
+  AND sa.sold_at <  date_trunc('month', now())
+GROUP BY s.name, DATE(sa.sold_at)
+ORDER BY s.name, day;
+
+-- ---------------------------------------------------------------------
+-- QUERY 2: top 20 products by gross margin in the last 90 days
+-- ---------------------------------------------------------------------
+SELECT p.name,
+       SUM(si.quantity) AS units,
+       SUM(si.quantity * (si.unit_price - p.unit_cost)) AS margin
+FROM sale_items si
+JOIN products p ON p.product_id = si.product_id
+JOIN sales sa ON sa.sale_id = si.sale_id
+WHERE sa.sold_at > now() - interval '90 days'
+GROUP BY p.name
+ORDER BY margin DESC
+LIMIT 20;
+
+-- ---------------------------------------------------------------------
+-- QUERY 3: waste rate per shop and category for last week
+-- Waste rate = units wasted / units baked
+-- ---------------------------------------------------------------------
+SELECT s.name AS shop,
+       p.category,
+       SUM(w.units_wasted) AS wasted,
+       SUM(b.units_baked) AS baked,
+       ROUND(100.0 * SUM(w.units_wasted) / SUM(b.units_baked), 1) AS waste_pct
+FROM shops s
+JOIN waste_log w ON w.shop_id = s.shop_id
+JOIN products p ON p.product_id = w.product_id
+JOIN production_batches b ON b.shop_id = s.shop_id
+                         AND b.product_id = p.product_id
+WHERE w.logged_at >= current_date - 7
+  AND b.baked_at >= current_date - 7
+GROUP BY s.name, p.category
+ORDER BY waste_pct DESC;
+
+-- ---------------------------------------------------------------------
+-- QUERY 4: loyalty customers who have not bought anything for 60 days
+-- but spent more than 200 in the 12 months before that
+-- ---------------------------------------------------------------------
+SELECT c.customer_id, c.first_name, c.last_name, c.email
+FROM customers c
+WHERE c.loyalty_number IS NOT NULL
+  AND c.customer_id NOT IN (
+        SELECT customer_id FROM sales
+        WHERE sold_at > now() - interval '60 days'
+  )
+  AND (
+        SELECT SUM(total_amount) FROM sales s2
+        WHERE s2.customer_id = c.customer_id
+          AND s2.sold_at > now() - interval '14 months'
+  ) > 200
+ORDER BY c.last_name;
+
+-- ---------------------------------------------------------------------
+-- QUERY 5: ingredient cost per batch of each product, and the share
+-- of the unit price that the ingredients represent
+-- ---------------------------------------------------------------------
+SELECT p.name,
+       SUM(r.quantity * i.cost_per_unit) AS batch_cost,
+       SUM(r.quantity * i.cost_per_unit) / 12 AS unit_cost_calc,
+       p.unit_price,
+       ROUND(100 * (SUM(r.quantity * i.cost_per_unit) / 12) / p.unit_price) AS pct_of_price
+FROM products p
+LEFT JOIN recipes r ON r.product_id = p.product_id
+LEFT JOIN ingredients i ON i.ingredient_id = r.ingredient_id
+WHERE p.is_active
+GROUP BY p.product_id, p.name, p.unit_price
+ORDER BY pct_of_price DESC;
+
+-- ---------------------------------------------------------------------
+-- QUERY 6: labour cost against revenue for each shop and week, with the
+-- monthly target from shop_targets, for the last 8 weeks
+-- ---------------------------------------------------------------------
+SELECT s.name,
+       date_trunc('week', st.shift_start) AS week,
+       SUM(EXTRACT(EPOCH FROM (st.shift_end - st.shift_start)) / 3600 * st.hourly_rate) AS labour_cost,
+       SUM(sa.total_amount) AS revenue,
+       t.revenue_target
+FROM shops s
+JOIN staff_shifts st ON st.shop_id = s.shop_id
+JOIN sales sa ON sa.shop_id = s.shop_id
+             AND date_trunc('week', sa.sold_at) = date_trunc('week', st.shift_start)
+LEFT JOIN shop_targets t ON t.shop_id = s.shop_id
+                        AND t.month_start = date_trunc('month', st.shift_start)
+WHERE st.shift_start >= now() - interval '8 weeks'
+GROUP BY s.name, date_trunc('week', st.shift_start), t.revenue_target
+ORDER BY s.name, week;
+
+-- ---------------------------------------------------------------------
+-- QUERY 7: use of discount codes last quarter: how many receipts used each
+-- code, the revenue on them, and the average basket compared to receipts
+-- without a code, only for codes that exist in discount_codes
+-- ---------------------------------------------------------------------
+SELECT d.code,
+       d.description,
+       COUNT(sa.sale_id) AS receipts,
+       SUM(sa.total_amount) AS revenue,
+       AVG(sa.total_amount) AS avg_basket,
+       (SELECT AVG(total_amount) FROM sales
+         WHERE discount_code IS NULL
+           AND sold_at >= date_trunc('quarter', now()) - interval '3 months'
+           AND sold_at <  date_trunc('quarter', now())) AS avg_basket_no_code
+FROM discount_codes d
+LEFT JOIN sales sa ON UPPER(sa.discount_code) = d.code
+WHERE sa.sold_at >= date_trunc('quarter', now()) - interval '3 months'
+  AND sa.sold_at <  date_trunc('quarter', now())
+GROUP BY d.code, d.description
+ORDER BY receipts DESC;
+```
+
+Some context for the review. The dashboard runs queries 1 and 2 each morning at about 07:00 and they take around a minute and a half now; query 3 is run by the head baker on Mondays and its numbers look much too high for some shops, which I could not explain. Query 4 feeds an email campaign. Query 5 is used when we decide on prices. Queries 6 and 7 are run by the finance manager on the first working day of the month, and she has told me that the labour percentage for some shops looks absurdly high. We are on a single managed PostgreSQL instance with 16 GB of memory, and we do not want to introduce a separate data warehouse unless you think it is really needed. We would like to keep the application's inserts fast, since the tills write a sale every few seconds at busy times. Please also tell us if any of the column types or constraints should change, for instance anything that could let bad data in.

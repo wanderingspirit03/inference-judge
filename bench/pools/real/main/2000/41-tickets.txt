@@ -1,0 +1,73 @@
+Wir sind der Kundendienst der Aufzugswerk Linden GmbH, und heute Morgen sind sechs Tickets eingegangen. Bitte schreiben Sie zu jedem Ticket eine eigene, vollständige Antwort an den Kunden, höflich, klar und ohne Fachjargon, mit den konkreten nächsten Schritten und Terminen, soweit sie aus den internen Notizen hervorgehen. Wo wir etwas nicht allein entscheiden können, soll die Antwort das ehrlich sagen und erklären, wie es weitergeht.
+
+---
+
+**Ticket 71204**
+Kanal: Telefon, vom Kundendienst notiert
+Kunde: Hausverwaltung Rosenthal & Söhne, Ansprechpartnerin Frau Gisela Hartwig
+Betreff: Aufzug steckt im dritten Stock fest, wiederholt
+
+Frau Hartwig meldet, dass der Personenaufzug im Wohnhaus Kastanienweg 14 seit drei Wochen immer wieder zwischen dem dritten und vierten Stock stehen bleibt. Gestern musste eine ältere Bewohnerin, Frau Pohl, rund 25 Minuten warten, bis der Notdienst kam. Die Hausverwaltung verlangt eine schriftliche Erklärung, warum die letzten beiden Wartungen den Fehler nicht gefunden haben, und fragt, ob sie die Miete für die betroffenen Bewohner mindern müsse und ob wir die Kosten tragen.
+
+Interne Notiz: Wartungsvertrag Nr. 5508, Vollwartung. Letzte Wartung am 12. des Vormonats, Befund unauffällig. Fehlerspeicher zeigt Türkontaktfehler im vierten Stock. Ein Techniker, Herr Vogel, kann am Donnerstag zwischen 8 und 12 Uhr kommen. Ersatzteil (Türkontakt) auf Lager. Kosten sind bei Vollwartung im Vertrag enthalten. Entscheidungen über Entschädigungen trifft die Kundenbetreuung Leitung, Frau Brandt.
+
+---
+
+**Ticket 71211**
+Kanal: E-Mail
+Kunde: Herr Ömer Yıldız, Eigentümer eines Geschäftshauses
+Betreff: Angebot Modernisierung, Preis zu hoch?
+
+Sehr geehrte Damen und Herren,
+Ihr Angebot vom 3. für die Modernisierung unseres Lastenaufzugs über 38.400 Euro netto kommt mir sehr hoch vor. Ein anderer Anbieter hat mir mündlich etwa 29.000 Euro genannt. Können Sie mir erklären, was in Ihrem Preis enthalten ist, ob Sie bei der Summe etwas nachlassen können und was passiert, wenn ich bis nächstes Jahr warte? Der Aufzug fährt im Moment noch, aber der Prüfer der Prüfstelle hat bei der letzten Hauptprüfung etwas zur Steuerung angemerkt.
+Mit freundlichen Grüßen
+Ö. Yıldız
+
+Interne Notiz: Angebot umfasst neue Steuerung, Frequenzumrichter, neue Türantriebe, Fangvorrichtung prüfen und Abnahme durch die Prüfstelle; Schachtbeleuchtung nicht enthalten. Mängelbericht der Prüfstelle: Steuerung entspricht nicht mehr dem Stand der Technik, Mangel "geringfügig", Frist zur Behebung 12 Monate ab Prüfdatum (Prüfdatum: 14. Mai). Preisnachlass bis maximal 4 Prozent darf der Vertrieb ohne Rücksprache gewähren, darüber entscheidet Herr Lenz.
+
+---
+
+**Ticket 71219**
+Kanal: Kontaktformular
+Kunde: Frau Dr. Marlene Keil, Praxis für Physiotherapie
+Betreff: Rechnung doppelt abgebucht
+
+Guten Tag, auf meinem Konto sind für die Wartung im Quartal zwei Abbuchungen von je 186,50 Euro erschienen, am 1. und am 4. Ich habe nur einen Vertrag. Bitte erstatten Sie die zweite Zahlung umgehend zurück. Ich muss meiner Steuerberaterin sauber belegen können, was bezahlt wurde.
+
+Interne Notiz: Zweite Abbuchung entstand, weil der Rücklauf einer fehlgeschlagenen ersten Abbuchung (Bankfehler) zeitgleich als neue Forderung angelegt wurde. Die Buchhaltung kann die Rückzahlung veranlassen, sie dauert etwa 5 Bankarbeitstage. Eine Korrekturrechnung wird automatisch erzeugt und per E-Mail versendet.
+
+---
+
+**Ticket 71226**
+Kanal: Telefon
+Kunde: Herr Detlef Brückner, Hausmeister der Seniorenresidenz Birkenhof
+Betreff: Der Aufzug ist nach dem Stromausfall tot
+
+Herr Brückner berichtet, dass nach einem Stromausfall in der Nacht der Aufzug im Haus B nicht wieder anläuft. Im Display steht "E41". Er hat den Hauptschalter schon aus- und eingeschaltet, ohne Erfolg. Im Haus wohnen mehrere Rollstuhlnutzer, der zweite Aufzug im Haus A ist zu weit weg. Er braucht heute noch jemanden.
+
+Interne Notiz: Fehler E41 bedeutet Phasenüberwachung, meist ein Sicherungs- oder Phasenfehler in der Zuleitung, nicht im Aufzug selbst. Notdienst kann heute zwischen 14 und 16 Uhr kommen, Anfahrt kostenlos, wenn der Fehler im Aufzug liegt; wenn er in der Zuleitung des Hauses liegt, wird der Einsatz mit 119 Euro netto berechnet. Der Kunde sollte vorab die Sicherungen im Keller prüfen und das Ergebnis mitteilen.
+
+---
+
+**Ticket 71231**
+Kanal: E-Mail
+Kunde: Frau Svenja Albrecht, Mieterin im Wohnhaus Lindenstraße 7
+Betreff: Beschwerde über Lärm und Gerüche im Aufzug
+
+Hallo, seit ein paar Wochen quietscht unser Aufzug jedes Mal, wenn er hält, und in der Kabine riecht es nach verbranntem Gummi. Ich habe Angst, dass das gefährlich ist. Meine Vermieterin sagt, sie habe mit Ihnen nichts zu tun, das sei Sache der Hausverwaltung. Ich möchte wissen, ob ich den Aufzug weiter benutzen kann und an wen ich mich wenden soll.
+
+Interne Notiz: Das Haus Lindenstraße 7 gehört zum Vertrag der Hausverwaltung Rosenthal & Söhne (Nr. 5521, Standardwartung). Mieter dürfen Mängel melden, aber Aufträge nur über die Verwaltung. Brandgeruch und Quietschen können auf einen heißen Bremsbelag oder auf einen schleifenden Türantrieb hinweisen. Wir senden bei Brandgeruch immer einen Techniker, ohne Kostenstelle, innerhalb von 48 Stunden, und raten, bis dahin die Nutzung einzustellen.
+
+---
+
+**Ticket 71238**
+Kanal: Brief, vom Posteingang erfasst
+Kunde: Wohnungseigentümergemeinschaft Am Mühlgraben 3–5, Verwalter Herr Konstantin Faber
+Betreff: Widerspruch gegen Preiserhöhung und Kündigung des Wartungsvertrags
+
+Sehr geehrte Damen und Herren,
+mit Schreiben vom 20. des Vormonats haben Sie uns mitgeteilt, dass sich die monatliche Wartungspauschale für unsere beiden Aufzüge ab dem 1. Januar von 212 Euro auf 241 Euro erhöht. Die Eigentümerversammlung hat beschlossen, dieser Erhöhung nicht zuzustimmen und den Vertrag zum nächstmöglichen Zeitpunkt zu kündigen. Bitte bestätigen Sie uns die Kündigung schriftlich, nennen Sie uns den Beendigungstermin und teilen Sie mit, welche Unterlagen (Prüfbücher, Schlüssel, Notrufprotokolle) wir von Ihnen erhalten.
+Mit freundlichen Grüßen
+K. Faber, Verwalter
+
+Interne Notiz: Vertrag Nr. 5340, Laufzeit bis 31. Dezember des übernächsten Jahres, Kündigungsfrist 6 Monate zum Jahresende, Preisanpassungsklausel erlaubt jährliche Erhöhung bis 6 Prozent (die Erhöhung beträgt 13,7 Prozent und liegt damit über der Grenze; Rechtsabteilung prüft). Die Prüfbücher gehören dem Betreiber und müssen auf Verlangen herausgegeben werden. Die Entscheidung über Kulanz bei der Preiserhöhung trifft Herr Lenz.

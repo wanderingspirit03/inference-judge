@@ -1,0 +1,62 @@
+We maintain street lights for several towns and use this CI pipeline for our fleet-tracking dashboard. Builds have become slow and flaky, and my manager worries about security. Can you audit the workflow, explain each problem and how bad it is, and give me a corrected version of the entire file?
+
+```yaml
+name: build-and-deploy
+
+on:
+  push:
+  pull_request_target:
+    branches: [main]
+  schedule:
+    - cron: "*/5 * * * *"
+
+env:
+  REGISTRY_PASSWORD: lampPost!2021
+  NODE_ENV: production
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-node@v1
+        with:
+          node-version: latest
+      - name: install
+        run: |
+          npm install
+          npm install -g some-cli-tool
+      - name: lint
+        run: npm run lint || true
+      - name: test
+        run: npm test
+        continue-on-error: true
+      - name: build
+        run: |
+          echo "Building for ${{ github.event.head_commit.message }}"
+          npm run build
+      - name: docker login
+        run: echo ${{ secrets.REGISTRY_TOKEN }} | docker login registry.lightworks.example.org -u ci --password-stdin
+      - name: push image
+        run: |
+          docker build -t registry.lightworks.example.org/fleet/dashboard:latest .
+          docker push registry.lightworks.example.org/fleet/dashboard:latest
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: deploy to production
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh -o StrictHostKeyChecking=no deploy@fleet.lightworks.example.org "docker pull registry.lightworks.example.org/fleet/dashboard:latest && docker-compose up -d"
+
+      - name: notify
+        run: curl -s -X POST -d "deployed ${{ github.sha }} by ${{ github.actor }}" https://chat.lightworks.example.org/hooks/ops-9f3a77
+```
+
+Background that might matter. The repository is private, but contractors from two partner firms have write access to branches and can open pull requests. We deploy to a single production server that controls the schedules of about 9,000 street lights, and a bad deploy can leave streets dark, so we need to be able to roll back quickly. The tests take about eight minutes, and the install step another three. Some developers have complained that the pipeline runs on every push to every branch, which uses up our monthly minutes, and that the scheduled run every five minutes was added by someone as a "health check" and nobody remembers why. The chat webhook is shared by several teams. We would like deployments to happen only from main, and only after tests pass, and we would like production deploys to need a manual approval.

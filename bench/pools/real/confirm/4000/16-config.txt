@@ -1,0 +1,365 @@
+I look after the onboard data systems on the research vessel RV Skerry Wren, and these are the files that collect sensor data from the winches and the CTD rosette, store it, and send it ashore over the satellite link when the cruise is at sea. Can you audit them for me? I want a list of problems ordered by how much they worry you, an explanation of each, and a corrected version of every file. We sail again in nine days.
+
+## Dockerfile (ingest service)
+
+```dockerfile
+FROM python:latest
+
+WORKDIR /app
+COPY . /app
+
+RUN apt-get update && apt-get install -y rsync curl cron vim
+RUN pip install -r requirements.txt
+
+ENV DATA_DIR=/data
+ENV SHORE_HOST=shore.skerrywren.example.org
+ENV SHORE_PASSWORD=wren-ctd-2024
+
+EXPOSE 8080 22
+CMD ["python", "ingest.py"]
+```
+
+## docker-compose.yml
+
+```yaml
+version: "3"
+services:
+  ingest:
+    build: .
+    restart: always
+    ports:
+      - "8080:8080"
+    volumes:
+      - /mnt/datastore:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - DATA_DIR=/data
+      - LOG_LEVEL=debug
+    privileged: true
+
+  ctd-listener:
+    image: skerrywren/ctd-listener:1.4
+    restart: always
+    network_mode: host
+    devices:
+      - /dev/ttyUSB0:/dev/ttyUSB0
+    volumes:
+      - /mnt/datastore:/data
+
+  dashboard:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+    volumes:
+      - grafana-data:/var/lib/grafana
+
+volumes:
+  grafana-data:
+```
+
+## sync-to-shore.sh
+
+```bash
+#!/bin/bash
+# Sends new data files to the shore server over the satellite link.
+# Run from cron every 30 minutes while at sea.
+
+DATA_DIR=/mnt/datastore
+SHORE=ops@shore.skerrywren.example.org
+LOG=/var/log/sync.log
+LOCK=/tmp/sync.lock
+
+if [ -f $LOCK ]; then
+    echo "already running" >> $LOG
+    exit 0
+fi
+touch $LOCK
+
+cd $DATA_DIR
+
+# Is the link up?
+ping -c 1 shore.skerrywren.example.org > /dev/null
+if [ $? -ne 0 ]; then
+    echo "$(date) link down" >> $LOG
+    exit 1
+fi
+
+for cruise in $(ls); do
+    echo "$(date) syncing $cruise" >> $LOG
+    rsync -avz --partial --bwlimit=0 $cruise $SHORE:/srv/incoming/ >> $LOG 2>&1
+    if [ $? -eq 0 ]; then
+        find $cruise -name "*.raw" -mtime +2 -exec rm {} \;
+    fi
+done
+
+rm $LOCK
+echo "$(date) done" >> $LOG
+```
+
+## rotate-and-clean.sh
+
+```bash
+#!/bin/sh
+# Keeps the datastore from filling up. Called nightly at 02:00 UTC.
+
+USED=$(df /mnt/datastore | tail -1 | awk '{print $5}' | sed 's/%//')
+
+if [ $USED -gt 80 ]; then
+    echo "disk at $USED percent, deleting oldest cruise"
+    OLDEST=$(ls -tr /mnt/datastore | head -1)
+    rm -rf /mnt/datastore/$OLDEST
+fi
+
+# compress logs older than a week
+find /var/log -name "*.log" -mtime +7 -exec gzip {} \;
+
+# remove temp files
+rm -rf /tmp/*
+```
+
+## crontab (user ops)
+
+```
+*/30 * * * * /home/ops/sync-to-shore.sh
+0 2 * * * /home/ops/rotate-and-clean.sh
+@reboot docker-compose -f /home/ops/wren/docker-compose.yml up -d
+```
+
+## .gitlab-ci.yml
+
+```yaml
+stages:
+  - build
+  - test
+  - deploy
+
+build-image:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker build -t skerrywren/ingest:latest .
+    - docker login -u $REGISTRY_USER -p $REGISTRY_PASSWORD
+    - docker push skerrywren/ingest:latest
+
+run-tests:
+  stage: test
+  image: python:3.12
+  script:
+    - pip install -r requirements.txt
+    - pytest tests/ || true
+
+deploy-ship:
+  stage: deploy
+  script:
+    - ssh ops@wren-gateway.skerrywren.example.org "cd wren && git pull && docker-compose pull && docker-compose up -d"
+  only:
+    - main
+  when: always
+```
+
+## config/ingest.yaml
+
+```yaml
+instruments:
+  - name: ctd-rosette
+    type: serial
+    port: /dev/ttyUSB0
+    baud: 9600
+    sample_interval_s: 1
+    output: /data/{cruise}/ctd/{date}.raw
+  - name: winch-main
+    type: tcp
+    host: 192.168.10.21
+    port: 4001
+    sample_interval_s: 5
+    output: /data/{cruise}/winch/{date}.csv
+  - name: multibeam
+    type: smb
+    share: //192.168.10.40/mbes
+    username: surveyor
+    password: Skerry2023!
+    output: /data/{cruise}/mbes/
+  - name: weather
+    type: tcp
+    host: 192.168.10.30
+    port: 4010
+    sample_interval_s: 60
+    output: /data/{cruise}/met/{date}.csv
+
+storage:
+  min_free_gb: 200
+  on_full: overwrite_oldest
+
+upload:
+  enabled: true
+  schedule: "*/30 * * * *"
+  retries: 0
+  verify: false
+```
+
+## nginx.conf (reverse proxy in front of the dashboard)
+
+```nginx
+server {
+    listen 80;
+    server_name wren-data.local;
+
+    location / {
+        proxy_pass http://dashboard:3000;
+        proxy_set_header Host $host;
+    }
+
+    location /files/ {
+        alias /mnt/datastore/;
+        autoindex on;
+    }
+
+    location /ingest/ {
+        proxy_pass http://ingest:8080/;
+        client_max_body_size 0;
+    }
+}
+```
+
+## verify-shore-copy.sh
+
+```bash
+#!/bin/bash
+# Chief scientist asked for this: tell her whether the shore copy matches the ship.
+CRUISE=$1
+SHIP=/mnt/datastore/$CRUISE
+SHORE=ops@shore.skerrywren.example.org
+
+cd $SHIP
+find . -type f | sort > /tmp/ship_files.txt
+ssh $SHORE "cd /srv/incoming/$CRUISE && find . -type f | sort" > /tmp/shore_files.txt
+
+if diff /tmp/ship_files.txt /tmp/shore_files.txt; then
+    echo "File lists match for $CRUISE"
+else
+    echo "File lists differ for $CRUISE"
+fi
+```
+
+## /etc/systemd/system/ctd-watchdog.service
+
+```ini
+[Unit]
+Description=Restart CTD listener if it stops producing data
+
+[Service]
+Type=simple
+ExecStart=/bin/bash -c 'while true; do if [ -z "$(find /mnt/datastore -name "*.raw" -mmin -5)" ]; then docker restart wren_ctd-listener_1; fi; sleep 60; done'
+Restart=always
+User=root
+
+[Install]
+WantedBy=multi-user.target
+```
+
+## alerts.yml (Prometheus rules)
+
+```yaml
+groups:
+  - name: wren
+    rules:
+      - alert: DiskAlmostFull
+        expr: node_filesystem_avail_bytes{mountpoint="/mnt/datastore"} / node_filesystem_size_bytes{mountpoint="/mnt/datastore"} < 0.05
+        for: 1m
+        labels:
+          severity: page
+      - alert: NoCtdData
+        expr: time() - ctd_last_sample_timestamp > 60
+        labels:
+          severity: warning
+```
+
+## requirements.txt
+
+```
+flask
+pyserial
+requests
+pandas
+numpy
+paramiko
+pysmb
+```
+
+## prometheus.yml
+
+```yaml
+global:
+  scrape_interval: 5s
+
+rule_files:
+  - alerts.yml
+
+scrape_configs:
+  - job_name: node
+    static_configs:
+      - targets: ["192.168.10.5:9100"]
+  - job_name: ingest
+    static_configs:
+      - targets: ["ingest:8080"]
+  - job_name: ctd
+    static_configs:
+      - targets: ["192.168.10.5:9201"]
+```
+
+## /etc/fstab (datastore lines)
+
+```
+/dev/md0   /mnt/datastore   ext4   defaults   0   0
+/dev/sdc1  /mnt/scratch     ext4   defaults   0   0
+```
+
+## /etc/logrotate.d/wren
+
+```
+/var/log/sync.log /var/log/ingest/*.log {
+    daily
+    rotate 365
+    compress
+    missingok
+    notifempty
+}
+```
+
+## /etc/udev/rules.d/90-ctd.rules
+
+```
+SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", MODE="0666"
+```
+
+## get-gps.sh (called by the ingest service to tag each file with a position)
+
+```bash
+#!/bin/bash
+POS=$(gpspipe -w -n 10 | grep -m 1 TPV | python -c "import sys, json; d=json.load(sys.stdin); print(d['lat'], d['lon'])")
+echo $POS > /data/last_position.txt
+```
+
+## backup-config.sh (weekly, run by hand by the second engineer)
+
+```bash
+#!/bin/bash
+# Copies the ship configuration to the spare laptop in the instrument lab.
+STAMP=`date +%Y%m%d`
+mkdir /mnt/scratch/config-$STAMP
+cp -r /home/ops/wren/* /mnt/scratch/config-$STAMP/
+cp /etc/fstab /etc/systemd/system/ctd-watchdog.service /mnt/scratch/config-$STAMP/
+scp -r /mnt/scratch/config-$STAMP engineer@192.168.10.77:/backups/
+echo "backup $STAMP finished"
+```
+
+## Some context
+
+The vessel has about 40 days at sea per cruise and a satellite link that runs at roughly 256 kbit/s shared with the crew's welfare internet, which is why there is a limit on the bandwidth that data transfer may use when the link is busy. The datastore is a 12 TB RAID volume, mounted at /mnt/datastore, with one directory per cruise (named like WREN-2026-04). The raw files from the CTD rosette are small but the multibeam echosounder writes around 40 GB a day, and the science party insists that nothing is deleted from the ship until the chief scientist, Dr. Ximena Abernathy-Osei, has confirmed that the shore copy is complete. The ingest container is also reachable by the scientists' laptops through the ship's network, and the ship's IT officer, Bartholomew Nkemelu, has told me that the guest wifi is on the same network segment as the instruments, which I know is not ideal.
+
+Two things happened on the last cruise that I want to make sure cannot happen again. On day 23 the datastore reached 94 percent and the nightly script deleted the oldest cruise directory on the volume, which turned out to be WREN-2026-02, whose shore copy had stopped half way through three weeks earlier without anyone noticing. Then on day 31 the CTD stopped sampling for about eleven hours overnight because the serial adapter had reset, and the watchdog restarted the container over and over without fixing it, so the gap was only found when the morning shift looked at the plots. The Prometheus alert for that case never fired. Please assume the scientists will want any change to be easy to explain to a non-specialist, and that I can edit files on the ship but cannot easily pull new images while at sea.

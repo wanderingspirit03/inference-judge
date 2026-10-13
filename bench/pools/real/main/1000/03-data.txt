@@ -1,0 +1,26 @@
+Below is a table from our digitisation project showing how the team did over the last eight weeks. Please write up an analysis for the museum's board: what the numbers say, what looks odd or worrying, what probably explains it, and what we should do next. A few paragraphs per theme, please, and a closing list of recommendations.
+
+Context: The Aldermere Museum is scanning its collection of 18,000 photographs, letters and small objects, working through boxes in order. Each week the team (three scanners and one quality checker, with volunteers on Wednesdays) records how many items were scanned, how many failed the quality check and had to be rescanned, how many records got full descriptions, and the number of hours worked. The scanning budget assumes 210 items scanned per week.
+
+| Week | Starting | Items scanned | Rescans | Items described | Hours worked | Notes |
+|---|---|---|---|---|---|---|
+| 1 | 2 Mar | 232 | 18 | 140 | 118 | New flatbed scanner in use |
+| 2 | 9 Mar | 246 | 21 | 152 | 121 | |
+| 3 | 16 Mar | 251 | 19 | 149 | 120 | Volunteers joined (4 people) |
+| 4 | 23 Mar | 274 | 33 | 160 | 134 | Letters from the Harrow bequest |
+| 5 | 30 Mar | 188 | 41 | 97 | 96 | Easter week, one scanner on leave |
+| 6 | 6 Apr | 205 | 52 | 118 | 112 | Fragile paper, slower handling |
+| 7 | 13 Apr | 263 | 24 | 171 | 126 | Back to photographs |
+| 8 | 20 Apr | 281 | 22 | 176 | 128 | Volunteers (6 people) |
+
+Totals: 1,940 items scanned, 230 rescans, 1,163 items described, 955 hours worked.
+
+Some further facts that may help:
+- The quality checker, Imogen Pryce, rejects an item if the colour chart is out of range, if edges are cropped, or if dust marks cover more than two percent of the image. She says her standard did not change during the eight weeks.
+- The cost of one staff hour is 19.50 pounds including employer costs. Volunteer hours are counted in the hours column but cost nothing.
+- Boxes 1 to 40 hold photographs; boxes 41 to 52 are letters. Weeks 4 to 6 were spent on boxes 41 to 49.
+- Descriptions are written by the team from catalogue cards. The museum's funder asks that at least 60 percent of scanned items have a full description by the end of June.
+- Storage so far: 1.1 terabytes. The server has 4 terabytes free, and the museum expects to scan at higher resolution for the letters, which would double the size per item.
+- The new scanner was bought in February for 3,400 pounds, and the funder paid half.
+
+The board meets in two weeks. The director, Hadiza Mensah, wants to know whether to ask the funder for money to pay for one extra part-time scanner, or whether the volunteers are enough. She is also unsure whether it is right to count rescans in the weekly target, since they do not add new items.

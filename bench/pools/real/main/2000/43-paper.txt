@@ -1,0 +1,51 @@
+I'm on the review panel for our internal research series and this write-up landed on my desk today. Could you write me a detailed peer review of it? I'd like you to go through the methods and the results, point out what is convincing and what is not, name any flaws in the design or the statistics, and tell me what the authors should do before we circulate it to the regional managers.
+
+Title: Does a longer first fitting appointment reduce lens remakes? A staggered rollout across 38 Larkfield Opticians branches
+
+Authors: Imogen Tarrant (Clinical Quality), Dev Okonkwo-Pryce (Data and Insight), Marta Lindqvist (Retail Operations)
+
+1. Background
+
+Lens remakes are the single largest avoidable cost in our dispensing operation. A remake happens when a customer returns within 60 days because the glasses do not suit them, for reasons such as the wrong fitting height, an unexpected swim effect, or discomfort with a progressive design. In the 2025 financial year the chain remade 11,420 pairs out of 96,180 dispensed, a remake rate of 11.9 percent, at an average cost of 74 pounds per remake in lenses, labour and postage. Clinical Quality proposed that the first fitting appointment, then scheduled at 15 minutes, was too short for staff to check frame position, explain adaptation and measure properly. The hypothesis was that extending the appointment to 25 minutes would lower the remake rate enough to pay for the extra staff time.
+
+2. Methods
+
+2.1 Design. We used a staggered rollout. Of 38 branches that dispense progressive and varifocal lenses, 12 were assigned to switch to the 25-minute fitting in March 2025, 13 in May 2025 and 13 in July 2025. Assignment was made by Retail Operations, who put the branches with the most available staff rooms into the earliest group so that the longer appointments would not collide with the diary. Branches therefore were not randomised. Each branch contributes the months before and after its own switch, and the main comparison is between the remake rate in switched branches and the remake rate in not yet switched branches in the same calendar month.
+
+2.2 Population. We included every pair of glasses with progressive, varifocal or occupational lenses dispensed between 1 October 2024 and 31 August 2025 and counted a remake if a replacement was ordered for any clinical reason within 60 days of collection. Remakes due to damage, loss or a changed prescription from a new eye test were excluded. In total 41,870 eligible pairs were dispensed over the period, of which 17,310 were dispensed after their branch had switched.
+
+2.3 Outcome. The primary outcome was the 60-day remake rate per branch per month. The secondary outcomes were the customer satisfaction score, a single question on a 1 to 5 scale sent by text message 14 days after collection, and the number of fittings completed per dispenser per day.
+
+2.4 Analysis. We fitted a linear model of the monthly branch remake rate on a treatment indicator, with branch and calendar month fixed effects, weighting each branch month by the number of pairs dispensed. Standard errors were clustered by branch. We also report a simple unadjusted comparison of the average remake rate in the months before and after the switch. No sample size calculation was done in advance, as the rollout schedule was set by operations. Missing satisfaction scores, which were 61 percent of all pairs, were left out of the satisfaction analysis.
+
+3. Results
+
+3.1 Remake rate. In the unadjusted comparison across all groups the average progressive remake rate fell from 14.6 percent before the switch to 10.9 percent after, a drop of 3.7 percentage points. In the fixed effects model the estimated treatment effect was minus 2.4 percentage points (95 percent confidence interval minus 4.1 to minus 0.7). The effect was larger in the first group of branches (minus 3.8 points) than in the third group (minus 0.9 points, interval minus 3.0 to plus 1.2).
+
+Table 1. Remake rate by rollout group (percent of eligible pairs, all months before and after each group's own switch)
+
+| Group | Branches | Before | After | Change |
+|---|---|---|---|---|
+| 1 (March 2025) | 12 | 15.2 | 11.1 | minus 4.1 |
+| 2 (May 2025) | 13 | 14.5 | 10.8 | minus 3.7 |
+| 3 (July 2025) | 13 | 14.1 | 10.7 | minus 3.4 |
+
+Note that the group 3 figures rest on only two months after the switch (July and August 2025), because the data end on 31 August 2025, and the group 2 figures on four months. The model estimates in section 3.1 use all available months.
+
+3.2 Satisfaction. The mean satisfaction score rose from 4.21 to 4.34 among customers who answered. The authors note that the response rate was higher after the switch, 42 percent against 36 percent.
+
+3.3 Throughput. Dispensers completed an average of 9.1 fittings per day before the switch and 6.8 after it. Seven branches reported that they lengthened their opening hours on Saturdays to compensate, which is not reflected in the per day figures.
+
+3.4 Cost. Using the 74 pound cost per remake, a 2.4 point reduction applied to 41,870 pairs would avoid about 1,005 remakes, a saving of roughly 74,400 pounds over eleven months. Extra dispenser time was estimated at 6,100 hours at 14.20 pounds an hour, which is 86,600 pounds, so the authors report a net cost of 12,200 pounds. They argue that the figure is acceptable because it ignores the value of customer goodwill and a lower number of complaints, which they did not measure.
+
+4. Discussion
+
+The authors conclude that the longer appointment works and recommend rolling it out to all 104 branches, including those that do not dispense many progressive lenses. They suggest the smaller effect in the third group is a sign that branches learned to use the time well only in the later months, and they attribute the larger early effect to the enthusiasm of the first adopters. They acknowledge that branches were not randomised but state that the fixed effects model removes any difference between them. They add that the weather in the spring of 2025 was unusually bright, which may have affected how many customers came in for sunglasses, but they did not adjust for this.
+
+5. Limitations stated by the authors
+
+The study covers a single financial year, and no data on lens type, frame type or the age of the customer were included in the model. The authors also say that dispensers knew which regime they were working under, so the remake decisions made by the dispensers could have been influenced, although remakes are logged by the laboratory and not by the branch.
+
+6. Appendix: branch characteristics
+
+Group 1 branches had on average 3.2 dispensers, group 2 had 2.8 and group 3 had 2.5. The mean number of progressive pairs dispensed per branch per month was 118 in group 1, 104 in group 2 and 92 in group 3. Four branches in group 3 lost their most senior dispenser during the study period, and one branch in group 2 moved to a new unit in July 2025.

@@ -107,6 +107,21 @@ def test_tps_compile_stalled_blocks_are_dropped(tmp_path):
     assert only["status"] == "compile_stalls" and only["value"] is None
 
 
+def test_tps_a_sweep_that_wrote_no_summary_is_not_called_a_stall(tmp_path):
+    """The harness refused to start (a prompt pool with nothing left for a
+    size, say): there is no block, and the reason says so."""
+    good = tps_block_dir(tmp_path, "good", 512.0)
+    (tmp_path / "empty").mkdir()
+    l = compare.tps_launch([tmp_path / "empty", good], label="C2", role="candidate")
+    assert l["status"] == "ok" and l["n_unmeasured"] == 1
+    l = compare.tps_launch([tmp_path / "empty"], label="C2", role="candidate")
+    assert l["status"] == "no_measurement" and l["value"] is None
+    verdict, reasons = compare._launch_problem(l)
+    assert verdict == "INVALID"
+    assert "1 of 1 sweeps wrote no summary" in reasons[0] and "run.log" in reasons[0]
+    assert "stalled" not in reasons[0]
+
+
 def test_tps_identical_candidate_is_not_promoted(tmp_path):
     r = abba(tmp_path)
     assert r["verdict"] == "REJECTED"
@@ -320,6 +335,48 @@ def test_tps_calibration_floors_sigma_l(tmp_path):
     assert cal["stamps"] == STAMPS
     with pytest.raises(ValueError):
         compare.tps_calibration(ls[:1], STAMPS)
+
+
+def test_tps_a_calibration_names_the_launch_that_is_not_a_measurement(tmp_path):
+    """The ruler does not choose which launches of the incumbent count: one
+    that is not a measurement refuses the calibration, by name and with the
+    launch's own reason."""
+    ls = [launch(tmp_path, "K1", "incumbent", 1000.0),
+          launch(tmp_path, "K2", "incumbent", 1000.0, invalid={"length": 3}),
+          launch(tmp_path, "K3", "incumbent", 0.0)]
+    assert compare.tps_calibration_problems(ls[:1]) == []
+    why = compare.tps_calibration_problems(ls)
+    assert len(why) == 2
+    assert "invalid_requests in K2" in why[0] and "length x" in why[0]
+    assert "K3" in why[1] and "headline 0" in why[1]
+    with pytest.raises(ValueError, match="invalid_requests in K2"):
+        compare.tps_calibration(ls, STAMPS)
+
+
+def test_tps_calibrate_can_be_asked_about_the_launches_so_far(tmp_path, capsys):
+    """run.sh asks after every launch, so a calibration that cannot stand ends
+    at the launch that broke it and not after the last one."""
+    paths = []
+    for label, kw in (("K1", {}), ("K2", {"invalid": {"length": 3}})):
+        l = launch(tmp_path, label, "incumbent", 1000.0, **kw)
+        paths.append(tmp_path / f"{label}.json")
+        paths[-1].write_text(json.dumps(l))
+    out = tmp_path / "check.json"
+
+    def ask(n):
+        rc = compare.main(["tps-calibrate", "--so-far", "--out", str(out),
+                           *sum((["--launch", str(p)] for p in paths[:n]), [])])
+        return rc, json.loads(out.read_text())
+
+    assert ask(1) == (0, {"ok": True, "verdict": None, "reasons": []})   # one is not yet two
+    rc, res = ask(2)
+    assert rc == 1 and res["verdict"] == "INVALID" and not res["ok"]
+    assert len(res["reasons"]) == 1 and "invalid_requests in K2" in res["reasons"][0]
+    # the calibration itself says the same, and writes nothing
+    cal = tmp_path / "calibration.json"
+    assert compare.main(["tps-calibrate", "--out", str(cal),
+                         *sum((["--launch", str(p)] for p in paths), [])]) == 1
+    assert not cal.exists() and "invalid_requests in K2" in capsys.readouterr().err
 
 
 def test_tps_promote_and_confirmation(tmp_path):

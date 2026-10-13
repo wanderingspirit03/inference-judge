@@ -1,0 +1,49 @@
+Please write one detailed reply to this thread that settles every open point and says where I disagree, and then give me a list of actions with an owner and a date for each. I'm Rhea, the product manager, so the reply goes out from me.
+
+---
+From: Callum Ferreira (Engineering lead)
+To: Rhea Castellano, Anouk Visser, Dimitri Ortega
+Date: Mon 12 Oct, 09:14
+Subject: Card freeze feature - can we hit the 2 November release?
+
+Hi all, I looked at the card freeze work again. Backend is done and tested. The app screens are about 70% built. What's left is the confirmation flow, the error states, and the push notification when a card is frozen from another device. I think we can make 2 November if we cut the notification to a later release. If we keep it in, I would say 16 November. Can we decide this week?
+
+Callum
+
+---
+From: Anouk Visser (Design)
+To: Callum Ferreira, Rhea Castellano, Dimitri Ortega
+Date: Mon 12 Oct, 11:40
+Subject: Re: Card freeze feature - can we hit the 2 November release?
+
+I would push back on cutting the notification. In the research sessions, 5 of 8 people said they only trust a freeze if they get a message afterwards. Without it, I think many will open the app a second time just to check, and support will get calls. Also the error states are not finished in Figma yet, I will have them by Wednesday. If we need the dates to hold, I can drop the animation on the confirmation screen, which saves Callum about two days.
+
+Anouk
+
+---
+From: Dimitri Ortega (Compliance)
+To: Callum Ferreira, Anouk Visser, Rhea Castellano
+Date: Mon 12 Oct, 14:05
+Subject: Re: Card freeze feature - can we hit the 2 November release?
+
+Two things from my side. First, the in-app text must say clearly that a freeze does not stop recurring payments already authorised, such as subscriptions, or we risk complaints. Legal wants to approve the wording, and they need five working days. Second, the notification must not show the last four digits of the card on the lock screen. Please do not ship without both.
+
+Dimitri
+
+---
+From: Callum Ferreira
+To: Rhea Castellano, Anouk Visser, Dimitri Ortega
+Date: Tue 13 Oct, 08:50
+Subject: Re: Card freeze feature - can we hit the 2 November release?
+
+Understood on the digits, that is easy, the lock screen text will just say "Your card was frozen". On the legal wording, if the text goes to legal tomorrow, Wednesday, they will be done by Wednesday 21 October, which is fine for 2 November. But the app store review has been taking two to three days lately, so we need the final build by Thursday 29 October at the latest. If the notification stays in and Anouk drops the animation, I now think 9 November is realistic, not 16. Rhea, which one do you want?
+
+Callum
+
+---
+From: Rhea Castellano
+To: Callum Ferreira, Anouk Visser, Dimitri Ortega
+Date: Tue 13 Oct, 10:22
+Subject: Re: Card freeze feature - can we hit the 2 November release?
+
+Thanks everyone. I will reply properly this afternoon. One more input first: Sales has told me that the partner bank wants card freeze in the demo they are giving to their board on 10 November. So I lean towards 9 November, but I need to check whether the beta testers can have it earlier. Dimitri, can you send me the exact wording you want before I write back?

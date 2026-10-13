@@ -1,0 +1,326 @@
+Our harbour authority runs a small internal tool that allocates berths to fishing boats and works out the harbour dues and the fish landing fees each month. I wrote it a few years ago and now other people have started to depend on it. Please do a thorough code review (bugs, edge cases, money handling, design, anything risky), explain what you would change and why, and then write a full set of unit tests with pytest covering the main behaviour and the edge cases you find. I would like the tests to be complete enough that I can refactor with confidence.
+
+```python
+"""harbour.py - berth allocation, dues and landing fees for Port Merrow.
+
+Used by the harbour office to allocate berths and to produce the monthly
+invoice lines for each vessel.
+"""
+
+import csv
+import datetime
+import io
+import math
+from collections import defaultdict
+from dataclasses import dataclass, field
+
+DUES_PER_GT_PER_DAY = 0.42        # euro per gross tonne per day
+MINIMUM_DAILY_DUES = 6.50
+NIGHT_SURCHARGE = 0.15            # applied to arrivals between 22:00 and 05:00
+LANDING_FEE_RATE = 0.012          # share of landed value
+LANDING_FEE_MINIMUM = 4.00
+HOME_PORT_DISCOUNT = 0.20
+ICE_PRICE_PER_TONNE = 38.0
+VAT = 0.21
+
+LENGTH_CLASSES = [(12, "S"), (18, "M"), (30, "L")]
+
+
+@dataclass
+class Vessel:
+    reg: str
+    name: str
+    gross_tonnage: float
+    length_m: float
+    home_port: str = "Port Merrow"
+    species_licences: list = field(default_factory=list)
+
+    def size_class(self):
+        for limit, label in LENGTH_CLASSES:
+            if self.length_m < limit:
+                return label
+        return "XL"
+
+
+@dataclass
+class Berth:
+    code: str
+    max_length_m: float
+    max_draught_m: float
+    has_power: bool = False
+    occupied_by: str = None
+
+
+@dataclass
+class Stay:
+    vessel: Vessel
+    berth_code: str
+    arrival: datetime.datetime
+    departure: datetime.datetime = None
+
+
+@dataclass
+class Landing:
+    vessel_reg: str
+    species: str
+    weight_kg: float
+    price_per_kg: float
+    when: datetime.date
+
+    @property
+    def value(self):
+        return self.weight_kg * self.price_per_kg
+
+
+class AllocationError(Exception):
+    pass
+
+
+class Harbour:
+    def __init__(self, berths, ice_sales=[]):
+        self.berths = {b.code: b for b in berths}
+        self.stays = []
+        self.landings = []
+        self.ice_sales = ice_sales
+
+    # ---- berth allocation -------------------------------------------------
+
+    def free_berths(self):
+        return [b for b in self.berths.values() if b.occupied_by is None]
+
+    def find_berth(self, vessel, draught_m, needs_power=False):
+        candidates = []
+        for berth in self.free_berths():
+            if berth.max_length_m < vessel.length_m:
+                continue
+            if berth.max_draught_m < draught_m:
+                continue
+            if needs_power and not berth.has_power:
+                continue
+            candidates.append(berth)
+        if not candidates:
+            raise AllocationError("no berth for %s" % vessel.reg)
+        # smallest berth that fits, so the big ones stay free
+        candidates.sort(key=lambda b: b.max_length_m)
+        return candidates[0]
+
+    def arrive(self, vessel, draught_m, when, needs_power=False):
+        berth = self.find_berth(vessel, draught_m, needs_power)
+        berth.occupied_by = vessel.reg
+        stay = Stay(vessel, berth.code, when)
+        self.stays.append(stay)
+        return stay
+
+    def depart(self, reg, when):
+        for stay in self.stays:
+            if stay.vessel.reg == reg and stay.departure is None:
+                stay.departure = when
+                self.berths[stay.berth_code].occupied_by = None
+                return stay
+        raise AllocationError("%s is not in port" % reg)
+
+    # ---- dues -------------------------------------------------------------
+
+    def days_of_stay(self, stay, month_end=None):
+        end = stay.departure or month_end or datetime.datetime.now()
+        delta = end - stay.arrival
+        return max(1, math.ceil(delta.total_seconds() / 86400))
+
+    def is_night_arrival(self, stay):
+        h = stay.arrival.hour
+        return h >= 22 or h < 5
+
+    def dues_for_stay(self, stay, month_end=None):
+        days = self.days_of_stay(stay, month_end)
+        daily = stay.vessel.gross_tonnage * DUES_PER_GT_PER_DAY
+        if daily < MINIMUM_DAILY_DUES:
+            daily = MINIMUM_DAILY_DUES
+        total = daily * days
+        if self.is_night_arrival(stay):
+            total = total + total * NIGHT_SURCHARGE
+        if stay.vessel.home_port == "Port Merrow":
+            total = total - total * HOME_PORT_DISCOUNT
+        return round(total, 2)
+
+    # ---- landings -----------------------------------------------------------
+
+    def record_landing(self, landing):
+        known = [s.vessel for s in self.stays if s.vessel.reg == landing.vessel_reg]
+        if not known:
+            raise AllocationError("landing from unknown vessel %s" % landing.vessel_reg)
+        vessel = known[0]
+        if landing.species not in vessel.species_licences:
+            raise ValueError("%s is not licensed for %s" % (vessel.reg, landing.species))
+        if landing.weight_kg <= 0:
+            raise ValueError("weight must be positive")
+        self.landings.append(landing)
+
+    def landing_fee(self, landing):
+        fee = landing.value * LANDING_FEE_RATE
+        if fee < LANDING_FEE_MINIMUM:
+            fee = LANDING_FEE_MINIMUM
+        return round(fee, 2)
+
+    def quota_used(self, reg, species, year):
+        total = 0
+        for l in self.landings:
+            if l.vessel_reg == reg and l.species == species and l.when.year == year:
+                total += l.weight_kg
+        return total
+
+    def quota_remaining(self, reg, species, year, quota_kg):
+        return quota_kg - self.quota_used(reg, species, year)
+
+    # ---- ice ----------------------------------------------------------------
+
+    def sell_ice(self, reg, tonnes, when):
+        self.ice_sales.append((reg, tonnes, when))
+
+    def ice_total(self, reg, year, month):
+        total = 0
+        for r, t, w in self.ice_sales:
+            if r == reg and w.year == year and w.month == month:
+                total += t * ICE_PRICE_PER_TONNE
+        return total
+
+    # ---- invoicing ----------------------------------------------------------
+
+    def invoice_lines(self, reg, year, month):
+        lines = []
+        month_start = datetime.datetime(year, month, 1)
+        if month == 12:
+            month_end = datetime.datetime(year + 1, 1, 1)
+        else:
+            month_end = datetime.datetime(year, month + 1, 1)
+
+        for stay in self.stays:
+            if stay.vessel.reg != reg:
+                continue
+            if stay.arrival < month_end and (stay.departure is None or stay.departure >= month_start):
+                dues = self.dues_for_stay(stay, month_end)
+                lines.append(("Harbour dues %s" % stay.berth_code, dues))
+
+        for landing in self.landings:
+            if landing.vessel_reg == reg and landing.when.year == year and landing.when.month == month:
+                lines.append(
+                    ("Landing fee %s %skg" % (landing.species, landing.weight_kg),
+                     self.landing_fee(landing))
+                )
+
+        ice = self.ice_total(reg, year, month)
+        if ice:
+            lines.append(("Ice", round(ice, 2)))
+
+        return lines
+
+    def invoice_total(self, reg, year, month):
+        net = sum(amount for _, amount in self.invoice_lines(reg, year, month))
+        vat = round(net * VAT, 2)
+        return {"net": round(net, 2), "vat": vat, "gross": round(net + vat, 2)}
+
+    def monthly_csv(self, year, month):
+        regs = sorted({s.vessel.reg for s in self.stays})
+        out = io.StringIO()
+        writer = csv.writer(out)
+        writer.writerow(["reg", "net", "vat", "gross"])
+        for reg in regs:
+            t = self.invoice_total(reg, year, month)
+            writer.writerow([reg, t["net"], t["vat"], t["gross"]])
+        return out.getvalue()
+
+    def landings_by_species(self, year, month):
+        result = defaultdict(float)
+        for l in self.landings:
+            if l.when.year == year and l.when.month == month:
+                result[l.species] += l.weight_kg
+        return dict(result)
+
+    def occupancy_report(self):
+        rows = []
+        for code, b in sorted(self.berths.items()):
+            rows.append((code, b.max_length_m, b.occupied_by or "-"))
+        return rows
+
+
+def parse_landing_row(row):
+    """Parse one row of the landing slip CSV: reg,species,kg,price,date"""
+    reg, species, kg, price, date = row
+    y, m, d = date.split("-")
+    return Landing(reg.strip(), species.strip().lower(), float(kg), float(price),
+                   datetime.date(int(y), int(m), int(d)))
+
+
+def load_landings(text):
+    reader = csv.reader(io.StringIO(text))
+    next(reader)
+    return [parse_landing_row(r) for r in reader if r]
+
+QUOTAS_KG = {
+    ("cod", 2026): 1800.0,
+    ("haddock", 2026): 2500.0,
+    ("plaice", 2026): 1200.0,
+}
+
+
+def overdue_stays(harbour, now, max_days=14):
+    """Return stays that are still open and longer than max_days."""
+    result = []
+    for stay in harbour.stays:
+        if stay.departure is None and (now - stay.arrival).days > max_days:
+            result.append(stay)
+    return result
+
+
+def vessels_over_quota(harbour, year):
+    """Return a dict reg -> list of species where landings exceed the quota."""
+    over = {}
+    regs = {l.vessel_reg for l in harbour.landings}
+    for reg in regs:
+        for (species, quota_year), quota in QUOTAS_KG.items():
+            if quota_year != year:
+                continue
+            if harbour.quota_used(reg, species, year) > quota:
+                over.setdefault(reg, []).append(species)
+    return over
+
+
+def berth_utilisation(harbour, start, end):
+    """Share of berth-days used between two datetimes, from 0 to 1."""
+    total_days = (end - start).days * len(harbour.berths)
+    used = 0
+    for stay in harbour.stays:
+        a = max(stay.arrival, start)
+        b = min(stay.departure or end, end)
+        if b > a:
+            used += (b - a).days
+    return used / total_days
+
+
+def export_landings(harbour, year, month):
+    out = io.StringIO()
+    writer = csv.writer(out)
+    writer.writerow(["reg", "species", "kg", "price_per_kg", "value", "date"])
+    for l in sorted(harbour.landings, key=lambda x: x.when):
+        if l.when.year == year and l.when.month == month:
+            writer.writerow([l.vessel_reg, l.species, l.weight_kg, l.price_per_kg,
+                             l.value, l.when.isoformat()])
+    return out.getvalue()
+
+
+def average_price_per_kg(harbour, species, year, month):
+    weights = 0
+    values = 0
+    for l in harbour.landings:
+        if l.species == species and l.when.year == year and l.when.month == month:
+            weights += l.weight_kg
+            values += l.value
+    return values / weights
+
+
+def split_invoice(lines, parts):
+    """Split invoice lines evenly between co-owners of a vessel."""
+    share = [(label, round(amount / parts, 2)) for label, amount in lines]
+    return [share for _ in range(parts)]
+```
+
+A few facts that may help. Port Merrow has 38 berths, and the invoice run is done on the first working day of each month. About 90 vessels use the harbour in a month, mostly local boats that stay for a few days. Prices are in euro. Landing slips arrive as CSV from the fish auction. The home port discount applies to vessels registered at Port Merrow, and the night surcharge was introduced two years ago for arrivals that need extra staff. Dues have been disputed twice by owners who said they were charged for days they were out at sea.

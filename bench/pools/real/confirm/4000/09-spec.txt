@@ -1,0 +1,146 @@
+Here is the spec for the new scheduling and records system we are building for our clinic. Please write me a complete test plan for it, with numbered test cases (preconditions, steps, expected result) grouped by feature, plus a short list of the edge cases and negative tests you think the spec leaves open.
+
+# Larkfield Veterinary Clinic: Scheduling and Patient Records System (LVC-SRS)
+Version 0.9, owner: Marguerite Oyelaran (practice manager), technical lead: Tobias Wennerström
+
+## 1. Purpose and scope
+
+Larkfield Veterinary Clinic has three consulting rooms, one surgical theatre, a small laboratory and a dispensary, served by four vets (Dr. Anselm Kowalczyk, Dr. Priya Raghunathan, Dr. Imogen Fairweather, Dr. Daniel Okonkwo-Lyle), five nurses and three reception staff. Today appointments live in a paper diary and a shared spreadsheet, and patient histories are split between index cards and a legacy database. LVC-SRS replaces all of this with one web application used on the reception desktop, the consulting-room tablets and the nurses' phones.
+
+In scope: appointment booking, reminders, patient and owner records, clinical notes, medication dispensing, stock control for the dispensary, laboratory result intake, invoicing and daily takings. Out of scope for version 1: online payment, the owners' mobile app, and insurance claim submission.
+
+## 2. Users and roles
+
+| Role | Can do |
+|---|---|
+| Receptionist | Create and edit owners and patients, book and move appointments, take payment, print invoices. Cannot read clinical notes. |
+| Nurse | Read and add clinical notes in "nursing" category, record weights and vitals, dispense stock against a prescription, enter lab results. Cannot sign prescriptions. |
+| Vet | Everything a nurse can, plus sign prescriptions, close consultations, edit any clinical note written under their own name, and view the full history. |
+| Practice manager | Everything except clinical notes, plus reports, price lists, user administration and stock adjustments above 5 units. |
+
+Every user logs in with an individual account. Passwords must be at least 12 characters. After 10 minutes of inactivity the session locks; after 5 consecutive failed logins the account is locked for 15 minutes. All writes are recorded in an audit log (user, time, record, old value, new value) that cannot be edited from the application.
+
+## 3. Owners and patients
+
+3.1 An owner record has: surname, given name, at least one phone number, email (optional), postal address, preferred contact method (phone, email, none), and a free-text note. Duplicate detection: if a new owner has the same surname and the same phone number as an existing one, the system warns the user and offers to open the existing record. It does not block creation.
+
+3.2 A patient belongs to exactly one owner at a time. Fields: name, species (dog, cat, rabbit, guinea pig, bird, reptile, other), breed (free text), sex (male, female), neutered (yes/no), date of birth (exact or estimated to the month), colour, microchip number (15 digits, optional), insurance reference (optional), and status (active, deceased, transferred). Marking a patient deceased cancels all future appointments and reminders for that patient and requires a vet.
+
+3.3 Ownership transfer: a vet or the practice manager can move a patient to a different owner. The old owner stays in the history of the patient. Open invoices stay with the owner who was responsible when they were created.
+
+3.4 Microchip numbers are unique across active patients. Entering a number already in use shows the patient it belongs to and refuses to save.
+
+3.5 Weight is recorded in kilograms with one decimal for animals under 10 kg and with no decimal above. A weight that differs by more than 20 percent from the previous weight within 30 days is accepted but flagged for the vet.
+
+## 4. Appointments
+
+4.1 Appointment types and default lengths:
+
+| Type | Default length | Room |
+|---|---|---|
+| Consultation | 15 min | Consulting room |
+| Vaccination | 10 min | Consulting room |
+| Dental check | 20 min | Consulting room |
+| Surgery | 60 min | Theatre |
+| Nurse clinic | 20 min | Consulting room |
+| Lab drop-off | 5 min | None |
+
+4.2 The diary shows one column per vet and one per room, in 5-minute slots, between the clinic opening hours: Monday to Friday 08:00 to 18:30, Saturday 09:00 to 13:00, closed Sunday and on the public holidays listed by the practice manager. Booking outside opening hours is refused.
+
+4.3 A booking needs a patient, a type, a vet (or "any available vet"), a start time and a reason. The system rejects a booking if the vet, or the room, is already occupied for any part of the interval. A surgery booking additionally reserves a 30-minute recovery block directly after it in the theatre column, which cannot be booked by anyone else.
+
+4.4 "Any available vet" chooses the vet with the fewest booked minutes on that day who is not on leave. Ties are broken alphabetically by surname.
+
+4.5 Leave: the practice manager enters leave for a vet as a date range. Existing appointments inside the range are listed and must each be moved or cancelled before the leave is saved.
+
+4.6 Moving an appointment keeps its history. Cancelling requires a reason from a list (owner request, no show, clinic cancelled, patient deceased, other). If an appointment is cancelled less than 2 hours before its start, the system adds a "late cancellation" mark to the owner. Three marks in 12 months show a banner at booking time. The banner does not block booking.
+
+4.7 Emergency walk-ins can be added at the top of the day with a type of "Emergency" and no start time. They are shown in a separate queue and ordered by arrival. A vet picks one from the queue, and it then becomes a normal 30-minute appointment starting now, which may overlap the vet's next booking. The system warns of the overlap and lists the affected appointments.
+
+4.8 Overbooking: a receptionist cannot overbook. The practice manager can, by confirming a warning that names the overlapped appointment. Overbooked entries are shown with a red border.
+
+## 5. Reminders
+
+5.1 Vaccination reminders are generated from the vaccination schedule on the patient. For each vaccine the vet sets an interval in months (for most vaccines 12, for some 36). A reminder is created 30 days before the due date and a second one 7 days before, unless a booking for a vaccination already exists.
+
+5.2 Appointment reminders: 48 hours and 3 hours before the start, by the owner's preferred method. If the preferred method is "none", no reminder is sent. If the preferred method is email but no email is stored, the system falls back to phone text message and records that it did.
+
+5.3 An owner can reply "C" to a text message to cancel. This cancels the appointment with the reason "owner request" and sends a confirmation. Any other reply is stored on the owner record and shown to reception.
+
+5.4 Reminders are not sent between 21:00 and 07:30 local time; they are queued and sent at 07:30. A reminder for an appointment starting before 09:00 is sent the evening before at 20:00 instead of the 3-hour reminder.
+
+## 6. Clinical notes and prescriptions
+
+6.1 A consultation has: reason, history, examination findings, diagnosis, plan, and attachments (images or PDF up to 10 MB each, at most 8 per consultation). Notes are saved as a draft every 30 seconds. A consultation is closed by a vet; after closing, notes can only be extended through an addendum that carries its own author and timestamp.
+
+6.2 A prescription lists drug, strength, form, dose per administration, frequency, duration in days, and total quantity. The total quantity must equal dose times frequency times days, within rounding to the pack unit; otherwise the system shows the calculated figure and asks the vet to confirm.
+
+6.3 Controlled drugs (list maintained by the practice manager) require a second sign-off by another vet before they can be dispensed. The same person cannot give both sign-offs.
+
+6.4 Allergy check: each patient can have allergies recorded. Prescribing a drug whose active ingredient matches a recorded allergy shows a blocking warning that the vet can override only by entering a reason.
+
+6.5 Dose guidance: for drugs with a weight-based range in the formulary, a dose outside the range for the last recorded weight shows a warning. The weight must be less than 90 days old; otherwise the warning says the weight is out of date.
+
+## 7. Dispensary and stock
+
+7.1 Each stock item has a code, name, form, pack size, unit, reorder level, reorder quantity, supplier, cost price and sale price, and one or more batches with a batch number and expiry date.
+
+7.2 Dispensing deducts from the batch with the earliest expiry that has enough quantity. A batch past its expiry date can never be dispensed. A batch expiring within 30 days is dispensed only if no later batch exists, and the nurse sees a notice.
+
+7.3 When the total quantity of an item falls to or below its reorder level, it is added to the next morning's reorder list at 07:00. Items already on an open order are not added again.
+
+7.4 Goods in: a nurse or the practice manager enters a delivery note against an order, one line per item and batch. Receiving more than was ordered is allowed with a warning; receiving an item that was not on the order is refused.
+
+7.5 Stock adjustments (breakage, expiry write-off, count correction) require a reason. Adjustments above 5 units need the practice manager.
+
+## 8. Laboratory
+
+8.1 Samples are registered with the patient, a test panel and the collection time. The analyser sends results as a file dropped into a shared folder every few minutes. The system matches each result to a sample by the sample barcode.
+
+8.2 A result outside the reference range for the species is marked high or low. A result more than three times outside range is marked critical and appears on the vet's home screen until acknowledged.
+
+8.3 A result that cannot be matched to any sample goes into an "unmatched" list for the practice manager. Results are never discarded.
+
+## 9. Invoicing and takings
+
+9.1 An invoice is created automatically when a consultation is closed and collects the consultation fee, procedures and dispensed items from that visit. Prices are taken from the price list valid on the day of the visit. Sales tax is 20 percent on medicines, food and all services.
+
+9.2 A receptionist can apply a discount of up to 10 percent; larger discounts need the practice manager. Payment methods: cash, card, and account (invoice sent to the owner, due in 30 days).
+
+9.3 Invoices cannot be deleted. A mistake is corrected by a credit note that references the original and a new invoice.
+
+9.4 End of day: the practice manager runs the daily takings report, which must reconcile totals by payment method with the sum of the day's invoices and credit notes. A difference blocks the day from being marked closed.
+
+## 10. Non-functional requirements
+
+10.1 Any screen loads in under 2 seconds on the clinic network with up to 12 users working at once. The diary for one day with 60 appointments loads in under 1 second.
+
+10.2 All data is backed up nightly at 02:00 and the backup is restored and checked once a month. Loss of at most 24 hours of work is acceptable.
+
+10.3 The application works in the two most recent releases of the browsers used on the clinic machines. The consulting-room tablets are used in landscape orientation only.
+
+10.4 Personal data of owners is kept for 7 years after the last visit and is then anonymised. An owner can request an export of their data, which the practice manager produces as a PDF within 30 days.
+
+10.5 Times are shown in the clinic's local time zone. The change to and from summer time must not move or duplicate any appointment.
+
+## 11. Reports
+
+11.1 The practice manager can run these reports for any date range of up to 366 days, as a screen table and as a CSV download: appointments by vet and type, cancellations and no shows by reason, revenue by category (consultations, procedures, medicines, food, other), revenue by vet, stock value by supplier, and expiring batches within 60 days.
+
+11.2 The no-show report lists every owner with two or more no shows in the range, the dates, and whether a late cancellation mark was also added. The report counts a no show only when the appointment status is "no show"; a cancellation made after the start time is stored as a no show automatically.
+
+11.3 Vets can see their own list of consultations that were opened but not closed for more than 24 hours. The list is shown on the vet's home screen with the oldest first. A consultation left open for more than 7 days is also listed for the practice manager.
+
+11.4 Report figures must agree with the invoices: the revenue total of any report for a given range must equal the sum of invoices minus credit notes dated inside that range, to the penny.
+
+## 12. Migration from the old system
+
+12.1 Before go-live, owners, patients and the last five years of consultations are imported from the legacy database through a one-off import tool. The tool reads a CSV export for each of the three entity types and writes a log with one line per rejected row.
+
+12.2 A row is rejected when a required field is empty, when a patient refers to an owner that does not exist in the import, or when a microchip number is already used by an active patient. Rejected rows do not stop the import; accepted rows are saved.
+
+12.3 Imported consultations are stored as closed, with the author "Legacy import" and the original date. They cannot be edited, only extended with an addendum.
+
+12.4 The import can be run again on the same files without creating duplicates: an owner is identified by the legacy id, which is stored on the new record.
+
+12.5 On the last working day before go-live the diary is frozen; the paper diary is used for emergencies only, and those entries are typed into the new system within 24 hours of go-live.

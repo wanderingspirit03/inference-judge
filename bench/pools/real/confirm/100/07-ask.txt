@@ -1,0 +1,1 @@
+I am a new technician aboard a marine research vessel. Write a detailed guide to deploying and recovering a CTD rosette from the deck, with the safety checks, crew roles, step-by-step procedure and what to do when something goes wrong.

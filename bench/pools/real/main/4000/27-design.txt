@@ -1,0 +1,177 @@
+Our volunteer mountain rescue team wants to replace the phone tree and spreadsheets we use for call-outs, and I wrote the design document below. Could you give me an honest critique (what is weak, missing or risky), suggest at least two alternative approaches to the main design choices, and then write an implementation plan with phases, effort estimates and what to do first? I am the only developer and the rest of the team are not technical, so keep that in mind.
+
+---
+
+DESIGN DOCUMENT: CALLOUT (Call-out Coordination Tool)
+Team: Stonecrest Mountain Rescue (volunteer, 38 active members, covers the Stonecrest massif and the two valleys on either side)
+Author: Ingvar Tallis (deputy team leader, volunteer developer)
+Status: Draft 2, for review by the team committee
+Date: 12 October
+
+1. Background and problem
+
+When the police or the ambulance service request our help, the duty controller (one of five members who rotate weekly) currently starts a phone tree. They call the first six members on a list, each of whom calls two more. Members answer whether they can attend, and the controller writes down who is coming on a printed sheet. Last winter we measured the time from the request to the point where the controller knew that at least eight people were on the way. The median was 27 minutes and the worst case was 51 minutes. On three of the 44 call-outs last year the controller reached the end of the list with fewer than eight confirmed members, and had to ask the neighbouring team for help.
+
+Other problems we have observed:
+
+- Nobody knows during a call-out who is already on the hill, where they are, and when they are expected to return. Team members text the controller, who writes it down.
+- Equipment (stretchers, ropes, the two vehicles, the drone) is tracked in a spreadsheet that is out of date after every incident.
+- Post-incident reports are written from memory a week later.
+- Qualification records (first aid renewals, avalanche course, driving licence for the vehicles) are kept by the training officer in a different spreadsheet. Twice last year a member who had an expired first aid certificate was sent on a call-out.
+
+2. Goals
+
+1. Reduce the time to eight confirmed members to under ten minutes at the median.
+2. Give the controller a live view of who is responding, who is on the hill, and who is back.
+3. Keep a simple record of each incident that can be turned into the post-incident report.
+4. Warn the controller about members whose qualifications are out of date.
+5. Keep running costs below 40 euros a month, because we are funded by donations.
+
+3. Non-goals
+
+- Replacing the radio system. We will continue to use handheld radios and the repeater on Eaglesmouth Ridge.
+- Casualty medical records. These stay on the paper forms agreed with the ambulance service.
+- Public-facing features. The tool is for the team only.
+
+4. Proposed solution
+
+4.1 Overview
+
+Callout has three parts: a web application used by the controller on a laptop, a phone application used by team members (installed as a progressive web app so that we do not have to publish in app stores), and a small server that holds the data and sends messages.
+
+4.2 Alerting
+
+When the controller creates a call-out in the web application, the server sends a push notification to all active members and, at the same time, a text message through an SMS gateway to members who have not opened the notification within 90 seconds. A member responds with one of three buttons: "Coming", "Not available", or "Coming, 30 minutes". The text message contains a link with a one-time token, which opens the same response page without logging in. If a member has not responded after four minutes, the controller sees them highlighted in red and can call them.
+
+The SMS gateway costs about 0.06 euros per message. With 38 members and an estimated 50 call-outs a year, with roughly a third of the members needing a text message, the estimated cost is 38 euros a year in messages plus the gateway's monthly fee of 5 euros.
+
+4.3 The controller's board
+
+The web application shows a board with four columns: Alerted, Responding, On the hill, Returned. Each member appears as a card that moves automatically as their status changes. Members change their own status from the phone application: tapping "On the hill" shares the last known position of the phone. During the call-out the phone sends its position every two minutes while there is mobile coverage and stores positions when there is no coverage, sending them when coverage returns.
+
+The board also shows a count of members with each qualification needed, for example "Casualty carer: 3 of 5 needed" and "Vehicle driver: 2 of 2 needed", based on the responses.
+
+4.4 Qualifications
+
+Each member record has a list of qualifications with expiry dates. The server checks them every night and sends a message to the training officer 60 days and 14 days before an expiry. On the board, a member whose first aid certificate has expired is shown with a warning label, but can still respond. The controller decides.
+
+4.5 Equipment
+
+The equipment list is a simple table: item, location, status (available, in use, needs repair), and last checked date. A call-out records which items were taken. When the call-out is closed, the controller or quartermaster confirms that each item has returned.
+
+4.6 Incident record
+
+During a call-out the controller keeps a timeline by typing short entries (for example "14:32 casualty located at grid ref NY 3512 2398"). Entries are timestamped automatically. When the call-out closes, the tool produces a document with the timeline, the list of members, equipment used and total person-hours. The team leader completes it with the narrative.
+
+4.7 Overdue and welfare checks
+
+When a member taps "On the hill", the controller sets an expected return time for the group (default: four hours). Fifteen minutes before that time the board marks the group amber, and at the expected time it marks them red and plays a sound on the controller's laptop. The controller can extend the time with one click. The tool does not contact anyone automatically at this stage; the controller tries the radio first, then the phone. A later version might send an automatic message to the group leader, but the author prefers not to build that until the team has used the first version in a real incident.
+
+4.8 Handover between controllers
+
+Controllers rotate weekly, but a long call-out can outlast one person's availability. The controller can hand the board over to another controller by choosing a name from a list. The new controller receives a notification and must accept; until then the previous controller keeps control. All timeline entries show who wrote them. Only one controller can edit the board at a time, and others see it read-only.
+
+5. Architecture
+
+5.1 Offline behaviour and synchronisation
+
+The phone application stores the member's own responses and positions in the browser's local database. Each stored item has a random identifier created on the phone and a timestamp from the phone's clock. When coverage returns, the application sends the stored items to the server in the order they were recorded; the server ignores any item whose identifier it has already seen. If a phone's clock is wrong by more than five minutes, the server marks the item with a warning but still stores it. The web application for the controller does not work offline; it needs a connection to the server.
+
+5.2 Interfaces
+
+The server offers a small set of HTTP endpoints, of which the most important are: creating a call-out, listing the current roster, posting a response, posting a batch of positions, adding a timeline entry, and closing a call-out. The board receives updates by a long-lived connection so that cards move without the page being reloaded. If the connection drops, the page reconnects and asks for the full state.
+
+5.3 Components
+
+- The server is a Node.js application using a PostgreSQL database, hosted on a single virtual server from a European provider at 12 euros a month.
+- The web application and phone application share one codebase written in a JavaScript framework. The phone application is a progressive web app with a service worker for offline storage.
+- Authentication is by email magic link for the controller and phone app. Each member has a phone number and email.
+- Push notifications use the browser's web push standard. SMS goes through a third-party gateway.
+- Backups: a nightly database dump copied to a storage bucket at a second provider.
+
+6. Data model (summary)
+
+- members: id, name, phone, email, role, active flag
+- qualifications: member id, type, issued date, expiry date
+- callouts: id, created at, requested by, location text, grid reference, status
+- responses: callout id, member id, status, timestamp
+- positions: callout id, member id, latitude, longitude, recorded at
+- equipment: id, name, location, status, last checked
+- equipment use: callout id, equipment id, taken at, returned at
+- timeline entries: callout id, timestamp, text, author id
+
+7. Security and privacy
+
+Location data is personal data. We store positions only during a call-out and delete detailed positions after 90 days, keeping only the start and end points for each member. Access to the board is limited to the five controllers and the two team leaders. Members can see only their own record and the current call-out roster. The server is accessed over HTTPS only. We have not yet appointed a person responsible for data protection; the committee needs to decide who.
+
+8. Reliability
+
+Our area has poor mobile coverage in the upper parts of the valleys, and this is where the call-outs happen. The design assumes that members are mostly in coverage when they receive the alert (at home or at work) and that coverage on the hill matters only for positions. The server runs on one machine; if the machine is down, controllers will fall back on the phone tree, which will be kept up to date through a weekly export of the member list to a PDF that each controller keeps on their phone.
+
+9. Rollout
+
+The author proposes to build the first version over the winter, run it in parallel with the phone tree from March to June, and decide in July whether to switch. A trial in a training exercise would take place in April.
+
+10. Cost
+
+| Item | Cost |
+|---|---|
+| Virtual server | 12 euros a month |
+| SMS gateway fee and messages | about 8 euros a month on average |
+| Backup storage | 2 euros a month |
+| Domain name | 15 euros a year |
+| Total | about 23 euros a month |
+
+The author's time is volunteered.
+
+11. Open questions
+
+- Who maintains the tool if the author leaves the team?
+- Do we need a second controller screen at the base for the team leader?
+- Should members be able to see each other's positions, or only the controller?
+- How do we handle members who do not have a smartphone? There are four, and all are over 65 and valued members.
+- Should the tool talk to the police system that sends us the call-out requests, which arrive by email and by a phone call?
+
+12. Risks identified by the author
+
+- Alert fatigue: if every small request triggers a full alert, members will stop responding.
+- A false sense of confidence: the board shows only what members tap, and the controller may assume the board is the truth.
+- The author is a single point of failure.
+- Push notifications on some phones are delayed when the phone is in power saving mode.
+
+13. Alternatives considered by the author
+
+- Use a commercial group messaging service and a shared spreadsheet. This would be cheaper and faster to set up, but it gives no board, no qualification warnings and no incident record, and would leave member phone numbers with a third party.
+- Buy a call-out product used by other rescue teams. The author found one product at 480 euros a month for teams of our size, which is 20 times our budget.
+- Do nothing and train the controllers to run the phone tree faster. The training officer prefers this and points out that the tool will not help if the repeater fails.
+
+14. Testing
+
+The author plans automated tests for the server logic (status changes, roster counts, qualification warnings and the synchronisation of stored items), manual tests on four different phones including two old ones, and a training exercise in April in which 20 members receive an alert at an unannounced time. Success is defined as eight confirmed members within ten minutes in at least four of five exercises.
+
+15. Decisions requested from the committee
+
+1. Approval to start the build, with the cost in section 10.
+2. A named person to be responsible for data protection.
+3. Agreement on the parallel running period, March to June.
+4. Agreement that members without smartphones will be called by the controller as at present.
+
+16. Data migration and member onboarding
+
+The current member list is a spreadsheet with 52 rows, of which 38 are active members; the others are former members and associate members who help with fundraising. Only the 38 active members will be imported. The training officer's qualifications spreadsheet has 214 rows and uses free text for the qualification names ("FA", "First Aid at Work", "first aid 3 day"), so the author will map these by hand to six fixed types: first aid, casualty care, avalanche awareness, rope rescue, vehicle driver and radio operator. The import will be run twice, once as a dry run that lists every row it could not understand, which the training officer corrects before the real import.
+
+Each member will receive a message with a link to install the phone application and confirm their phone number. Members who do not confirm within two weeks will be listed for the team leader. The author will hold two drop-in evenings at the base, on 5 and 12 February, where members can bring their phones and be helped to install it, allow notifications and turn off battery saving for the application.
+
+17. Proposed schedule
+
+| Period | Work |
+|---|---|
+| Late October to November | Data model, member import, alerting and responses |
+| December | Controller board, offline phone behaviour, synchronisation |
+| January | Qualifications, equipment, incident record, backups |
+| February | Onboarding evenings, internal testing with five members |
+| March to June | Parallel running with the phone tree |
+| April | Unannounced training exercise |
+| July | Committee decision on switching over |
+
+The author estimates 8 to 10 hours a week of his own time, with the first working version in late December if nothing else takes priority. He notes that this estimate does not allow for the winter peak in call-outs, when his time is likely to be shorter.

@@ -224,7 +224,7 @@ Sections and fields:
 | `accelerator` | `kind`, `chips`, `hosts` | `type`, `topology`, `hbm_gb_per_chip` |
 | `model` | `served_name`, `revision`, `local_dir`, `tokenizer` | `chat_template` (`""`), `chat_template_kwargs`, `hf_id`, `gcs` |
 | `engine` | `name`, `image`, `docker_flags` | `env` (`{}`), `launch`, `port` (`8000`), `shm_size` (`""`), `sources` (`[]`), `compile_cache` (`{seed, mount}`) |
-| `metric` | `kind` (`tps`), `isl`, `osl`, `concurrency`, `slo`, `ramp_s`, `window_s` | `screen_window_s`, `design` (`abba`), `blocks` (`2`), `prompt_pool`, `confirm_pool`, `pool_size` (`2048`), `length_tol` (`0.0`), `guard_tol` (`0.03`), `screen_tol` (`0.02`), `stall_ms` (`1000`) |
+| `metric` | `kind` (`tps`), `isl`, `osl`, `concurrency`, `slo`, `ramp_s`, `window_s` | `screen_window_s`, `design` (`abba`), `blocks` (`2`), `prompt_pool`, `confirm_pool`, `pool_size` (`2048`), `length_tol` (`0.0`), `isl_tol` (`0.3`), `extra_body`, `guard_tol` (`0.03`), `screen_tol` (`0.02`), `stall_ms` (`1000`) |
 | `budgets` | `build_s`, `compile_s`, `health_s`, `run_s` | none |
 | `health` | none | `url`, `ready_timeout_s` |
 | `reference` | `dir` | `prompts`, `tasks`, `max_tokens`, `launches` |
@@ -306,7 +306,9 @@ whitespace tokeniser, used with the mock) or the path to a Hugging Face
 `prompt_id`, `load`, `level`, `t_sched`, `t_send`, `t_first`, `t_last`,
 `tokens_client`, `tokens_usage`, `cached_tokens`, `finish_reason`, `itl_ms`,
 `isl`, `isl_client`, `error_kind`, `prompt_reused`, `distinct4`,
-`compression`, `text_sha1`, `ok` and `invalid_reason`.
+`compression`, `text_sha1`, `ok` and `invalid_reason`. An invalid request
+also keeps `text`, the answer it received, so the reason can be checked
+against the answer itself. A valid one keeps only the hash.
 
 A request is invalid, with `invalid_reason` set, when it:
 
@@ -345,8 +347,13 @@ it exceeds 50 ms, because a slow client would look like a slow server.
 `--window-s` window (default 10). In a closed loop, `--warm-cycles` makes
 every stream send that many unscored passes over the input sizes before the
 ramp starts. `--prompt-pool` names a JSONL pool of `{"id", "prompt"}` rows,
-sampled with `--seed`. `--pool-exclude` names `tps_records.jsonl` files
-whose prompts must not be sent again. `run.sh` uses it to retire prompts: a
+sampled with `--seed`. Rows that also carry `"isl"` are whole requests: each
+is sent as written behind the reference line, and only under its own size.
+At load the harness checks that each fits its size (at most the size, at
+least 1 - `--isl-tol` of it), and it stops if a measured size has no request
+left. A pool that mixes the two forms is refused. `--pool-exclude` names
+`tps_records.jsonl` files whose prompts must not be sent again. `run.sh` uses
+it to retire prompts: a
 candidate keeps its writable cache between its launches and could carry an
 answer from one to the next, so the prompts of the first candidate launch are
 excluded from the second. Each incumbent launch still draws the same
@@ -457,7 +464,15 @@ applies them to a run's launches.
 **Calibration.** The operator runs `run.sh --calibrate <id>`. It launches the
 incumbent `CALIBRATE_LAUNCHES` times (default 10) and measures the spread of
 the launch means, `sigma_L`. Everything else is judged against it.
-`compare.py` floors `sigma_L` at `0.005`.
+`compare.py` floors `sigma_L` at `0.005`. A calibration needs every one of
+its launches to be a measurement, because the ruler does not choose which
+launches of the incumbent count. One launch with invalid requests, text
+outside the sanity band, no sweep measured, every block stalled or no level
+meeting the ceilings therefore refuses the whole calibration. `run.sh` asks
+`compare.py` after every launch (`tps-calibrate --so-far`) and ends the run
+`INVALID` at the launch that broke it. The reasons name that launch and give
+its own reason, then say where the calibration stopped. The later launches
+are not run, and no calibration file is installed.
 
 The minimum detectable effect is `mde = max(0.02, 3.2 * sigma_L)`. The 3.2 is
 the sum of two normal quantiles (2.33 for a 1% false-promotion rate and 0.84
@@ -506,7 +521,9 @@ first that applies:
 9. Otherwise `REJECTED`.
 
 **Launch status.** A launch is `ok` or one of `invalid_requests`,
-`insane_text`, `compile_stalls`, `no_blocks` or `no_goodput`. A block with an
+`insane_text`, `compile_stalls`, `no_measurement`, `no_blocks` or
+`no_goodput`. `no_measurement` is a launch none of whose sweeps wrote a
+summary: the harness stopped before it measured. A block with an
 inter-token gap over `metric.stall_ms` (default `1000`) is dropped, so one
 stall does not decide a verdict.
 
@@ -564,10 +581,13 @@ This keeps the incumbent, measured by an older judge, from being compared
 with the candidate.
 
 **The ruler lock.** `ruler_hash` is the sha256 over these files, sorted by
-name, plus the target file: `harness.py`, `metrics.py`, `compare.py`,
-`quality2.py`, `stats.py`, `tokenizer.py`, `target.py` and `run.sh`. For
-each file the hash takes `name`, a NUL byte, the file's bytes and a NUL
-byte.
+name: `harness.py`, `metrics.py`, `compare.py`, `quality2.py`, `stats.py`,
+`tokenizer.py`, `target.py` and `run.sh`, plus the target file and the data
+files it names (`metric.prompt_pool`, `metric.confirm_pool`,
+`reference.prompts` and `reference.tasks`). For each file the hash takes
+`name`, a NUL byte, the file's bytes and a NUL byte. A data file is hashed
+where the target's path finds it (a relative path is under the bench root);
+a path that does not exist is left out.
 
 At clock start `setup/bootstrap.sh` runs `run.sh --lock-ruler` as `driver`,
 through its sudo route.
@@ -575,9 +595,10 @@ That writes `$BENCH_ROOT/RULER_LOCK` once (`O_EXCL`; it refuses to
 overwrite). The file holds the hash and a `target NAME` line. From then on,
 `run.sh` calls `target.py check-lock` at the start of every run and exits
 `70` if the live judge or the target differs from the lock. A lock without
-a `target` line covers the judge's files only. The lock covers code and the
-target file, not the pools, the reference or the canary reference. Those are
-protected by Unix permissions and by being written once.
+a `target` line covers the judge's files only. The lock covers the code, the
+target file and the target's data files. It does not cover the recorded
+reference or the canary reference. Those are protected by Unix permissions
+and by being written once.
 
 **The seal.** The seal of a scored launch is a rule of the judge, not a
 setting of the target: `--network none`, no published port, read-only mounts
@@ -849,9 +870,17 @@ pass.
 **What has been run where.**
 
 - TPU (Google Cloud v6e): the model server of
-  `targets/v6e4-gemma4-26b-tps.yaml` was brought up by hand on a v6e-4.
-  `setup/tpu.sh`, bootstrap and a judged run have not been run on real TPU
-  hardware, and the target is still `runnable: false`.
+  `targets/v6e4-gemma4-26b-tps.yaml` ran on one on-demand v6e-4 on
+  2026-10-13. `setup/tpu.sh` and bootstrap ran to the end. The judge measured
+  a baseline and a 10-launch calibration, and in the rehearsal a candidate
+  identical to the baseline was `REJECTED`. The chip gate passed only with
+  `--network host --privileged`, so the target is `runnable: true` with a
+  seal weaker than the full one, and results say so. The spend guard saved
+  the results every hour and the VM deleted itself at the deadline. Later
+  changes to `setup/tpu.sh` are tested with fakes only. That session used an
+  earlier speed pool and judge, so nothing has been measured on a TPU with
+  the current ones. No research loop has run on a TPU, and the rehearsal's
+  `buildfail` case was not run.
 - GPU (NVIDIA): built and tested on a laptop with fakes. It has not been run
   on real hardware. Expect to find problems.
 - CPU mock: runs on any laptop. The cheat suite and the rehearsal use it.

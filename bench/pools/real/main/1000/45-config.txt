@@ -1,0 +1,62 @@
+Our regional blood donation service uses this shell script every night to export the donor appointment list and copy it to the mobile clinic laptops. A colleague says it is "fine, it has worked for years", but I am not convinced. Please audit it properly: list every problem you find with how serious it is, explain the fixes, and give me a corrected version of the whole script.
+
+```bash
+#!/bin/bash
+# nightly_export.sh - export tomorrow's appointments to the mobile clinic laptops
+# runs from cron at 22:30 as user "donor-sync"
+
+DB_HOST=db1.bloodservice.example.org
+DB_USER=export
+DB_PASS=Clinic2019!
+OUT_DIR=/srv/exports/appointments
+LAPTOPS="clinic-van-1 clinic-van-2 clinic-van-3 clinic-hall"
+LOG=/var/log/nightly_export.log
+
+cd $OUT_DIR
+DATE=`date +%Y-%m-%d`
+TOMORROW=`date -d tomorrow +%Y-%m-%d`
+
+echo "start $DATE" >> $LOG
+
+# remove old files
+rm -rf $OUT_DIR/$OLD_PREFIX*
+find $OUT_DIR -name "*.csv" -mtime +7 | xargs rm
+
+# dump appointments
+mysql -h $DB_HOST -u $DB_USER -p$DB_PASS donors -e "SELECT donor_id, first_name, last_name, phone, blood_group, slot FROM appointments WHERE date = '$TOMORROW'" > appointments_$TOMORROW.csv
+
+if [ $? = 0 ]
+then
+  echo "export ok" >> $LOG
+fi
+
+# check file is not empty
+SIZE=`ls -l appointments_$TOMORROW.csv | awk '{print $5}'`
+if [ $SIZE -lt 10 ]; then
+  echo "file too small" >> $LOG
+fi
+
+for L in $LAPTOPS
+do
+  scp appointments_$TOMORROW.csv $L:/data/clinic/today.csv
+  ssh $L "chmod 777 /data/clinic/today.csv"
+  echo "copied to $L" >> $LOG
+done
+
+# keep a copy for the audit team
+cp appointments_$TOMORROW.csv /mnt/shared/audit/
+chmod -R 777 /mnt/shared/audit
+
+echo "done" >> $LOG
+mail -s "export finished" it-team@bloodservice.example.org < $LOG
+```
+
+And this is the crontab line, installed for the same user:
+
+```
+30 22 * * * /srv/scripts/nightly_export.sh
+```
+
+Some background that may help. The laptops are in vans that are often parked at remote sites with weak mobile coverage, so a laptop is sometimes unreachable at 22:30. The staff at the clinics start work at 7:00 and need the file to be there, because without it they register donors on paper and enter them by hand later. The phone numbers and blood groups are personal health data, and our data protection officer has asked twice about how the file is handled after it leaves the database. The audit team reads the copy in the shared folder once a month. The server runs a standard Linux distribution with bash 5 and has the mysql client and OpenSSH installed. We do not have a separate secrets manager, but the server does have a protected configuration directory at /etc/donor-sync.
+
+Please also tell me what should be logged, how failures should reach a person, and whether the cron setup itself needs changes.

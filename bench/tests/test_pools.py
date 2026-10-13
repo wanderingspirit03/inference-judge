@@ -1,10 +1,11 @@
-"""bench/pools: the speed pools, the quality prompts and the quality tasks.
+"""bench/pools: the quality prompts and the quality tasks. (The speed pools
+are real_pool.py's; tests/test_real_pool.py holds them.)
 
 The data files are checked in; build_pools.py is the one interface that makes
-them. These tests hold the files to what the harness and the ruler need of
-them: counts, unique ids, disjoint main and confirm pools, lines longer than
-the largest input size, a prompt length spread, task answers that reproduce
-independently, and the probe tool working against the mock server.
+them. These tests hold the files to what the ruler needs of them: counts,
+unique ids, a prompt length spread, the subset a 6144 context can hold, task
+answers that reproduce independently, and the probe tool working against the
+mock server.
 
 Token lengths are checked with the real Gemma tokenizer when GEMMA_TOKENIZER_JSON
 points at its tokenizer.json (and the `tokenizers` package is installed); without
@@ -12,9 +13,7 @@ it, a conservative characters-per-token bound stands in.
 """
 from __future__ import annotations
 
-import ast
 import importlib.util
-import json
 import os
 import random
 import re
@@ -26,7 +25,6 @@ import pytest
 
 import metrics
 import quality2
-from tokenizer import WhitespaceTokenizer
 
 BENCH = Path(__file__).resolve().parent.parent
 POOLS = BENCH / "pools"
@@ -35,27 +33,13 @@ sys.path.insert(0, str(POOLS))
 import build_pools            # noqa: E402
 import pool_tasks             # noqa: E402
 
-LARGEST_ISL = 8192
-NONCE_AND_HEADROOM = 400                    # tokens: "Request reference: <uuid>.", chat noise
 MAX_PROMPT_TOKENS = 7800                    # + 128 forced tokens must fit in 8192
-# characters per Gemma token, highest seen on the checked-in files (4.85 / 3.25 / 4.00)
-CPT_BOUND = {"prose": 4.9, "code": 3.3, "mixed": 4.05}
 
 TOKENIZER_JSON = os.environ.get("GEMMA_TOKENIZER_JSON", "")
 
 
 def _load(name: str) -> list[dict]:
     return metrics.read_jsonl(str(POOLS / name))
-
-
-@pytest.fixture(scope="module")
-def main_pool():
-    return _load(build_pools.FILES["main"])
-
-
-@pytest.fixture(scope="module")
-def confirm_pool():
-    return _load(build_pools.FILES["confirm"])
 
 
 @pytest.fixture(scope="module")
@@ -83,14 +67,12 @@ def _kind(row: dict) -> str:
 
 
 # ------------------------------------------------------------ the files ---
-def test_counts_and_ids(main_pool, confirm_pool, prompts, tasks):
-    assert (len(main_pool), len(confirm_pool), len(prompts), len(tasks)) == (384, 320, 256, 200)
-    for rows in (main_pool, confirm_pool, prompts, tasks):
+def test_counts_and_ids(prompts, tasks):
+    assert (len(prompts), len(tasks)) == (256, 200)
+    for rows in (prompts, tasks):
         ids = [r["id"] for r in rows]
         assert len(set(ids)) == len(ids)
         assert all(isinstance(r["prompt"], str) and r["prompt"].strip() for r in rows)
-    assert all(r["id"].startswith("main-") for r in main_pool)
-    assert all(r["id"].startswith("confirm-") for r in confirm_pool)
 
 
 def test_files_are_a_fresh_build():
@@ -99,98 +81,21 @@ def test_files_are_a_fresh_build():
 
 
 def test_build_is_deterministic_and_parameterised():
-    small = dict(main_lines=6, confirm_lines=5, min_tokens=1200, n_prompts=40, n_tasks=30)
+    small = dict(n_prompts=40, n_tasks=30)
     a, b = build_pools.build(**small), build_pools.build(**small)
     assert a == b
     counts = {name: len(text.splitlines()) for name, text in a.items()}
-    assert counts == {build_pools.FILES["main"]: 6, build_pools.FILES["confirm"]: 5,
-                      build_pools.FILES["prompts"]: 40, build_pools.FILES["tasks"]: 30}
-    shorter = build_pools.build(**{**small, "min_tokens": 600})
-    assert (sum(len(json.loads(l)["prompt"]) for l in a[build_pools.FILES["main"]].splitlines())
-            > sum(len(json.loads(l)["prompt"]) for l in shorter[build_pools.FILES["main"]].splitlines()))
+    assert counts[build_pools.FILES["prompts"]] == 40 and counts[build_pools.FILES["tasks"]] == 30
+    assert set(counts) == set(build_pools.FILES.values())
 
 
 def test_cli_check_reports_a_changed_file(tmp_path):
-    small = dict(main_lines=3, confirm_lines=3, min_tokens=600, n_prompts=36, n_tasks=20)
+    small = dict(n_prompts=36, n_tasks=20)
     assert build_pools.write(tmp_path, **small)
     assert build_pools.check(tmp_path, **small) == []
     target = tmp_path / build_pools.FILES["tasks"]
     target.write_text(target.read_text().replace("ANSWER", "ANSVER", 1))
     assert build_pools.check(tmp_path, **small) == [build_pools.FILES["tasks"]]
-
-
-# ------------------------------------------------------- the speed pools ---
-def test_main_and_confirm_are_disjoint(main_pool, confirm_pool):
-    assert not {r["id"] for r in main_pool} & {r["id"] for r in confirm_pool}
-
-    def paragraphs(rows):
-        return {p.strip() for r in rows for p in r["prompt"].split("\n\n")[1:] if len(p.strip()) > 80}
-
-    # the code generator has a dozen shapes, so a few short boilerplate blocks
-    # (an __init__, a loop) recur across pools; no passage of any size does
-    shared = paragraphs(main_pool) & paragraphs(confirm_pool)
-    assert all(len(p) < 300 for p in shared), max(shared, key=len)[:200]
-    prose = [r for r in main_pool + confirm_pool if _kind(r) == "prose"]
-    assert not paragraphs([r for r in prose if r["id"].startswith("main")]) & \
-        paragraphs([r for r in prose if r["id"].startswith("confirm")])
-    # no shared long prefix, in the pool or across pools
-    heads = Counter(r["prompt"][:400] for r in main_pool + confirm_pool)
-    assert max(heads.values()) == 1
-    # body prefixes too (the instruction line is shared by design)
-    bodies = Counter(r["prompt"].split("\n\n", 1)[1][:300] for r in main_pool + confirm_pool)
-    assert max(bodies.values()) == 1
-
-
-def test_pool_lines_are_long_enough_by_characters(main_pool, confirm_pool):
-    for r in main_pool + confirm_pool:
-        need = (LARGEST_ISL + NONCE_AND_HEADROOM) * CPT_BOUND[_kind(r)]
-        assert len(r["prompt"]) >= need, (r["id"], len(r["prompt"]), need)
-
-
-def test_pool_kinds_are_mixed(main_pool, confirm_pool):
-    for rows in (main_pool, confirm_pool):
-        kinds = Counter(_kind(r) for r in rows)
-        assert set(kinds) == {"prose", "code", "mixed"}
-        assert kinds["prose"] > kinds["code"] > 0 and kinds["mixed"] > 0
-
-
-def test_pool_lines_ask_for_a_long_output(main_pool, confirm_pool):
-    """The metrics sanity band reads the output text, so every line opens with an
-    instruction that makes the model write a lot rather than one word."""
-    heads = set(build_pools.PROSE_HEADS) | set(build_pools.CODE_HEADS)
-    for r in main_pool + confirm_pool:
-        assert r["prompt"].split("\n\n", 1)[0] in heads, r["id"]
-    for h in heads:
-        assert re.search(r"\b(long|extensive|detailed|thorough|full|every|exhaustive|at length|"
-                         r"as long as you can|complete)\b", h), h
-
-
-def test_python_in_pool_lines_parses(main_pool, confirm_pool):
-    """The Python files in code lines are well-formed: a model asked to review
-    them is not being asked to read noise."""
-    checked = 0
-    for r in main_pool + confirm_pool:
-        for m in re.finditer(r"^# file: \S+\.py\n(.*?)(?=^(?:#|//|--|/\*) file: |\Z|^```)", r["prompt"], re.S | re.M):
-            ast.parse(m.group(1))
-            checked += 1
-    assert checked >= 50
-
-
-def test_pools_load_through_the_harness(main_pool, confirm_pool):
-    import harness
-    ws = WhitespaceTokenizer()
-    for pool, seed in ((main_pool, 1), (confirm_pool, 2)):
-        sampler = harness._PromptSampler(pool, seed, frozenset())
-        seen = set()
-        for _ in range(len(pool)):
-            row, reused = sampler.next()
-            assert not reused and row["id"] not in seen
-            seen.add(row["id"])
-            assert len(ws.fit(row["prompt"], 128).split()) == 128
-        assert sampler.n_reused == 0
-    # a sweep excludes the previous sweep's ids and still has a pool left
-    spent = frozenset(r["id"] for r in main_pool[:100])
-    assert len(harness._PromptSampler(main_pool, 3, spent).items) == len(main_pool) - 100
 
 
 # -------------------------------------------------------- quality prompts ---
@@ -208,6 +113,15 @@ def test_prompts_are_distinct(prompts):
     assert len({r["prompt"] for r in prompts}) == len(prompts)
     assert len({r["prompt"][:300] for r in prompts if len(r["prompt"]) > 4000}) == \
         sum(len(r["prompt"]) > 4000 for r in prompts)
+
+
+def test_the_6144_file_is_the_prompts_file_without_the_listed_rows(prompts):
+    """Same rows, same order, so a target with a 6144 context is checked on a
+    subset of what a larger one is checked on."""
+    small = _load(build_pools.FILES["prompts_6144"])
+    assert small == [r for r in prompts if r["id"] not in build_pools.OVER_6144]
+    assert len(small) == len(prompts) - len(build_pools.OVER_6144) == 240
+    assert build_pools.OVER_6144 <= {r["id"] for r in prompts}
 
 
 def test_prompts_work_as_ruler_prompts(prompts):
@@ -266,9 +180,12 @@ def test_task_generator_is_seeded():
 
 
 # ------------------------------------------------ the real tokenizer ---
-def test_pool_lines_exceed_the_largest_input(main_pool, confirm_pool, tokenizer):
-    counts = [tokenizer(r["prompt"]) for r in main_pool + confirm_pool]
-    assert min(counts) >= LARGEST_ISL + NONCE_AND_HEADROOM, min(counts)
+def test_the_6144_file_leaves_out_exactly_the_prompts_that_do_not_fit(prompts, tokenizer):
+    """6144 context, 128 forced tokens: the ones left out are the ones over
+    6100 tokens, and nothing kept comes near the limit."""
+    over = {r["id"] for r in prompts if tokenizer(r["prompt"]) > 6100}
+    assert over == build_pools.OVER_6144
+    assert max(tokenizer(r["prompt"]) for r in prompts if r["id"] not in over) <= 6144 - 128 - 100
 
 
 def test_quality_prompt_length_spread(prompts, tokenizer):

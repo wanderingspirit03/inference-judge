@@ -1,0 +1,343 @@
+This is the pick-wave planner we use at the Dunmore distribution warehouse to group customer orders into waves for the pickers. It was written quickly by a contractor, and since then several people have patched it. Could you do a thorough code review (bugs, edge cases, design, performance) and then write a complete set of unit tests with pytest? Please say clearly which problems could cause a wrong pick or a lost order, because those matter most to us.
+
+```python
+"""Pick-wave planning for the Dunmore warehouse."""
+
+from __future__ import annotations
+
+import heapq
+import math
+from collections import defaultdict
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from typing import Dict, Iterable, List, Optional, Tuple
+
+AISLE_WIDTH_M = 3.0
+BAY_DEPTH_M = 1.2
+MAX_WAVE_LINES = 120
+MAX_WAVE_WEIGHT_KG = 600.0
+MAX_ORDERS_PER_WAVE = 25
+CUTOFF_HOUR = 15
+
+
+@dataclass
+class Location:
+    aisle: int
+    bay: int
+    level: int
+
+    def code(self) -> str:
+        return f"A{self.aisle:02d}-B{self.bay:02d}-L{self.level}"
+
+
+@dataclass
+class Sku:
+    sku: str
+    weight_kg: float
+    fragile: bool = False
+    hazmat: bool = False
+    location: Optional[Location] = None
+
+
+@dataclass
+class OrderLine:
+    sku: str
+    quantity: int
+
+
+@dataclass
+class Order:
+    order_id: str
+    customer: str
+    lines: List[OrderLine]
+    placed_at: datetime
+    priority: int = 0
+    carrier: str = "standard"
+
+
+@dataclass
+class Wave:
+    wave_id: int
+    orders: List[Order] = field(default_factory=list)
+    line_count: int = 0
+    weight_kg: float = 0.0
+    carrier: str = "standard"
+
+
+def parse_location(code: str) -> Location:
+    """Parse a code such as 'A03-B12-L2'."""
+    parts = code.split("-")
+    aisle = int(parts[0][1:])
+    bay = int(parts[1][1:])
+    level = int(parts[2][1:])
+    return Location(aisle, bay, level)
+
+
+def walking_distance(a: Location, b: Location) -> float:
+    """Approximate walking distance in metres between two locations."""
+    if a.aisle == b.aisle:
+        return abs(a.bay - b.bay) * BAY_DEPTH_M
+    across = abs(a.aisle - b.aisle) * AISLE_WIDTH_M
+    return across + (a.bay + b.bay) * BAY_DEPTH_M
+
+
+def order_weight(order: Order, catalogue: Dict[str, Sku]) -> float:
+    total = 0.0
+    for line in order.lines:
+        total += catalogue[line.sku].weight_kg * line.quantity
+    return total
+
+
+def is_due_today(order: Order, now: datetime) -> bool:
+    """Orders placed before the cutoff leave today; later ones leave tomorrow."""
+    cutoff = now.replace(hour=CUTOFF_HOUR, minute=0, second=0, microsecond=0)
+    return order.placed_at <= cutoff
+
+
+def sort_orders(orders: Iterable[Order]) -> List[Order]:
+    return sorted(orders, key=lambda o: (-o.priority, o.placed_at))
+
+
+def build_waves(
+    orders: List[Order],
+    catalogue: Dict[str, Sku],
+    now: datetime,
+) -> List[Wave]:
+    """Group orders into waves respecting size, weight and carrier limits."""
+    waves: List[Wave] = []
+    current: Dict[str, Wave] = {}
+    next_id = 1
+
+    for order in sort_orders(orders):
+        if not is_due_today(order, now):
+            continue
+
+        weight = order_weight(order, catalogue)
+        lines = len(order.lines)
+        wave = current.get(order.carrier)
+
+        needs_new = (
+            wave is None
+            or wave.line_count + lines > MAX_WAVE_LINES
+            or wave.weight_kg + weight > MAX_WAVE_WEIGHT_KG
+            or len(wave.orders) >= MAX_ORDERS_PER_WAVE
+        )
+        if needs_new:
+            wave = Wave(wave_id=next_id, carrier=order.carrier)
+            next_id += 1
+            waves.append(wave)
+            current[order.carrier] = wave
+
+        wave.orders.append(order)
+        wave.line_count += lines
+        wave.weight_kg += weight
+
+    return waves
+
+
+def pick_list(wave: Wave, catalogue: Dict[str, Sku]) -> List[Tuple[str, str, int]]:
+    """Return (location code, sku, quantity) tuples for a wave in walking order."""
+    totals: Dict[str, int] = defaultdict(int)
+    for order in wave.orders:
+        for line in order.lines:
+            totals[line.sku] += line.quantity
+
+    stops = []
+    for sku, qty in totals.items():
+        item = catalogue[sku]
+        loc = item.location
+        stops.append((loc.aisle, loc.bay if loc.aisle % 2 == 0 else -loc.bay, loc.code(), sku, qty))
+
+    stops.sort()
+    return [(code, sku, qty) for _, _, code, sku, qty in stops]
+
+
+def route_length(stops: List[Location], start: Optional[Location] = None) -> float:
+    """Total walking distance for visiting the stops in the given order."""
+    if not stops:
+        return 0.0
+    position = start or Location(1, 0, 1)
+    total = 0.0
+    for stop in stops:
+        total += walking_distance(position, stop)
+        position = stop
+    return total
+
+
+def nearest_neighbour(stops: List[Location], start: Location) -> List[Location]:
+    """Greedy route: always walk to the closest remaining stop."""
+    remaining = list(stops)
+    route = []
+    position = start
+    while remaining:
+        best = min(remaining, key=lambda s: walking_distance(position, s))
+        remaining.remove(best)
+        route.append(best)
+        position = best
+    return route
+
+
+def split_hazmat(wave: Wave, catalogue: Dict[str, Sku]) -> Tuple[Wave, Optional[Wave]]:
+    """Move orders containing hazardous goods into their own wave."""
+    clean = Wave(wave_id=wave.wave_id, carrier=wave.carrier)
+    hazard = Wave(wave_id=wave.wave_id * 1000, carrier=wave.carrier)
+    for order in wave.orders:
+        target = clean
+        for line in order.lines:
+            if catalogue[line.sku].hazmat:
+                target = hazard
+        target.orders.append(order)
+        target.line_count += len(order.lines)
+        target.weight_kg += order_weight(order, catalogue)
+    return clean, (hazard if hazard.orders else None)
+
+
+class StockLedger:
+    """Tracks available stock per SKU and reserves quantities for orders."""
+
+    def __init__(self, opening: Dict[str, int]):
+        self.available = dict(opening)
+        self.reservations: Dict[str, Dict[str, int]] = {}
+
+    def reserve(self, order: Order) -> bool:
+        for line in order.lines:
+            if self.available.get(line.sku, 0) < line.quantity:
+                return False
+        held = {}
+        for line in order.lines:
+            self.available[line.sku] -= line.quantity
+            held[line.sku] = held.get(line.sku, 0) + line.quantity
+        self.reservations[order.order_id] = held
+        return True
+
+    def release(self, order_id: str) -> None:
+        held = self.reservations.pop(order_id, {})
+        for sku, qty in held.items():
+            self.available[sku] = self.available.get(sku, 0) + qty
+
+    def short_orders(self, orders: Iterable[Order]) -> List[str]:
+        short = []
+        for order in orders:
+            if order.order_id not in self.reservations:
+                short.append(order.order_id)
+        return short
+
+
+def allocate(orders: List[Order], ledger: StockLedger) -> Tuple[List[Order], List[Order]]:
+    """Reserve stock in priority order. Returns (allocated, backordered)."""
+    allocated, backordered = [], []
+    for order in sort_orders(orders):
+        if ledger.reserve(order):
+            allocated.append(order)
+        else:
+            backordered.append(order)
+    return allocated, backordered
+
+
+def slotting_score(sku: str, history: Dict[str, int], catalogue: Dict[str, Sku]) -> float:
+    """Higher scores belong closer to the dispatch door: fast, light items."""
+    picks = history.get(sku, 0)
+    weight = catalogue[sku].weight_kg
+    return picks / math.sqrt(weight + 1)
+
+
+def suggest_moves(
+    history: Dict[str, int],
+    catalogue: Dict[str, Sku],
+    top: int = 10,
+) -> List[Tuple[str, str]]:
+    """Suggest moving the busiest SKUs to the lowest-numbered aisles."""
+    ranked = sorted(catalogue, key=lambda s: slotting_score(s, history, catalogue), reverse=True)
+    moves = []
+    for rank, sku in enumerate(ranked[:top]):
+        target_aisle = rank // 4 + 1
+        current = catalogue[sku].location
+        if current and current.aisle > target_aisle:
+            moves.append((sku, f"A{target_aisle:02d}"))
+    return moves
+
+
+def late_orders(orders: List[Order], now: datetime, sla_hours: int = 24) -> List[Order]:
+    """Orders that have been waiting longer than the service level."""
+    limit = timedelta(hours=sla_hours)
+    return [o for o in orders if now - o.placed_at > limit]
+
+
+def top_k_heavy(orders: List[Order], catalogue: Dict[str, Sku], k: int = 5) -> List[Tuple[float, str]]:
+    heap: List[Tuple[float, str]] = []
+    for order in orders:
+        w = order_weight(order, catalogue)
+        if len(heap) < k:
+            heapq.heappush(heap, (w, order.order_id))
+        elif w > heap[0][0]:
+            heapq.heapreplace(heap, (w, order.order_id))
+    return sorted(heap, reverse=True)
+
+@dataclass
+class CountResult:
+    location_code: str
+    sku: str
+    expected: int
+    counted: int
+    counted_at: datetime
+
+    @property
+    def variance(self) -> int:
+        return self.counted - self.expected
+
+
+class CycleCounter:
+    """Plans and records cycle counts so every location is counted regularly."""
+
+    def __init__(self, catalogue: Dict[str, Sku], expected: Dict[str, int]):
+        self.catalogue = catalogue
+        self.expected = dict(expected)
+        self.last_counted: Dict[str, datetime] = {}
+        self.results: List[CountResult] = []
+
+    def due(self, now: datetime, per_day: int = 40, fast_days: int = 30, slow_days: int = 90,
+            history: Optional[Dict[str, int]] = None) -> List[str]:
+        """Pick the SKUs to count today: fast movers monthly, others quarterly."""
+        history = history or {}
+        candidates = []
+        for sku in self.catalogue:
+            interval = fast_days if history.get(sku, 0) >= 50 else slow_days
+            last = self.last_counted.get(sku)
+            if last is None:
+                candidates.append((datetime.min, sku))
+            elif now - last >= timedelta(days=interval):
+                candidates.append((last, sku))
+        candidates.sort()
+        return [sku for _, sku in candidates[:per_day]]
+
+    def record(self, sku: str, counted: int, now: datetime) -> CountResult:
+        item = self.catalogue[sku]
+        result = CountResult(
+            location_code=item.location.code(),
+            sku=sku,
+            expected=self.expected.get(sku, 0),
+            counted=counted,
+            counted_at=now,
+        )
+        self.results.append(result)
+        self.last_counted[sku] = now
+        if result.variance != 0:
+            self.expected[sku] = counted
+        return result
+
+    def variance_report(self, threshold: int = 2) -> List[str]:
+        lines = []
+        for r in self.results:
+            if abs(r.variance) >= threshold:
+                sign = "+" if r.variance > 0 else ""
+                lines.append(f"{r.location_code} {r.sku}: expected {r.expected}, counted {r.counted} ({sign}{r.variance})")
+        return lines
+
+    def accuracy(self) -> float:
+        if not self.results:
+            return 1.0
+        exact = sum(1 for r in self.results if r.variance == 0)
+        return exact / len(self.results)
+```
+
+Background: we run this each afternoon, usually with 800 to 1,500 orders, and about 6,000 SKUs. The pickers have complained about two things: pick lists sometimes make them walk to the far end of an aisle and back, and a few orders from the 14:50 to 15:00 period seem to disappear and are not picked until the next day. The stock ledger is shared between two planners running at the same time on busy days. Please take those complaints seriously in the review.

@@ -1,0 +1,29 @@
+I manage the stock at a regional seed bank and pulled this table of germination tests from our last audit. Please write up an analysis for the board: the main findings, which species and storage conditions are worrying, anything that looks like a data problem, and a list of concrete next steps. Say clearly what you can and cannot conclude from so few rows.
+
+Context: we store seed in sealed foil packets at minus 18 C (freezer) or at 5 C (cool room). Each accession is tested for germination at deposit, then re-tested after storage. "Seeds tested" is the number sown per test, usually 100 or 50 when seed was scarce. Germination is the percentage of seeds that sprouted within the test period. The viability threshold we use for regeneration is 80 percent of the original result.
+
+| Accession | Species | Collected | Storage | Years stored | Seeds tested | Germination at deposit (%) | Germination now (%) |
+|---|---|---|---|---|---|---|---|
+| A-1041 | Wild barley | 2009 | Freezer | 15 | 100 | 96 | 94 |
+| A-1042 | Wild barley | 2009 | Cool room | 15 | 100 | 95 | 71 |
+| A-1107 | Meadow clover | 2012 | Freezer | 12 | 100 | 88 | 85 |
+| A-1108 | Meadow clover | 2012 | Cool room | 12 | 100 | 90 | 52 |
+| A-1302 | Sea kale | 2016 | Freezer | 8 | 50 | 74 | 70 |
+| A-1303 | Sea kale | 2016 | Cool room | 8 | 50 | 72 | 40 |
+| A-1355 | Oat landrace | 2017 | Freezer | 7 | 100 | 93 | 92 |
+| A-1356 | Oat landrace | 2017 | Cool room | 7 | 100 | 92 | 84 |
+| A-1420 | Marsh marigold | 2018 | Freezer | 6 | 50 | 61 | 58 |
+| A-1421 | Marsh marigold | 2018 | Cool room | 6 | 50 | 63 | 22 |
+| A-1560 | Dyer's woad | 2020 | Freezer | 4 | 100 | 82 | 81 |
+| A-1640 | Wild barley | 2023 | Freezer | 1 | 100 | 94 | 97 |
+| A-1655 | Sea kale | 2023 | Cool room | 1 | 50 | 76 | 76 |
+
+Notes from the lab:
+- Accession A-1640 was tested by a new technician. The 97 is higher than the deposit test, which we put down to noise but nobody has checked it.
+- The cool room lost power for about nine days in August 2021, and its temperature rose to roughly 14 C. The freezer was unaffected.
+- Marsh marigold seed is known to be short-lived and is difficult to germinate; the lab used the same method each time as far as we know.
+- A-1560 has no cool room duplicate because only one packet was received.
+- There is no column for the date of the latest test. All current tests were done between April and June of this year.
+- We hold duplicate packets of nearly every accession at a partner bank in the north, but we have not tested those.
+
+The board will decide in two weeks whether to move all remaining cool room accessions to the freezer, which would need two more units costing about 9,000 each. I need something I can read out and also hand over as a written summary.

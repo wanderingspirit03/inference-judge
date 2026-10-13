@@ -1,0 +1,42 @@
+I would like a detailed peer review of the methods and results section below, written as if you were a referee for a journal on heritage management. Please comment on the design, the statistics, whether the conclusions follow from the evidence, and what the authors should add or change. Be specific, point to numbers, and end with a recommendation and a ranked list of required revisions.
+
+**Does repainting on a fixed cycle protect coastal lighthouse towers? A comparison of maintenance regimes across 14 sites**
+
+*Methods and Results (draft 2, for the Skerrow Lighthouse Trust)*
+
+**2. Methods**
+
+2.1 Sites. The Skerrow Lighthouse Trust cares for 14 decommissioned light towers on the north and east coasts. All are masonry towers between 11 and 31 m tall, built between 1847 and 1912. Exposure was rated from 1 (sheltered estuary) to 5 (open sea) by the Trust's surveyor using fetch distance and recorded storm days. Eight towers have exposure 4 or 5.
+
+2.2 Maintenance regimes. Between 2014 and 2019 the Trust followed one of two regimes. Seven towers (Group A) were repainted with a lime-based breathable coating every four years. The other seven (Group B) were repainted every eight years with an acrylic masonry paint, after the Trust's former contractor argued that the acrylic would last twice as long. Allocation was not random: the Trust gave Group A to the towers that its volunteers could reach most easily, because the lime coating needs more frequent work.
+
+2.3 Outcome measures. In June 2024 a single surveyor inspected each tower and recorded three outcomes. (i) Moisture: the mean of 12 readings with a resistance moisture meter at 1.5 m on the leeward face, expressed as percent by weight. (ii) Salt: the surface chloride content from three scrapings per tower, measured in the laboratory in mg per kg. (iii) Defect count: the number of cracks wider than 0.3 mm, spalled areas larger than 100 cm2 and loose joints counted over the whole tower, divided by the wall area in square metres.
+
+2.4 Analysis. Group means were compared with Welch's t test. We also fitted a linear regression of the defect rate on group, exposure and tower age. Because of the small sample, the significance level was set at 0.10. Missing data were handled by dropping the tower from that analysis. All analysis was done in a spreadsheet.
+
+2.5 Measurement quality. The moisture meter was calibrated against an oven-dried core from one tower before the survey, and the readings were converted using the manufacturer's curve for sandstone. Eleven of the towers are sandstone and three (Brae Head, Cullen Point and Inner Skerry) are brick. The brick towers were measured with the same curve. Defects were counted in a single pass from ground level and from the gallery, and no ladders or drones were used above the lantern room.
+
+**3. Results**
+
+3.1 Sample. All 14 towers were surveyed. For one tower (Hallen Ness, Group B) the laboratory lost the salt samples, leaving 13 towers for the chloride analysis. Mean age was 128 years in Group A and 109 years in Group B. Mean exposure was 3.0 in Group A and 4.1 in Group B.
+
+3.2 Moisture. Mean moisture was 14.2 percent (standard deviation 3.1) in Group A and 17.9 percent (standard deviation 4.0) in Group B. The difference of 3.7 percentage points was significant (t = 1.95, p = 0.08). Moisture rose with exposure in both groups.
+
+3.3 Salt. Mean surface chloride was 410 mg per kg in Group A (n = 7) and 655 mg per kg in Group B (n = 6). The difference was not significant (p = 0.21), although the direction agrees with the moisture result. The two highest values, 1,240 and 1,090 mg per kg, were both from Group B towers on exposed headlands.
+
+3.4 Defects. The mean defect rate was 0.42 per square metre in Group A and 0.81 per square metre in Group B. In the regression model the coefficient for Group B was 0.31 (95 percent confidence interval 0.02 to 0.60). The coefficient for exposure was 0.18 per unit (p = 0.03) and tower age was not significant. The model explained 61 percent of the variance (adjusted R2 = 0.49).
+
+3.5 Costs. Over the 2014 to 2024 period, the lime regime cost an average of 19,400 per tower in materials and contractor time and the acrylic regime cost an average of 14,900 per tower. The Trust's volunteers contributed an estimated 310 hours per tower to Group A and 120 hours per tower to Group B, which are not included in the figures above.
+
+3.6 Results by exposure. To check whether the group difference was an artefact of exposure, towers were divided into sheltered (exposure 1 to 3) and exposed (exposure 4 to 5) sets. Mean defect rates per square metre are shown below.
+
+| Exposure set | Group A (lime, 4 years) | Group B (acrylic, 8 years) |
+|---|---|---|
+| Sheltered | 0.35 (n = 5) | 0.38 (n = 1) |
+| Exposed | 0.60 (n = 2) | 0.88 (n = 6) |
+
+Among exposed towers Group B had the higher defect rate, by 0.28 per square metre. Among sheltered towers there was only one Group B tower, so no comparison was attempted.
+
+3.7 Summary of findings. Towers repainted every four years with lime had less moisture, lower chloride and fewer defects than towers repainted every eight years with acrylic paint, although only the moisture and defect differences reached the 0.10 level. The acrylic regime was cheaper in cash terms but, after adjustment for exposure, was associated with about 0.3 additional defects per square metre. We therefore conclude that breathable lime coatings on a four-year cycle protect coastal masonry better than acrylic coatings on an eight-year cycle, and that the Trust should move all towers to the lime regime. Because the defect rate rose with exposure, towers rated 4 or 5 should be repainted first.
+
+3.8 Limitations. The towers were not randomly allocated, and the surveyor was aware of each tower's regime. The study has a single inspection time point, so we cannot say how fast defects accumulated. Hallen Ness, the tower with missing salt data, is also the most exposed in Group B.

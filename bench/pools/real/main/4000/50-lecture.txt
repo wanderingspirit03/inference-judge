@@ -1,0 +1,103 @@
+Das sind meine Vorlesungsmitschriften zur Fahrtenvermittlung in einer Taxizentrale, und nächste Woche habe ich die Klausur im Modul Verkehrsbetrieb. Bitte erstelle mir daraus einen ausführlichen Lernleitfaden mit den wichtigsten Begriffen, mit durchgerechneten Beispielen zu den Formeln und mit einem Quiz samt Lösungen (etwa fünfzehn Fragen, gemischt aus Verständnis- und Rechenaufgaben). Wenn in meinen Notizen etwas unklar oder wahrscheinlich falsch ist, weise mich bitte darauf hin.
+
+Vorlesung 6: Disposition in der Taxizentrale (Prof. Dr. Reinhild Käferstein, Wintersemester)
+
+1. Aufgaben der Zentrale
+
+Eine Taxizentrale nimmt Fahrtwünsche entgegen (Telefon, App, Internet, Stammkunden), ordnet jedem Wunsch ein Fahrzeug zu und überwacht die Fahrt bis zur Abrechnung. Sie hat vier Hauptaufgaben:
+
+- Auftragsannahme: Erfassen von Abholort, Ziel, Zeit, Personenzahl und Sonderwünschen (Rollstuhl, Kindersitz, großes Gepäck).
+- Disposition: Auswahl des Fahrzeugs und Übermittlung des Auftrags.
+- Überwachung: Verfolgen der Position, Reagieren auf Verspätungen und Ausfälle.
+- Auswertung: Berechnen von Kennzahlen und Planen der Besetzung für die nächsten Wochen.
+
+Wichtig für die Klausur: Die Zentrale arbeitet in einem Spannungsfeld zwischen Kundenwartezeit (kurz) und Auslastung der Fahrzeuge (hoch). Beides gleichzeitig zu maximieren ist nicht möglich.
+
+2. Zustände von Fahrzeugen und Aufträgen
+
+Ein Fahrzeug hat im System einen von fünf Zuständen: frei (am Halteplatz oder fahrend ohne Fahrgast), zugeteilt (auf dem Weg zum Abholort), besetzt (Fahrgast an Bord), Pause und außer Dienst. Ein Auftrag durchläuft die Zustände offen, zugeteilt, gestartet, abgeschlossen. Ein Auftrag kann außerdem storniert werden (durch den Kunden) oder verloren gehen (kein Fahrzeug gefunden oder Kunde nicht angetroffen).
+
+Merke: Die Zeit zwischen Zuteilung und Abholung heißt Anfahrtszeit. Die Zeit zwischen Auftragseingang und Abholung heißt Wartezeit des Kunden. Die Wartezeit ist also immer größer als die Anfahrtszeit, weil sie die Annahme und die Suche nach einem Fahrzeug enthält.
+
+3. Zuteilungsverfahren
+
+3.1 Nächstes freies Fahrzeug. Der Auftrag geht an das freie Fahrzeug mit der kürzesten Fahrzeit zum Abholort. Das Verfahren ist einfach und liefert kurze Anfahrten für den einzelnen Auftrag. Nachteil: Es kann Fahrzeuge aus einem Stadtteil abziehen und dort Lücken reißen, weshalb die nächsten Kunden dort länger warten.
+
+3.2 Zonenwarteschlange. Die Stadt wird in Zonen eingeteilt. In jeder Zone stehen freie Fahrzeuge in einer Warteschlange; wer am längsten wartet, bekommt den nächsten Auftrag der Zone. Das Verfahren ist gerecht gegenüber den Fahrern, aber nicht optimal für die Anfahrt, denn das Fahrzeug an erster Stelle ist nicht unbedingt das nächste. Es wird in Städten mit festen Halteplätzen verwendet.
+
+3.3 Angebotsverfahren (Bietverfahren). Der Auftrag wird an mehrere Fahrzeuge in der Nähe gesendet, und diese bestätigen innerhalb von 15 Sekunden. Das Fahrzeug mit der besten Bewertung (Entfernung, Wartezeit, Qualität) erhält den Zuschlag. Vorteil: Der Fahrer entscheidet mit. Nachteil: Es gibt Ablehnungen, und jede Ablehnung kostet Zeit.
+
+3.4 Bündelung (Batching). Die Zentrale sammelt Aufträge über ein kurzes Zeitfenster, zum Beispiel 20 Sekunden, und löst dann ein Zuordnungsproblem für alle Aufträge und alle freien Fahrzeuge gleichzeitig, mit dem Ziel, die Summe der Anfahrtszeiten zu minimieren. Das Ergebnis ist im Mittel besser als bei sofortiger Zuteilung, aber jeder Kunde wartet im Schnitt 10 Sekunden länger auf die Bestätigung.
+
+Zusammengefasst:
+
+| Verfahren | Anfahrtszeit | Fairness unter Fahrern | Aufwand | Typische Anwendung |
+|---|---|---|---|---|
+| Nächstes Fahrzeug | niedrig | niedrig | niedrig | kleine Flotte, App |
+| Zonenwarteschlange | mittel | hoch | niedrig | Halteplätze, Bahnhof |
+| Angebotsverfahren | mittel | mittel | mittel | gemischte Flotte |
+| Bündelung | sehr niedrig | mittel | hoch | große Flotte, Spitzenzeiten |
+
+4. Kennzahlen
+
+Die wichtigsten Kennzahlen einer Taxizentrale sind:
+
+- Mittlere Wartezeit der Kunden (in Minuten) und der Anteil der Kunden, die länger als 10 Minuten warten.
+- Verlustquote = verlorene Aufträge geteilt durch alle Aufträge.
+- Leerfahrtanteil = Leerkilometer geteilt durch Gesamtkilometer (Leerkilometer sind alle Kilometer ohne Fahrgast, also auch die Anfahrt).
+- Auslastung = Zeit mit Fahrgast (besetzt) geteilt durch Schichtzeit.
+- Umsatz je Stunde = Fahrpreise geteilt durch Schichtstunden.
+
+Beispiel 1 (Verlustquote). In einer Woche gingen bei der Zentrale 1.840 Aufträge ein. 1.702 wurden abgeschlossen, 138 gingen verloren. Verlustquote = 138 / 1.840 = 0,075 = 7,5 Prozent. Davon waren 92 Fälle ohne verfügbares Fahrzeug und 46 Fälle, in denen der Kunde nicht am Abholort war.
+
+Beispiel 2 (Leerfahrtanteil). Eine Flotte von 40 Fahrzeugen fuhr an einem Tag zusammen 6.400 km. Davon waren 2.016 km Leerkilometer. Leerfahrtanteil = 2.016 / 6.400 = 0,315 = 31,5 Prozent. Fährt die Zentrale die Anfahrt durch bessere Zuteilung im Mittel um 0,3 km kürzer bei 1.100 Aufträgen am Tag, so sinken die Leerkilometer um 330 km, also auf 1.686 km, und der Leerfahrtanteil auf 27,8 Prozent. (Gesamtkilometer sinken dann auf 6.070 km.)
+
+Beispiel 3 (Auslastung). Ein Fahrer arbeitet eine Schicht von 10 Stunden. Er hat 4 Stunden 30 Minuten besetzt gefahren. Auslastung = 4,5 / 10 = 45 Prozent.
+
+5. Warteschlangen in der Telefonannahme
+
+Die Telefonannahme lässt sich als Warteschlangensystem beschreiben. Anrufe kommen mit der Rate λ (Anrufe je Stunde), und jede Disponentin bearbeitet im Mittel μ Anrufe je Stunde (μ = 1 geteilt durch die mittlere Bearbeitungszeit). Die Verkehrsbelastung ist a = λ / μ. Bei c Disponentinnen ist die Auslastung ρ = a / c, und das System ist nur stabil, wenn ρ kleiner als 1 ist.
+
+5.1 Ein Schalter (M/M/1). Mit einer Disponentin gilt für die mittlere Zahl wartender Anrufe Lq = ρ² / (1 − ρ) und für die mittlere Wartezeit Wq = Lq / λ.
+
+Beispiel 4. λ = 24 Anrufe je Stunde, mittlere Bearbeitungszeit 2 Minuten, also μ = 30 je Stunde. ρ = 24 / 30 = 0,8. Lq = 0,64 / 0,2 = 3,2 Anrufe. Wq = 3,2 / 24 = 0,1333 Stunden = 8 Minuten. Die Anrufer warten im Mittel 8 Minuten, bevor jemand antwortet. Das ist für eine Taxizentrale viel zu lang.
+
+5.2 Mehrere Schalter (M/M/c, Erlang C). Mit c Disponentinnen gibt die Erlang-C-Formel die Wahrscheinlichkeit, dass ein Anrufer warten muss:
+
+C(c, a) = [ aᶜ / c! · 1 / (1 − ρ) ] / [ Σ (von k = 0 bis c − 1) aᵏ / k! + aᶜ / c! · 1 / (1 − ρ) ].
+
+Die mittlere Wartezeit aller Anrufer ist Wq = C(c, a) / (c · μ − λ).
+
+Beispiel 5. In der Spitzenstunde kommen λ = 48 Anrufe je Stunde, μ = 30 je Stunde, es arbeiten c = 2 Disponentinnen. a = 48 / 30 = 1,6 und ρ = 0,8. Der Zähler: a² / 2! = 1,28, geteilt durch (1 − 0,8) ergibt 6,4. Die Summe im Nenner: 1 + 1,6 = 2,6. Also C = 6,4 / (2,6 + 6,4) = 6,4 / 9,0 = 0,711. Mit 71 Prozent Wahrscheinlichkeit muss ein Anrufer warten. Wq = 0,711 / (60 − 48) = 0,0593 Stunden = 3,6 Minuten. Mit zwei Plätzen warten die Anrufer in der Spitze also im Mittel gut dreieinhalb Minuten, was für eine Taxizentrale immer noch zu lang ist.
+
+Beispiel 5b. Setzt man in derselben Stunde eine dritte Disponentin ein (c = 3), sinkt die Auslastung auf ρ = 1,6 / 3 = 0,533. Zähler: a³ / 3! = 4,096 / 6 = 0,683; geteilt durch (1 − 0,533) ergibt 1,463. Summe im Nenner: 1 + 1,6 + 1,28 = 3,88. Also C = 1,463 / (3,88 + 1,463) = 0,274. Wq = 0,274 / (90 − 48) = 0,0065 Stunden, das sind etwa 23 Sekunden. Eine einzige zusätzliche Person senkt die Wartezeit also von 3,6 Minuten auf weniger als eine halbe Minute. Das zeigt, warum sich die Besetzung der Annahme in der Spitze fast immer lohnt.
+
+Merke: Die Wartezeit steigt stark, wenn ρ gegen 1 geht. Deshalb plant man die Besetzung mit einer Auslastung der Annahme von etwa 70 bis 80 Prozent und nicht mit 95 Prozent.
+
+6. Nachfrageprognose und Schichtplanung
+
+Die Nachfrage schwankt nach Uhrzeit, Wochentag, Wetter und Veranstaltungen. Die Zentrale prognostiziert sie aus den Aufträgen derselben Stunde in den letzten Wochen. Ein einfaches Verfahren ist der gleitende Mittelwert über vier gleiche Wochentage, mit einem Zuschlag bei Regen (in unserer Zentrale 18 Prozent) und bei Großveranstaltungen (individuell geschätzt).
+
+Beispiel 6. An den letzten vier Freitagen zwischen 22 und 23 Uhr gab es 96, 104, 88 und 112 Aufträge. Der Mittelwert ist (96 + 104 + 88 + 112) / 4 = 100 Aufträge. Für den kommenden Freitag ist Regen angesagt. Prognose = 100 · 1,18 = 118 Aufträge. Wenn ein Fahrzeug in dieser Stunde im Mittel 1,6 Aufträge schafft (Anfahrt, Fahrt, Rückkehr), werden 118 / 1,6 = 73,75, also mindestens 74 Fahrzeuge im Dienst benötigt. Hat die Flotte nur 65 Fahrzeuge in der Spätschicht, werden voraussichtlich Aufträge verloren gehen oder lange warten.
+
+7. Preisregeln und Vorbestellung
+
+Der Fahrpreis in Städten mit Tarifpflicht besteht aus einem Grundpreis, einem Kilometerpreis und einem Wartezeitpreis. In unserem Beispiel gelten 4,50 Euro Grundpreis, 2,40 Euro je Kilometer und 0,60 Euro je angefangene Minute Wartezeit während der Fahrt. Für Vorbestellungen berechnet die Zentrale zusätzlich 2,00 Euro. Bei Fahrten mit mehr als vier Fahrgästen darf ein Großraumtaxi angefordert werden, für das ein Zuschlag von 5,00 Euro gilt.
+
+Beispiel 7. Eine vorbestellte Fahrt über 7,5 Kilometer mit 4 Minuten Wartezeit kostet 4,50 + 7,5 · 2,40 + 4 · 0,60 + 2,00 = 4,50 + 18,00 + 2,40 + 2,00 = 26,90 Euro.
+
+8. Störungen und Rückfallebenen
+
+Fällt die Zentrale aus, müssen die Fahrer weiter Aufträge bekommen. Es gibt drei Rückfallebenen: Erstens der Funkbetrieb auf einem festen Kanal. Zweitens die Aufträge per Telefon direkt an Stammfahrer. Drittens das Fahren nach Halteplatz ohne Zentrale. Wichtig ist, jede Stufe vorher zu üben, und nach der Störung alle in der Zwischenzeit gefahrenen Aufträge nachzuerfassen, damit die Abrechnung stimmt.
+
+9. Qualität, Barrierefreiheit und Datenschutz
+
+Zur Qualitätssicherung wertet die Zentrale jede Woche Beschwerden, Lob und Rückfragen aus. Typische Beschwerden sind lange Wartezeiten, abgelehnte Aufträge und Umwege. Eine Beschwerde wird innerhalb von zwei Arbeitstagen beantwortet; bei Streit über den Fahrweg liefert die Zentrale den aufgezeichneten Streckenverlauf.
+
+Rollstuhlgerechte Fahrzeuge sind knapp. In unserem Beispiel hat die Flotte 40 Fahrzeuge, davon 5 rollstuhlgerecht. Die Zentrale reserviert diese Fahrzeuge nicht, aber sie vergibt Aufträge mit Rollstuhl bevorzugt an sie. Frage zum Nachdenken: Welche Kennzahl würde man zusätzlich führen, um zu prüfen, ob Kunden mit Rollstuhl schlechter bedient werden? (Antwort der Vorlesung: die mittlere Wartezeit getrennt nach Auftragsart.)
+
+Beim Datenschutz gilt: Positionsdaten der Fahrzeuge dürfen nur für die Disposition und die Abrechnung genutzt werden, Gesprächsaufzeichnungen werden nach 30 Tagen gelöscht, und Kundendaten wie Adressen von Stammkunden werden nur für die Dauer des Vertragsverhältnisses gespeichert. Fahrer müssen über die Ortung informiert werden.
+
+Beispiel 8 (Umsatz je Stunde). Ein Fahrer hat in einer Schicht von 10 Stunden 22 Fahrten mit einem mittleren Fahrpreis von 17,80 Euro. Umsatz = 22 · 17,80 = 391,60 Euro. Umsatz je Stunde = 391,60 / 10 = 39,16 Euro. Zieht man davon die Anfahrten ab, die nicht bezahlt werden, sieht man, warum eine kurze Anfahrt direkt das Einkommen der Fahrer erhöht.
+
+Prüfungshinweise von Frau Käferstein: Erlang C wird nicht auswendig verlangt, die Formel steht im Formelblatt. Man muss aber die Auslastung ρ, die Verkehrsbelastung a und die Wartezeit sicher berechnen können. Die Zuteilungsverfahren werden als Vergleichstabelle abgefragt, und die Kennzahlen als Rechenaufgabe.

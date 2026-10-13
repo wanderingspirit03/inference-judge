@@ -1,0 +1,127 @@
+Below is our Q3 operations review for the Kelderwick Container Terminal. I have to present it to the board on Thursday and I would like a section-by-section summary I can read out loud, followed by your recommendations for what we should do in Q4 and in what order. Please point out anything in the numbers that does not add up or that the board is likely to ask about.
+
+---
+
+KELDERWICK CONTAINER TERMINAL
+Quarterly Operations Review, Q3 (1 July to 30 September)
+Prepared by: Operations Planning Office (author: Marit Oosterhuis, Head of Planning)
+Distribution: Board of Directors, Terminal Management Team, Harbour Authority liaison
+Status: Final
+
+1. Executive summary
+
+Kelderwick handled 412,600 TEU in the third quarter, which is 6.1 percent above the same quarter last year (388,900 TEU) and 2.4 percent above our budget of 402,900 TEU. Vessel calls totalled 311, against 298 a year ago. The average gross crane productivity across the quarter was 27.8 moves per hour per crane, up from 26.1 in Q2 but still below the contractual target of 30 that we committed to in the Meridian Line service agreement.
+
+Three events shaped the quarter. First, the commissioning of the two new ship-to-shore cranes (STS 7 and STS 8) was completed on 19 August, six weeks later than planned. Second, a software fault in the terminal operating system on 2 September caused a gate outage of 5 hours and 40 minutes and a yard planning freeze of about three hours. Third, the strike at the regional rail operator from 22 to 26 September forced us to shift 3,180 TEU of planned rail departures to road, which in turn produced the worst truck queues we have recorded this year.
+
+Revenue for the quarter was 38.4 million euros, 4.9 percent above budget. Operating cost was 29.7 million euros, 7.2 percent above budget, so operating profit came in at 8.7 million euros against a budget of 9.0 million. The shortfall is almost entirely explained by overtime, one-off commissioning costs, and the extra trucking subsidy we paid during the rail strike. Lost-time injuries rose from one in Q2 to three in Q3, which is the item the Management Team regards as most serious.
+
+2. Volumes and vessel calls
+
+Container volumes by trade lane are shown below. All figures are in TEU, import plus export plus transhipment, with empty containers included.
+
+| Trade lane | Q3 this year | Q3 last year | Change | Share of total |
+|---|---|---|---|---|
+| North Europe feeder | 121,400 | 118,200 | +2.7% | 29.4% |
+| Mediterranean | 78,900 | 70,100 | +12.6% | 19.1% |
+| West Africa | 54,300 | 49,800 | +9.0% | 13.2% |
+| Transatlantic | 92,700 | 91,500 | +1.3% | 22.5% |
+| Asia (via hub transhipment) | 65,300 | 59,300 | +10.1% | 15.8% |
+| Total | 412,600 | 388,900 | +6.1% | 100.0% |
+
+The growth in the Mediterranean lane comes from the new weekly service operated by Meridian Line that started in late June. The West Africa growth is mostly empty repositioning, and we should not read it as a lasting change in demand. Transhipment accounted for 61,800 TEU, or 15.0 percent of the total, which is slightly lower than the 16.3 percent of last year because two feeder loops were consolidated by their carriers in July.
+
+Of the 311 vessel calls, 87 were of vessels longer than 300 metres, compared with 71 last year. Average call size rose from 1,305 TEU to 1,327 TEU. The number of calls that started more than two hours after their scheduled berthing window was 64, or 20.6 percent. Twenty-three of these delays were caused by late arrival of the vessel itself, 19 by our own berth being occupied by an overrunning call, and 22 by weather, mainly fog in the first half of September and a strong northwesterly wind on 14 and 15 August.
+
+3. Berth and crane performance
+
+The terminal has three berths with a combined quay length of 1,150 metres. Berth occupancy averaged 68 percent, with a peak of 91 percent in the week of 8 September when three large vessels arrived within 30 hours of each other.
+
+Crane productivity by month:
+
+| Month | Gross moves per crane hour | Net moves per crane hour | Crane availability |
+|---|---|---|---|
+| July | 26.9 | 31.2 | 94.1% |
+| August | 27.5 | 32.0 | 91.3% |
+| September | 29.0 | 33.4 | 95.6% |
+| Quarter | 27.8 | 32.1 | 93.7% |
+
+August availability was reduced by the commissioning work on STS 7 and STS 8, and by a spreader fault on STS 3 that took the crane out of service for four days. September was the best month we have had since the terminal opened its third berth, and the Planning Office attributes this to the new cranes being fully in service and to the revised stowage planning rules introduced on 1 September, which limit the number of consecutive moves in the same bay.
+
+The gap between gross and net productivity is the main reason we remain below the contractual target of 30. Net productivity of 32.1 is above the target, but the contract is written on gross productivity, which counts waiting time for hatch covers, lashing, and vessel-side delays. Roughly 40 percent of the gap is lashing time. We have asked Meridian Line to discuss whether the contract metric can be changed to a berth-window measure, but they have not yet responded.
+
+4. Yard and equipment
+
+The yard holds 31,500 TEU in ground slots. Average yard utilisation was 74 percent, with a peak of 93 percent on 24 September, during the rail strike. When utilisation passes 85 percent, the number of unproductive reshuffles per hundred moves rises sharply. In Q3 reshuffles averaged 11.2 per hundred moves, against 9.8 in Q2. In the week of the rail strike the figure reached 17.4.
+
+Dwell time of import containers averaged 4.6 days (Q2: 4.1 days). Export dwell was 3.2 days. The increase in import dwell is partly explained by customs inspections, which rose by 18 percent following a new risk profile applied by the national customs authority in August, and partly by the rail strike.
+
+Equipment status at the end of the quarter:
+
+- Rubber-tyred gantry cranes: 24 in fleet, 21 available on average. Two units are due for the major overhaul in Q4.
+- Terminal tractors: 36 in fleet. Fifteen are more than ten years old and account for 58 percent of unplanned breakdowns.
+- Reach stackers: 6 in fleet, all available, used mostly for the empty depot.
+- Straddle carriers: none. The terminal uses a tractor and trailer system.
+
+Fuel consumption per move fell by 3.5 percent, which is the first fall in six quarters. The main reason is the electric conversion of eight RTG cranes completed in the spring, and we expect a further fall once the remaining 16 cranes are converted.
+
+5. Gate and landside operations
+
+The gate processed 188,400 truck transactions, an average of 2,048 per day. The average truck turnaround time inside the terminal was 41 minutes, compared with 36 minutes in Q2. The share of trucks that finished within 45 minutes was 71 percent against a target of 85 percent. The pre-booking system for truck slots covered 63 percent of the volume, up from 55 percent.
+
+The gate outage on 2 September began at 06:12 and lasted until 11:52. It was caused by a database lock in the terminal operating system that appeared after a patch was installed on the night of 1 September. The vendor has confirmed that the patch was not tested against our configuration of the gate module. During the outage 410 trucks queued on the access road and, after 45 minutes, the queue reached the public road, which led to a complaint from the municipality. We had no written fallback procedure for manual gate processing; staff improvised with paper lists, which is why the recovery took more than an hour after the system was restored.
+
+During the rail strike, the rail share of landside transport fell from 31 percent to 9 percent for five days. We used 14 additional trucking contractors and paid a subsidy of 38 euros per container to keep export cargo moving. Total subsidy cost was 121,000 euros. Average truck waiting time outside the gate peaked at 118 minutes on 24 September.
+
+6. Safety and environment
+
+Three lost-time injuries occurred, compared with one in Q2 and two in Q3 last year. The total recordable injury frequency rate was 4.1 per million hours worked, against 3.2 in the previous quarter.
+
+- 14 July: a lasher fell from a vessel hatch cover while working on a wet surface. Fractured wrist, 38 days lost.
+- 3 September: a tractor driver was struck by a swinging door while handling a damaged container. Back strain, 12 days lost. This happened during the gate outage recovery, when drivers were working extended shifts.
+- 20 September: a stevedore twisted his knee after stepping off a twistlock stacking platform. 21 days lost.
+
+Two of the three incidents occurred during or just after periods of high overtime. Average overtime per operational employee rose to 14.6 hours per month, from 9.1 in Q2. Near-miss reports numbered 96, an increase of 31 percent, which the Safety Manager reads as a sign of better reporting rather than greater danger.
+
+Environmental indicators were stable. Shore power connections were used by 17 vessel calls, below the target of 30 for the quarter, because only one berth is equipped and because carriers cite the cost of connection. Noise complaints from the neighbouring Oosterstrand housing area numbered 9, against 14 in Q3 last year, mostly relating to night-time crane alarms.
+
+7. People and staffing
+
+The terminal employs 612 people, of whom 438 are operational. Voluntary turnover over the last twelve months is 11.4 percent. Eleven crane operators left during the quarter, mainly to a competing terminal that offered a retention bonus. We recruited nine operators and have 14 in training, but a newly trained operator takes about eight months to reach full productivity. Sickness absence was 5.8 percent, higher than the 4.9 percent of Q2, with a noticeable rise among night-shift employees.
+
+The labour agreement with the port workers' union expires on 31 March. Opening talks are planned for early December. The union has already signalled that it will ask for a limit on overtime and for a shorter roster cycle.
+
+8. Finance
+
+| Item (million euros) | Actual | Budget | Variance |
+|---|---|---|---|
+| Revenue | 38.4 | 36.6 | +1.8 |
+| Personnel cost | 14.9 | 13.8 | -1.1 |
+| Equipment and maintenance | 6.2 | 5.9 | -0.3 |
+| Energy and fuel | 3.1 | 3.0 | -0.1 |
+| Subcontracted trucking and services | 2.9 | 1.9 | -1.0 |
+| Commissioning one-offs | 1.2 | 0.0 | -1.2 |
+| Other operating cost | 1.4 | 1.3 | -0.1 |
+| Total operating cost | 29.7 | 27.7 | -2.0 |
+| Operating profit | 8.7 | 9.0 | -0.3 |
+
+Note that the sum of the cost lines above is 29.7 and the budgeted cost lines sum to 27.9 rather than 27.7; the Finance Department has been asked to confirm which figure is correct before the board meeting. Capital expenditure in the quarter was 11.3 million euros, of which 8.4 million related to STS 7 and STS 8 and 1.7 million to the RTG electrification programme. The balance on the port authority's concession fee was paid on schedule.
+
+9. Customer feedback
+
+The customer survey was sent to 41 shipping lines and 120 hauliers. The response rates were 59 percent and 33 percent. Shipping lines gave an average score of 7.4 out of 10 (Q2: 7.1), citing improved crane productivity in September but criticising schedule reliability. Hauliers gave 5.9 (Q2: 6.6), with 71 percent of comments about waiting time at the gate. Two shipping lines, including Meridian Line, have asked for a written recovery plan on berth windows before renewing in the new year.
+
+10. Outlook and proposals for Q4
+
+The Planning Office expects Q4 volume of 405,000 to 420,000 TEU, with the usual increase before the winter holidays in the first half of December. The following items are proposed for management attention:
+
+1. Write and test a manual gate fallback procedure and require the vendor to run patches in a test environment that mirrors our gate configuration. Estimated cost 60,000 euros.
+2. Raise the pre-booking share of truck slots from 63 percent to at least 80 percent by introducing a late-arrival charge in January.
+3. Begin replacing the oldest 15 terminal tractors, starting with six units in Q4. Estimated cost 1.1 million euros for six units.
+4. Introduce a cap on voluntary overtime of 12 hours per month per operator and recruit 20 additional lashers.
+5. Negotiate with the rail operator for a guaranteed minimum capacity of 20 percent of volume during strikes, and set up a standing agreement with trucking contractors for surge capacity.
+6. Extend shore power to the second berth. The Harbour Authority has offered a grant of 40 percent of the 2.6 million euro cost, subject to a decision by 15 November.
+7. Prepare the position for the labour negotiations beginning in December.
+
+Marit Oosterhuis
+Head of Planning, Kelderwick Container Terminal

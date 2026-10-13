@@ -1,0 +1,63 @@
+These are the notes from yesterday's kickoff meeting about the dome projector replacement at the Ashgrove Planetarium. I need a complete project plan built from them: phases, tasks, owners, dates, dependencies, risks with mitigations, and a budget summary. Where the notes are vague or contradict themselves, please say so and propose a sensible assumption rather than leaving a gap.
+
+ASHGROVE PLANETARIUM
+Dome Projector Replacement: Kickoff Meeting
+Held Tuesday 6 October, 14:00 to 15:40, Orrery Room
+Present: Ingrid Solheim (director, chair), Mehmet Kaya (technical manager), Priya Raman (education lead), Lucas Obuya (finance and grants), Dalia Hartmann (facilities), Peter Wójcik (visitor services). Apologies: Roxanne Mbeki (marketing).
+
+1. Background
+
+The current projector system (two projectors, installed 2011) is failing. Last month there were four shows cancelled because of a colour wheel fault, and the supplier has stopped providing spare parts. The board approved a replacement in principle in July. The new system is a single laser projector with a fisheye lens and a new media server, bought from Meridian Optics. The quote is 318,000 including installation and two days of staff training. Lucas has 240,000 from the city arts fund (confirmed, payable in two instalments of 120,000: on signing the contract and on completion) and a pending application of 60,000 to a science education foundation, with a decision expected on 20 November. The remaining 18,000 would come from reserves.
+
+2. Dates and constraints
+
+Meridian says delivery is 10 weeks after order. Installation takes 8 working days and the dome cannot be used during that time, as the old projectors must be taken out and the dome surface checked. Mehmet pointed out that the dome has not been repainted since 2014 and that the installer may need a clean surface for calibration; this could add 4 to 5 days. Dalia said repainting needs scaffolding and a dry week, and the scaffolding contractor is booked until late November.
+
+The planetarium's busiest period is the school group season from February to the end of June, and the winter holiday family shows from 20 December to 3 January, which bring in about 22 percent of the annual ticket revenue. Ingrid does not want the dome closed in either period. Priya said that three schools have already booked science days for 11 and 12 February and she does not want to cancel them.
+
+Ingrid's target: new projector in operation by the end of January, if possible, but she accepts a later date if it avoids closing during the holidays. Peter said that a closure in January is the least costly, as the number of visitors in that month is low.
+
+3. Decisions made
+
+- The contract will be signed with Meridian Optics once the city fund instalment arrives; Lucas expects it within two weeks. The foundation decision on 20 November is not a condition of ordering, and the shortfall of 60,000 would then be covered by a loan from reserves if the application fails (Ingrid to confirm this with the board treasurer).
+- The dome repainting will be done in the same closure as the installation, to avoid closing twice. Dalia to get quotes.
+- Existing shows will be re-encoded for the new system. Priya has 14 shows in the library, of which 9 are used regularly. Mehmet thinks conversion costs about 400 per show in staff time and a few hundred in software. Not decided whether to convert all 14.
+- A temporary arrangement for the closure is needed: Priya suggested taking a portable inflatable dome to schools; no cost estimate yet.
+
+4. Items not agreed
+
+- Whether to keep the old projectors as spares or sell them. Mehmet said they have no resale value; Lucas thought a museum in the next town might pay something.
+- Whether to ask the supplier to extend the warranty from 3 to 5 years, for about 9,500. Lucas against, Mehmet for.
+- Whether the sound system should be replaced at the same time. Mehmet says the amplifier is ageing, and the quote for a new one is about 22,000. No one wanted to put this in the plan at this stage, but Ingrid said it should be listed as an option.
+- Closing dates. Two options were discussed: closing from 4 to 22 January (3 weeks), or closing from 8 to 26 March (3 weeks). The January option clashes with the earliest delivery date unless the order goes in by 9 October. The March option interferes with the school season. No decision.
+
+5. Staff and training
+
+Meridian offers two days of training. Mehmet and two others should attend: Priya, plus one of the part-time operators (Peter to nominate one). Priya also wants a half-day workshop with the freelance show producers to explain what the new system can do, such as full-dome video and live sky simulation. Not costed.
+
+6. Communications
+
+Roxanne was absent. Ingrid asked Peter to draft a visitor notice about the closure once the dates are fixed, and to contact the three schools with February bookings. Ingrid will inform the board at the meeting on 3 November. A press release is planned for when the order is placed, and another for the reopening, with a launch event to which donors, the city council and the schools will be invited.
+
+7. Risks mentioned
+
+- Delay in delivery from the manufacturer.
+- Dome surface in worse condition than expected.
+- Foundation application refused.
+- Staff absence during the closure, as Mehmet is the only person who knows the old system.
+- Pricing: the quote is in euros, and the exchange rate may change if the final invoice is in dollars. Lucas to ask whether the price is fixed.
+
+8. Actions recorded in the meeting
+
+Lucas: confirm city fund payment date, ask Meridian about price fixing and warranty terms. By Friday 9 October.
+Dalia: quotes for repainting and scaffolding. By 16 October.
+Mehmet: list of the shows needing conversion, with estimates. By 23 October.
+Peter: nominate a part-time operator for training. By 16 October.
+Priya: investigate the portable dome and school visits. By 30 October.
+Ingrid: speak to the treasurer about reserves and write to the board.
+
+9. Any other business
+
+Dalia reported that the dome's air handling unit is noisy during quiet shows and that the technician who services it quoted 2,800 for new bearings. She will ask whether this can be done during the same closure, because the dome will be empty and the scaffolding would already be up. Peter said that visitor feedback in September mentioned the seat covers in rows 4 to 6, which are torn; he will price replacements, about 40 seats in total, and bring a figure to the next meeting. Mehmet asked everyone to remember that the old projector room must stay locked, as the lamp cabinets contain mercury and a specialist company has to remove them. Ingrid thanked everyone and said that the project would be run as a standing item at every monthly management meeting until the reopening.
+
+Next meeting: Tuesday 27 October, 14:00.

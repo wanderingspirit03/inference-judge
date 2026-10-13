@@ -1,0 +1,35 @@
+Please write a complete test plan with concrete test cases for this feature specification: preconditions, steps, expected results, plus boundary cases, negative cases and anything the spec leaves unclear. Group the cases by area and mark which ones are the most important to automate.
+
+**Spec: Match result entry and league table, v1.2**
+Product: Eastvale Amateur Football League app
+Owner: Gwen Tarrant, league secretary
+
+**1. Purpose.** Team captains enter match results from their phones. The app calculates the league table automatically. The league has 12 teams in one division and each pair of teams plays twice, once at home and once away, so a season has 22 rounds and 132 matches.
+
+**2. Entering a result.**
+2.1 Only the captain or the deputy of the home team or away team can enter a result for a match.
+2.2 The result consists of two whole numbers from 0 to 30, home goals and away goals.
+2.3 The first entry is saved as "pending". The captain of the other team gets a notification and has 48 hours to confirm or dispute it.
+2.4 If confirmed, the result becomes "final" and the table is updated within one minute.
+2.5 If disputed, the match is marked "disputed" and the league secretary decides. Until she decides, the match does not count in the table.
+2.6 If the other captain does nothing within 48 hours, the result becomes final automatically.
+2.7 A result can be entered no earlier than the kick-off time of the match and no later than 14 days after it. After 14 days, only the league secretary can enter it.
+2.8 A final result can only be changed by the league secretary, and each change is recorded with her name and a reason.
+
+**3. Postponed and forfeited matches.**
+3.1 A match can be marked "postponed" by either captain until one hour before kick-off. The new date must be within 21 days.
+3.2 A team that does not show up forfeits. The league secretary records a forfeit as 3-0 for the other team.
+3.3 A team with three forfeits in a season is removed from the league, and all its results are cancelled.
+
+**4. The league table.**
+4.1 A win gives 3 points, a draw 1 point, a loss 0 points.
+4.2 Teams are ordered by points, then goal difference, then goals scored, then the result of the matches between the tied teams, then alphabetical order.
+4.3 The table shows position, team, played, won, drawn, lost, goals for, goals against, goal difference and points.
+4.4 The table includes only final results. Disputed and pending matches are excluded.
+4.5 The bottom two teams are marked in red, and the top team is marked in gold once it can no longer be overtaken.
+
+**5. Notifications.** Captains get an email and a push message when a result is entered, confirmed, disputed or changed. They can turn off push messages but not emails.
+
+**6. Accounts and roles.** Each team has one captain and one deputy, both registered by the league secretary using an email address. A person can hold a role in only one team. If a captain leaves, the deputy takes over until the secretary names a new deputy. Captains sign in with a one-time link sent by email, and the link expires after 15 minutes.
+
+**7. Non-functional.** The table page loads in under two seconds with 500 users online at the same time. All times are shown in the local time of the league.

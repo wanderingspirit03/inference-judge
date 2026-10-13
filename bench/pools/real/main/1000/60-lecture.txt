@@ -1,0 +1,42 @@
+Voici mes notes du cours de stabilité des navires donné à l'école d'apprentis de notre chantier naval. Peux-tu en faire un guide d'étude pour les nouveaux apprentis, avec des exemples résolus pas à pas, puis un quiz d'une dizaine de questions avec le corrigé complet ?
+
+# Cours 4 : Flottabilité et stabilité initiale
+
+Chantier naval de Kerbréhan, formation des apprentis, formateur : M. Yann Le Goff
+
+## 1. Principe d'Archimède
+
+Un corps flottant déplace un volume d'eau dont le poids est égal au sien. Pour un navire, on écrit :
+
+déplacement (en tonnes) = volume immergé (en m³) × masse volumique de l'eau
+
+La masse volumique de l'eau de mer est d'environ 1,025 t/m³, celle de l'eau douce de 1,000 t/m³. Un navire qui passe de la mer à une rivière s'enfonce donc un peu plus, car il lui faut déplacer un plus grand volume.
+
+Exemple vu en cours : une barge rectangulaire de 30 m de long, 8 m de large, qui flotte avec un tirant d'eau de 1,5 m en eau de mer. Volume immergé : 30 × 8 × 1,5 = 360 m³. Déplacement : 360 × 1,025 = 369 t. En eau douce, le même déplacement donne un volume de 369 m³, soit un tirant d'eau de 369 / 240 = 1,54 m environ, soit 4 cm de plus.
+
+## 2. Centre de gravité et centre de carène
+
+- G : centre de gravité du navire, le point d'application du poids.
+- B : centre de carène, le centre du volume immergé, point d'application de la poussée.
+
+Quand le navire gîte, la forme de la partie immergée change, et B se déplace du côté de la gîte. Les forces de poids et de poussée forment alors un couple. Si ce couple ramène le navire vers la verticale, la stabilité est positive.
+
+## 3. Hauteur métacentrique
+
+Le métacentre M est le point où la verticale passant par B coupe l'axe du navire pour de petits angles de gîte (moins de 10 degrés). La distance GM s'appelle la hauteur métacentrique. Elle se calcule par :
+
+GM = KB + BM − KG
+
+où K est la quille, KB la hauteur du centre de carène, KG la hauteur du centre de gravité, et BM = I / V avec I le moment d'inertie du plan de flottaison et V le volume immergé.
+
+Pour un plan de flottaison rectangulaire de longueur L et de largeur B : I = L × B³ / 12.
+
+Exemple : pour la barge ci-dessus, I = 30 × 8³ / 12 = 1 280 m⁴, donc BM = 1 280 / 360 = 3,56 m. KB = 1,5 / 2 = 0,75 m. Si KG = 2,2 m, alors GM = 0,75 + 3,56 − 2,2 = 2,11 m. La stabilité initiale est largement positive. Si KG montait à 3,9 m, GM tomberait à 0,41 m : la barge deviendrait très sensible à la gîte.
+
+## 4. Bras de levier et couple de rappel
+
+Pour un petit angle de gîte θ, le bras de levier du couple de rappel est GZ = GM × sin θ, et le moment de rappel vaut déplacement × GZ. Avec GM = 2,11 m, θ = 5° (sin 5° ≈ 0,0872), on trouve GZ ≈ 0,184 m et un moment de 369 × 0,184 ≈ 67,9 t·m.
+
+## 5. Devoir
+
+Recalculer GM de la barge avec un tirant d'eau de 1,8 m et KG = 2,5 m.

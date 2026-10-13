@@ -1,0 +1,301 @@
+Here is the schema and the reporting queries for our mushroom farm's production database (PostgreSQL). The weekly report has become slow since we passed two years of data, and I suspect the design has other problems too. Please review the design, tell me which indexes I need and why, and rewrite the queries with an explanation of each change.
+
+```sql
+-- Fenwick Hollow Mushrooms: production tracking
+-- PostgreSQL 15
+
+CREATE TABLE species (
+    species_id      SERIAL PRIMARY KEY,
+    common_name     TEXT NOT NULL,
+    latin_name      TEXT,
+    colonise_days   INTEGER NOT NULL,
+    fruit_days      INTEGER NOT NULL,
+    target_temp_c   NUMERIC(4,1),
+    target_humidity INTEGER
+);
+
+CREATE TABLE growing_rooms (
+    room_id         SERIAL PRIMARY KEY,
+    room_name       TEXT NOT NULL,
+    capacity_blocks INTEGER NOT NULL,
+    room_type       TEXT NOT NULL,   -- 'incubation' or 'fruiting'
+    active          BOOLEAN DEFAULT TRUE
+);
+
+CREATE TABLE substrate_batches (
+    batch_id        SERIAL PRIMARY KEY,
+    mixed_on        DATE NOT NULL,
+    recipe          TEXT NOT NULL,
+    straw_kg        NUMERIC(8,2),
+    sawdust_kg      NUMERIC(8,2),
+    bran_kg         NUMERIC(8,2),
+    sterilised      BOOLEAN DEFAULT FALSE,
+    notes           TEXT
+);
+
+CREATE TABLE grow_blocks (
+    block_id        SERIAL PRIMARY KEY,
+    species_id      INTEGER REFERENCES species(species_id),
+    batch_id        INTEGER REFERENCES substrate_batches(batch_id),
+    room_id         INTEGER REFERENCES growing_rooms(room_id),
+    inoculated_on   DATE NOT NULL,
+    moved_to_fruit  DATE,
+    discarded_on    DATE,
+    discard_reason  TEXT,
+    weight_kg       NUMERIC(5,2)
+);
+
+CREATE TABLE harvests (
+    harvest_id      SERIAL PRIMARY KEY,
+    block_id        INTEGER REFERENCES grow_blocks(block_id),
+    harvested_at    TIMESTAMP NOT NULL,
+    flush_number    INTEGER NOT NULL,
+    weight_kg       NUMERIC(6,3) NOT NULL,
+    grade           TEXT,            -- 'A', 'B', 'C'
+    picker          TEXT
+);
+
+CREATE TABLE customers (
+    customer_id     SERIAL PRIMARY KEY,
+    customer_name   TEXT NOT NULL,
+    customer_type   TEXT,            -- 'restaurant', 'market', 'wholesaler'
+    city            TEXT,
+    email           TEXT
+);
+
+CREATE TABLE orders (
+    order_id        SERIAL PRIMARY KEY,
+    customer_id     INTEGER REFERENCES customers(customer_id),
+    ordered_at      TIMESTAMP NOT NULL,
+    delivery_date   DATE,
+    status          TEXT DEFAULT 'open'
+);
+
+CREATE TABLE order_items (
+    item_id         SERIAL PRIMARY KEY,
+    order_id        INTEGER REFERENCES orders(order_id),
+    species_name    TEXT NOT NULL,
+    grade           TEXT NOT NULL,
+    kg              NUMERIC(6,2) NOT NULL,
+    price_per_kg    NUMERIC(6,2) NOT NULL
+);
+
+CREATE TABLE climate_readings (
+    reading_id      BIGSERIAL PRIMARY KEY,
+    room_id         INTEGER REFERENCES growing_rooms(room_id),
+    read_at         TIMESTAMP NOT NULL,
+    temp_c          NUMERIC(4,1),
+    humidity        INTEGER,
+    co2_ppm         INTEGER
+);
+
+-- Sensors write one row per room every minute, so this table has grown
+-- to roughly 11 million rows. Only the last 14 days are used by the app.
+
+CREATE INDEX idx_harvests_block ON harvests(block_id);
+CREATE INDEX idx_orders_customer ON orders(customer_id);
+
+-- ---------------------------------------------------------------------
+-- Reports
+-- ---------------------------------------------------------------------
+
+-- 1. Weekly harvest by species and grade, last 8 weeks
+SELECT s.common_name,
+       h.grade,
+       date_trunc('week', h.harvested_at) AS week,
+       SUM(h.weight_kg) AS total_kg
+FROM harvests h
+JOIN grow_blocks b ON b.block_id = h.block_id
+JOIN species s ON s.species_id = b.species_id
+WHERE h.harvested_at > NOW() - INTERVAL '8 weeks'
+GROUP BY s.common_name, h.grade, date_trunc('week', h.harvested_at)
+ORDER BY week DESC, s.common_name, h.grade;
+
+-- 2. Yield per block by species (biological efficiency, kg harvested per
+--    kg of block weight), for blocks that are finished
+SELECT b.block_id,
+       s.common_name,
+       b.weight_kg AS block_kg,
+       (SELECT SUM(weight_kg) FROM harvests WHERE block_id = b.block_id) AS harvested_kg,
+       (SELECT SUM(weight_kg) FROM harvests WHERE block_id = b.block_id) / b.weight_kg * 100 AS efficiency_pct
+FROM grow_blocks b
+JOIN species s ON s.species_id = b.species_id
+WHERE b.discarded_on IS NOT NULL
+   OR b.moved_to_fruit < CURRENT_DATE - 60;
+
+-- 3. Contamination rate by substrate recipe
+SELECT sb.recipe,
+       COUNT(*) AS blocks,
+       COUNT(*) FILTER (WHERE b.discard_reason ILIKE '%contam%') AS contaminated,
+       ROUND(COUNT(*) FILTER (WHERE b.discard_reason ILIKE '%contam%') * 100.0 / COUNT(*), 1) AS pct
+FROM grow_blocks b
+JOIN substrate_batches sb ON sb.batch_id = b.batch_id
+GROUP BY sb.recipe
+ORDER BY pct DESC;
+
+-- 4. Room climate summary for yesterday
+SELECT r.room_name,
+       MIN(c.temp_c) AS min_temp,
+       MAX(c.temp_c) AS max_temp,
+       AVG(c.humidity) AS avg_humidity,
+       MAX(c.co2_ppm) AS peak_co2
+FROM climate_readings c
+JOIN growing_rooms r ON r.room_id = c.room_id
+WHERE CAST(c.read_at AS DATE) = CURRENT_DATE - 1
+GROUP BY r.room_name;
+
+-- 5. Top customers by revenue this year, with their favourite species
+SELECT c.customer_name,
+       c.customer_type,
+       SUM(oi.kg * oi.price_per_kg) AS revenue,
+       (SELECT oi2.species_name
+        FROM order_items oi2
+        JOIN orders o2 ON o2.order_id = oi2.order_id
+        WHERE o2.customer_id = c.customer_id
+        GROUP BY oi2.species_name
+        ORDER BY SUM(oi2.kg) DESC
+        LIMIT 1) AS favourite_species
+FROM customers c
+JOIN orders o ON o.customer_id = c.customer_id
+JOIN order_items oi ON oi.order_id = o.order_id
+WHERE EXTRACT(YEAR FROM o.ordered_at) = EXTRACT(YEAR FROM CURRENT_DATE)
+GROUP BY c.customer_id, c.customer_name, c.customer_type
+ORDER BY revenue DESC
+LIMIT 20;
+
+-- 6. Open orders that cannot be filled from the last 3 days of harvest
+SELECT o.order_id, cu.customer_name, oi.species_name, oi.grade, oi.kg AS ordered_kg,
+       COALESCE(SUM(h.weight_kg), 0) AS available_kg
+FROM orders o
+JOIN customers cu ON cu.customer_id = o.customer_id
+JOIN order_items oi ON oi.order_id = o.order_id
+LEFT JOIN species s ON s.common_name = oi.species_name
+LEFT JOIN grow_blocks b ON b.species_id = s.species_id
+LEFT JOIN harvests h ON h.block_id = b.block_id
+                    AND h.grade = oi.grade
+                    AND h.harvested_at > NOW() - INTERVAL '3 days'
+WHERE o.status = 'open'
+GROUP BY o.order_id, cu.customer_name, oi.species_name, oi.grade, oi.kg
+HAVING COALESCE(SUM(h.weight_kg), 0) < oi.kg;
+
+-- 7. Picker productivity: kilograms per picking session day, last 30 days
+SELECT h.picker,
+       CAST(h.harvested_at AS DATE) AS day,
+       SUM(h.weight_kg) AS kg
+FROM harvests h
+WHERE h.harvested_at >= CURRENT_DATE - 30
+  AND h.picker IS NOT NULL
+GROUP BY h.picker, CAST(h.harvested_at AS DATE)
+ORDER BY day DESC, kg DESC;
+
+-- 8. Blocks due to move to fruiting in the next week
+SELECT b.block_id, s.common_name, r.room_name,
+       b.inoculated_on + s.colonise_days AS due_to_move
+FROM grow_blocks b
+JOIN species s ON s.species_id = b.species_id
+JOIN growing_rooms r ON r.room_id = b.room_id
+WHERE b.moved_to_fruit IS NULL
+  AND b.discarded_on IS NULL
+  AND b.inoculated_on + s.colonise_days BETWEEN CURRENT_DATE AND CURRENT_DATE + 7
+ORDER BY due_to_move;
+
+-- 9. Capacity check: blocks currently in each room against capacity
+SELECT r.room_name, r.capacity_blocks, COUNT(b.block_id) AS in_room
+FROM growing_rooms r
+LEFT JOIN grow_blocks b ON b.room_id = r.room_id AND b.discarded_on IS NULL
+WHERE r.active
+GROUP BY r.room_id, r.room_name, r.capacity_blocks
+HAVING COUNT(b.block_id) > r.capacity_blocks * 0.9;
+
+-- ---------------------------------------------------------------------
+-- Stock, deliveries and quality (added last spring)
+-- ---------------------------------------------------------------------
+
+CREATE TABLE packed_stock (
+    stock_id        SERIAL PRIMARY KEY,
+    species_name    TEXT NOT NULL,
+    grade           TEXT NOT NULL,
+    packed_on       DATE NOT NULL,
+    kg              NUMERIC(6,2) NOT NULL,
+    use_by          DATE NOT NULL,
+    location        TEXT              -- 'chiller 1', 'chiller 2', 'van'
+);
+
+CREATE TABLE deliveries (
+    delivery_id     SERIAL PRIMARY KEY,
+    order_id        INTEGER REFERENCES orders(order_id),
+    driver          TEXT,
+    left_at         TIMESTAMP,
+    arrived_at      TIMESTAMP,
+    temp_on_arrival NUMERIC(3,1),
+    rejected_kg     NUMERIC(6,2) DEFAULT 0
+);
+
+CREATE TABLE quality_checks (
+    check_id        SERIAL PRIMARY KEY,
+    harvest_id      INTEGER REFERENCES harvests(harvest_id),
+    checked_on      DATE NOT NULL,
+    cap_diameter_mm INTEGER,
+    moisture_pct    NUMERIC(4,1),
+    passed          BOOLEAN,
+    inspector       TEXT,
+    comments        TEXT
+);
+
+-- 10. Stock that expires within two days, by location
+SELECT location, species_name, grade, SUM(kg) AS kg, MIN(use_by) AS earliest
+FROM packed_stock
+WHERE use_by <= CURRENT_DATE + 2
+GROUP BY location, species_name, grade
+ORDER BY earliest, location;
+
+-- 11. Late or rejected deliveries by driver, last quarter
+SELECT d.driver,
+       COUNT(*) AS deliveries,
+       COUNT(*) FILTER (WHERE d.arrived_at::date > o.delivery_date) AS late,
+       SUM(d.rejected_kg) AS rejected_kg,
+       AVG(d.temp_on_arrival) AS avg_temp
+FROM deliveries d
+JOIN orders o ON o.order_id = d.order_id
+WHERE EXTRACT(QUARTER FROM d.left_at) = EXTRACT(QUARTER FROM CURRENT_DATE) - 1
+GROUP BY d.driver
+ORDER BY late DESC;
+
+-- 12. Average days from inoculation to first harvest, per species and room
+SELECT s.common_name, r.room_name,
+       ROUND(AVG(first_h.first_day - b.inoculated_on), 1) AS avg_days
+FROM grow_blocks b
+JOIN species s ON s.species_id = b.species_id
+JOIN growing_rooms r ON r.room_id = b.room_id
+JOIN (SELECT block_id, MIN(CAST(harvested_at AS DATE)) AS first_day
+      FROM harvests
+      GROUP BY block_id) first_h ON first_h.block_id = b.block_id
+GROUP BY s.common_name, r.room_name
+ORDER BY s.common_name, avg_days;
+
+-- 13. Blocks whose flush weights are falling: second flush lighter than 40%
+--     of the first
+SELECT b.block_id, s.common_name,
+       f1.weight_kg AS first_flush,
+       f2.weight_kg AS second_flush
+FROM grow_blocks b
+JOIN species s ON s.species_id = b.species_id
+JOIN (SELECT block_id, SUM(weight_kg) AS weight_kg
+      FROM harvests WHERE flush_number = 1 GROUP BY block_id) f1
+  ON f1.block_id = b.block_id
+JOIN (SELECT block_id, SUM(weight_kg) AS weight_kg
+      FROM harvests WHERE flush_number = 2 GROUP BY block_id) f2
+  ON f2.block_id = b.block_id
+WHERE f2.weight_kg < f1.weight_kg * 0.4;
+
+-- 14. Monthly revenue and kilograms sold, with the same month last year
+SELECT to_char(o.ordered_at, 'YYYY-MM') AS month,
+       SUM(oi.kg) AS kg,
+       SUM(oi.kg * oi.price_per_kg) AS revenue
+FROM orders o
+JOIN order_items oi ON oi.order_id = o.order_id
+WHERE o.status <> 'cancelled'
+GROUP BY to_char(o.ordered_at, 'YYYY-MM')
+ORDER BY month DESC
+LIMIT 24;
+```

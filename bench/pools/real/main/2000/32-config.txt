@@ -1,0 +1,180 @@
+Can you audit these seven files from our cement plant's kiln data collector? I want to know every problem you can find (security, reliability, bad practice), why each one matters, and then a corrected version of all of them. The collector runs on a small server in the control room and pulls readings from the kiln PLC gateway every minute.
+
+File 1: Dockerfile
+
+```dockerfile
+FROM python:latest
+
+WORKDIR /app
+COPY . /app
+
+RUN apt-get update && apt-get install -y curl wget vim cron
+RUN pip install -r requirements.txt
+RUN pip install influxdb-client
+
+ENV INFLUX_TOKEN=kq83hd02-example-token
+ENV GATEWAY_HOST=10.20.4.17
+ENV GATEWAY_PORT=4840
+
+EXPOSE 8086
+EXPOSE 22
+
+RUN chmod -R 777 /app
+
+CMD cron && python collect.py && tail -f /var/log/cron.log
+```
+
+File 2: collect.sh (called by cron each minute, and also by the nightly archive job)
+
+```bash
+#!/bin/bash
+# kiln collector - Greywater Cement Works
+DEST=/data/kiln
+LOG=/var/log/kiln_collect.log
+GATEWAY=$GATEWAY_HOST
+TODAY=`date +%Y-%m-%d`
+
+mkdir $DEST
+cd $DEST
+
+echo "starting $TODAY" >> $LOG
+
+# fetch the latest readings
+curl http://$GATEWAY/api/readings?unit=kiln1 -o readings_$TODAY.json
+
+if [ $? = 0 ]; then
+  python /app/parse.py readings_$TODAY.json > parsed.csv
+else
+  echo "fetch failed" >> $LOG
+fi
+
+# push to the database
+curl -XPOST "http://influx.greywater.example.org:8086/api/v2/write?org=plant&bucket=kiln" \
+  -H "Authorization: Token $INFLUX_TOKEN" \
+  --data-binary @parsed.csv >> $LOG
+
+# nightly cleanup and archive
+HOUR=`date +%H`
+if [ $HOUR = 02 ]; then
+  tar czf /backup/kiln_$TODAY.tar.gz $DEST/*
+  rm -rf $DEST/*
+  scp /backup/kiln_$TODAY.tar.gz archive@10.20.4.90:/archive/
+  find /backup -mtime +30 -exec rm {} \;
+fi
+
+# alert if kiln temperature is high
+TEMP=`grep kiln_shell_temp parsed.csv | tail -1 | cut -d, -f3`
+if [ $TEMP -gt 380 ]; then
+  echo "kiln shell temperature $TEMP" | mail -s "KILN ALARM" ops@example.org
+fi
+
+echo "done" >> $LOG
+```
+
+File 3: .ci/pipeline.yml
+
+```yaml
+name: kiln-collector
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request_target:
+    branches: [ main ]
+
+env:
+  REGISTRY: registry.greywater.example.org
+  REGISTRY_PASSWORD: Gw-registry-2024!
+
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@main
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Install
+        run: |
+          pip install -r requirements.txt
+          pip install pytest
+
+      - name: Test
+        run: pytest || true
+
+      - name: Build image
+        run: docker build -t $REGISTRY/kiln-collector:latest .
+
+      - name: Login and push
+        run: |
+          echo $REGISTRY_PASSWORD | docker login $REGISTRY -u ci --password-stdin
+          docker push $REGISTRY/kiln-collector:latest
+
+  deploy:
+    needs: build
+    runs-on: self-hosted
+    steps:
+      - name: Deploy to control room server
+        run: |
+          ssh -o StrictHostKeyChecking=no deploy@10.20.4.31 \
+            "docker pull $REGISTRY/kiln-collector:latest && docker stop kiln; docker rm kiln; docker run -d --name kiln --restart always -p 8086:8086 -v /data:/data $REGISTRY/kiln-collector:latest"
+      - name: Notify
+        run: curl -X POST -d "deployed" https://chat.example.org/hooks/kiln
+```
+
+File 4: crontab (copied to /etc/cron.d/kiln)
+
+```
+* * * * * root /app/collect.sh
+5 2 * * 0 root /app/collect.sh
+0 6 * * * root find /data/kiln -name "*.json" -mtime +2 -delete
+```
+
+File 5: requirements.txt
+
+```
+requests
+numpy>=1.20
+pandas
+pyyaml==3.12
+influxdb-client
+pytest
+```
+
+File 6: parse.py (called by collect.sh)
+
+```python
+import json
+import sys
+
+with open(sys.argv[1]) as f:
+    data = json.load(f)
+
+for r in data["readings"]:
+    name = r["tag"].replace(" ", "_")
+    print("kiln," + "unit=kiln1," + name + "," + str(r["value"]) + "," + str(r["ts"]))
+```
+
+File 7: docker-compose.yml (used on the test bench in the lab)
+
+```yaml
+version: "3"
+services:
+  influx:
+    image: influxdb:2.0
+    ports:
+      - "8086:8086"
+    environment:
+      DOCKER_INFLUXDB_INIT_USERNAME: admin
+      DOCKER_INFLUXDB_INIT_PASSWORD: admin123
+      DOCKER_INFLUXDB_INIT_ORG: plant
+      DOCKER_INFLUXDB_INIT_BUCKET: kiln
+  collector:
+    build: .
+    depends_on:
+      - influx
+    volumes:
+      - ./data:/data
+```
+
+Some context. The server has 4 GB of memory and a 120 GB disk. Readings are about 30 KB a minute. The kiln shell temperature limit is 380 degrees C and an alarm over that is a real safety matter for the shift supervisor. The nightly job has twice produced empty archives, and last month the disk filled up in a weekend. Our colleagues in IT have asked us to stop publishing anything on port 22.

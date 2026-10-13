@@ -1,0 +1,120 @@
+Attached below is our third quarter internal review. I need to present it to the partners on Monday and I haven't had time to digest it myself. Please give me a section-by-section summary, then tell me which problems you think are most serious, what the numbers say about next quarter, and a short list of concrete recommendations I can put to the partners with an owner for each one.
+
+# Q3 2026 Operating Review
+Hollis & Varga Tax Advisory, Dunmore office
+Prepared by: Priya Natarajan, Office Manager
+Reviewed by: Gerald Hollis (Managing Partner), Elke Varga (Partner)
+Period covered: 1 July to 30 September 2026
+Distribution: partners only
+
+## 1. Summary
+
+The quarter was profitable but weaker than planned. Revenue was 612,400 against a budget of 640,000, a shortfall of 4.3 percent. Operating profit was 118,900 against a budget of 192,000. Three things explain most of the gap: the cost of covering two staff departures with temporary accountants, a write-off on the Kessler Foods engagement, and the licence fees for the new filing software, billed for four months in the quarter (one month in advance), which started before the old system could be switched off.
+
+The most important operational event was a set of late filings in the last week of September for the self-employed client group, caused by the transition to the new software. Seven returns were filed after the deadline. The penalties charged by the tax authority total 3,150 and the firm has decided to pay them directly rather than pass them on to clients. This is covered in section 6.
+
+Client numbers are stable at 912 active clients, down from 918 at the end of June. Fee income per client rose by 1.9 percent. The pipeline for the autumn corporate work is good, with five new engagements signed worth an estimated 84,000 in fees, but staffing for these is not yet confirmed.
+
+## 2. Financial results
+
+| Item | Q3 actual | Q3 budget | Q2 actual |
+|---|---|---|---|
+| Revenue | 612,400 | 640,000 | 598,700 |
+| Staff costs | 351,800 | 342,000 | 338,500 |
+| Software and licences | 34,600 | 29,000 | 27,200 |
+| Premises and general costs | 52,300 | 53,000 | 51,900 |
+| Temporary staff and contractors | 42,900 | 18,000 | 21,400 |
+| Write-offs and bad debt | 11,900 | 6,000 | 4,100 |
+| Penalties paid | 0 | 0 | 0 |
+| Operating profit | 118,900 | 192,000 | 155,600 |
+
+Revenue by service line:
+
+| Service line | Q3 actual | Share | Q2 actual |
+|---|---|---|---|
+| Personal tax returns | 148,200 | 24.2% | 161,800 |
+| Self-employed and small business | 171,500 | 28.0% | 160,400 |
+| Corporate tax and accounts | 189,300 | 30.9% | 172,600 |
+| Payroll services | 63,700 | 10.4% | 62,100 |
+| Advisory (inheritance, restructuring, relocation) | 39,700 | 6.5% | 41,800 |
+| Total | 612,400 | 100.0% | 598,700 |
+
+Personal tax returns drop in Q3 because most are filed in the spring; the quarter-on-quarter fall of 8.4 percent is in line with the previous year. The growth in corporate work, 9.7 percent over Q2, comes from the completion of year-end accounts for clients with a 31 March year end, which have an extended deadline at the end of December.
+
+The Kessler Foods write-off is 8,200 out of the total 11,900. The client disputed the fee for a restructuring opinion after the original scope was extended three times without a signed change of scope. The partners agreed in August that Elke would negotiate, and a settlement of 60 percent of the invoiced amount was accepted. The remaining 3,700 of write-offs are small unpaid invoices that have been outstanding for more than 180 days.
+
+Cash position at 30 September was 286,500, compared with 271,000 at the end of June. Debtor days are 47, up from 41 in Q2. The increase is explained mainly by the delayed invoicing of the corporate clients, which was held back while the new software was being tested.
+
+## 3. Staffing
+
+Headcount at the end of the quarter was 23 full-time equivalent staff: 3 partners, 4 managers, 9 accountants and tax advisers, 4 assistants, 2 payroll specialists, and 1 office administrator (Priya). In the quarter, two experienced accountants left. Marta Soliz left on 14 July to join a client company, and Pavel Dunne left on 21 August for a position in another city. Both had more than eight years with the firm and between them looked after 74 clients. Their clients were reassigned within a week, but the transfer was done by a simple list, without a handover meeting for the 20 most complex files.
+
+Two temporary accountants were hired from an agency from 1 August, at a cost of 4,150 a month each plus the agency margin, and one contractor was engaged for the payroll team during a period of leave. The cost of temporary staff was 42,900 against a budget of 18,000. The partners must decide whether the temporary positions should become permanent. A recruitment process for two accountants was opened on 1 September, and four candidates were interviewed in September. One offer has been made and is waiting for an answer.
+
+Overtime recorded in the timesheets was 1,420 hours in the quarter, 62 percent above the same quarter last year. The highest individual total was 168 hours. Two staff members have reached the internal limit of 150 overtime hours for the half year. Sick leave days were 61, compared with 38 a year ago, with three longer absences of more than ten working days. The partners should consider whether the current workload is sustainable.
+
+Training: eleven staff members attended the continuing education course on the new rules for foreign income, and nine completed the mandatory anti money laundering refresher. Two staff members have not yet completed the refresher and will be removed from client onboarding until they do.
+
+## 4. Client portfolio
+
+Active clients: 912 at 30 September (918 at 30 June).
+
+- New clients in the quarter: 21, of which 12 are self-employed, 6 are small companies, 3 are individuals with foreign income.
+- Clients lost: 27. Reasons recorded: moved away or ceased trading (11), changed to another adviser on price (7), retired or died (5), dissatisfied with service (4).
+- The four clients lost for dissatisfaction all cite slow responses after the departure of their accountant. Two of them were in the group of the 20 complex files mentioned in section 3.
+
+The ten largest clients account for 21 percent of revenue, a lower concentration than last year (24 percent). Kessler Foods remains on the list but only for routine accounts. The firm has now introduced a written change-of-scope form for all advisory work above 5,000; it has been used on six engagements since 1 September.
+
+Fee levels: the standard hourly rates were increased by 3.5 percent from 1 July. No client has left because of the increase according to the exit notes, but seven asked for a discount and two received one.
+
+## 5. Software migration
+
+The firm decided in March to replace the old filing system, which is no longer supported by its vendor after 31 December, with a cloud product that connects directly to the tax authority's portal. The contract was signed on 12 May for three years at 6,900 a month. The plan was to run both systems in parallel for the month of July and switch over on 1 August.
+
+What actually happened:
+- Data migration of the client master data was completed on 24 July, nine days late, because of duplicate client numbers in the old system (about 140 clients had two numbers).
+- Staff training took place on 29 and 30 July for all accountants. Attendance was 19 of 21. The two absent staff members were not trained until 11 August.
+- The switch was made on 1 August as planned, but the old system was kept running for reference until 30 September. That is why Q3 shows four months of the new licence fee (27,600, because August was billed in advance in July) together with the last three months of the old one (7,000 included in the total of 34,600).
+- The direct link to the tax authority portal for self-employed returns was not certified until 9 September, three weeks later than expected. During that time, returns had to be uploaded by hand.
+- Eight support tickets are still open with the vendor, of which two are marked as blocking: the import of payroll data for clients with more than one employer, and the reminder emails that are not sent to clients with a non-standard year end.
+
+The partners should note that the old system will not be supported after the end of the year. All working data must be exported and stored before then, and a decision on how long to keep the archive has not been made. The legal retention period for tax records is ten years.
+
+## 6. Late filings and compliance
+
+Between 24 and 30 September, seven returns for self-employed clients were filed after the deadline of 30 September for those who had requested the extension. The returns were filed between one and four days late. The tax authority has charged penalties of 450 per return, which makes 3,150 in total.
+
+Root cause, as established by Elke Varga and Priya Natarajan on 3 October:
+1. The reminder emails to accountants about approaching deadlines had been set up in the old system and were not recreated in the new one.
+2. The deadline list was not checked manually in the last two weeks because of the pressure of other work.
+3. Four of the seven clients had sent their documents only in the last week. The accountants waited for missing information instead of filing a provisional return, which the rules allow.
+4. Two of the seven clients had previously been handled by Marta Soliz, and the deadline was not in the handover list.
+
+Actions already taken: a manual deadline list reviewed every Monday by Elke, a calendar for each accountant with deadlines for their clients, and a written rule that a provisional return must be filed three working days before the deadline if documents are missing. The firm's professional indemnity insurer has been informed as a precaution. No claim has been made by a client.
+
+A second compliance point: an internal audit of 40 client files chosen at random found that 6 had no signed engagement letter on file, all of them clients who joined before 2022. The partners decided in July that the missing letters must be obtained by 31 December. By 30 September, 2 of the 6 had been obtained.
+
+## 7. Risks
+
+| Risk | Likelihood | Impact | Current control |
+|---|---|---|---|
+| More late filings in the December rush | Medium | High | Weekly deadline review, provisional filing rule |
+| Further staff departures from overload | Medium | High | Recruitment, overtime limit |
+| Open blocking tickets with the software vendor | High | Medium | Escalated to vendor account manager |
+| Old system data lost after support ends | Low | High | No owner assigned |
+| Debtor days continue to rise | Medium | Medium | Invoicing now back on schedule |
+| Missing engagement letters | Medium | Low | Deadline of 31 December |
+
+## 8. Outlook for Q4
+
+October to December is the busiest period for corporate accounts. Based on the workload forecast, 4,300 chargeable hours are needed in Q4 against an estimated 3,900 hours of capacity with current staffing, excluding temporary staff. With the two temporary accountants the capacity is about 4,350 hours, but this leaves no room for sickness or for the five new corporate engagements, which need about 600 hours. Expected revenue is 655,000 if the capacity is found and the new engagements are staffed, and about 600,000 if they are not.
+
+The budget for Q4 assumes no temporary staff. It needs to be revised.
+
+## 9. Decisions requested from the partners
+
+1. Whether to convert the two temporary accountants to permanent positions, or extend the agency contract to 31 January.
+2. Whether to approve the offer to the first candidate already made, and to proceed with the second position.
+3. Who will own the archive of the old filing system, and how long it is kept.
+4. Whether to continue paying penalties for client delays directly, or to introduce a clause in the engagement letter that allows the firm to pass on penalties caused by late documents.
+5. Approval of the revised Q4 budget, to be presented in the next meeting.

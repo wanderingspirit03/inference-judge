@@ -1,0 +1,49 @@
+Our new agency needs to sign this with the terminal and I'm not a lawyer. Could you explain it to me clause by clause in plain language, say what each clause means for us in practice, and list the risks I should raise before we sign? Please also tell me which clauses I should try to negotiate.
+
+TERMINAL ACCESS AND SERVICES AGREEMENT
+between Brightwater Container Terminal Ltd ("the Terminal") and Corvane Freight Agents Ltd ("the Agent")
+
+1. Definitions
+"Container" means any standard shipping container presented for handling. "Dwell Time" means the time between a Container's discharge from a vessel and its departure through the gate. "Free Period" means the first five calendar days of Dwell Time for import Containers, counted from the day after discharge. "Business Day" means any day other than a Saturday, Sunday or public holiday in the city of Brightwater.
+
+2. Term
+This Agreement begins on 1 February and continues for twenty-four months. It renews automatically for further periods of twelve months unless either party gives written notice of at least ninety days before the end of the current period.
+
+3. Services
+The Terminal will discharge, store, and release Containers for which the Agent is named as the delivery party, and will load export Containers booked by the Agent at least forty-eight hours before vessel cut-off. The Terminal does not guarantee any particular vessel schedule or crane productivity.
+
+4. Charges
+(a) The Agent will pay the Terminal's published tariff, as amended from time to time. The Terminal may amend the tariff on thirty days' written notice.
+(b) After the Free Period, storage is charged per Container per day at 18 for the first seven days, 34 for days eight to fourteen, and 61 per day thereafter.
+(c) Invoices are payable within fourteen days. Late payment bears interest at four percent above the base rate of the national bank, calculated daily.
+(d) The Agent may not withhold any payment on account of a claim against the Terminal.
+
+5. Gate Appointments
+The Agent must book a gate appointment for every collection or delivery. A truck arriving more than thirty minutes outside its window may be refused and must rebook at a cost of 40.
+
+6. Dangerous and Refrigerated Goods
+The Agent must declare dangerous goods in writing at least seventy-two hours before arrival, giving the correct classification. The Agent is responsible for all costs arising from wrongly declared goods, including clean-up, delays to other cargo, and fines. Refrigerated Containers must be connected to power within four hours of discharge. The Terminal is not liable for loss of temperature-sensitive cargo unless the loss results from the Terminal's wilful misconduct.
+
+7. Liability
+(a) The Terminal's liability for loss of or damage to cargo is limited to the lower of the proven value of the cargo and 2,000 per Container.
+(b) The Terminal is not liable for indirect or consequential loss, loss of profit, or delay of any kind.
+(c) Any claim must be notified in writing within seven days of the Container's release, and legal proceedings must begin within nine months.
+(d) Nothing in this clause limits liability for death or personal injury caused by negligence.
+
+8. Indemnity
+The Agent will indemnify the Terminal against all claims by third parties relating to cargo handled under this Agreement, including claims by the cargo owner, except to the extent caused by the Terminal's gross negligence.
+
+9. Lien
+The Terminal may hold any Container and its cargo until all sums owed by the Agent, under this or any other agreement, are paid. After sixty days the Terminal may sell the cargo and apply the proceeds to the debt.
+
+10. Force Majeure
+Neither party is liable for failure caused by events outside its reasonable control, including storms, strikes, equipment failure and port closures. Storage charges continue to run during any such event.
+
+11. Termination
+Either party may end this Agreement immediately by written notice if the other commits a serious breach not fixed within fourteen days of notice, or becomes insolvent. The Terminal may also suspend services at any time if an invoice is more than thirty days overdue.
+
+12. Governing Law
+This Agreement is governed by the laws of the Republic of Westmark. Disputes will be settled by the courts of Brightwater.
+
+Signed for the Terminal: ____________ Date: ________
+Signed for the Agent: ____________ Date: ________

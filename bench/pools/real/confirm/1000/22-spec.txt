@@ -1,0 +1,42 @@
+Based on this product spec, please write me a complete test plan with test cases: what to test, the steps, the expected result for each case, plus edge cases and a short list of what you could not test from the spec alone. We are the quarry operator's small software team and this goes to QA next week.
+
+# Product spec: Weighbridge Ticket Kiosk v1.2
+Greywacke Ridge Quarry. Owner: Priti Kavanagh.
+
+## Purpose
+A touchscreen kiosk at the quarry gate that lets a haulage driver identify themselves, pick a product, and receive a printed delivery ticket after the truck is weighed in and out.
+
+## Flow
+1. The driver scans their haulier card or types a four-digit PIN. Three wrong PINs lock the card for 15 minutes.
+2. The kiosk reads the plate from the gate camera. If the plate is not registered to the card's haulier, the kiosk shows "Plate not recognised" and calls the gatehouse.
+3. The driver chooses a product from the list of products their customer account is allowed to buy: 6F2 crushed stone, 20 mm single size, sharp sand, or quarry dust.
+4. The truck drives onto the scale. The kiosk records the gross weight when the reading is stable for 3 seconds.
+5. The driver unloads or loads and drives onto the scale again. The kiosk records the second weight, calculates the net weight, and prints a ticket with the ticket number, plate, product, net weight in tonnes (two decimals), date and time.
+
+## Rules
+- Maximum permitted gross weight is 44 tonnes. If the first weight exceeds 44.00 tonnes, the kiosk refuses the load and prints a warning.
+- If the account is on stop, the kiosk shows "Account on hold" and no ticket is printed.
+- If the net weight differs from the customer's ordered quantity by more than 5 percent, the ticket is marked "Review" and the office is notified by email.
+- Ticket numbers increase by one and are never reused, even if the print fails.
+- If the network is down, the kiosk keeps working offline and uploads tickets when the network returns, in order.
+- A driver may reprint the last ticket once within 10 minutes.
+
+## Screens and messages
+- Welcome: "Scan your card or enter your PIN". After 60 seconds of no input the kiosk returns to this screen.
+- PIN failure: "Incorrect PIN. 2 attempts left", then 1, then "Card locked for 15 minutes".
+- Product list: shows only the products the account may buy, in the order 6F2 crushed stone, 20 mm single size, sharp sand, quarry dust.
+- On scale: "Hold still. Weighing" with a countdown of 3 seconds. If the reading moves by more than 20 kg during the countdown, the countdown restarts.
+- Ticket printed: "Ticket 104233 printed. Please take your ticket and drive on".
+
+## Ticket layout
+Header with the quarry name and permit number, then ticket number, date and time, plate, haulier, customer, product, gross, tare and net weights in tonnes with two decimals, and the driver's card number with only the last four digits visible. Tickets marked "Review" print the word REVIEW in capitals at the top.
+
+## Non-functional requirements
+- The kiosk must show the product list within 2 seconds of a successful login.
+- The printer must be able to print 200 tickets per shift without paper jams in normal use.
+- The screen must be readable in direct sunlight and usable with gloves.
+- Tickets uploaded after an outage must keep their original timestamps.
+- The kiosk must record every login, refusal and print in a local log kept for 90 days.
+
+## Not in scope
+Payment, loading bay scheduling, and weight corrections by the office.

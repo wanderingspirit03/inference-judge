@@ -1,0 +1,326 @@
+This is the module we use at Lakeside Aquatics to book lane sessions, check water quality readings and work out the lifeguard cover for each day. It works, but I wrote it quickly and I don't trust it. Please review it properly (bugs, edge cases, design problems, anything that could cause a safety or billing mistake) and then write a full set of unit tests with pytest that covers the behaviour you think is correct.
+
+```python
+"""poolops.py - session booking, water quality checks and lifeguard cover
+for the Lakeside Aquatics public pools.
+
+Times are naive local times; the site operates in one time zone.
+"""
+
+from __future__ import annotations
+
+import csv
+import io
+import math
+from dataclasses import dataclass, field
+from datetime import date, datetime, time, timedelta
+from typing import Dict, Iterable, List, Optional, Tuple
+
+# ---------------------------------------------------------------------------
+# Constants
+# ---------------------------------------------------------------------------
+
+OPENING_TIME = time(6, 30)
+CLOSING_TIME = time(21, 30)
+SLOT_MINUTES = 30
+MAX_LANES = 8
+SWIMMERS_PER_LANE = 12
+LEISURE_POOL_CAPACITY = 90
+GUARD_RATIO_LANES = 40      # one guard per 40 swimmers in the lane pool
+GUARD_RATIO_LEISURE = 30    # one guard per 30 swimmers in the leisure pool
+MIN_GUARDS = 2
+
+CHLORINE_MIN = 1.0   # mg/l free chlorine
+CHLORINE_MAX = 3.0
+PH_MIN = 7.2
+PH_MAX = 7.8
+TEMP_MIN = 26.0      # degrees Celsius
+TEMP_MAX = 32.0
+
+PRICES = {
+    "adult": 5.80,
+    "child": 3.20,
+    "senior": 3.90,
+    "concession": 3.50,
+}
+MEMBER_DISCOUNT = 0.15
+FAMILY_BUNDLE_PRICE = 14.00
+
+
+# ---------------------------------------------------------------------------
+# Data classes
+# ---------------------------------------------------------------------------
+
+@dataclass
+class Booking:
+    booking_id: str
+    customer: str
+    day: date
+    start: time
+    slots: int
+    lanes: int
+    category: str = "adult"
+    member: bool = False
+    cancelled: bool = False
+
+    def end_time(self) -> time:
+        start_dt = datetime.combine(self.day, self.start)
+        return (start_dt + timedelta(minutes=SLOT_MINUTES * self.slots)).time()
+
+
+@dataclass
+class WaterReading:
+    taken_at: datetime
+    pool: str
+    chlorine: float
+    ph: float
+    temperature: float
+    taken_by: str = ""
+
+
+@dataclass
+class Guard:
+    name: str
+    certified_until: date
+    available_days: List[int] = field(default_factory=list)  # 0 = Monday
+
+
+# ---------------------------------------------------------------------------
+# Booking
+# ---------------------------------------------------------------------------
+
+class BookingError(Exception):
+    pass
+
+
+class LaneCalendar:
+    """Keeps track of how many lanes are taken in each half hour slot."""
+
+    def __init__(self) -> None:
+        self.bookings: Dict[str, Booking] = {}
+        self.usage: Dict[Tuple[date, time], int] = {}
+
+    def _slots_for(self, day: date, start: time, slots: int) -> List[Tuple[date, time]]:
+        result = []
+        current = datetime.combine(day, start)
+        for _ in range(slots):
+            result.append((current.date(), current.time()))
+            current += timedelta(minutes=SLOT_MINUTES)
+        return result
+
+    def lanes_free(self, day: date, start: time, slots: int) -> int:
+        taken = 0
+        for key in self._slots_for(day, start, slots):
+            taken = max(taken, self.usage.get(key, 0))
+        return MAX_LANES - taken
+
+    def add(self, booking: Booking) -> None:
+        if booking.booking_id in self.bookings:
+            raise BookingError("duplicate booking id " + booking.booking_id)
+        if booking.start < OPENING_TIME:
+            raise BookingError("before opening time")
+        if booking.end_time() > CLOSING_TIME:
+            raise BookingError("after closing time")
+        if booking.lanes < 1:
+            raise BookingError("at least one lane is required")
+        if self.lanes_free(booking.day, booking.start, booking.slots) < booking.lanes:
+            raise BookingError("not enough lanes free")
+        for key in self._slots_for(booking.day, booking.start, booking.slots):
+            self.usage[key] = self.usage.get(key, 0) + booking.lanes
+        self.bookings[booking.booking_id] = booking
+
+    def cancel(self, booking_id: str) -> Booking:
+        booking = self.bookings.get(booking_id)
+        if booking is None:
+            raise BookingError("unknown booking " + booking_id)
+        booking.cancelled = True
+        for key in self._slots_for(booking.day, booking.start, booking.slots):
+            self.usage[key] -= booking.lanes
+        return booking
+
+    def bookings_on(self, day: date) -> List[Booking]:
+        found = [b for b in self.bookings.values() if b.day == day and not b.cancelled]
+        return sorted(found, key=lambda b: b.start)
+
+    def peak_usage(self, day: date) -> int:
+        values = [v for (d, _), v in self.usage.items() if d == day]
+        return max(values) if values else 0
+
+
+# ---------------------------------------------------------------------------
+# Pricing
+# ---------------------------------------------------------------------------
+
+def price_for_swimmer(category: str, member: bool = False) -> float:
+    if category not in PRICES:
+        raise ValueError("unknown category: " + category)
+    price = PRICES[category]
+    if member:
+        price = price * (1 - MEMBER_DISCOUNT)
+    return round(price, 2)
+
+
+def price_for_group(categories: Iterable[str], member: bool = False) -> float:
+    """Price for a group entering together.
+
+    Two adults and two or more children qualify for the family bundle.
+    """
+    cats = list(categories)
+    adults = cats.count("adult")
+    children = cats.count("child")
+    others = [c for c in cats if c not in ("adult", "child")]
+
+    total = 0.0
+    if adults >= 2 and children >= 2:
+        total += FAMILY_BUNDLE_PRICE
+        adults -= 2
+        children -= 2
+    for _ in range(adults):
+        total += price_for_swimmer("adult", member)
+    for _ in range(children):
+        total += price_for_swimmer("child", member)
+    for c in others:
+        total += price_for_swimmer(c, member)
+    return round(total, 2)
+
+
+def lane_session_fee(booking: Booking, hourly_rate: float = 24.0) -> float:
+    """Fee for a club or group booking of lanes."""
+    hours = booking.slots * SLOT_MINUTES / 60
+    fee = hourly_rate * hours * booking.lanes
+    if booking.member:
+        fee *= 1 - MEMBER_DISCOUNT
+    return round(fee, 2)
+
+
+# ---------------------------------------------------------------------------
+# Water quality
+# ---------------------------------------------------------------------------
+
+def check_reading(reading: WaterReading) -> List[str]:
+    """Return a list of problems found in a reading; empty means all good."""
+    problems = []
+    if reading.chlorine < CHLORINE_MIN:
+        problems.append("chlorine too low")
+    if reading.chlorine > CHLORINE_MAX:
+        problems.append("chlorine too high")
+    if reading.ph < PH_MIN:
+        problems.append("pH too low")
+    if reading.ph > PH_MAX:
+        problems.append("pH too high")
+    if reading.temperature < TEMP_MIN:
+        problems.append("water too cold")
+    if reading.temperature > TEMP_MAX:
+        problems.append("water too warm")
+    return problems
+
+
+def pool_must_close(reading: WaterReading) -> bool:
+    """A pool closes if chlorine is out of range or pH is out of range."""
+    problems = check_reading(reading)
+    return any("chlorine" in p or "pH" in p for p in problems)
+
+
+def readings_overdue(readings: List[WaterReading], pool: str, now: datetime,
+                     interval_hours: int = 2) -> bool:
+    """True if no reading has been taken for the pool in the last interval."""
+    latest = None
+    for r in readings:
+        if r.pool == pool and (latest is None or r.taken_at > latest):
+            latest = r.taken_at
+    if latest is None:
+        return True
+    return now - latest > timedelta(hours=interval_hours)
+
+
+def chlorine_dose_grams(volume_m3: float, current: float, target: float,
+                        grams_per_m3_per_mgl: float = 1.8) -> float:
+    """Grams of chlorine granules needed to raise the level to the target."""
+    if target <= current:
+        return 0.0
+    return round(volume_m3 * (target - current) * grams_per_m3_per_mgl, 1)
+
+
+def daily_summary(readings: List[WaterReading], day: date) -> Dict[str, float]:
+    day_readings = [r for r in readings if r.taken_at.date() == day]
+    if not day_readings:
+        return {}
+    n = len(day_readings)
+    return {
+        "count": n,
+        "chlorine_avg": round(sum(r.chlorine for r in day_readings) / n, 2),
+        "ph_avg": round(sum(r.ph for r in day_readings) / n, 2),
+        "temp_avg": round(sum(r.temperature for r in day_readings) / n, 1),
+        "out_of_range": sum(1 for r in day_readings if check_reading(r)),
+    }
+
+
+# ---------------------------------------------------------------------------
+# Lifeguard cover
+# ---------------------------------------------------------------------------
+
+def guards_required(lane_swimmers: int, leisure_swimmers: int) -> int:
+    """Number of lifeguards needed for the expected number of swimmers."""
+    lane_guards = math.ceil(lane_swimmers / GUARD_RATIO_LANES)
+    leisure_guards = math.ceil(leisure_swimmers / GUARD_RATIO_LEISURE)
+    return max(MIN_GUARDS, lane_guards + leisure_guards)
+
+
+def expected_lane_swimmers(calendar: LaneCalendar, day: date, start: time) -> int:
+    lanes_used = MAX_LANES - calendar.lanes_free(day, start, 1)
+    return lanes_used * SWIMMERS_PER_LANE
+
+
+def eligible_guards(guards: List[Guard], day: date) -> List[Guard]:
+    return [g for g in guards
+            if day.weekday() in g.available_days and g.certified_until >= day]
+
+
+def cover_gaps(calendar: LaneCalendar, guards: List[Guard], day: date,
+               leisure_forecast: int) -> List[Tuple[time, int, int]]:
+    """For each half hour, return (slot, required, available) where short."""
+    available = len(eligible_guards(guards, day))
+    gaps = []
+    current = datetime.combine(day, OPENING_TIME)
+    end = datetime.combine(day, CLOSING_TIME)
+    while current < end:
+        lane_swimmers = expected_lane_swimmers(calendar, day, current.time())
+        needed = guards_required(lane_swimmers, leisure_forecast)
+        if needed > available:
+            gaps.append((current.time(), needed, available))
+        current += timedelta(minutes=SLOT_MINUTES)
+    return gaps
+
+
+# ---------------------------------------------------------------------------
+# Reports
+# ---------------------------------------------------------------------------
+
+def bookings_to_csv(bookings: List[Booking]) -> str:
+    out = io.StringIO()
+    writer = csv.writer(out)
+    writer.writerow(["id", "customer", "day", "start", "end", "lanes", "fee"])
+    for b in bookings:
+        writer.writerow([
+            b.booking_id,
+            b.customer,
+            b.day.isoformat(),
+            b.start.strftime("%H:%M"),
+            b.end_time().strftime("%H:%M"),
+            b.lanes,
+            "%.2f" % lane_session_fee(b),
+        ])
+    return out.getvalue()
+
+
+def utilisation(calendar: LaneCalendar, day: date) -> float:
+    """Share of lane-slots used on a day, as a percentage."""
+    total_slots = int(
+        (datetime.combine(day, CLOSING_TIME) - datetime.combine(day, OPENING_TIME))
+        .total_seconds() / 60 / SLOT_MINUTES
+    )
+    used = sum(v for (d, _), v in calendar.usage.items() if d == day)
+    return round(100.0 * used / (total_slots * MAX_LANES), 1)
+```
+
+A few notes on how it is used. The front desk calls `LaneCalendar.add` when a club phones to book lanes, the evening duty manager runs `cover_gaps` every Sunday for the following week, and the pool plant technician enters readings through a small tablet app that calls `check_reading` and `pool_must_close`. The pool must be closed straight away if `pool_must_close` returns true, so I am especially worried about mistakes in that part. The leisure pool is not booked through the calendar at all, only the lane pool. We have not had a billing complaint yet but the finance team says the family bundle looks odd on some Saturdays.

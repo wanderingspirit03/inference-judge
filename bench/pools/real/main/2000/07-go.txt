@@ -1,0 +1,178 @@
+This package decides whether a customer in our mobile banking app may send a transfer, based on daily limits and a velocity check. Please explain how it works, review it for bugs and design problems (I suspect there are a few around concurrency and money handling), and write table-driven tests that cover the important behaviour.
+
+```go
+// Package limits decides whether a transfer may proceed, based on
+// per-customer daily limits and a short-term velocity check.
+package limits
+
+import (
+	"errors"
+	"fmt"
+	"sync"
+	"time"
+)
+
+// Amount is a value in minor currency units (cents).
+type Amount int64
+
+// Tier controls the daily limit a customer gets.
+type Tier int
+
+const (
+	TierBasic Tier = iota
+	TierStandard
+	TierPremium
+)
+
+var dailyLimit = map[Tier]Amount{
+	TierBasic:    50000,
+	TierStandard: 250000,
+	TierPremium:  1000000,
+}
+
+var (
+	ErrDailyLimit   = errors.New("daily limit exceeded")
+	ErrVelocity     = errors.New("too many transfers in a short time")
+	ErrInvalidSum   = errors.New("amount must be positive")
+	ErrUnknownTier  = errors.New("unknown customer tier")
+	ErrNewPayeeCap  = errors.New("amount too high for a new payee")
+)
+
+// Transfer is a request to move money to a payee.
+type Transfer struct {
+	CustomerID string
+	PayeeID    string
+	Amount     Amount
+	At         time.Time
+}
+
+type record struct {
+	amount Amount
+	at     time.Time
+}
+
+// Checker keeps recent transfers in memory.
+type Checker struct {
+	mu          sync.Mutex
+	history     map[string][]record
+	knownPayees map[string]map[string]bool
+	tiers       map[string]Tier
+	window      time.Duration
+	maxInWindow int
+	newPayeeCap Amount
+}
+
+// NewChecker builds a checker. A window of zero disables the velocity check.
+func NewChecker(window time.Duration, maxInWindow int, newPayeeCap Amount) *Checker {
+	return &Checker{
+		history:     make(map[string][]record),
+		knownPayees: make(map[string]map[string]bool),
+		tiers:       make(map[string]Tier),
+		window:      window,
+		maxInWindow: maxInWindow,
+		newPayeeCap: newPayeeCap,
+	}
+}
+
+// SetTier assigns a tier to a customer.
+func (c *Checker) SetTier(customerID string, t Tier) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.tiers[customerID] = t
+}
+
+// AddPayee marks a payee as known for a customer.
+func (c *Checker) AddPayee(customerID, payeeID string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.knownPayees[customerID] == nil {
+		c.knownPayees[customerID] = make(map[string]bool)
+	}
+	c.knownPayees[customerID][payeeID] = true
+}
+
+// Allow checks a transfer and, if it is allowed, records it.
+func (c *Checker) Allow(t Transfer) error {
+	if t.Amount <= 0 {
+		return ErrInvalidSum
+	}
+
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	tier, ok := c.tiers[t.CustomerID]
+	if !ok {
+		tier = TierBasic
+	}
+	limit, ok := dailyLimit[tier]
+	if !ok {
+		return ErrUnknownTier
+	}
+
+	if !c.knownPayees[t.CustomerID][t.PayeeID] && t.Amount > c.newPayeeCap {
+		return fmt.Errorf("%w: %d > %d", ErrNewPayeeCap, t.Amount, c.newPayeeCap)
+	}
+
+	var spentToday Amount
+	var recent int
+	for _, r := range c.history[t.CustomerID] {
+		if sameDay(r.at, t.At) {
+			spentToday += r.amount
+		}
+		if c.window > 0 && t.At.Sub(r.at) < c.window {
+			recent++
+		}
+	}
+
+	if spentToday+t.Amount > limit {
+		return fmt.Errorf("%w: %d of %d already used", ErrDailyLimit, spentToday, limit)
+	}
+	if c.window > 0 && recent >= c.maxInWindow {
+		return ErrVelocity
+	}
+
+	c.history[t.CustomerID] = append(c.history[t.CustomerID], record{t.Amount, t.At})
+	return nil
+}
+
+// Remaining returns how much a customer may still send today.
+func (c *Checker) Remaining(customerID string, now time.Time) Amount {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	tier := c.tiers[customerID]
+	var spent Amount
+	for _, r := range c.history[customerID] {
+		if sameDay(r.at, now) {
+			spent += r.amount
+		}
+	}
+	return dailyLimit[tier] - spent
+}
+
+// Prune drops history older than two days to keep memory bounded.
+func (c *Checker) Prune(now time.Time) {
+	cutoff := now.Add(-48 * time.Hour)
+	for id, recs := range c.history {
+		kept := recs[:0]
+		for _, r := range recs {
+			if r.at.After(cutoff) {
+				kept = append(kept, r)
+			}
+		}
+		if len(kept) == 0 {
+			delete(c.history, id)
+		} else {
+			c.history[id] = kept
+		}
+	}
+}
+
+func sameDay(a, b time.Time) bool {
+	ay, am, ad := a.Date()
+	by, bm, bd := b.Date()
+	return ay == by && am == bm && ad == bd
+}
+```
+
+Some background from the team: customers are across three time zones, the app server runs in UTC, and transfers are submitted by up to a few hundred goroutines at once. A cancelled transfer is never un-recorded at the moment, and we plan to move the history into a database next quarter, so I would like the review to say what the interface should look like to make that easy.

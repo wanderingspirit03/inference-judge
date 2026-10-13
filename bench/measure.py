@@ -9,12 +9,14 @@ Docker, no agent: one command, one table.
     measure.py URL --model NAME
                [--tokenizer auto|ws|server|FILE|hf:REPO]
                [--input 256,2048] [--output 256] [--users 1] [--seconds 15]
-               [--api-key-env VAR] [--json FILE]
+               [--api-key-env VAR] [--extra-body JSON] [--json FILE]
 
 It sends the same load the judge sends (harness.measure_tps: fresh prompts,
 a nonce at the start of each, streaming) and reads the result with the same
-arithmetic (metrics.tps_level_summary). Two things differ from a judged run,
-and the output says which applies:
+arithmetic (metrics.tps_level_summary). A target whose metric.extra_body adds
+fields to every request is measured the same way with --extra-body, for
+example --extra-body '{"skip_special_tokens": false}'. Two things differ from
+a judged run, and the output says which applies:
 
   who counts   The judge counts tokens itself and never trusts the server's
                `usage`. So does this, when it has the model's tokenizer:
@@ -151,10 +153,13 @@ def _mark(rows: list[dict], osl: int, counted_by: str, fixed: bool, tol: float) 
 
 
 # ------------------------------------------------------------ the measuring --
-def _client_args(url: str, model: str, api_key_env: str | None) -> argparse.Namespace:
+def _client_args(url: str, model: str, api_key_env: str | None,
+                 extra_body: dict | None = None) -> argparse.Namespace:
     argv = ["--base-url", url, "--model", model, "--mode", "tps"]
     if api_key_env:
         argv += ["--api-key-env", api_key_env]
+    if extra_body:
+        argv += ["--extra-body", json.dumps(extra_body)]
     return harness.build_parser().parse_args(argv)
 
 
@@ -218,11 +223,12 @@ def _row(users: int, size: int, rates: dict, level_rows: list[dict], window: lis
 
 async def measure(url: str, model: str, tok: Any, counted_by: str, sizes: list[int],
                   osl: int, users: list[int], seconds: float,
-                  api_key_env: str | None = None) -> dict:
-    """Probe the endpoint, load it at each number of users, return the rows."""
+                  api_key_env: str | None = None, extra_body: dict | None = None) -> dict:
+    """Probe the endpoint, load it at each number of users, return the rows.
+    `extra_body` goes into every request, the probe's included."""
     tol = 0.0 if tok.name == "ws" and counted_by == "client" else LENGTH_TOL
     ramp = min(2.0, max(0.5, seconds / 4))
-    async with harness.Client(_client_args(url, model, api_key_env)) as client:
+    async with harness.Client(_client_args(url, model, api_key_env, extra_body)) as client:
         fixed, took = await _probe(client, tok, sizes, osl, counted_by, tol, url)
         seconds = max(seconds, MIN_ANSWERS * len(sizes) * took)
         print(f"measure: {'fixed' if fixed else 'free'}-length answers, about "
@@ -244,6 +250,7 @@ async def measure(url: str, model: str, tok: Any, counted_by: str, sizes: list[i
                       s["goodput_tps_per_chip"]) for size in sizes]
     return {"url": url, "model": model, "counted_by": counted_by, "tokenizer": tok.name,
             "answers": "fixed" if fixed else "free", "output": osl, "seconds": seconds,
+            "extra_body": extra_body or None,
             "rows": rows, "warnings": res.self_check["warnings"]}
 
 
@@ -260,6 +267,8 @@ def table(result: dict, note: str = "") -> str:
            "answers: " + (f"fixed at {result['output']} tokens" if result["answers"] == "fixed"
                           else f"free length, up to {result['output']} tokens (the server "
                                "does not keep to a fixed length, so runs differ in work done)")]
+    if result.get("extra_body"):
+        out.append("extra request fields: " + json.dumps(result["extra_body"]))
     if by_server:
         out.append("input sizes are in words here, not tokens")
     if note:
@@ -296,6 +305,17 @@ def _ints(value: str) -> list[int]:
     return out
 
 
+def _json_object(value: str) -> dict:
+    try:
+        out = json.loads(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(f"{value!r} is not JSON ({exc})") from exc
+    if not isinstance(out, dict):
+        raise argparse.ArgumentTypeError(f"{value!r}: a JSON object, e.g. "
+                                         '\'{"skip_special_tokens": false}\'')
+    return out
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(
         prog="measure", description="Measure how fast an OpenAI-style endpoint answers.")
@@ -314,12 +334,16 @@ def main(argv: list[str] | None = None) -> int:
                          "answers are slow, so every input size gets a few)")
     ap.add_argument("--api-key-env", default=None,
                     help="name of the environment variable that holds the API key")
+    ap.add_argument("--extra-body", type=_json_object, default=None, metavar="JSON",
+                    help="a JSON object of extra fields for every request, as a target's "
+                         "metric.extra_body sends them")
     ap.add_argument("--json", default=None, help="also write the result to this file")
     args = ap.parse_args(argv)
     try:
         tok, counted_by, note = resolve_tokenizer(args.tokenizer, args.model)
         result = asyncio.run(measure(args.url, args.model, tok, counted_by, args.input,
-                                     args.output, args.users, args.seconds, args.api_key_env))
+                                     args.output, args.users, args.seconds, args.api_key_env,
+                                     args.extra_body))
     except SystemExit as exc:
         print(exc, file=sys.stderr)
         return 2

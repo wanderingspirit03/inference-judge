@@ -1,0 +1,162 @@
+This module schedules which trams leave the Eastgate depot each morning and which bay each one is parked in overnight. I need a thorough code review (correctness, edge cases, style, anything risky) and then a complete set of unit tests written with pytest.
+
+```python
+"""depot.py - morning dispatch planning for the Eastgate tram depot."""
+
+from dataclasses import dataclass, field
+from datetime import time, timedelta, datetime
+from typing import Dict, List, Optional
+
+MAINTENANCE_LIMIT_KM = 12000
+MAX_BAY_CAPACITY = 2
+
+
+@dataclass
+class Tram:
+    number: int
+    model: str
+    km_since_service: int
+    fault_codes: List[str] = field(default_factory=list)
+    bay: Optional[str] = None
+
+    def needs_service(self) -> bool:
+        return self.km_since_service >= MAINTENANCE_LIMIT_KM
+
+    def is_roadworthy(self) -> bool:
+        if self.needs_service():
+            return False
+        return not any(code.startswith("B") for code in self.fault_codes)
+
+
+@dataclass
+class Departure:
+    line: str
+    scheduled: time
+    tram: Optional[Tram] = None
+
+
+class Depot:
+    def __init__(self, bays: Dict[str, int]):
+        # bays maps a bay name to its capacity
+        self.bays = bays
+        self.trams: Dict[int, Tram] = {}
+
+    def add_tram(self, tram: Tram) -> None:
+        if tram.number in self.trams:
+            raise ValueError("tram already registered")
+        self.trams[tram.number] = tram
+
+    def park(self, number: int, bay: str) -> None:
+        tram = self.trams[number]
+        occupied = [t for t in self.trams.values() if t.bay == bay]
+        capacity = self.bays.get(bay, MAX_BAY_CAPACITY)
+        if len(occupied) > capacity:
+            raise RuntimeError("bay full: " + bay)
+        tram.bay = bay
+
+    def roadworthy_trams(self) -> List[Tram]:
+        return sorted(
+            [t for t in self.trams.values() if t.is_roadworthy()],
+            key=lambda t: t.km_since_service,
+        )
+
+    def plan_morning(self, departures: List[Departure]) -> List[Departure]:
+        available = self.roadworthy_trams()
+        ordered = sorted(departures, key=lambda d: d.scheduled)
+        for dep in ordered:
+            if not available:
+                break
+            dep.tram = available.pop()
+        return ordered
+
+    def unstaffed(self, departures: List[Departure]) -> List[Departure]:
+        return [d for d in departures if d.tram is None]
+
+
+def assign_night_bays(depot: Depot, preferred: Dict[str, str]) -> Dict[int, str]:
+    """Give every tram a bay for the night.
+
+    preferred maps a model name to the bay that has the right overhead
+    charging gear for it. Trams whose preferred bay is full go to the
+    first bay with space.
+    """
+    result: Dict[int, str] = {}
+    for number in sorted(depot.trams):
+        tram = depot.trams[number]
+        wanted = preferred.get(tram.model)
+        placed = False
+        if wanted is not None:
+            try:
+                depot.park(number, wanted)
+                placed = True
+            except RuntimeError:
+                placed = False
+        if not placed:
+            for bay in depot.bays:
+                try:
+                    depot.park(number, bay)
+                    placed = True
+                    break
+                except RuntimeError:
+                    continue
+        if not placed:
+            result[number] = "UNPLACED"
+        else:
+            result[number] = tram.bay
+    return result
+
+
+def load_fault_log(lines: List[str], depot: Depot) -> int:
+    """Read lines of the form 'tram,code' and attach codes to trams.
+
+    Returns the number of lines that could not be applied.
+    """
+    skipped = 0
+    for line in lines:
+        parts = line.strip().split(",")
+        if len(parts) != 2:
+            skipped += 1
+            continue
+        number, code = parts
+        tram = depot.trams.get(int(number))
+        if tram is None:
+            skipped += 1
+            continue
+        tram.fault_codes.append(code)
+    return skipped
+
+
+def service_forecast(depot: Depot, daily_km: int) -> Dict[int, int]:
+    """Days until each tram reaches the service limit at a given daily distance."""
+    forecast: Dict[int, int] = {}
+    for number, tram in depot.trams.items():
+        remaining = MAINTENANCE_LIMIT_KM - tram.km_since_service
+        forecast[number] = remaining // daily_km
+    return forecast
+
+
+def minutes_late(scheduled: time, actual: time) -> int:
+    base = datetime(2026, 1, 1)
+    s = datetime.combine(base, scheduled)
+    a = datetime.combine(base, actual)
+    delta = a - s
+    return int(delta.total_seconds() / 60)
+
+
+def report(depot: Depot, departures: List[Departure]) -> str:
+    lines = []
+    for dep in depot.plan_morning(departures):
+        if dep.tram is None:
+            lines.append(f"{dep.scheduled:%H:%M} line {dep.line}: NO TRAM")
+        else:
+            lines.append(
+                f"{dep.scheduled:%H:%M} line {dep.line}: tram {dep.tram.number}"
+                f" ({dep.tram.model}, {dep.tram.km_since_service} km)"
+            )
+    missing = depot.unstaffed(departures)
+    if missing:
+        lines.append(f"{len(missing)} departures without a tram")
+    return "\n".join(lines)
+```
+
+Some background so you know what the dispatchers expect. Trams with fault codes starting with "B" have a brake problem and must never leave the depot; other fault codes (for example "D" for doors) are tolerated for a day. Trams with the fewest kilometres since service are supposed to go out on the earliest departures, because the early lines are the busiest. A bay should never hold more trams than its capacity. Last Tuesday the plan put the tram with the highest mileage on the 05:10 departure, which was the opposite of what we wanted, and one night bay 4 ended up with three trams in it. I would also like your opinion on whether the lateness helper does what its name suggests when a tram leaves after midnight.

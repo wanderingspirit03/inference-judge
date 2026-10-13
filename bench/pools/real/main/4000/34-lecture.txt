@@ -1,0 +1,144 @@
+Voici mes notes du cours de formation que je donne aux nouveaux conseillers de notre centre d'appels (revendeur de forfaits mobiles et d'accès internet, plateau de Lille). Pouvez-vous en faire un guide de révision complet pour les stagiaires, avec des exemples chiffrés résolus pas à pas, puis un quiz d'au moins quinze questions avec les corrections détaillées ? Les stagiaires passent l'évaluation vendredi, alors le guide doit être clair et progressif.
+
+# Formation conseillers clientèle – Module 3 : traiter une réclamation de facturation
+
+Formatrice : Océane Marchetti, responsable qualité et formation
+Durée : une journée (7 heures), groupe de douze stagiaires
+Prérequis : modules 1 (outils et accès) et 2 (présentation des offres)
+
+## 1. Pourquoi ce module existe
+
+Dans notre centre, environ 31 % des appels entrants concernent la facture. Ce sont aussi les appels les plus longs : la durée moyenne de traitement (DMT) est de 7 minutes 40 secondes pour une réclamation de facturation, contre 4 minutes 50 secondes pour une question sur le réseau. Une réclamation mal traitée revient presque toujours : le taux de rappel sous sept jours atteint 22 % quand le conseiller n'a pas vérifié la facture avec le client, contre 6 % quand il l'a fait.
+
+Objectifs de la journée :
+- savoir lire une facture de revendeur et en expliquer chaque ligne ;
+- reconnaître les cinq causes d'écart les plus fréquentes ;
+- recalculer à la main un prorata, un remboursement et une TVA ;
+- appliquer la méthode en six étapes pour conduire l'appel ;
+- connaître les limites de ce que le conseiller peut décider seul.
+
+## 2. Comprendre la facture
+
+Notre client reçoit une facture mensuelle qui comporte quatre blocs.
+
+**Bloc 1 : l'abonnement.** Le prix du forfait pour le mois à venir, facturé d'avance. Exemple : forfait « Souffle 40 Go » à 14,99 € TTC par mois.
+
+**Bloc 2 : les options.** Les services ajoutés : assurance du téléphone (4,00 € par mois), option appels internationaux (3,50 € par mois), supplément de données.
+
+**Bloc 3 : la consommation hors forfait.** Appels vers des numéros surtaxés, SMS vers des services payants, utilisation des données à l'étranger hors zone, achats sur facture. Cette partie est facturée à terme échu, donc pour le mois précédent.
+
+**Bloc 4 : les ajustements.** Remises, avoirs, frais ponctuels (frais de mise en service de 9,99 €, frais de remplacement de carte SIM de 10,00 €), et le prorata en cas de changement de forfait en cours de mois.
+
+Les prix affichés au client sont toujours TTC. La TVA est de 20 %. Pour passer d'un prix TTC à un prix hors taxes, on divise par 1,20. Pour retrouver le montant de TVA, on soustrait le hors taxes du TTC.
+
+> Exemple 1. Le forfait Souffle 40 Go coûte 14,99 € TTC. Hors taxes : 14,99 ÷ 1,20 = 12,49 € (arrondi au centime). TVA : 14,99 − 12,49 = 2,50 €.
+
+## 3. Les cinq causes d'écart les plus fréquentes
+
+D'après l'analyse de 1 200 réclamations du dernier trimestre, voici la répartition :
+
+| Cause | Part des réclamations |
+|---|---|
+| Prorata après changement de forfait | 34 % |
+| Option non souhaitée ou oubliée | 21 % |
+| Consommation hors forfait (surtaxé, étranger) | 18 % |
+| Fin de promotion (le prix remonte) | 15 % |
+| Erreur réelle de notre part (double facturation, remise non appliquée) | 8 % |
+
+Les 4 % restants sont des cas divers : prélèvement rejeté, facture adressée à un ancien titulaire, fraude.
+
+Le point important à transmettre aux stagiaires : seules 8 % des réclamations proviennent d'une erreur réelle. La plupart du temps, le client a raison de s'étonner, mais la facture est correcte. Le rôle du conseiller est d'expliquer, pas de se défendre, et de corriger quand c'est justifié.
+
+## 4. Le calcul du prorata
+
+Quand un client change de forfait en cours de mois, l'ancien forfait est facturé jusqu'à la veille du changement et le nouveau à partir du jour du changement. Le calcul se fait au jour : prix mensuel ÷ nombre de jours du mois × nombre de jours concernés.
+
+> Exemple 2. Madame Leroy passe du forfait à 9,99 € au forfait à 19,99 € le 12 avril (avril compte 30 jours).
+> - Ancien forfait : du 1er au 11 avril, soit 11 jours. 9,99 ÷ 30 × 11 = 3,66 € (3,663).
+> - Nouveau forfait : du 12 au 30 avril, soit 19 jours. 19,99 ÷ 30 × 19 = 12,66 € (12,660).
+> - Total du mois pour l'abonnement : 3,66 + 12,66 = 16,32 €.
+> Le client s'attendait à payer 19,99 €, ou 9,99 €. Il est surpris par un montant intermédiaire. Il faut lui montrer le détail ligne par ligne.
+
+Attention : si le forfait est facturé d'avance, le prorata du nouveau forfait apparaît sur la facture du mois en cours et le mois suivant apparaît en plein tarif. Beaucoup de clients voient donc deux montants proches sur deux factures et croient à une double facturation.
+
+> Exemple 3 (remboursement). M. Benali a souscrit par erreur l'option « appels internationaux » à 3,50 € par mois le 3 mars (mars compte 31 jours). Il appelle le 20 mars pour la résilier et signale qu'il ne l'a jamais voulue. Le conseiller constate dans l'enregistrement de vente que le client n'a pas confirmé l'option. L'option est donc annulée avec effet rétroactif et remboursée en totalité : 3,50 € de l'abonnement de mars. Si le client avait voulu l'option, puis résilié, il aurait payé le prorata : du 3 au 20 mars inclus, soit 18 jours, 3,50 ÷ 31 × 18 = 2,03 €.
+
+## 5. Les limites de décision du conseiller
+
+Le conseiller peut décider seul, sans demander à un superviseur :
+- un geste commercial jusqu'à 15 € TTC une fois par période de douze mois et par client ;
+- le remboursement intégral d'une option non confirmée, sur 3 mois maximum en arrière ;
+- la correction d'un prorata erroné, quel que soit le montant, si l'erreur est prouvée dans l'outil de facturation.
+
+Le superviseur doit valider :
+- tout geste commercial supérieur à 15 € et inférieur ou égal à 50 € ;
+- tout remboursement de consommation hors forfait supérieure à 30 € ;
+- toute demande de résiliation sans frais en dehors des cas prévus par la loi.
+
+Le service litiges, par transfert de dossier et non par transfert d'appel, traite : tout montant au-dessus de 50 €, les suspicions de fraude, les clients qui annoncent un recours auprès de la médiation ou d'une association de consommateurs, et les factures adressées à un tiers.
+
+Un conseiller ne doit jamais promettre un résultat qui dépend d'un autre service. La phrase à employer : « Je transmets votre dossier au service concerné ; vous recevrez une réponse par courriel sous cinq jours ouvrés. »
+
+## 6. La méthode en six étapes
+
+Le sigle à retenir est **ACCORD**.
+
+1. **Accueillir** : se présenter, donner le prénom, vérifier l'identité du titulaire (nom, date de naissance, code postal, et les quatre derniers chiffres du numéro de ligne). Ne jamais donner d'information avant la vérification.
+2. **Cerner** : laisser le client exposer son problème sans l'interrompre pendant trente secondes environ, puis reformuler : « Si je comprends bien, vous avez payé 31,48 € alors que vous attendiez 19,99 €. C'est bien cela ? »
+3. **Contrôler** : ouvrir la facture dans l'outil avec le client, ligne par ligne. Comparer avec l'offre souscrite et l'historique des changements des trois derniers mois.
+4. **Où est l'écart ?** : identifier la cause parmi les cinq causes du tableau. Poser une question fermée de confirmation : « Avez-vous changé de forfait le 12 avril ? »
+5. **Répondre** : expliquer avec des mots simples, chiffres à l'appui, puis proposer la solution : correction, remboursement, geste commercial, ou explication seule si la facture est correcte.
+6. **Désamorcer et clore** : vérifier que le client a compris, résumer les actions décidées, indiquer les délais, noter le dossier dans l'outil. Terminer par une phrase positive.
+
+### Exemple de dialogue (cause : fin de promotion)
+
+Client : « Mon forfait était à 8,99 € et là je paie 16,99 €. C'est du vol. »
+Conseiller : « Je comprends que cette hausse vous surprenne, monsieur Fabre. Je regarde votre dossier avec vous. Pouvez-vous me confirmer que vous avez souscrit en octobre de l'année dernière ? »
+Client : « Oui. »
+Conseiller : « Votre offre comprenait un tarif promotionnel de 8,99 € pendant douze mois. Il s'est terminé en octobre, et le prix du forfait est passé à 16,99 €. Ce changement figurait dans le contrat et dans un message envoyé un mois avant. Je peux vous proposer un forfait équivalent à 12,99 € sans engagement, ou vous accorder un geste de 10 € sur la prochaine facture si vous gardez votre forfait. Qu'est-ce qui vous conviendrait le mieux ? »
+
+On remarque que le conseiller n'accuse pas le client de ne pas avoir lu, il ne s'excuse pas pour une faute qui n'existe pas, il donne des chiffres et propose un choix.
+
+## 7. Les mots à éviter et les mots à préférer
+
+| À éviter | À préférer |
+|---|---|
+| « C'est normal. » | « Je vous explique d'où vient ce montant. » |
+| « Vous auriez dû lire le contrat. » | « Ce point figure dans votre contrat, je vous le montre. » |
+| « Ce n'est pas ma faute. » | « Voyons ensemble ce qui s'est passé. » |
+| « Je ne peux rien faire. » | « Voici ce que je peux faire dans l'immédiat. » |
+| « Vous me redites cela ? » | « Pour être sûr de bien comprendre, je reformule. » |
+
+## 8. Indicateurs de suivi des conseillers
+
+Chaque conseiller est suivi sur quatre indicateurs, calculés chaque semaine.
+
+- **DMT** (durée moyenne de traitement) : cible 7 minutes sur les réclamations de facturation. Une DMT trop courte n'est pas un bon signe, elle peut cacher un contrôle bâclé.
+- **RPC** (résolution au premier contact) : part des dossiers sans rappel sous sept jours. Cible 85 %.
+- **Qualité d'écoute** : note sur 20 donnée par le coach à partir de cinq appels écoutés par semaine. Cible 15 ou plus.
+- **Satisfaction client** : note moyenne de l'enquête envoyée par SMS après l'appel, sur 5. Cible 4,2.
+
+> Exemple 4. Sur la semaine 14, un conseiller a traité 46 appels de facturation pour un temps total de conversation de 5 h 22 min. Sa DMT est de 322 min ÷ 46 = 7,0 minutes, soit 7 minutes pile. Sur ces 46 dossiers, 7 ont fait l'objet d'un rappel sous sept jours. Son RPC est (46 − 7) ÷ 46 = 84,8 %, donc juste sous la cible de 85 %.
+
+## 9. Gestion des clients très mécontents
+
+Trois règles :
+1. Ne pas répondre au ton par le ton. Baisser légèrement la voix et ralentir le débit.
+2. Nommer l'émotion : « Je vois que cette situation vous a mis en colère, et je le comprends. »
+3. Passer rapidement aux faits : « Je vous propose de commencer par vérifier la facture ensemble. »
+
+Si le client insulte le conseiller, celui-ci a le droit de prévenir une première fois : « Je souhaite vous aider, mais je ne peux pas continuer si les propos restent injurieux. » À la deuxième insulte, il met fin à l'appel et signale l'incident au superviseur avec l'heure de l'appel. Aucun conseiller n'est sanctionné pour avoir appliqué cette procédure.
+
+## 10. Exercices pratiques de l'après-midi
+
+Les stagiaires travaillent en binômes, l'un joue le client et l'autre le conseiller, puis ils inversent. Trois scénarios sont distribués :
+
+- Scénario A : prorata (Mme Leroy, exemple 2).
+- Scénario B : option non confirmée (M. Benali, exemple 3).
+- Scénario C : consommation hors forfait à l'étranger. Une cliente est partie en Suisse, où l'itinérance n'est pas incluse dans son forfait, et elle reçoit une facture avec 41,60 € de données. Le conseiller doit expliquer l'écart, vérifier si un message d'alerte a été envoyé (c'est le cas : un SMS à 20 € de consommation et un autre à 40 €), et décider : le remboursement dépasse 30 €, donc il faut passer par le superviseur.
+
+À la fin de l'exercice, chaque binôme présente au groupe ce qui a été le plus difficile.
+
+## 11. Évaluation de vendredi
+
+L'évaluation comporte vingt questions à choix multiples et deux appels simulés écoutés par la formatrice. Pour valider le module, le stagiaire doit obtenir au moins 14 sur 20 au questionnaire et au moins 12 sur 20 à chaque appel simulé. En cas d'échec, une session de rattrapage est organisée la semaine suivante.

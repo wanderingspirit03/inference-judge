@@ -1,0 +1,338 @@
+This is the booking module for our planetarium's website. I inherited it and I can follow most of it, but not why some parts are written the way they are. Please explain what each part does, propose a refactoring that makes it safer and easier to change, and write tests for the refactored version.
+
+```typescript
+// shows.ts - show schedule, seat holds and ticket pricing for the Aldermoor Planetarium
+
+export type ShowKind = "dome" | "talk" | "workshop";
+export type Concession = "adult" | "child" | "senior" | "student" | "member";
+
+export interface Show {
+  id: string;
+  title: string;
+  kind: ShowKind;
+  startsAt: Date;
+  durationMin: number;
+  capacity: number;
+  basePricePence: number;
+  minAge?: number;
+}
+
+export interface Hold {
+  showId: string;
+  seats: number;
+  expiresAt: Date;
+  holderEmail: string;
+}
+
+export interface Booking {
+  reference: string;
+  showId: string;
+  email: string;
+  tickets: Record<Concession, number>;
+  totalPence: number;
+  createdAt: Date;
+}
+
+const HOLD_MINUTES = 8;
+const GROUP_DISCOUNT_FROM = 10;
+const MEMBER_DISCOUNT = 0.25;
+
+const concessionFactor: Record<Concession, number> = {
+  adult: 1,
+  child: 0.5,
+  senior: 0.8,
+  student: 0.7,
+  member: 1 - MEMBER_DISCOUNT,
+};
+
+export class ShowStore {
+  private shows = new Map<string, Show>();
+  private holds: Hold[] = [];
+  private bookings: Booking[] = [];
+  private counter = 1000;
+
+  addShow(show: Show): void {
+    if (this.shows.has(show.id)) {
+      throw new Error("Show exists: " + show.id);
+    }
+    if (show.capacity <= 0) {
+      throw new Error("Capacity must be positive");
+    }
+    this.shows.set(show.id, show);
+  }
+
+  getShow(id: string): Show {
+    const show = this.shows.get(id);
+    if (!show) throw new Error("Unknown show " + id);
+    return show;
+  }
+
+  upcoming(now: Date = new Date()): Show[] {
+    return [...this.shows.values()]
+      .filter((s) => s.startsAt > now)
+      .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
+  }
+
+  private activeHolds(showId: string, now: Date): Hold[] {
+    return this.holds.filter((h) => h.showId === showId && h.expiresAt > now);
+  }
+
+  seatsTaken(showId: string): number {
+    let n = 0;
+    for (const b of this.bookings) {
+      if (b.showId === showId) {
+        n += Object.values(b.tickets).reduce((a, c) => a + c, 0);
+      }
+    }
+    return n;
+  }
+
+  seatsLeft(showId: string, now: Date = new Date()): number {
+    const show = this.getShow(showId);
+    const held = this.activeHolds(showId, now).reduce((a, h) => a + h.seats, 0);
+    return show.capacity - this.seatsTaken(showId) - held;
+  }
+
+  placeHold(showId: string, seats: number, email: string, now: Date = new Date()): Hold {
+    if (seats < 1) throw new Error("Need at least one seat");
+    if (this.seatsLeft(showId, now) < seats) {
+      throw new Error("Not enough seats");
+    }
+    const hold: Hold = {
+      showId,
+      seats,
+      holderEmail: email,
+      expiresAt: new Date(now.getTime() + HOLD_MINUTES * 60 * 1000),
+    };
+    this.holds.push(hold);
+    return hold;
+  }
+
+  releaseExpired(now: Date = new Date()): number {
+    const before = this.holds.length;
+    this.holds = this.holds.filter((h) => h.expiresAt > now);
+    return before - this.holds.length;
+  }
+
+  price(showId: string, tickets: Partial<Record<Concession, number>>): number {
+    const show = this.getShow(showId);
+    let total = 0;
+    let count = 0;
+    for (const key of Object.keys(tickets)) {
+      const kind = key as Concession;
+      const qty = tickets[kind] ?? 0;
+      total += show.basePricePence * concessionFactor[kind] * qty;
+      count += qty;
+    }
+    if (count >= GROUP_DISCOUNT_FROM) {
+      total = total * 0.9;
+    }
+    return Math.round(total);
+  }
+
+  book(
+    showId: string,
+    email: string,
+    tickets: Partial<Record<Concession, number>>,
+    now: Date = new Date()
+  ): Booking {
+    const show = this.getShow(showId);
+    const count = Object.values(tickets).reduce((a, c) => (a ?? 0) + (c ?? 0), 0) as number;
+    if (count === 0) throw new Error("No tickets requested");
+
+    const own = this.activeHolds(showId, now).find((h) => h.holderEmail === email);
+    const available = this.seatsLeft(showId, now) + (own ? own.seats : 0);
+    if (count > available) throw new Error("Sold out");
+
+    if (show.minAge && (tickets.child ?? 0) > 0 && show.minAge > 12) {
+      throw new Error("Children not admitted to this show");
+    }
+
+    if (own) {
+      this.holds = this.holds.filter((h) => h !== own);
+    }
+
+    this.counter++;
+    const booking: Booking = {
+      reference: "ALD-" + this.counter,
+      showId,
+      email,
+      tickets: {
+        adult: tickets.adult ?? 0,
+        child: tickets.child ?? 0,
+        senior: tickets.senior ?? 0,
+        student: tickets.student ?? 0,
+        member: tickets.member ?? 0,
+      },
+      totalPence: this.price(showId, tickets),
+      createdAt: now,
+    };
+    this.bookings.push(booking);
+    return booking;
+  }
+
+  cancel(reference: string, now: Date = new Date()): number {
+    const idx = this.bookings.findIndex((b) => b.reference === reference);
+    if (idx < 0) throw new Error("No such booking");
+    const booking = this.bookings[idx];
+    const show = this.getShow(booking.showId);
+    const hoursBefore = (show.startsAt.getTime() - now.getTime()) / 3600000;
+    this.bookings.splice(idx, 1);
+    if (hoursBefore >= 48) return booking.totalPence;
+    if (hoursBefore >= 24) return Math.round(booking.totalPence / 2);
+    return 0;
+  }
+
+  revenue(showId?: string): number {
+    return this.bookings
+      .filter((b) => !showId || b.showId === showId)
+      .reduce((sum, b) => sum + b.totalPence, 0);
+  }
+
+  occupancyReport(): { id: string; title: string; percent: number }[] {
+    return [...this.shows.values()].map((s) => ({
+      id: s.id,
+      title: s.title,
+      percent: Math.round((this.seatsTaken(s.id) / s.capacity) * 100),
+    }));
+  }
+}
+
+export function formatPence(pence: number): string {
+  const pounds = Math.floor(pence / 100);
+  const rest = pence % 100;
+  return "£" + pounds + "." + (rest < 10 ? "0" + rest : rest);
+}
+
+export function formatShowTime(show: Show): string {
+  const end = new Date(show.startsAt.getTime() + show.durationMin * 60000);
+  const pad = (n: number) => (n < 10 ? "0" + n : String(n));
+  return (
+    pad(show.startsAt.getHours()) + ":" + pad(show.startsAt.getMinutes()) +
+    " - " + pad(end.getHours()) + ":" + pad(end.getMinutes())
+  );
+}
+
+export function groupByDay(shows: Show[]): Record<string, Show[]> {
+  const out: Record<string, Show[]> = {};
+  for (const show of shows) {
+    const key = show.startsAt.toISOString().slice(0, 10);
+    if (!out[key]) out[key] = [];
+    out[key].push(show);
+  }
+  return out;
+}
+
+export function overlappingShows(shows: Show[]): [string, string][] {
+  const pairs: [string, string][] = [];
+  for (let i = 0; i < shows.length; i++) {
+    for (let j = i + 1; j < shows.length; j++) {
+      const a = shows[i];
+      const b = shows[j];
+      const aEnd = a.startsAt.getTime() + a.durationMin * 60000;
+      const bEnd = b.startsAt.getTime() + b.durationMin * 60000;
+      if (a.kind === "dome" && b.kind === "dome") {
+        if (a.startsAt.getTime() < bEnd && b.startsAt.getTime() < aEnd) {
+          pairs.push([a.id, b.id]);
+        }
+      }
+    }
+  }
+  return pairs;
+}
+
+export function suggestAlternatives(store: ShowStore, showId: string, seats: number, now: Date = new Date()): Show[] {
+  const wanted = store.getShow(showId);
+  return store
+    .upcoming(now)
+    .filter((s) => s.id !== showId && s.kind === wanted.kind)
+    .filter((s) => store.seatsLeft(s.id, now) >= seats)
+    .slice(0, 3);
+}
+
+export interface WaitlistEntry {
+  showId: string;
+  email: string;
+  seats: number;
+  joinedAt: Date;
+}
+
+export class Waitlist {
+  private entries: WaitlistEntry[] = [];
+
+  join(showId: string, email: string, seats: number, now: Date = new Date()): number {
+    const existing = this.entries.find((e) => e.showId === showId && e.email === email);
+    if (existing) {
+      existing.seats = seats;
+      return this.position(showId, email);
+    }
+    this.entries.push({ showId, email, seats, joinedAt: now });
+    return this.position(showId, email);
+  }
+
+  position(showId: string, email: string): number {
+    const queue = this.entries.filter((e) => e.showId === showId);
+    return queue.findIndex((e) => e.email === email) + 1;
+  }
+
+  // Returns the people who can now be offered seats, in order of joining.
+  offerSeats(showId: string, seatsFree: number): WaitlistEntry[] {
+    const offered: WaitlistEntry[] = [];
+    let remaining = seatsFree;
+    for (const entry of this.entries.filter((e) => e.showId === showId)) {
+      if (entry.seats <= remaining) {
+        offered.push(entry);
+        remaining -= entry.seats;
+      }
+    }
+    return offered;
+  }
+
+  remove(showId: string, email: string): boolean {
+    const before = this.entries.length;
+    this.entries = this.entries.filter((e) => !(e.showId === showId && e.email === email));
+    return this.entries.length < before;
+  }
+}
+
+export function schoolGroupQuote(
+  store: ShowStore,
+  showId: string,
+  pupils: number,
+  teachers: number
+): { totalPence: number; perPupilPence: number; freeTeachers: number } {
+  const show = store.getShow(showId);
+  const freeTeachers = Math.min(teachers, Math.floor(pupils / 8));
+  const paidTeachers = teachers - freeTeachers;
+  const pupilPrice = Math.round(show.basePricePence * 0.4);
+  const total = pupils * pupilPrice + paidTeachers * show.basePricePence;
+  return {
+    totalPence: total,
+    perPupilPence: Math.round(total / pupils),
+    freeTeachers,
+  };
+}
+
+export function bookingsToCsv(bookings: Booking[]): string {
+  const header = "reference,show,email,adult,child,senior,student,member,total";
+  const rows = bookings.map((b) =>
+    [
+      b.reference,
+      b.showId,
+      b.email,
+      b.tickets.adult,
+      b.tickets.child,
+      b.tickets.senior,
+      b.tickets.student,
+      b.tickets.member,
+      (b.totalPence / 100).toFixed(2),
+    ].join(",")
+  );
+  return [header, ...rows].join("\n");
+}
+
+export function parseReference(ref: string): number | null {
+  const match = /^ALD-(\d+)$/.exec(ref.trim());
+  return match ? parseInt(match[1], 10) : null;
+}
+```

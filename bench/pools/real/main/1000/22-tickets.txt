@@ -1,0 +1,44 @@
+These are four tickets from our queue this morning. Could you write a complete, individual reply to each customer, in a warm but professional tone, explaining exactly what we will do and what they need to do? Please keep our policy in mind, which I have put at the bottom.
+
+---
+
+**Ticket #48211** | Channel: email | Priority: normal
+From: Ingrid Valdez
+Subject: New glasses make me dizzy
+
+Hello, I collected my new varifocals from the Millbrook branch nine days ago. I was told it would take a week or so to get used to them, but I still feel dizzy when I walk downstairs and my computer screen looks blurry at the edges. I am 61 and these are my first varifocals. I have a bus pass and cannot drive to a branch easily. Can you just remake them with a different prescription? Order number MB-77310.
+
+---
+
+**Ticket #48214** | Channel: web chat transcript | Priority: high
+From: Tomasz Brandt
+
+Tomasz: Hi, I ordered contact lenses online (monthly, six boxes) and the delivery came with the wrong strength. I ordered minus 2.75 and got minus 2.25.
+Agent: Sorry to hear that. Could you tell me the order number?
+Tomasz: 5530-XL. I already put one pair in before I noticed and my eyes feel a bit scratchy now.
+Agent: Understood. I will pass this to our clinical team. Could you tell me whether the scratchiness has continued?
+Tomasz: Yes, still scratchy two hours later. I took them out. Do I get a refund? I also need the right lenses before Friday, I travel for work.
+
+---
+
+**Ticket #48219** | Channel: email | Priority: normal
+From: Hannelore Okafor
+Subject: Frame snapped, still under warranty?
+
+Dear team, the arm of my frames broke where it joins the front, while I was cleaning them. They are the Larchwood titanium model, bought at your Easton Road branch fourteen months ago for 189. I have my receipt, and your website says frames have a two year guarantee. I am at work during the shop's opening hours, so I would like to post them to you if possible.
+
+---
+
+**Ticket #48226** | Channel: phone note typed by agent | Priority: low
+Caller: Mr. Desmond Pryce, age 78, daughter Alana called on his behalf.
+
+Alana says her father's eye test at Harbour Street was booked for last Tuesday but the shop was closed without notice. He waited outside for forty minutes in the cold. He has an appointment letter. She wants an apology, a new appointment at a time when she can drive him (weekday afternoons after 3 pm), and asks whether the test can be done at home because he finds it hard to walk. Branch manager has been told but has not replied.
+
+---
+
+## Our policy notes (internal)
+
+- Adaptation: new varifocal wearers get a free adjustment check and, if the problem continues after two weeks, a free re-test and a one-time free remake of the lenses within 60 days of collection. A remake needs an optometrist to confirm the prescription first, so we cannot change the strength without a re-test. A mobile optician service covers addresses within 12 miles of any branch for a visit fee of 25, waived for customers over 75 or with mobility problems.
+- Contact lenses: wrong item shipped is always replaced free of charge with next day delivery, and the wrong box is collected by courier. Eye discomfort must be passed to the clinical team, who call within four hours. Advise the customer to stop wearing lenses and to seek urgent care if there is pain, redness or reduced vision. Refunds are not offered if a customer wore the wrong lenses; instead we replace and, if the customer wishes, offer a free check.
+- Frames: the two year guarantee covers breakage from faulty materials and workmanship, not accidental damage. Hinge or joint failure under normal cleaning is normally treated as a defect. Customers can post frames using a prepaid envelope we send; repair takes about 10 working days.
+- Missed appointments caused by us: we apologise, offer a free upgrade of the anti-glare coating or a 15 voucher, and the branch manager must call back within two working days.

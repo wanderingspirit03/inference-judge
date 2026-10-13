@@ -1,0 +1,307 @@
+Below is the database for the production and warranty reporting at our bicycle factory (PostgreSQL 15, about 14 million rows in stock_movements and 2.3 million in warranty_claims). Reports have become slow and the numbers sometimes disagree between departments. Please review the schema design, say which indexes and constraints are missing, and rewrite each of the queries at the end in a better form with an explanation of what was wrong and how the new version works. Also list any places where the design allows bad data.
+
+## Schema
+
+```sql
+CREATE TABLE suppliers (
+    id            serial PRIMARY KEY,
+    name          varchar(200),
+    country       varchar(50),
+    contact_email varchar(200),
+    rating        varchar(10),
+    active        varchar(5) DEFAULT 'yes'
+);
+
+CREATE TABLE parts (
+    id             serial PRIMARY KEY,
+    sku            varchar(40),
+    description    text,
+    category       varchar(40),
+    supplier_id    integer,
+    unit_cost      real,
+    reorder_level  integer,
+    weight_g       integer
+);
+
+CREATE TABLE models (
+    id            serial PRIMARY KEY,
+    code          varchar(20),
+    name          varchar(100),
+    type          varchar(30),   -- road, gravel, mountain, e-bike, kids
+    launch_date   varchar(20),
+    retail_price  numeric(10,2),
+    discontinued  boolean DEFAULT false
+);
+
+CREATE TABLE bom (
+    model_id   integer,
+    part_id    integer,
+    quantity   integer,
+    notes      text
+);
+
+CREATE TABLE production_orders (
+    id            serial PRIMARY KEY,
+    model_id      integer REFERENCES models(id),
+    planned_qty   integer,
+    started_on    varchar(20),
+    finished_on   varchar(20),
+    status        varchar(20),   -- planned, running, done, cancelled
+    line          varchar(10)
+);
+
+CREATE TABLE bikes (
+    serial_no           varchar(30) PRIMARY KEY,
+    model_id            integer REFERENCES models(id),
+    production_order_id integer REFERENCES production_orders(id),
+    frame_size          varchar(10),
+    colour              varchar(30),
+    built_at            timestamp,
+    qa_passed           boolean,
+    qa_notes            text
+);
+
+CREATE TABLE dealers (
+    id          serial PRIMARY KEY,
+    name        varchar(200),
+    city        varchar(100),
+    country     varchar(50),
+    region      varchar(50),
+    since       date
+);
+
+CREATE TABLE sales (
+    id           serial PRIMARY KEY,
+    bike_serial  varchar(30),
+    dealer_id    integer,
+    sold_on      date,
+    price        numeric(10,2),
+    discount_pct numeric(5,2)
+);
+
+CREATE TABLE warranty_claims (
+    id             serial PRIMARY KEY,
+    bike_serial    varchar(30),
+    claim_date     date,
+    part_id        integer,
+    failure_code   varchar(10),
+    description    text,
+    resolution     varchar(30),   -- repaired, replaced, refunded, rejected
+    cost           numeric(10,2),
+    closed_date    date
+);
+
+CREATE TABLE stock_movements (
+    id          bigserial PRIMARY KEY,
+    part_id     integer,
+    moved_at    timestamp,
+    quantity    integer,        -- positive in, negative out
+    reason      varchar(30),    -- delivery, production, scrap, adjustment, return
+    reference   varchar(50),    -- order number, delivery note, etc.
+    warehouse   varchar(10)
+);
+
+CREATE TABLE purchase_orders (
+    id            serial PRIMARY KEY,
+    supplier_id   integer,
+    part_id       integer,
+    ordered_on    date,
+    promised_on   date,
+    received_on   date,
+    qty_ordered   integer,
+    qty_received  integer,
+    unit_price    numeric(10,4)
+);
+
+CREATE TABLE qa_checks (
+    id          bigserial PRIMARY KEY,
+    bike_serial varchar(30),
+    station     varchar(20),
+    checked_at  timestamp,
+    result      varchar(10),   -- pass, fail, rework
+    inspector   varchar(60),
+    measurement jsonb
+);
+```
+
+Notes about the data: `suppliers.active` holds 'yes', 'no', 'Yes', 'Y' and sometimes NULL. `models.launch_date` is written by hand and has formats like '2019-03-01', '01.03.2019' and 'spring 2019'. In `bom` some model and part pairs appear twice because of an import that was run two times. In `stock_movements`, the `reference` for production movements holds the production order id as text, for example '4517', and for deliveries it holds a delivery note number like 'DN-88231'. About 3 percent of `bikes.production_order_id` are NULL for older bikes. `purchase_orders.received_on` is NULL until the goods arrive, and partial deliveries are booked by overwriting `qty_received`. `qa_checks` holds one row per station per bike, normally six rows, plus extra rows for each rework. `warranty_claims.bike_serial` is not always a serial that exists in `bikes`, because dealers type it in by hand.
+
+## Queries currently in use
+
+### Q1: parts that need reordering (run every morning by purchasing)
+
+```sql
+SELECT p.sku, p.description, s.name AS supplier,
+       (SELECT SUM(quantity) FROM stock_movements sm WHERE sm.part_id = p.id) AS on_hand,
+       p.reorder_level
+FROM parts p, suppliers s
+WHERE p.supplier_id = s.id
+  AND (SELECT SUM(quantity) FROM stock_movements sm WHERE sm.part_id = p.id) < p.reorder_level
+  AND s.active = 'yes'
+ORDER BY on_hand;
+```
+
+### Q2: monthly production by model, last 12 months (finance dashboard)
+
+```sql
+SELECT m.name,
+       to_char(b.built_at, 'YYYY-MM') AS month,
+       count(*) AS bikes_built,
+       sum(case when b.qa_passed then 1 else 0 end) AS passed,
+       round(100.0 * sum(case when b.qa_passed then 1 else 0 end) / count(*), 1) AS pass_rate
+FROM bikes b
+JOIN models m ON m.id = b.model_id
+WHERE to_char(b.built_at, 'YYYY-MM') >= to_char(now() - interval '12 months', 'YYYY-MM')
+GROUP BY m.name, to_char(b.built_at, 'YYYY-MM')
+ORDER BY month, m.name;
+```
+
+### Q3: bill of materials cost per model (engineering)
+
+```sql
+SELECT m.code, m.name, sum(p.unit_cost * bom.quantity) AS material_cost
+FROM models m, bom, parts p
+WHERE bom.model_id = m.id AND bom.part_id = p.id
+GROUP BY m.code, m.name
+ORDER BY material_cost DESC;
+```
+
+### Q4: bikes sold per dealer region and average realised price (sales)
+
+```sql
+SELECT d.region,
+       count(s.id) AS units,
+       avg(s.price - s.price * s.discount_pct / 100) AS avg_price
+FROM dealers d
+LEFT JOIN sales s ON s.dealer_id = d.id
+WHERE s.sold_on >= '2026-01-01'
+GROUP BY d.region
+ORDER BY units DESC;
+```
+
+### Q5: warranty claim rate and cost per model (quality)
+
+```sql
+SELECT m.name,
+       (SELECT count(*) FROM warranty_claims w
+         JOIN bikes b2 ON b2.serial_no = w.bike_serial
+         WHERE b2.model_id = m.id) AS claims,
+       (SELECT count(*) FROM bikes b3 WHERE b3.model_id = m.id) AS bikes_built,
+       (SELECT sum(w.cost) FROM warranty_claims w
+         JOIN bikes b2 ON b2.serial_no = w.bike_serial
+         WHERE b2.model_id = m.id) AS total_cost
+FROM models m
+WHERE m.discontinued = false;
+```
+
+### Q6: parts that never appear in any bill of materials (cleanup)
+
+```sql
+SELECT sku, description
+FROM parts
+WHERE id NOT IN (SELECT part_id FROM bom);
+```
+
+### Q7: average days to close a warranty claim by failure code, 2026
+
+```sql
+SELECT failure_code,
+       avg(closed_date - claim_date) AS avg_days,
+       count(*)
+FROM warranty_claims
+WHERE extract(year from claim_date) = 2026
+GROUP BY failure_code
+HAVING count(*) > 20
+ORDER BY avg_days DESC;
+```
+
+### Q8: scrap by production order (operations)
+
+```sql
+SELECT po.id, m.name, po.line, po.planned_qty,
+       sum(abs(sm.quantity)) AS scrapped_parts
+FROM production_orders po
+JOIN models m ON m.id = po.model_id
+JOIN stock_movements sm ON sm.reference = po.id::text
+WHERE sm.reason = 'scrap'
+  AND po.started_on LIKE '2026-%'
+GROUP BY po.id, m.name, po.line, po.planned_qty
+ORDER BY scrapped_parts DESC
+LIMIT 50;
+```
+
+### Q9: the ten dealers with the most warranty claims per bike sold (quality and sales, quarterly)
+
+```sql
+SELECT d.name, d.city,
+       count(distinct w.id) * 1.0 / count(distinct s.id) AS claims_per_bike
+FROM dealers d
+JOIN sales s ON s.dealer_id = d.id
+LEFT JOIN warranty_claims w ON w.bike_serial = s.bike_serial
+GROUP BY d.name, d.city
+ORDER BY claims_per_bike DESC
+LIMIT 10;
+```
+
+### Q10: current stock value by warehouse (finance, month end)
+
+```sql
+SELECT warehouse, sum(stock * unit_cost) AS value
+FROM (
+    SELECT sm.warehouse, sm.part_id, sum(sm.quantity) AS stock
+    FROM stock_movements sm
+    GROUP BY sm.warehouse, sm.part_id
+) x
+JOIN parts p ON p.id = x.part_id
+GROUP BY warehouse;
+```
+
+### Q11: supplier delivery performance, last 6 months (purchasing)
+
+```sql
+SELECT s.name,
+       count(*) AS orders,
+       sum(case when po.received_on > po.promised_on then 1 else 0 end) AS late,
+       100.0 * sum(case when po.received_on > po.promised_on then 1 else 0 end) / count(*) AS pct_late,
+       avg(po.received_on - po.promised_on) AS avg_delay_days
+FROM purchase_orders po
+JOIN suppliers s ON s.id = po.supplier_id
+WHERE po.ordered_on > current_date - 180
+GROUP BY s.name
+ORDER BY pct_late DESC;
+```
+
+### Q12: bikes that failed QA at least twice at the same station (quality)
+
+```sql
+SELECT bike_serial, station, count(*)
+FROM qa_checks
+WHERE result = 'fail'
+GROUP BY bike_serial, station
+HAVING count(*) >= 2;
+```
+
+### Q13: latest claim for each bike that has had claims (customer service)
+
+```sql
+SELECT w.*
+FROM warranty_claims w
+WHERE w.claim_date = (SELECT max(claim_date) FROM warranty_claims w2 WHERE w2.bike_serial = w.bike_serial);
+```
+
+### Q14: slow-moving parts, no movement out for 12 months, with value tied up (finance)
+
+```sql
+SELECT p.sku, p.description,
+       (SELECT sum(quantity) FROM stock_movements WHERE part_id = p.id) * p.unit_cost AS value_tied_up
+FROM parts p
+WHERE p.id NOT IN (
+    SELECT part_id FROM stock_movements
+    WHERE quantity < 0 AND moved_at > now() - interval '12 months'
+)
+ORDER BY value_tied_up DESC;
+```
+
+## Additional context
+
+The factory builds roughly 38,000 bikes a year across five models families. Stock movements are written by the warehouse scanners all day and by the production line software at each station. The reorder report in Q1 takes about 40 seconds and runs while the warehouse is busy, and the finance dashboard in Q2 takes almost two minutes. Purchasing says that Q1 sometimes shows parts that are in fact in stock; production says that Q8 scrap figures never match the figures in the quality reports. Nobody has ever added an index apart from the primary keys. We plan to move to a read replica for reporting next year.

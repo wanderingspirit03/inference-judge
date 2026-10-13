@@ -1,0 +1,1 @@
+I manage a logistics warehouse that picks about two thousand orders a day. Write a detailed guide to redesigning the pick routes, covering slotting, batching, zones, how to test changes safely, and the numbers to track.

@@ -118,6 +118,10 @@ count and prints "not checked". `--tokenizer server` asks for that on purpose.
 hosted APIs do not honour that. The tool then measures at whatever length the
 server sends and prints "free length" above the table.
 
+**Extra request fields.** `--extra-body '{"skip_special_tokens": false}'` adds
+the fields of a JSON object to every request, the way a target's
+`metric.extra_body` does for a judged run. The table prints the fields it sent.
+
 This is a measurement, not a verdict: nothing is sealed or compared. The tool
 is tested against the mock server (`bench/tests/test_measure.py`) and has been
 run once against a real server (`mlx_lm.server` with a 135M model, on a
@@ -307,7 +311,7 @@ it will list only numbers the judge produced.
 | `measure.py` | Tested against the mock server. Run once against a real server: `mlx_lm.server` with a 135M model, on a laptop. Not run against a hosted API, or against a server on a GPU or TPU. |
 | Claude Code as the researcher | The only agent that has run a real loop, and that was before the loop called it through `session.sh`. Through the adapter it has been tested with a stand-in program only: a real session on a laptop did not get past an expired login. |
 | Codex and Pi as the researcher | The adapters were written from the tools' documentation and tested with stand-in programs. Each has then run one short real session on a laptop through its adapter: a wiring check, not research. The adapter read the agent's output, the guard refused an edit to a frozen file and a call to `nvidia-smi`, and `audit.log` recorded the calls that ran. Neither has run a real loop. Still unseen for both: the driver starting sessions on a hardened machine, and the wording of their quota and login errors. For Codex also: that its hooks are enforced from `/etc/codex/requirements.toml`. |
-| TPU (Google Cloud v6e) | The model server of `targets/v6e4-gemma4-26b-tps.yaml` was brought up by hand on a v6e-4. `setup/tpu.sh`, bootstrap and a judged run have not yet been run on real TPU hardware, and the file is still `runnable: false`. |
+| TPU (Google Cloud v6e) | On 2026-10-13, on one on-demand v6e-4, `setup/tpu.sh` and bootstrap ran to the end with `targets/v6e4-gemma4-26b-tps.yaml`. The judge measured a baseline and a 10-launch calibration, and in the rehearsal a candidate identical to the baseline was `REJECTED`. The spend guard (`tools/tpu_deadman.sh`) saved the results every hour and the VM deleted itself at the deadline. The chip gate passed only with `--network host --privileged`, so the file is `runnable: true` with a weaker isolation than a full seal, and results say so. Since then `setup/tpu.sh` has changed to make the cache directories on a new disk and to accept the newer Hub folder layout; those changes are tested with fakes only. That session used an earlier speed pool and ruler, so nothing has been measured on a TPU with the current ones. No research loop has run on a TPU, and the rehearsal's `buildfail` case was not run. |
 | GPU (NVIDIA) | Built and tested on a laptop with fakes for `nvidia-smi`, `docker` and `git`. Not yet run on real hardware; expect the first real run to find something. |
 | Other chips and engines | Not tried. |
 

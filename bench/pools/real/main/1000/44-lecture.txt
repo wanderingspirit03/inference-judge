@@ -1,0 +1,41 @@
+Here are my lecture notes from the week on bicycle frame design in our apprenticeship course at the factory. Please turn them into a study guide for the new apprentices, with worked examples that show the calculations step by step, and finish with a quiz of about ten questions and a full answer key.
+
+# Week 6: Frame geometry and tube selection
+
+Lecturer: Mr. Tomasz Weller, Ostfeld Cycle Works, apprentice programme, group B
+
+## 1. Why geometry matters
+
+A frame is a set of tubes joined at fixed angles. The angles and lengths decide how the bicycle handles, how comfortable it is, and how the rider's weight is carried. Three numbers are measured first on every new design: the seat tube angle, the head tube angle, and the wheelbase.
+
+- Seat tube angle: usually between 72 and 74 degrees for a touring frame. A steeper angle moves the rider forward over the pedals.
+- Head tube angle: usually 70 to 72 degrees. A slacker angle (smaller number) makes steering calmer but slower.
+- Wheelbase: the distance between the two wheel axles. Longer is more stable, shorter is more nimble.
+
+## 2. Trail
+
+Trail is the distance on the ground between the point where the steering axis meets the road and the point where the front tyre touches the road. It is calculated as:
+
+trail = (R * cos(h) - offset) / sin(h)
+
+where R is the wheel radius including the tyre, h is the head tube angle measured from horizontal, and offset is the fork rake. Typical trail for our city bike is 55 to 65 mm.
+
+Example from class: R = 340 mm, h = 71 degrees, offset = 45 mm. Then cos(71) is about 0.326 and sin(71) is about 0.946. R * cos(h) = 110.8 mm. Subtract the offset: 65.8 mm. Divide by 0.946: trail is about 69.6 mm. Mr. Weller said this is a little high and would feel stable but heavy at low speed. Using a 50 mm fork rake instead gives about 64 mm.
+
+## 3. Tube selection
+
+We use three tube materials at Ostfeld: plain carbon steel for the budget line, chromium-molybdenum steel for the touring line, and 6061 aluminium for the sport line.
+
+| Material | Density (g/cm3) | Yield strength (MPa) | Typical wall (mm) |
+|---|---|---|---|
+| Plain carbon steel | 7.85 | 350 | 1.2 |
+| Chromium-molybdenum | 7.85 | 650 | 0.9 |
+| Aluminium 6061-T6 | 2.70 | 270 | 1.6 |
+
+The point made in class: chromium-molybdenum can use a thinner wall for the same strength, so the frame is lighter even though the metal is just as dense. Aluminium is the lightest by volume but needs thicker walls and larger diameters, which makes the frame stiffer and less forgiving.
+
+Worked example: a down tube 600 mm long, outside diameter 31.8 mm. With a 1.2 mm wall the cross-section area is pi * (15.9^2 - 14.7^2) = about 115 mm2, so the tube volume is about 69,200 mm3, or 69.2 cm3, and the mass of plain steel is 69.2 * 7.85 = 543 g. With a 0.9 mm wall in the chromium-molybdenum steel, the area is pi * (15.9^2 - 15.0^2) = about 87.5 mm2, volume 52.4 cm3 and mass 411 g. The saving is 132 g on one tube.
+
+## 4. Homework
+
+Calculate trail for the new commuter prototype (R = 350 mm, head angle 70.5 degrees, offset 48 mm) and the mass of its top tube in aluminium (length 540 mm, outside diameter 34.9 mm, wall 1.6 mm).

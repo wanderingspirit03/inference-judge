@@ -1,0 +1,133 @@
+Je viens d'intégrer l'équipe de l'application mobile de la banque Lumeris et j'ai pris ces notes pendant la formation interne sur la sécurité des sessions et de l'authentification. Pouvez-vous en faire un guide de révision complet, avec des exemples détaillés et corrigés pour chaque notion, puis un quiz d'une quinzaine de questions avec les réponses expliquées ? Je dois présenter ces points à mon responsable dans deux semaines, donc j'ai besoin que ce soit clair et que les chiffres des exemples soient justes.
+
+NOTES DE COURS : Authentification et sessions dans l'application mobile Lumeris
+Intervenante : Hélène Marchetti, responsable sécurité applicative
+Public : nouveaux développeurs mobile et équipe de test
+Durée : 3 heures, avec une pause
+
+1. Pourquoi ce sujet compte
+
+Hélène a ouvert la séance avec un chiffre : sur les 412 000 clients actifs de l'application, environ 1,9 pour cent utilisent un téléphone dont le système n'a pas été mis à jour depuis plus d'un an. Ces appareils sont les plus exposés, et ils sont aussi ceux qui nous coûtent le plus cher en incidents. L'an dernier, l'équipe a traité 37 cas de prise de contrôle de compte, dont 29 avaient commencé par un code reçu par SMS livré à une personne qui n'était pas le client. Elle a insisté sur un principe : l'application ne doit jamais faire confiance à l'appareil, au réseau ni à l'utilisateur seul, mais à une combinaison de preuves.
+
+Objectifs de la séance :
+- comprendre les trois familles de facteurs d'authentification ;
+- savoir comment fonctionne le cycle de vie d'une session, de l'ouverture à l'expiration ;
+- connaître les règles de stockage des secrets sur le téléphone ;
+- savoir calculer la durée de vie des jetons et le nombre de tentatives autorisées ;
+- repérer les erreurs de conception les plus fréquentes.
+
+2. Les trois familles de facteurs
+
+Un facteur d'authentification est une preuve qu'on est bien la personne qu'on prétend être. On les classe en trois familles :
+
+- ce que je sais : un code secret à six chiffres, une phrase de passe ;
+- ce que je possède : le téléphone enregistré, une clé de sécurité, une carte ;
+- ce que je suis : l'empreinte digitale, le visage.
+
+L'authentification forte exige au moins deux facteurs de familles différentes. Hélène a donné un exemple qui revient souvent aux examens internes : un code secret suivi d'une question secrète, comme le nom de jeune fille de la mère, n'est pas une authentification forte, puisque les deux preuves sont de la même famille, « ce que je sais ». À l'inverse, le code secret associé à la reconnaissance de l'empreinte est valide, car on combine deux familles.
+
+À la banque Lumeris, la règle est la suivante. À l'ouverture d'une session, le client saisit son identifiant et son code à six chiffres (premier facteur), puis confirme sur le téléphone enregistré avec l'empreinte ou le visage (second facteur, lié à l'appareil). Pour un virement supérieur à 500 euros, ou vers un bénéficiaire nouveau, une confirmation supplémentaire est demandée : c'est ce qu'on appelle l'authentification renforcée pour opération sensible.
+
+Remarque importante : la biométrie ne quitte jamais le téléphone. L'application reçoit seulement une réponse oui ou non du système, signée par une clé qui reste dans la puce sécurisée. Elle ne voit ni l'image ni le gabarit de l'empreinte.
+
+3. Le cycle de vie d'une session
+
+Hélène a dessiné au tableau les cinq étapes d'une session.
+
+Étape 1, l'ouverture. Après la réussite des deux facteurs, le serveur crée une session et envoie deux jetons : un jeton d'accès, de courte durée, et un jeton de renouvellement, de longue durée.
+
+Étape 2, l'usage. À chaque appel, l'application envoie le jeton d'accès. Le serveur vérifie la signature, la date d'expiration et le périmètre autorisé.
+
+Étape 3, le renouvellement. Quand le jeton d'accès expire, l'application présente le jeton de renouvellement pour en obtenir un nouveau, sans redemander le code.
+
+Étape 4, la rotation. À chaque renouvellement, le serveur émet aussi un nouveau jeton de renouvellement et invalide l'ancien. Si un ancien jeton est présenté une seconde fois, c'est le signe d'un vol : le serveur détruit alors toute la famille de jetons, et le client doit se reconnecter.
+
+Étape 5, la fin. La session se termine par une déconnexion volontaire, par l'expiration du jeton de renouvellement, par un blocage décidé par la banque, ou par un changement d'appareil.
+
+Les durées retenues chez nous :
+
+| Élément | Durée de vie | Remarque |
+|---|---|---|
+| Jeton d'accès | 5 minutes | Signé, vérifié sans appel à la base |
+| Jeton de renouvellement | 30 jours | Stocké côté serveur sous forme de hachage |
+| Inactivité maximale | 10 minutes | L'application se verrouille, le jeton reste valide |
+| Session absolue | 12 heures | Au-delà, nouvelle authentification complète |
+
+Hélène a précisé la différence entre le verrouillage et la fermeture. Au bout de 10 minutes d'inactivité, l'application affiche un écran de verrouillage, qui demande l'empreinte ou le code, mais la session n'est pas fermée. Au bout de 12 heures, même un utilisateur actif doit se réauthentifier complètement.
+
+4. Exemple corrigé : calculer le nombre de renouvellements
+
+Une cliente, Mme Delorme, ouvre une session à 8 h 00 et utilise l'application sans interruption de plus de 10 minutes. Combien de fois le jeton d'accès est-il renouvelé avant la limite de la session absolue ?
+
+La session absolue dure 12 heures, soit 720 minutes. Le jeton d'accès dure 5 minutes. Le premier jeton est émis à l'ouverture, donc il couvre de 8 h 00 à 8 h 05. Il faut ensuite 720 divisé par 5, soit 144 jetons au total pour couvrir les 12 heures, dont le premier émis à l'ouverture. Il y a donc 143 renouvellements. À chaque renouvellement, le jeton de renouvellement change aussi : 143 jetons de renouvellement ont été invalidés, et le dernier est abandonné à la fin de la session.
+
+Hélène a ajouté un point de vigilance : si la cliente reste inactive plus de 5 minutes mais moins de 10, le jeton d'accès expire sans que l'écran se verrouille. Au prochain geste, l'application renouvelle silencieusement, et la cliente ne voit rien.
+
+5. Stockage des secrets sur le téléphone
+
+Les règles rappelées en cours :
+
+1. Aucun secret en clair dans les préférences de l'application, dans les fichiers ou dans les journaux.
+2. Le jeton de renouvellement est stocké dans le coffre sécurisé du système (trousseau sur iOS, magasin de clés matériel sur Android), protégé par le verrouillage de l'appareil.
+3. Le jeton d'accès reste en mémoire seulement et n'est jamais écrit sur le disque.
+4. Le code secret à six chiffres n'est jamais stocké sur le téléphone : il est envoyé au serveur par un canal chiffré, comparé à une valeur hachée avec un sel et un algorithme lent, puis oublié.
+5. Les captures d'écran sont désactivées sur les écrans qui affichent un solde ou un IBAN complet.
+6. L'application refuse de démarrer sur un appareil dont le système a été modifié (appareil débridé ou « rooté ») pour les opérations sensibles, et signale l'appareil au serveur pour une analyse du risque.
+
+Hélène a raconté un incident : en 2022, un prototype interne enregistrait le jeton d'accès dans un fichier de préférences « pour gagner du temps au démarrage ». Un testeur l'a retrouvé en copiant la sauvegarde du téléphone sur un ordinateur. Le défaut a été corrigé avant la mise en production, mais elle l'utilise comme exemple pour montrer que « temporaire » ne veut pas dire « sûr ».
+
+6. Limitation des tentatives
+
+Pour résister aux attaques par essais successifs, le serveur compte les échecs de saisie du code secret.
+
+- Après 3 échecs consécutifs : attente de 30 secondes.
+- Après 5 échecs : attente de 5 minutes.
+- Après 8 échecs : le compte est bloqué, le client doit appeler le centre de relation client ou utiliser la procédure de réinitialisation avec une pièce d'identité.
+- Le compteur est remis à zéro après une connexion réussie.
+
+Le blocage est lié au compte, pas à l'appareil, afin d'empêcher un attaquant de changer de téléphone pour contourner la limite.
+
+Exemple corrigé : un code à six chiffres offre 10^6, soit un million de combinaisons. Un attaquant qui connaîtrait l'identifiant et pourrait essayer librement un code par seconde le trouverait en 500 000 secondes en moyenne, soit un peu moins de 6 jours. Avec la limite de 8 échecs, il n'a que 8 chances sur 1 000 000 d'essayer le bon code avant le blocage, soit 0,0008 pour cent. C'est pourquoi la limitation par compte est plus importante que la longueur du code lui-même.
+
+Hélène a reconnu une faiblesse : un attaquant qui veut nuire peut bloquer volontairement le compte d'un client en entrant huit mauvais codes. La banque a choisi d'accepter ce risque, parce que le blocage d'un compte est moins grave que son vol, mais elle étudie un déblocage par l'application d'un second appareil déjà enregistré.
+
+7. Changement d'appareil et récupération
+
+Lorsque le client change de téléphone, il doit enregistrer le nouvel appareil. Le parcours est le suivant : saisie de l'identifiant et du code, puis envoi d'un code à usage unique par courrier postal ou par un appel automatisé sur le numéro enregistré depuis plus de 30 jours, puis, si le client possède encore l'ancien appareil, validation sur celui-ci. Pendant 48 heures après l'enregistrement d'un nouvel appareil, les virements vers de nouveaux bénéficiaires sont limités à 300 euros par jour.
+
+Hélène a expliqué pourquoi la banque a abandonné le SMS comme second facteur pour les opérations sensibles : l'échange de carte SIM frauduleux, ou la redirection du numéro, permet à un tiers de recevoir le code. Les 29 cas mentionnés au début de la séance correspondaient tous à ce scénario. Le SMS reste utilisé uniquement pour avertir le client qu'une alerte a été émise, jamais pour transporter un secret.
+
+8. Erreurs de conception fréquentes
+
+À la fin de la séance, la classe a dressé la liste suivante, que l'intervenante a validée.
+
+- Faire confiance à une vérification faite seulement côté application. Toute règle de sécurité doit être revérifiée côté serveur, car l'application peut être modifiée.
+- Mettre une clé secrète dans le code de l'application. Quiconque télécharge l'application peut l'extraire.
+- Utiliser un jeton d'accès de longue durée « pour éviter les déconnexions ». Cela transforme un vol en accès durable.
+- Afficher des messages d'erreur trop précis, comme « identifiant inconnu » ou « code incorrect », qui permettent de savoir si un identifiant existe. Le message doit rester le même dans tous les cas.
+- Oublier d'invalider les jetons quand le client change son code secret ou signale la perte de son téléphone.
+- Écrire des données sensibles dans les journaux de débogage, qui sont ensuite envoyés à l'outil de suivi des plantages.
+
+9. Exemple corrigé : détecter le vol d'un jeton de renouvellement
+
+Scénario présenté par Hélène. M. Okonkwo possède un téléphone enregistré. Son jeton de renouvellement, appelons-le R1, est copié par un logiciel malveillant à 10 h 00. À 10 h 02, M. Okonkwo, qui ne se doute de rien, renouvelle sa session : le serveur reçoit R1, émet R2 et invalide R1. À 10 h 07, l'attaquant présente R1.
+
+Que se passe-t-il ? Le serveur constate que R1 a déjà été utilisé. Il ne peut pas savoir lequel des deux porteurs est le client légitime, donc il applique la règle de prudence : toute la famille de jetons (R1, R2 et les jetons d'accès associés) est détruite, une alerte est enregistrée et M. Okonkwo reçoit une notification. Au prochain geste, l'application échoue au renouvellement et lui demande de se reconnecter avec ses deux facteurs. L'attaquant, lui, n'obtient rien, puisque R1 est inutilisable.
+
+Si l'attaquant avait été plus rapide que le client, par exemple en présentant R1 à 10 h 01, le résultat aurait été le même, mais dans l'autre sens : c'est le client qui aurait présenté un jeton déjà consommé à 10 h 02, et la famille aurait été détruite à ce moment-là. Dans les deux cas, la durée pendant laquelle l'attaquant garde un accès utile est au plus de 5 minutes, soit la durée du dernier jeton d'accès valide. C'est la raison pour laquelle on combine un jeton d'accès très court et la rotation.
+
+Calcul de l'exposition maximale : sans rotation, un jeton de renouvellement volé reste valable 30 jours, soit 43 200 minutes. Avec la rotation, la fenêtre utile se réduit à l'intervalle entre le vol et le prochain renouvellement du client légitime, au pire 5 minutes. Le gain est d'un facteur 8 640 (43 200 divisé par 5).
+
+10. Journalisation et alertes
+
+Les évènements suivants sont enregistrés côté serveur, sans jamais inclure de code secret ni de jeton complet : ouverture et fermeture de session, échecs de saisie, changement d'appareil, rotation réutilisée, opération sensible refusée, et appareil débridé détecté. Chaque évènement porte l'identifiant du compte, un identifiant d'appareil pseudonymisé, l'heure et le résultat.
+
+Le centre de supervision reçoit une alerte dans trois cas : plus de 20 comptes bloqués en une heure, ce qui peut indiquer une attaque de masse ; une rotation réutilisée sur un compte déjà alerté dans les 30 derniers jours ; et un virement vers un nouveau bénéficiaire, supérieur à 2 000 euros, dans les 48 heures qui suivent un changement d'appareil. Les journaux sont conservés 13 mois et accessibles seulement à l'équipe sécurité et aux auditeurs.
+
+Hélène a insisté sur la protection de la vie privée : les journaux ne contiennent pas le contenu des opérations, ni les noms des bénéficiaires, mais uniquement ce qui est nécessaire pour comprendre un incident.
+
+11. Consignes pour les tests
+
+L'équipe de test doit vérifier au minimum : l'expiration du jeton d'accès après 5 minutes ; le verrouillage à 10 minutes d'inactivité ; la fermeture à 12 heures ; le refus de l'ancien jeton de renouvellement après rotation ; les paliers de blocage à 3, 5 et 8 échecs ; le comportement sur un appareil débridé ; et l'absence de secret dans les sauvegardes du téléphone.
+
+Prochaine séance : le chiffrement des échanges, l'épinglage des certificats et la détection des fraudes en temps réel. À préparer : relire le document de politique de sécurité de la banque, versions 4.1 et suivantes.

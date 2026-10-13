@@ -1,0 +1,1 @@
+I look after a network of about sixty automatic weather stations and the sensors keep drifting. Write a complete Python program, with unit tests, that detects drift and stuck values in hourly readings, and explain how each check works.

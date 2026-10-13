@@ -1,0 +1,101 @@
+Please explain what this Go package for our veterinary practice does, review it for bugs and design problems, and write table-driven tests for it. I'd like the tests to cover the edge cases, not just the happy path.
+
+```go
+package dosage
+
+import (
+	"errors"
+	"fmt"
+	"math"
+	"strings"
+)
+
+type Species string
+
+const (
+	Dog    Species = "dog"
+	Cat    Species = "cat"
+	Rabbit Species = "rabbit"
+)
+
+type Drug struct {
+	Name        string
+	MgPerKg     float64
+	MaxDailyMg  float64
+	DosesPerDay int
+	Species     []Species
+}
+
+type Patient struct {
+	Name     string
+	Species  Species
+	WeightKg float64
+	Allergy  []string
+}
+
+type Prescription struct {
+	Drug       string
+	DoseMg     float64
+	DosesDaily int
+	Warning    string
+}
+
+var ErrWeight = errors.New("weight must be positive")
+var ErrSpecies = errors.New("drug not approved for species")
+
+var catalog = map[string]Drug{
+	"amoxicillin": {"amoxicillin", 12.5, 500, 2, []Species{Dog, Cat}},
+	"meloxicam":   {"meloxicam", 0.1, 5, 1, []Species{Dog}},
+	"metacam-rab": {"metacam-rab", 0.3, 3, 1, []Species{Rabbit}},
+}
+
+func approved(d Drug, s Species) bool {
+	for _, x := range d.Species {
+		if x == s {
+			return true
+		}
+	}
+	return false
+}
+
+func allergic(p Patient, drug string) bool {
+	for _, a := range p.Allergy {
+		if strings.ToLower(a) == strings.ToLower(drug) {
+			return true
+		}
+	}
+	return false
+}
+
+func round(v float64, places int) float64 {
+	f := math.Pow(10, float64(places))
+	return math.Round(v*f) / f
+}
+
+func Calculate(p Patient, drugName string) (Prescription, error) {
+	if p.WeightKg <= 0 {
+		return Prescription{}, ErrWeight
+	}
+	d, ok := catalog[strings.ToLower(drugName)]
+	if !ok {
+		return Prescription{}, fmt.Errorf("unknown drug %q", drugName)
+	}
+	if !approved(d, p.Species) {
+		return Prescription{}, ErrSpecies
+	}
+	dose := round(d.MgPerKg*p.WeightKg, 1)
+	daily := dose * float64(d.DosesPerDay)
+	rx := Prescription{Drug: d.Name, DoseMg: dose, DosesDaily: d.DosesPerDay}
+	if daily > d.MaxDailyMg {
+		dose = round(d.MaxDailyMg/float64(d.DosesPerDay), 1)
+		rx.DoseMg = dose
+		rx.Warning = "dose capped at daily maximum"
+	}
+	if allergic(p, d.Name) {
+		rx.Warning = "patient has recorded allergy"
+	}
+	return rx, nil
+}
+```
+
+Some context. The reception team prints the Calculate result on the treatment sheet, and the vets have told us they trust the numbers. We have had one near miss where a rabbit owner was handed a dog dose, so please be strict about anything that could produce an unsafe number. The catalog will later move to a database, so tell me whether the current design makes that change harder.

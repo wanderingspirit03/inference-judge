@@ -1,0 +1,117 @@
+These are the notes I took at the kickoff meeting for our new press installation. Nobody has turned them into a plan yet. Could you write the full project plan from them: phases, tasks, owners, dates, dependencies, a risk register with mitigations, and a list of questions that still need answering before we can commit to dates? Where the notes contradict each other or leave something out, point it out instead of guessing silently.
+
+# Kickoff meeting: Press 4 installation and finishing line relocation
+Stanhope & Pike Printers, Halbrook works
+Date: Tuesday 6 October 2026, 14:00 to 16:10, Meeting room B
+Notes by: Wilhelmina Cray (Production Planner)
+
+Present: Bertrand Stanhope (Managing Director), Oksana Lindgren (Operations Director), Dev Malhotra (Head of Pressroom), Greta Voss (Head of Finishing), Anselm Pike (Facilities and Maintenance), Raúl Ferreira (Finance Manager), Yusuf Demir (Customer Service Manager), Wilhelmina Cray (notes). Apologies: Hannelore Brandt (IT and prepress), who will get the notes.
+
+## 1. Why we are doing this
+
+Bertrand opened by repeating the board decision of 21 September: we buy a new eight-unit sheet-fed offset press (called Press 4 from now on) to replace Press 1, a 22-year-old four-colour machine that has had eleven breakdowns in the last year and that the vendor no longer supports with spare parts. Purchase price agreed with the supplier, Kronwald Machines, is 1.84 million, including a coating unit and the automatic plate loading. A separate 112,000 is reserved for the installation work in the hall: floor reinforcement, power, ventilation and compressed air.
+
+Reasons given: Press 1 downtime cost an estimated 138,000 in lost jobs and overtime last year. The two largest customers (the regional theatre group and the publisher Orlen Books) have asked for coated stock and varnish finishes that Press 1 cannot do. The new press is also about 40 percent faster on make-ready, because of plate loading and inline colour control.
+
+Bertrand wants the new press producing by the middle of January, because the theatre group's spring season brochures arrive in the second half of January and the annual contract with Orlen Books starts on 1 February. Oksana says this is "possible but only if everything goes right" and asked that nobody commits to customers before the plan is checked.
+
+## 2. Timeline as the supplier described it
+
+Raúl read out the delivery schedule from the signed order confirmation:
+- Press delivered in 14 modules by lorry to Halbrook on Monday 30 November (the supplier says the week of 30 November, plus or minus a few days).
+- Installation team from Kronwald: six technicians for four weeks. They need the hall floor prepared and power connected before they arrive.
+- Commissioning and test printing: one week after installation.
+- Operator training: five days, by Kronwald's trainer, in the week after commissioning.
+- Handover and acceptance test: a 12-hour continuous run at agreed speed with a quality check against the contract's specification.
+
+Anselm pointed out that four weeks plus one week plus one week of training, starting on 30 November, would bring us to the second week of January, and with the Christmas closure (the works is closed from 24 December to 1 January) the real finish would be around 18 January. Dev said that is too close. Nobody disagreed. Bertrand said the supplier had promised to try to reduce the installation to three weeks with a larger team, and Raúl will ask in writing.
+
+## 3. The hall
+
+The new press goes into the north bay of the pressroom, where Press 1 and the old folding machine stand today. Anselm showed a floor plan. Key points:
+- The press weighs about 38 tonnes, and the current floor slab was rated for 22 tonnes per machine. A structural survey is needed, and probably reinforced foundations under the press units. Anselm has a quote from a structural engineer for a survey: 3,800, two weeks to complete. He asked for permission to order it this week. Agreed by Bertrand.
+- Power: the new press needs a 400 A supply. The existing board is at 260 A capacity, and it is shared with the finishing area. The electricity network operator has to be asked for an upgrade, which Anselm says can take up to eight weeks. Application not yet made. He will do it tomorrow if Raúl approves the fee (about 6,500).
+- Compressed air and extraction: the existing compressor is old, and the new press needs a quantity of air that it cannot supply. A new compressor and a dryer are in the 112,000 budget. Delivery time is 6 to 8 weeks.
+- Press 1 has to be removed first. Anselm has a scrap and resale dealer who offered 9,000 for the machine, collected, but the dealer needs three days and a crane. Oksana asked whether Press 1 can be sold after the new one is working, so that the plant keeps some capacity until then. Anselm said no, because Press 4 sits in Press 1's space. This is an open question.
+- The hall will also lose the old folding machine position, which Greta will use for the relocated finishing line (section 4).
+
+## 4. The finishing line
+
+Greta explained that the relocation of the finishing line is a separate project that was added to this one. Today the cutter, the folder, the saddle stitcher and the perfect binder stand in the south bay, on the other side of the building. The new press produces more sheets per hour than the finishing area can handle if left where it is, because the stacks have to be moved by pallet truck across a public walkway, and finishing is already a bottleneck on 30 percent of jobs.
+
+Plan proposed by Greta: move the cutter and the folder to the north bay, next to Press 4, at the position where the old folding machine now stands. The saddle stitcher and the binder stay in the south bay for now. This needs the folder disconnected and reinstalled by an outside rigging firm (quote requested, not yet received; Greta thinks about 14,000), new floor markings, and a revised workflow for the pallets. She says the move can be done in two days over a weekend.
+
+Raúl asked whether this is in the budget. It is not. The 112,000 does not include rigging or relocation of finishing equipment. Greta said she believes a saving can be found by not buying the pallet conveyor (about 21,000), which was in an earlier version of the request. Bertrand: "Put it to me with numbers next week, not now."
+
+Dev asked who will run the folder during the move period, since it will be out of service for at least two days and during that time the customer jobs that need folding must be sent elsewhere. Greta says she has an arrangement with a trade finisher nearby, Marwick Bindery, who charged 60 an hour before. No contract yet.
+
+## 5. Production during the installation
+
+This was the longest discussion. For roughly six weeks from the start of November to the middle of December, the pressroom will have no Press 1 and no Press 4. Press 2 (a two-colour) and Press 3 (a four-colour) continue to run. Dev's figures: Presses 2 and 3 together can take about 55 percent of the work that currently runs on all three machines. The remaining 45 percent must be moved to trade printers, delayed, or declined.
+
+Yusuf listed the customers who would be most affected: the theatre group's autumn programme reprint (due 20 November), the Orlen Books paperback run (three titles, due in the first week of December), and the annual calendars for two local banks, which are normally printed in the second half of November and are the biggest seasonal job of the year (about 180,000 in revenue). He said that he cannot tell customers anything until he knows which dates are firm.
+
+Decisions and suggestions:
+- The calendars will be printed first, by the end of October, on Press 1 before it is taken out, even if that means shifting other jobs. Dev says it is possible if the paper arrives by 16 October. Yusuf will confirm the paper order with the supplier.
+- Jobs of 8,000 sheets and above that need coating will be sent to a trade printer, Dunmere Press. Oksana will ask them for a rate and capacity for November. A first guess is that outsourcing costs about 22 percent more than printing in-house.
+- Overtime on Press 3 on Saturdays during November: Dev will propose a rota, but he does not have enough trained operators. Two apprentices could be used under supervision.
+- Press 1 will print its last job on Friday 30 October. Anselm will start the removal the following Monday.
+
+## 6. People and training
+
+Dev has five press operators and two assistants. Only three operators have worked with a plate loading system, and none with the inline colour control. Kronwald's training of five days can take six people. Dev wants all five operators plus one assistant. Raúl asked about the cost of backfill. Dev said that during the training week Press 3 will have to run with the remaining crew, and he does not think this is possible without agency staff.
+
+Hannelore was absent, but Wilhelmina noted her email from last week: the prepress system needs a software update and a new colour profile for the new press, and the connection from the workflow server to Press 4 requires a network cable run and two licences. She estimates 11,000 and says the work must be done before commissioning. This needs an owner at the meeting and nobody took it, so Oksana asked Wilhelmina to make sure Hannelore picks it up.
+
+## 7. Money
+
+Raúl summarised the figures so far:
+- Press purchase: 1,840,000 (financing by the bank loan of 1,500,000 and 340,000 own funds).
+- Installation work: 112,000 budget.
+- Not yet budgeted: structural survey 3,800, power upgrade application 6,500, rigging for the finishing line about 14,000, prepress work 11,000, agency staff during training (no figure), trade printer extra cost (no figure), Marwick Bindery (no figure).
+- Income expected from the sale of Press 1: 9,000.
+
+Raúl said the bank wants a monthly progress report during the installation, and the loan's first draw down is conditional on the signed order confirmation (done) and proof of insurance for the equipment during transport and installation. Anselm will ask the insurance broker for a quote this week.
+
+He also warned that the contract with Kronwald has a penalty for late acceptance on our side: if the hall is not ready on 30 November, the supplier can charge 4,200 per week of delay, and re-schedule the technicians, which can mean several weeks of waiting.
+
+## 8. Risks mentioned in the meeting
+
+- The floor needs more reinforcement than expected, which would delay the delivery date.
+- The network operator's upgrade takes longer than eight weeks.
+- Compressor delivery arrives late.
+- Technicians arrive but the hall is not ready, with penalty.
+- Loss of customers during the weeks with reduced capacity.
+- The calendar job is not finished before Press 1 is removed.
+- Operators are not ready for the new press, and quality in January is poor.
+- One of the Kronwald modules is damaged in transport.
+
+No owners or ratings were given in the meeting.
+
+## 9. Next steps agreed in the room
+
+1. Anselm orders the structural survey (this week) and applies for the power upgrade (Wednesday, with approval from Raúl).
+2. Raúl writes to Kronwald asking for a three-week installation with a larger team.
+3. Yusuf confirms the calendar paper with the supplier by Friday 9 October.
+4. Oksana asks Dunmere Press for November rates.
+5. Greta gets the quote from the rigging firm and a priced proposal to Bertrand next Tuesday, 13 October.
+6. Dev drafts the training and overtime rota for November.
+7. Wilhelmina circulates these notes and asks Hannelore to take the prepress work.
+8. Next meeting: Tuesday 13 October at 14:00.
+
+Bertrand closed the meeting by asking everyone to keep the project out of customer conversations until the plan is written.
+
+## 10. Any other business
+
+**Certification.** Oksana reminded the group that the FSC chain-of-custody audit is booked for the week of 22 February. The auditor will check that the new press is covered in the procedures, including the paper stock records and the labelling of FSC jobs. The procedures document must be updated and Press 4 added to the equipment list before the audit. Wilhelmina is the document owner and will do this in January, after commissioning, unless the audit date is moved.
+
+**Safety.** Anselm said that the installation will bring outside technicians into the hall for four weeks, and each one needs a site induction and a signed permit to work. He will ask the safety adviser, Prakash Oduya, to run the inductions on the first day. Also, the new press uses a different washing solvent than Press 1, and the solvent store has limited capacity (two 200 litre drums); the safety data sheets must be reviewed before the first delivery. Dev will send the data sheets to Prakash.
+
+**Noise and neighbours.** The works is next to a block of flats on its eastern side. The lorries with the press modules are expected to arrive in the early morning, and the crane for the unloading will need a road closure notice from the council. Anselm will apply for the permit two weeks before delivery, and will tell the neighbours by letter.
+
+**Customer message.** Yusuf asked for one agreed paragraph that he and the sales staff can use if customers ask about the new press. Bertrand said he would write it, but not until the plan is approved. Yusuf said that is awkward, because the theatre group's production manager already asked him last week why the autumn schedule had been moved. He will say only that a new machine is coming in the winter and that delivery dates will be confirmed in November.
+
+**Spare parts.** Dev asked whether the spare parts and blankets for Press 1 should be sold with the machine or kept for Press 3, which uses the same rollers. Nobody knew. Anselm will check which items are common to both.
+
+**Insurance for the interim.** Raúl asked whether the stock of finished sheets stored in the north bay during the installation is covered. Nobody knew. Raúl will ask the broker at the same time as he asks about the equipment insurance.
+

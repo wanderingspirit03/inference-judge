@@ -1,0 +1,173 @@
+Below is a long email thread from our courier startup about whether to change how we pay riders and what to do about the late deliveries in the Harlow district. I have to answer for the whole team tomorrow morning. Please write me a detailed reply that settles every open point in the thread, and then give me a list of actions with an owner and a date for each.
+
+---
+
+From: Marguerite Okonkwo-Daly <marguerite@swiftlark.example.org>
+To: Tobias Hartnell <tobias@swiftlark.example.org>, Priya Venkataraman <priya@swiftlark.example.org>, Dmitri Valkanov <dmitri@swiftlark.example.org>
+Cc: Ellis Brannigan <ellis@swiftlark.example.org>
+Date: Mon, 5 Oct 2026, 08:12
+Subject: Rider pay, Harlow lateness, and the Q4 plan
+
+Hi all,
+
+I need us to close three things this week, and I would like to do it by email so there is a record. First, the Harlow district. Our on-time rate there fell to 81 percent in September, against 94 percent in the rest of the city. Second, rider pay. We currently pay a flat 4.10 per parcel, and I keep hearing that it does not work for the long, hilly routes. Third, the Q4 plan, because the autumn peak starts in three weeks and we have not agreed how many extra riders we hire.
+
+Please read the numbers Priya sent on Friday before you reply. I would like each of you to give a clear opinion, not a list of options.
+
+Marguerite
+
+---
+
+From: Priya Venkataraman <priya@swiftlark.example.org>
+To: Marguerite Okonkwo-Daly <marguerite@swiftlark.example.org>, Tobias Hartnell <tobias@swiftlark.example.org>, Dmitri Valkanov <dmitri@swiftlark.example.org>
+Cc: Ellis Brannigan <ellis@swiftlark.example.org>
+Date: Mon, 5 Oct 2026, 09:40
+Subject: Re: Rider pay, Harlow lateness, and the Q4 plan
+
+Hello everyone,
+
+Here are the figures again so nobody has to dig for them. In September we delivered 61,400 parcels. Harlow made up 9,800 of those, which is 16 percent of volume, but it produced 41 percent of all late deliveries. The average route in Harlow takes 3 hours 20 minutes for 38 parcels. The average route elsewhere takes 2 hours 45 minutes for 44 parcels. So a Harlow rider earns 155.80 for a shift, and a rider in the flat east side earns 180.40. Riders have noticed. Three of our best Harlow riders left in September, and two of them told Ellis that the pay was the reason.
+
+My view is that we should move to a pay model with a base amount per parcel plus a distance and climb supplement. I have a draft that gives 3.60 per parcel, plus 0.35 per kilometre beyond the first 12 on a route, plus a fixed 6.00 for any route that crosses the Harlow ridge. On September volumes this would cost us about 7,300 more per month, but only if we change nothing else. I think it pays for itself if it keeps even four riders.
+
+One caution: the supplement needs a way to measure kilometres that riders trust. Today the app records straight-line distance between stops, which understates hilly routes.
+
+Priya
+
+---
+
+From: Tobias Hartnell <tobias@swiftlark.example.org>
+To: Priya Venkataraman <priya@swiftlark.example.org>, Marguerite Okonkwo-Daly <marguerite@swiftlark.example.org>, Dmitri Valkanov <dmitri@swiftlark.example.org>
+Cc: Ellis Brannigan <ellis@swiftlark.example.org>
+Date: Mon, 5 Oct 2026, 11:05
+Subject: Re: Rider pay, Harlow lateness, and the Q4 plan
+
+All,
+
+I will be direct, as Marguerite asked. I do not think pay is the main cause of the lateness. I looked at the dispatch logs for the 31 worst Harlow days in September. On 22 of them the van that brings parcels from the depot to the Harlow hub left late, on average by 47 minutes, because the loading bay at the depot was blocked by returns from a large retail client. A rider cannot be on time if the parcels reach the hub at 08:50 and the promise window starts at 09:00 for the first drop.
+
+So my position is: fix the depot loading order first, and keep pay as it is until we see the effect. If we change pay now we will not know what worked, and we will have a permanent cost increase for what may be a logistics problem.
+
+I also want to say that the supplement idea is complicated. Riders will argue about every route. I would prefer a simple raise of the flat rate to 4.35 for Harlow only.
+
+Tobias
+
+---
+
+From: Dmitri Valkanov <dmitri@swiftlark.example.org>
+To: Tobias Hartnell <tobias@swiftlark.example.org>, Priya Venkataraman <priya@swiftlark.example.org>, Marguerite Okonkwo-Daly <marguerite@swiftlark.example.org>
+Cc: Ellis Brannigan <ellis@swiftlark.example.org>
+Date: Mon, 5 Oct 2026, 13:30
+Subject: Re: Rider pay, Harlow lateness, and the Q4 plan
+
+Hi,
+
+Some facts from the engineering side, because they affect both of your proposals.
+
+1. The distance problem is real and I can fix it. We can switch the app from straight-line distance to road-network distance using the routing service we already license. It needs about two weeks of work and a test with ten riders. I could have it done by 23 October if I start Wednesday. It will also fix the wrong estimates customers see in the tracking page for Harlow.
+
+2. Tobias is right that the depot delay matters, but I think he overstates it. His 22 out of 31 days used the scheduled departure time. The real departure time comes from the van's own tracker, and I compared the two. On 14 of those 22 days the van left on time and was held up by traffic on the ring road between 08:15 and 08:45. So the depot explains about 8 days, not 22.
+
+3. A Harlow-only flat rate would be unfair to the riders on the northern edge of the east side, whose routes are also long. A supplement based on real distance would not have that problem.
+
+4. For Q4, the dispatch tool cannot handle more than 140 active riders at once without slowing down. We are at 112. So the hiring plan has an upper limit of 28 more riders unless I get a week to change the tool.
+
+Dmitri
+
+---
+
+From: Ellis Brannigan <ellis@swiftlark.example.org>
+To: Marguerite Okonkwo-Daly <marguerite@swiftlark.example.org>, Priya Venkataraman <priya@swiftlark.example.org>, Tobias Hartnell <tobias@swiftlark.example.org>, Dmitri Valkanov <dmitri@swiftlark.example.org>
+Date: Mon, 5 Oct 2026, 15:55
+Subject: Re: Rider pay, Harlow lateness, and the Q4 plan
+
+Hello all,
+
+I am the one who talks to the riders every week, so here is what I hear. The riders do not mainly talk about the per-parcel rate. They talk about three things: the ridge routes, waiting at the hub for parcels, and not knowing the next day's pay until the evening. A rider who waits 40 minutes at the hub is paid for nothing. That wait is probably the reason two riders left, more than the rate.
+
+I would suggest we do four things together: pay a small waiting allowance of 4.00 after 20 minutes at the hub, publish the next day's route list by 18:00, adopt Priya's supplement once Dmitri's distance fix is live, and start the depot loading change right away. I know Tobias worries about not learning what worked. We could keep one control group, for example the Millbrook district, which has similar volume and no pay change.
+
+On hiring, I think 20 extra riders for the peak is right, because the returns season in November always catches us short. Training takes five days and I have a trainer for only eight people at a time, so we must start recruiting this week.
+
+Ellis
+
+---
+
+From: Marguerite Okonkwo-Daly <marguerite@swiftlark.example.org>
+To: Ellis Brannigan <ellis@swiftlark.example.org>, Priya Venkataraman <priya@swiftlark.example.org>, Tobias Hartnell <tobias@swiftlark.example.org>, Dmitri Valkanov <dmitri@swiftlark.example.org>
+Date: Mon, 5 Oct 2026, 17:20
+Subject: Re: Rider pay, Harlow lateness, and the Q4 plan
+
+Thank you, this is very useful. A few questions remain, and I want a single answer to each:
+
+- Who owns the depot loading change, and by when? Tobias, is it yours?
+- Dmitri, can the distance fix be done sooner than 23 October if I take Hannelore off the tracking page work? And what happens to the pay change if it slips?
+- Priya, what does the whole package cost per month if we include Ellis's waiting allowance, and what is the most we would pay if volumes rise 20 percent in the peak?
+- The retail client who blocks the bay: do we have a contract clause about return volumes? Priya, I think you reviewed it in the spring.
+- Hiring: 20 riders in batches of eight means three training weeks. If we start on 12 October, the last batch finishes on 30 October. Is that early enough for the peak?
+
+I also want to tell the riders something this week, even if it is only the date of the decision. Ellis, please draft a short message for me.
+
+Marguerite
+
+---
+
+From: Tobias Hartnell <tobias@swiftlark.example.org>
+To: Marguerite Okonkwo-Daly <marguerite@swiftlark.example.org>, Ellis Brannigan <ellis@swiftlark.example.org>, Priya Venkataraman <priya@swiftlark.example.org>, Dmitri Valkanov <dmitri@swiftlark.example.org>
+Date: Tue, 6 Oct 2026, 07:45
+Subject: Re: Rider pay, Harlow lateness, and the Q4 plan
+
+Marguerite, yes, the loading change is mine. My plan is to give the retail client a fixed return window from 13:00 to 15:00 each day and to move our Harlow outbound loading to 06:30 to 07:30, so the two never overlap. I need the client to agree, and I have a call with their operations lead on Thursday. If they refuse, I can use the second bay, but it needs a forklift driver at 06:00, which is about 1,900 a month.
+
+I accept Dmitri's correction about the traffic, and I withdraw the idea of a Harlow-only flat rate. I still say we should not roll out the pay change before the road-distance fix. Paying a supplement on bad distance numbers would create the arguments I fear. I can live with the waiting allowance and the early route list now, because those are easy to measure.
+
+Tobias
+
+---
+
+From: Priya Venkataraman <priya@swiftlark.example.org>
+To: Marguerite Okonkwo-Daly <marguerite@swiftlark.example.org>, Tobias Hartnell <tobias@swiftlark.example.org>, Ellis Brannigan <ellis@swiftlark.example.org>, Dmitri Valkanov <dmitri@swiftlark.example.org>
+Date: Tue, 6 Oct 2026, 09:10
+Subject: Re: Rider pay, Harlow lateness, and the Q4 plan
+
+Costs, as asked. Using September volumes:
+
+- Supplement and lower base rate: +7,300 per month.
+- Waiting allowance: about 1,150 per month, assuming 280 waits over 20 minutes, as the hub log shows.
+- Second bay with forklift driver, if needed: +1,900.
+- Total: 8,450 without the bay, 10,350 with it.
+- At 20 percent more volume the supplement part rises to about 8,900, so the ceiling is roughly 12,000 per month with everything.
+
+The retail contract does have a clause, section 9.2, which says returns above 1,500 parcels in a week must be announced 48 hours in advance. They broke it in 4 of the last 5 weeks, and I can send a formal notice. I would prefer Tobias raise it on Thursday first, politely.
+
+On hiring, I agree with Ellis on 20 riders. Their cost is covered by the parcels they carry, and each rider adds roughly 190 of margin per week at peak volumes.
+
+Priya
+
+---
+
+From: Dmitri Valkanov <dmitri@swiftlark.example.org>
+To: Marguerite Okonkwo-Daly <marguerite@swiftlark.example.org>, Tobias Hartnell <tobias@swiftlark.example.org>, Ellis Brannigan <ellis@swiftlark.example.org>, Priya Venkataraman <priya@swiftlark.example.org>
+Date: Tue, 6 Oct 2026, 11:30
+Subject: Re: Rider pay, Harlow lateness, and the Q4 plan
+
+Answers to Marguerite's questions about the distance fix.
+
+If Hannelore joins me from tomorrow, I can finish the road-distance change by 16 October, but not earlier, because the ten-rider test needs five working days of real routes. If it slips, there is a safe fallback: Priya's supplement can run on the old straight-line distance multiplied by a fixed hill factor of 1.3 for routes that cross the ridge. It is crude, but it is close to what the road data suggests when I check it against last month's 40 longest routes, where the average error was 6 percent. I would not use it for more than a month.
+
+Two other things. The waiting allowance needs the hub scanner to record when a rider arrives, and today it records only when the first parcel is scanned out. I can add an arrival tap on the rider's app by Friday, which is simple. And the early route list at 18:00 is fine for me, but the routes are only final after the 17:30 order cut-off, so I would publish at 18:15 and not 18:00.
+
+On the rider limit, I can raise the dispatch tool to 170 active riders in one week of work, which I would do after the distance fix, around 23 October. With 20 hires we reach 132, so we stay under 140 and do not need it for this peak. I would still do it before the January sale.
+
+Dmitri
+
+---
+
+From: Ellis Brannigan <ellis@swiftlark.example.org>
+To: Marguerite Okonkwo-Daly <marguerite@swiftlark.example.org>, Tobias Hartnell <tobias@swiftlark.example.org>, Priya Venkataraman <priya@swiftlark.example.org>, Dmitri Valkanov <dmitri@swiftlark.example.org>
+Date: Tue, 6 Oct 2026, 14:15
+Subject: Re: Rider pay, Harlow lateness, and the Q4 plan
+
+Two short points. First, the draft message for the riders, if Marguerite agrees: we have read your feedback, we will tell you the decision on pay by Friday 9 October, and starting next week there will be a waiting allowance and an earlier route list. Second, on the control group, Millbrook has 5,200 parcels a month, which is about half of Harlow, and its on-time rate was 93 percent in September. That is not a perfect match, but it is the best we have. I propose we compare on-time rate and rider resignations for six weeks, and we do not tell the Millbrook riders it is a test, only that their changes come later.
+
+Ellis

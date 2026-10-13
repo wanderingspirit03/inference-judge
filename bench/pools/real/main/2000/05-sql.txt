@@ -1,0 +1,134 @@
+I run the reporting for a regional warehouse and the pick-rate dashboard has become painfully slow. Could you review this schema and the five queries behind the dashboard and the audit extract, tell me what is wrong with the design and the indexes, and give me rewritten queries with an explanation of why each change helps? Assume PostgreSQL 15 and roughly 40 million rows in pick_line.
+
+```sql
+CREATE TABLE warehouse (
+    warehouse_id   integer PRIMARY KEY,
+    name           text NOT NULL,
+    timezone       text NOT NULL DEFAULT 'Europe/Berlin'
+);
+
+CREATE TABLE location (
+    location_id    bigint PRIMARY KEY,
+    warehouse_id   integer NOT NULL REFERENCES warehouse(warehouse_id),
+    aisle          text NOT NULL,
+    bay            integer NOT NULL,
+    level          integer NOT NULL,
+    zone           text NOT NULL,          -- 'FAST', 'SLOW', 'BULK', 'COLD'
+    UNIQUE (warehouse_id, aisle, bay, level)
+);
+
+CREATE TABLE sku (
+    sku_id         bigint PRIMARY KEY,
+    sku_code       text NOT NULL,
+    description    text,
+    weight_kg      numeric(8,3),
+    category       text,
+    is_active      boolean NOT NULL DEFAULT true
+);
+
+CREATE TABLE employee (
+    employee_id    integer PRIMARY KEY,
+    full_name      text NOT NULL,
+    shift          text NOT NULL,          -- 'EARLY', 'LATE', 'NIGHT'
+    hired_on       date NOT NULL
+);
+
+CREATE TABLE customer_order (
+    order_id       bigint PRIMARY KEY,
+    customer_code  text NOT NULL,
+    warehouse_id   integer NOT NULL REFERENCES warehouse(warehouse_id),
+    created_at     timestamp NOT NULL,
+    promised_by    timestamp,
+    status         text NOT NULL           -- 'OPEN', 'PICKING', 'PACKED', 'SHIPPED', 'CANCELLED'
+);
+
+CREATE TABLE pick_line (
+    pick_line_id   bigint PRIMARY KEY,
+    order_id       bigint NOT NULL REFERENCES customer_order(order_id),
+    sku_id         bigint NOT NULL REFERENCES sku(sku_id),
+    location_id    bigint NOT NULL REFERENCES location(location_id),
+    employee_id    integer REFERENCES employee(employee_id),
+    qty_requested  integer NOT NULL,
+    qty_picked     integer,
+    picked_at      timestamp,
+    status         text NOT NULL           -- 'PENDING', 'PICKED', 'SHORT', 'CANCELLED'
+);
+
+CREATE INDEX idx_pick_line_order ON pick_line(order_id);
+CREATE INDEX idx_pick_line_status ON pick_line(status);
+CREATE INDEX idx_pick_line_picked_at ON pick_line(picked_at);
+CREATE INDEX idx_order_status ON customer_order(status);
+CREATE INDEX idx_sku_code ON sku(lower(sku_code));
+```
+
+Query 1, picks per employee per hour for today's shift (the dashboard runs it every 30 seconds):
+
+```sql
+SELECT e.full_name,
+       date_trunc('hour', p.picked_at) AS hour,
+       count(*) AS lines_picked,
+       sum(p.qty_picked) AS units
+FROM pick_line p
+JOIN employee e ON e.employee_id = p.employee_id
+WHERE p.picked_at::date = current_date
+  AND p.status = 'PICKED'
+GROUP BY e.full_name, date_trunc('hour', p.picked_at)
+ORDER BY hour, lines_picked DESC;
+```
+
+Query 2, orders at risk of missing their promised time (open or picking orders with unpicked lines, due in the next four hours):
+
+```sql
+SELECT o.order_id, o.customer_code, o.promised_by,
+       (SELECT count(*) FROM pick_line p
+         WHERE p.order_id = o.order_id AND p.status = 'PENDING') AS pending_lines
+FROM customer_order o
+WHERE o.status IN ('OPEN', 'PICKING')
+  AND o.promised_by < now() + interval '4 hours'
+  AND o.order_id IN (SELECT order_id FROM pick_line WHERE status = 'PENDING')
+ORDER BY o.promised_by;
+```
+
+Query 3, short-pick rate by zone for the last 30 days:
+
+```sql
+SELECT l.zone,
+       count(*) FILTER (WHERE p.status = 'SHORT') * 100.0 / count(*) AS short_pct
+FROM pick_line p
+JOIN location l ON l.location_id = p.location_id
+WHERE p.picked_at > now() - interval '30 days'
+GROUP BY l.zone
+ORDER BY short_pct DESC;
+```
+
+Query 4, the SKUs picked most often without ever being short, for the slotting review:
+
+```sql
+SELECT s.sku_code, s.description, count(*) AS times_picked
+FROM sku s
+JOIN pick_line p ON p.sku_id = s.sku_id
+WHERE lower(s.sku_code) LIKE '%' || lower('AB') || '%'
+  AND s.sku_id NOT IN (SELECT sku_id FROM pick_line WHERE status = 'SHORT')
+  AND p.status = 'PICKED'
+GROUP BY s.sku_code, s.description
+ORDER BY times_picked DESC
+LIMIT 50;
+```
+
+Query 5, the weekly audit extract that finance asks for (all picks for one warehouse in a date range, with the order and the location):
+
+```sql
+SELECT o.order_id, o.customer_code, w.name AS warehouse,
+       s.sku_code, l.aisle || '-' || l.bay || '-' || l.level AS bin,
+       p.qty_requested, p.qty_picked, p.picked_at
+FROM pick_line p
+JOIN customer_order o ON o.order_id = p.order_id
+JOIN warehouse w ON w.warehouse_id = o.warehouse_id
+JOIN sku s ON s.sku_id = p.sku_id
+JOIN location l ON l.location_id = p.location_id
+WHERE w.name = 'North Depot'
+  AND p.picked_at BETWEEN '2026-09-01' AND '2026-09-30'
+ORDER BY p.picked_at;
+```
+
+Some context: the warehouse has two sites in different time zones, pick_line grows by about 300,000 rows a day, and rows older than 18 months are almost never queried except for a yearly audit. Orders are never deleted. Employees sometimes pick for a colleague, so employee_id can be null on old rows. Nobody has run VACUUM settings or looked at the query plans yet, and the dashboard database is the same one the handheld scanners write to.

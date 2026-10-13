@@ -1,0 +1,79 @@
+Please review this schema and the queries below. Tell me what's wrong with the design, which indexes I should add and why, and rewrite each of the four reports so they are correct and fast. Explain each rewrite. The reports are very slow now that the call table has about 40 million rows.
+
+```sql
+CREATE TABLE agents (
+    id          INT PRIMARY KEY,
+    name        VARCHAR(100),
+    team        VARCHAR(50),
+    hired_on    DATE,
+    active      VARCHAR(5)
+);
+
+CREATE TABLE customers (
+    id          INT PRIMARY KEY,
+    name        VARCHAR(200),
+    phone       VARCHAR(30),
+    plan        VARCHAR(50),
+    reseller_code VARCHAR(20)
+);
+
+CREATE TABLE calls (
+    id          INT PRIMARY KEY,
+    agent_id    INT,
+    customer_id INT,
+    started_at  VARCHAR(30),
+    duration_s  INT,
+    category    VARCHAR(50),
+    resolved    VARCHAR(5),
+    notes       TEXT
+);
+
+CREATE TABLE shifts (
+    agent_id    INT,
+    shift_date  VARCHAR(10),
+    start_time  VARCHAR(8),
+    end_time    VARCHAR(8)
+);
+
+CREATE TABLE callbacks (
+    id          INT PRIMARY KEY,
+    call_id     INT,
+    due_at      VARCHAR(30),
+    done        VARCHAR(5)
+);
+
+-- Report 1: calls per agent for last month, with names
+SELECT a.name, COUNT(*) AS calls
+FROM calls c, agents a
+WHERE c.agent_id = a.id
+  AND SUBSTRING(c.started_at, 1, 7) = '2025-04'
+GROUP BY a.name
+ORDER BY calls DESC;
+
+-- Report 2: customers who called more than 3 times about billing
+SELECT cu.name, cu.phone
+FROM customers cu
+WHERE (SELECT COUNT(*) FROM calls c
+       WHERE c.customer_id = cu.id
+         AND c.category = 'billing') > 3;
+
+-- Report 3: average handling time and unresolved rate by team
+SELECT a.team,
+       AVG(c.duration_s) AS avg_seconds,
+       SUM(CASE WHEN c.resolved = 'no' THEN 1 ELSE 0 END) * 100 / COUNT(*) AS unresolved_pct
+FROM agents a
+LEFT JOIN calls c ON c.agent_id = a.id
+WHERE a.active = 'yes'
+GROUP BY a.team;
+
+-- Report 4: top 10 reseller codes by total call minutes last month
+SELECT cu.reseller_code, SUM(c.duration_s) / 60 AS minutes
+FROM customers cu
+JOIN calls c ON c.customer_id = cu.id
+WHERE c.started_at LIKE '2025-04%'
+GROUP BY cu.reseller_code
+ORDER BY minutes DESC
+LIMIT 10;
+```
+
+Some things you should know. We resell mobile plans for three carriers, and the call centre has 85 agents on two shifts. Agents sometimes leave and their rows must stay, because old calls refer to them. The started_at field is stored as text like 2025-04-14 09:32:11 because the original import came from a spreadsheet. Callbacks that are not done by their due time should be shown to team leads every morning, but nobody has written that query yet, so please add it too. We run PostgreSQL 15.

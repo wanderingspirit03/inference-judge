@@ -1,0 +1,79 @@
+We are about to start testing the new platform announcement feature for our regional rail stations. Please write a complete test plan from the specification below, with numbered test cases (preconditions, steps, expected results), grouped by area, and mark which ones should be automated. Also list any places where the spec is ambiguous or leaves something out, because we need to settle those before testing begins.
+
+# Product Specification: Platform Announcements (PAN) v1.2
+
+Owner: Hildegard Ostrowski-Bell, Passenger Information. Engineering lead: Mikael Dovrenko. Operator: Calderbrook Regional Railways.
+
+## 1. Overview
+
+PAN produces spoken and written announcements at 38 stations from live train data. It replaces the manual announcement desk at the 31 small stations and supplements staff at the 7 major stations. Each platform has a speaker group, a text display and (at major stations) a second display on the footbridge.
+
+## 2. Inputs
+
+PAN receives from the train running system, every 30 seconds, a list for each platform of trains due in the next 60 minutes, with: service number, destination, scheduled time, expected time, platform, number of carriages, and status (on time, delayed, cancelled, platform changed, terminating here).
+
+## 3. Announcement types
+
+3.1 **Approaching.** Played 2 minutes before expected arrival. Text: "The [time] [operator] service to [destination], calling at [stops], is approaching platform [n]." Calling points are read only if there are 6 or fewer; otherwise only the first 3 and the last stop are read.
+
+3.2 **Arrival.** Played when the train is detected in the platform. Text: "The [time] service to [destination] is now arriving at platform [n]. This train has [x] carriages." The carriage number is omitted if it is unknown.
+
+3.3 **Delay.** Played when the expected time is at least 5 minutes after the scheduled time, and again every 10 minutes until the train arrives, at most 3 times. Text: "The [time] service to [destination] is delayed. It is now expected at [expected time]." If the delay exceeds 30 minutes, the sentence "We apologise for the delay" is added.
+
+3.4 **Cancellation.** Played immediately when a train is cancelled, then repeated 5 minutes later. If another train to the same destination departs within 30 minutes, the text adds "The next service to [destination] is the [time]."
+
+3.5 **Platform change.** Played immediately on all platforms involved. Priority over all other announcements. Text: "Platform change. The [time] service to [destination] will now depart from platform [n], not platform [old]." The footbridge display shows the change in red for 10 minutes.
+
+3.6 **Terminating.** For trains that end at the station, "This train terminates here. All change, please." is played after the arrival announcement.
+
+## 4. Queueing and priority
+
+4.1 Only one announcement is played on a speaker group at a time.
+4.2 Priority order (highest first): platform change, safety message, cancellation, arrival, delay, approaching.
+4.3 A higher-priority announcement waits for the current one to finish; it does not interrupt it, except for safety messages, which interrupt immediately.
+4.4 If an announcement has waited more than 45 seconds in the queue, it is discarded, except for platform changes and safety messages, which are never discarded.
+4.5 Two announcements of the same type for the same train are never queued at the same time.
+
+## 5. Quiet hours
+
+Between 23:00 and 05:30, spoken announcements are limited to platform changes, cancellations and safety messages. Text displays always show all announcements. Stations with housing within 50 metres of the platform may set their own quiet hours between 22:00 and 06:00.
+
+## 6. Language
+
+Announcements are produced in English. At 6 stations near the border, they are followed by a Welsh version of the same announcement. Place names are pronounced using a pronunciation table that staff can edit. If a place name is not in the table, the default voice pronunciation is used.
+
+## 7. Staff override
+
+A station supervisor can use a tablet to (a) pause all spoken announcements for up to 15 minutes, (b) type and play a custom message, up to 160 characters, and (c) mark a platform as closed, in which case no trains are announced there and the display reads "Platform closed". An override is logged with the supervisor's name and time.
+
+## 8. Fault behaviour
+
+8.1 If no data arrives for 90 seconds, the text display shows "Train information unavailable" and spoken announcements stop. When data resumes, the display clears automatically.
+8.2 If a speaker group fails its hourly self-test, the fault is sent to the control room, and announcements for that platform appear only on the displays.
+8.3 If the data feed returns a train with an unknown destination code, the announcement uses the text "a service" in place of the destination and an alert is raised.
+
+## 9. Performance
+
+A spoken announcement must start within 3 seconds of the triggering event, measured at the speaker. The system must handle 40 platforms and up to 6 simultaneous events per second.
+
+## 9a. Volume and sound
+
+9a.1 The announcement volume at each speaker group follows the ambient noise measured by a microphone on the platform, between a minimum of 55 dB and a maximum of 85 dB at one metre from the nearest speaker. When a freight train passes without stopping, the volume rises automatically for its duration and the announcement queue is held for up to 20 seconds.
+
+9a.2 At stations with a staffed ticket office, supervisors can lower the maximum to 75 dB between 06:00 and 08:00 if there are complaints. The setting is saved per station and survives a restart.
+
+## 9b. Display text
+
+9b.1 The text display shows the next four trains for its platform, in time order, with destination, scheduled time and expected time. Cancelled trains stay on the display, in red, until their scheduled time has passed plus 10 minutes. Terminating trains show "Terminates here" instead of a destination.
+
+9b.2 Destination names longer than 24 characters are shortened using a table of approved abbreviations. If a name is not in the table, it is cut at 21 characters followed by "...".
+
+9b.3 The display brightness follows a light sensor between 20 and 100 percent. At night it never goes below 20 percent.
+
+## 9c. Logging
+
+Every announcement is written to a log with the time it was queued, the time it started, the platform, the train and the text. Logs are kept for 90 days. A supervisor can view the last 24 hours of logs from the tablet. Discarded announcements are logged with the reason "expired in queue".
+
+## 10. Out of scope
+
+Customer mobile notifications, onboard announcements, and public address calls from the control room.

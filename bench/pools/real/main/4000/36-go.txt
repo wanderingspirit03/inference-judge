@@ -1,0 +1,367 @@
+I'm on the crew scheduling team at a small regional airline (nine turboprops, about 120 pilots and cabin crew). This is the first version of the Go package that builds a weekly roster and checks it against our duty-time rules. Can you explain how it works section by section, give me a careful code review (bugs, edge cases, design problems, things that will bite us in production), and then write table-driven tests for the important functions? Please be concrete about the line or function you are talking about.
+
+```go
+// Package crewsched builds and validates weekly crew rosters for a small
+// turboprop operation. Times are always handled in UTC.
+package crewsched
+
+import (
+	"errors"
+	"fmt"
+	"sort"
+	"strings"
+	"time"
+)
+
+// Rank is the role a crew member can fill on a flight.
+type Rank int
+
+const (
+	Captain Rank = iota
+	FirstOfficer
+	CabinLead
+	CabinCrew
+)
+
+func (r Rank) String() string {
+	switch r {
+	case Captain:
+		return "captain"
+	case FirstOfficer:
+		return "first officer"
+	case CabinLead:
+		return "cabin lead"
+	case CabinCrew:
+		return "cabin crew"
+	}
+	return fmt.Sprintf("rank(%d)", int(r))
+}
+
+// IsFlightDeck reports whether the rank requires an aircraft type rating.
+func (r Rank) IsFlightDeck() bool {
+	return r == Captain || r == FirstOfficer
+}
+
+// Window is a half-open period [Start, End).
+type Window struct {
+	Start time.Time
+	End   time.Time
+}
+
+// Overlaps reports whether the window intersects [start, end).
+func (w Window) Overlaps(start, end time.Time) bool {
+	return w.Start.Before(end) && start.Before(w.End)
+}
+
+// CrewMember is one person on the roster.
+type CrewMember struct {
+	ID          string
+	Name        string
+	Rank        Rank
+	Base        string
+	TypeRatings []string
+	Unavailable []Window
+}
+
+// HasRating reports whether the crew member holds the given type rating.
+func (c CrewMember) HasRating(aircraft string) bool {
+	for _, t := range c.TypeRatings {
+		if strings.EqualFold(t, aircraft) {
+			return true
+		}
+	}
+	return false
+}
+
+// AvailableFor reports whether none of the unavailable windows overlaps the period.
+func (c CrewMember) AvailableFor(start, end time.Time) bool {
+	for _, w := range c.Unavailable {
+		if w.Overlaps(start, end) {
+			return false
+		}
+	}
+	return true
+}
+
+// Flight is a single scheduled sector.
+type Flight struct {
+	Number   string
+	Origin   string
+	Dest     string
+	Dep      time.Time
+	Arr      time.Time
+	Aircraft string
+}
+
+// Block returns the block time of the flight.
+func (f Flight) Block() time.Duration {
+	return f.Arr.Sub(f.Dep)
+}
+
+// Duty is a series of flights flown by the same crew without a rest period.
+type Duty struct {
+	Flights []Flight
+}
+
+const (
+	reportBefore  = 60 * time.Minute
+	releaseAfter  = 30 * time.Minute
+	maxSectorGap  = 4 * time.Hour
+)
+
+// ErrEmptyDuty is returned when a duty has no flights.
+var ErrEmptyDuty = errors.New("crewsched: duty has no flights")
+
+// NewDuty validates that flights are in order and connected, and returns a duty.
+func NewDuty(flights []Flight) (Duty, error) {
+	if len(flights) == 0 {
+		return Duty{}, ErrEmptyDuty
+	}
+	for i, f := range flights {
+		if !f.Arr.After(f.Dep) {
+			return Duty{}, fmt.Errorf("crewsched: flight %s arrives before it departs", f.Number)
+		}
+		if i == 0 {
+			continue
+		}
+		prev := flights[i-1]
+		if prev.Dest != f.Origin {
+			return Duty{}, fmt.Errorf("crewsched: flights %s and %s are not connected (%s to %s)",
+				prev.Number, f.Number, prev.Dest, f.Origin)
+		}
+		gap := f.Dep.Sub(prev.Arr)
+		if gap < 0 {
+			return Duty{}, fmt.Errorf("crewsched: flight %s departs before %s arrives", f.Number, prev.Number)
+		}
+		if gap > maxSectorGap {
+			return Duty{}, fmt.Errorf("crewsched: gap of %s between %s and %s is too long for one duty",
+				gap, prev.Number, f.Number)
+		}
+	}
+	return Duty{Flights: flights}, nil
+}
+
+// Report is the time the crew must report for duty.
+func (d Duty) Report() time.Time {
+	return d.Flights[0].Dep.Add(-reportBefore)
+}
+
+// Release is the time the crew is released from duty.
+func (d Duty) Release() time.Time {
+	return d.Flights[len(d.Flights)-1].Arr.Add(releaseAfter)
+}
+
+// Length is the duty period from report to release.
+func (d Duty) Length() time.Duration {
+	return d.Release().Sub(d.Report())
+}
+
+// Block is the total block time of the duty.
+func (d Duty) Block() time.Duration {
+	var total time.Duration
+	for _, f := range d.Flights {
+		total += f.Block()
+	}
+	return total
+}
+
+// Limits are the duty and rest rules from the operations manual.
+type Limits struct {
+	MaxDuty        time.Duration
+	MinRest        time.Duration
+	MaxBlock28Days time.Duration
+	MaxConsecutive int
+}
+
+// DefaultLimits returns the limits currently approved by the regulator.
+func DefaultLimits() Limits {
+	return Limits{
+		MaxDuty:        13 * time.Hour,
+		MinRest:        11 * time.Hour,
+		MaxBlock28Days: 100 * time.Hour,
+		MaxConsecutive: 6,
+	}
+}
+
+// Violation describes a broken rule.
+type Violation struct {
+	Rule   string
+	Detail string
+}
+
+func (v Violation) String() string {
+	return v.Rule + ": " + v.Detail
+}
+
+// Check validates one crew member's duties against the limits. Duties must be
+// sorted by report time.
+func Check(duties []Duty, lim Limits) []Violation {
+	var out []Violation
+	var block time.Duration
+	consecutive := 0
+	for i, d := range duties {
+		if d.Length() > lim.MaxDuty {
+			out = append(out, Violation{
+				Rule:   "max-duty",
+				Detail: fmt.Sprintf("duty %d is %s, limit %s", i+1, d.Length(), lim.MaxDuty),
+			})
+		}
+		block += d.Block()
+		if i == 0 {
+			consecutive = 1
+			continue
+		}
+		prev := duties[i-1]
+		rest := d.Report().Sub(prev.Release())
+		if rest < 0 {
+			out = append(out, Violation{
+				Rule:   "overlap",
+				Detail: fmt.Sprintf("duty %d starts before duty %d is over", i+1, i),
+			})
+		}
+		if rest < lim.MinRest {
+			out = append(out, Violation{
+				Rule:   "min-rest",
+				Detail: fmt.Sprintf("only %s between duty %d and %d, minimum %s", rest, i, i+1, lim.MinRest),
+			})
+			consecutive++
+		} else if rest < 24*time.Hour {
+			consecutive++
+		} else {
+			consecutive = 1
+		}
+		if consecutive > lim.MaxConsecutive {
+			out = append(out, Violation{
+				Rule:   "max-consecutive",
+				Detail: fmt.Sprintf("%d duties in a row, limit %d", consecutive, lim.MaxConsecutive),
+			})
+		}
+	}
+	if block > lim.MaxBlock28Days {
+		out = append(out, Violation{
+			Rule:   "max-block",
+			Detail: fmt.Sprintf("block time %s exceeds %s", block, lim.MaxBlock28Days),
+		})
+	}
+	return out
+}
+
+// Requirement says how many people of a rank a flight needs.
+type Requirement struct {
+	Rank  Rank
+	Count int
+}
+
+// RequirementsFor returns the minimum crew for a flight.
+func RequirementsFor(f Flight) []Requirement {
+	reqs := []Requirement{
+		{Captain, 1},
+		{FirstOfficer, 1},
+		{CabinLead, 1},
+	}
+	if f.Aircraft == "ATR72" {
+		reqs = append(reqs, Requirement{CabinCrew, 1})
+	}
+	return reqs
+}
+
+// Roster maps a crew member ID to the flights assigned to them.
+type Roster map[string][]Flight
+
+// Gap is a requirement that could not be filled.
+type Gap struct {
+	Flight Flight
+	Rank   Rank
+}
+
+// Assign builds a roster greedily. Flights are processed in departure order and
+// each position is given to the eligible person with the least block time so far.
+func Assign(flights []Flight, crew []CrewMember, lim Limits) (Roster, []Gap) {
+	sorted := make([]Flight, len(flights))
+	copy(sorted, flights)
+	sort.Slice(sorted, func(i, j int) bool { return sorted[i].Dep.Before(sorted[j].Dep) })
+
+	roster := Roster{}
+	blockSoFar := map[string]time.Duration{}
+	var gaps []Gap
+
+	for _, f := range sorted {
+		for _, req := range RequirementsFor(f) {
+			for n := 0; n < req.Count; n++ {
+				best := -1
+				for i, c := range crew {
+					if c.Rank != req.Rank {
+						continue
+					}
+					if c.Base != f.Origin && len(roster[c.ID]) == 0 {
+						continue
+					}
+					if req.Rank.IsFlightDeck() && !c.HasRating(f.Aircraft) {
+						continue
+					}
+					if !c.AvailableFor(f.Dep.Add(-reportBefore), f.Arr.Add(releaseAfter)) {
+						continue
+					}
+					if busy(roster[c.ID], f) {
+						continue
+					}
+					if blockSoFar[c.ID]+f.Block() > lim.MaxBlock28Days {
+						continue
+					}
+					if best == -1 || blockSoFar[c.ID] < blockSoFar[crew[best].ID] {
+						best = i
+					}
+				}
+				if best == -1 {
+					gaps = append(gaps, Gap{Flight: f, Rank: req.Rank})
+					continue
+				}
+				id := crew[best].ID
+				roster[id] = append(roster[id], f)
+				blockSoFar[id] += f.Block()
+			}
+		}
+	}
+	return roster, gaps
+}
+
+// busy reports whether the person already flies something that overlaps f
+// once report and release times are added.
+func busy(assigned []Flight, f Flight) bool {
+	start := f.Dep.Add(-reportBefore)
+	end := f.Arr.Add(releaseAfter)
+	for _, a := range assigned {
+		if a.Dep.Add(-reportBefore).Before(end) && start.Before(a.Arr.Add(releaseAfter)) {
+			return true
+		}
+	}
+	return false
+}
+
+// Report formats the gaps for the duty controller.
+func FormatGaps(gaps []Gap) string {
+	if len(gaps) == 0 {
+		return "all positions filled"
+	}
+	var b strings.Builder
+	for _, g := range gaps {
+		fmt.Fprintf(&b, "%s %s-%s %s: no %s available\n",
+			g.Flight.Number, g.Flight.Origin, g.Flight.Dest,
+			g.Flight.Dep.Format("Mon 15:04"), g.Rank)
+	}
+	return b.String()
+}
+
+// BlockTotals returns the total block time for each person on the roster.
+func BlockTotals(r Roster) map[string]time.Duration {
+	totals := make(map[string]time.Duration, len(r))
+	for id, flights := range r {
+		for _, f := range flights {
+			totals[id] += f.Block()
+		}
+	}
+	return totals
+}
+```
+
+A few notes from me. We run this once a week on Thursday for the following Monday to Sunday, with about 60 flights and 70 crew. The unavailable windows come from leave requests and sickness. The operations manual says the minimum rest is 11 hours at home base and 10 hours away from base, but I only put 11 in because it was simpler. A "duty" in the code is meant to be one working day, and I know that Assign does not group flights into duties yet, it only gives out positions flight by flight, so the output still has to be turned into duties by hand before Check can be used. The regulator's 28 day limit is a rolling window, not the weekly total I check now.

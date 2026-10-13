@@ -1,0 +1,84 @@
+Please do a thorough code review of this module (bugs, edge cases, naming, structure, anything that would surprise a maintainer) and then write a full set of unit tests for it using pytest. It runs behind the booking page of our space-science outreach centre, where school groups reserve planetarium shows.
+
+```python
+from dataclasses import dataclass
+from datetime import date, datetime, timedelta
+
+SHOW_CAPACITY = 80
+SHOW_LENGTH_MIN = 45
+PRICE_PER_CHILD = 4.50
+PRICE_PER_ADULT = 6.00
+FREE_ADULTS_PER_CHILDREN = 10
+
+
+@dataclass
+class Booking:
+    school: str
+    show_date: date
+    show_time: str
+    children: int
+    adults: int
+    contact_email: str
+
+
+def free_adults(children):
+    return children // FREE_ADULTS_PER_CHILDREN
+
+
+def price(booking):
+    chargeable = max(0, booking.adults - free_adults(booking.children))
+    total = booking.children * PRICE_PER_CHILD + chargeable * PRICE_PER_ADULT
+    if booking.children + booking.adults >= 60:
+        total = total * 0.9
+    return round(total, 2)
+
+
+def seats_left(bookings, show_date, show_time):
+    taken = 0
+    for b in bookings:
+        if b.show_date == show_date and b.show_time == show_time:
+            taken += b.children + b.adults
+    return SHOW_CAPACITY - taken
+
+
+def validate(booking, existing, today=None):
+    today = today or date.today()
+    errors = []
+    if booking.children < 1:
+        errors.append("at least one child is required")
+    if booking.adults < 1:
+        errors.append("at least one adult is required")
+    if booking.adults * FREE_ADULTS_PER_CHILDREN < booking.children:
+        errors.append("not enough adults for the number of children")
+    if booking.show_date < today + timedelta(days=7):
+        errors.append("bookings need at least seven days notice")
+    if booking.show_date.weekday() >= 5:
+        errors.append("no shows at weekends")
+    try:
+        datetime.strptime(booking.show_time, "%H:%M")
+    except ValueError:
+        errors.append("show time must look like 10:30")
+    if "@" not in booking.contact_email:
+        errors.append("contact email looks wrong")
+    left = seats_left(existing, booking.show_date, booking.show_time)
+    if booking.children + booking.adults > left:
+        errors.append("only %d seats left" % left)
+    return errors
+
+
+def confirmation_text(booking):
+    total = price(booking)
+    return (
+        "Thank you, %s! You are booked for %s at %s with %d children and %d adults. "
+        "The total is %.2f pounds. The show lasts %d minutes."
+        % (
+            booking.school,
+            booking.show_date.isoformat(),
+            booking.show_time,
+            booking.children,
+            booking.adults,
+            total,
+            SHOW_LENGTH_MIN,
+        )
+    )
+```

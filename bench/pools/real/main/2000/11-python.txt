@@ -1,0 +1,156 @@
+This module takes the raw readings from our network of weather stations, does quality control, and produces daily summaries. I'd like a thorough code review (bugs, edge cases, design, performance) followed by a full set of pytest unit tests for it. Tell me which problems matter most for correctness of the published numbers.
+
+```python
+"""Quality control and daily summaries for weather station readings."""
+
+import csv
+import math
+import statistics
+from collections import defaultdict
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+
+TEMP_MIN, TEMP_MAX = -40.0, 50.0
+HUMIDITY_MIN, HUMIDITY_MAX = 0.0, 100.0
+MAX_TEMP_JUMP = 8.0          # degrees C between consecutive readings
+MAX_GAP_MINUTES = 30
+EXPECTED_READINGS_PER_DAY = 144   # one every ten minutes
+
+
+@dataclass
+class Reading:
+    station_id: str
+    timestamp: datetime
+    temperature: float
+    humidity: float
+    rain_mm: float
+    wind_ms: float
+    wind_dir_deg: float
+    flag: str = "ok"
+
+
+def parse_row(row):
+    """Turn a CSV row (dict of strings) into a Reading."""
+    return Reading(
+        station_id=row["station"],
+        timestamp=datetime.strptime(row["time"], "%Y-%m-%d %H:%M:%S"),
+        temperature=float(row["temp_c"]),
+        humidity=float(row["rh"]),
+        rain_mm=float(row["rain_mm"]),
+        wind_ms=float(row["wind_ms"]),
+        wind_dir_deg=float(row["wind_dir"]),
+    )
+
+
+def load_readings(path):
+    readings = []
+    with open(path) as f:
+        for row in csv.DictReader(f):
+            try:
+                readings.append(parse_row(row))
+            except ValueError:
+                continue
+    return readings
+
+
+def check_ranges(readings):
+    """Flag readings whose values are physically impossible."""
+    for r in readings:
+        if not (TEMP_MIN <= r.temperature <= TEMP_MAX):
+            r.flag = "temp_range"
+        if not (HUMIDITY_MIN < r.humidity <= HUMIDITY_MAX):
+            r.flag = "humidity_range"
+        if r.rain_mm < 0 or r.wind_ms < 0:
+            r.flag = "negative"
+        if r.wind_dir_deg < 0 or r.wind_dir_deg > 360:
+            r.flag = "direction"
+    return readings
+
+
+def check_jumps(readings):
+    """Flag sudden temperature jumps compared with the previous reading."""
+    by_station = defaultdict(list)
+    for r in readings:
+        by_station[r.station_id].append(r)
+
+    for station, items in by_station.items():
+        items.sort(key=lambda r: r.timestamp)
+        for prev, cur in zip(items, items[1:]):
+            if abs(cur.temperature - prev.temperature) > MAX_TEMP_JUMP:
+                cur.flag = "jump"
+    return readings
+
+
+def find_gaps(readings, station_id):
+    """Return a list of (start, end) tuples where data is missing."""
+    items = sorted(
+        (r for r in readings if r.station_id == station_id),
+        key=lambda r: r.timestamp,
+    )
+    gaps = []
+    for prev, cur in zip(items, items[1:]):
+        if cur.timestamp - prev.timestamp > timedelta(minutes=MAX_GAP_MINUTES):
+            gaps.append((prev.timestamp, cur.timestamp))
+    return gaps
+
+
+def mean_wind_direction(directions):
+    """Average a list of compass bearings in degrees."""
+    if not directions:
+        return None
+    sin_sum = sum(math.sin(math.radians(d)) for d in directions)
+    cos_sum = sum(math.cos(math.radians(d)) for d in directions)
+    return math.degrees(math.atan2(sin_sum, cos_sum))
+
+
+def daily_summary(readings, station_id, day):
+    """Summarise one station for one calendar day."""
+    items = [
+        r
+        for r in readings
+        if r.station_id == station_id and r.timestamp.date() == day
+    ]
+    good = [r for r in items if r.flag == "ok"]
+    if not good:
+        return None
+
+    temps = [r.temperature for r in good]
+    return {
+        "station": station_id,
+        "date": day.isoformat(),
+        "t_min": min(temps),
+        "t_max": max(temps),
+        "t_mean": statistics.mean(temps),
+        "t_median": statistics.median(temps),
+        "rain_total": sum(r.rain_mm for r in items),
+        "wind_max": max(r.wind_ms for r in good),
+        "wind_dir_mean": mean_wind_direction([r.wind_dir_deg for r in good]),
+        "completeness": len(good) / EXPECTED_READINGS_PER_DAY,
+        "flagged": len(items) - len(good),
+    }
+
+
+def write_summaries(summaries, path):
+    fields = [
+        "station", "date", "t_min", "t_max", "t_mean", "t_median",
+        "rain_total", "wind_max", "wind_dir_mean", "completeness", "flagged",
+    ]
+    with open(path, "w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fields)
+        writer.writeheader()
+        for s in summaries:
+            if s:
+                writer.writerow(s)
+
+
+def run(path_in, path_out, day):
+    readings = load_readings(path_in)
+    check_ranges(readings)
+    check_jumps(readings)
+    stations = sorted({r.station_id for r in readings})
+    summaries = [daily_summary(readings, s, day) for s in stations]
+    write_summaries(summaries, path_out)
+    return summaries
+```
+
+Background: the network has 61 stations and each sends a reading every ten minutes, so a day's file holds about 8,800 rows, though the yearly reprocessing job loads 3.2 million rows at once. Some older stations send timestamps in local time, not UTC, and a few send humidity as a fraction between 0 and 1. Rain readings are the amount since the previous reading, not cumulative totals. The summaries feed a public website, so a wrong number is embarrassing, and we occasionally get duplicate rows when a station resends after a connection drop.

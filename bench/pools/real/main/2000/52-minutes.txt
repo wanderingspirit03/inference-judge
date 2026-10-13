@@ -1,0 +1,47 @@
+I took these notes at yesterday's meeting and they are a bit of a jumble. Can you turn them into a full project plan for the Eastfield pipe replacement and heat exchanger work, with workstreams, owners, dates, dependencies and a risk register with mitigations? Where the notes leave something open, please say what decision is still needed and who has to make it.
+
+Meeting: Eastfield Network Renewal, project kick-off
+Company: Marrowgate District Heat Ltd
+Date: Tuesday 6 October 2026, 14:00 to 16:10, Boardroom 2
+Present: Ingrid Salomonsen (Head of Networks, chair), Kofi Abernethy (Project Manager), Lucan Frey (Operations Manager), Priya Nandakumar (Finance Business Partner), Dagmar Heitz (Customer Relations), Osric Penhale (Health and Safety), Bram Kettleby (contractor, Kettleby Pipeworks)
+Apologies: Sunniva Okafor (Procurement), who sent in a note on the heat exchanger delivery which Kofi read out
+
+1. Purpose and scope
+
+Ingrid reminded everyone why the work is needed. The 1.4 kilometre section of steel mains under Eastfield Road and Mill Lane was laid in 1987 and has had four leaks in the last 18 months. Together the leaks cost about 38,000 pounds in repairs and caused three unplanned outages, of which the longest was 11 hours. The section feeds 612 homes, a primary school and a care home. The scope agreed at the board in September is: replace the 1.4 kilometre section with pre-insulated pipe, replace the plate heat exchanger in the Mill Lane substation, and connect 38 new flats at Harbour Court to the new pipe before they are occupied. The approved budget is 1.86 million pounds, of which 120,000 pounds is held as contingency.
+
+2. Timing
+
+The work must be finished and the network back in full operation before the cold weather starts. Ingrid wants the new pipe live by 20 November, and no later than 4 December. The previous winter's coldest week began on 12 December. Lucan said that the system should not be taken out of service on any day when the forecast low is below 2 degrees. Kofi said it will be tight, because the permits from the city council normally take six weeks, and the roads team has said Eastfield Road cannot be fully closed for more than 14 days in a row.
+
+Bram said his crew can start on 26 October if the permits come through and he has the pipe by 19 October. His crew is eight people, and he has a second crew of six who can join from 9 November. He estimates about 5 weeks for the first crew alone. He wants the trench dug in four sections of about 350 metres each, with each section joined, pressure tested and backfilled before the next one is opened.
+
+3. Heat exchanger
+
+Sunniva's note: the supplier quoted 11 weeks from order for the new plate heat exchanger. If it is ordered by Friday 9 October, delivery is 25 December. That is far too late. A second supplier, whose price is 14 percent higher, quotes 6 weeks, so delivery would be around 20 November. Lucan said he does not want to install the exchanger at the same time as connecting the new pipe, because both need a shutdown, and he would rather combine them in one outage. Priya asked what the extra 14 percent comes to. Kofi said the first quote was 142,000 pounds, so the second is about 161,900. Nobody has decided which supplier to go with. Priya said she can approve up to 160,000 pounds herself and anything above needs the finance director.
+
+4. Customers
+
+Dagmar said that customers will be told by letter 4 weeks before any planned shutdown, and by text message 48 hours before. A planned outage of up to 8 hours is acceptable according to the regulator's guidance, but anything longer needs a temporary heat supply for the school and the care home. She asked who pays for the mobile boiler, which costs 1,900 pounds a day to hire. Ingrid said the cost must come from the project contingency. Dagmar also raised the 38 new flats: the developer, who has not been told about the delay, expects hot water from 1 December. She will talk to the developer this week. She would also like a named person at the company who residents can call during the work, available between 7 and 19 hours.
+
+Osric asked whether any residents on the route are on the priority register for vulnerable customers. Dagmar thinks there are 23, but the list was last updated in March. She will check it.
+
+5. Health and safety
+
+Osric said the old pipe is thought to be wrapped in a material that may contain asbestos, because the original insulation was installed in the late 1980s. A survey must be done before any cutting starts. He has a surveyor who can visit on the week of 12 October but has not yet been booked. If asbestos is found, the removal must be done by a licensed contractor, and that could add two to three weeks. Bram said his crew is not licensed. Osric also wants a traffic management plan approved by the council, a gas and water services drawing check before digging, and a daily check of excavations because the trenches will be 1.8 metres deep. Kofi asked whether the asbestos survey can be done on a sample basis and not on every joint. Osric said that must be decided by the surveyor.
+
+6. Money
+
+Priya summarised the budget. Pipe and materials are 610,000 pounds, the contractor's labour and plant is 540,000 pounds, the heat exchanger is about 142,000 to 162,000 pounds, traffic management and permits are 98,000 pounds, the project team and supervision are 165,000 pounds, reinstatement of road surfaces is 185,000 pounds, and the contingency is 120,000 pounds. She noted that these figures add up to a little more than 1.86 million pounds if the dearer exchanger is chosen, and asked Kofi to reconcile them by next Tuesday. Kofi agreed.
+
+7. Operations
+
+Lucan explained how the network will keep running while the section is out. The Eastfield branch can be isolated at two valves, one at Mill Lane substation and one at the junction with Quarry Street, and fed from the standby boiler house at Quarry Street. The standby plant is rated at 2.4 megawatts, but the peak demand of the branch in a cold spell is about 3.1 megawatts, so the standby can cover the branch only when the outside temperature is above about 2 degrees. This is the reason for his limit in section 2. He also said that the new pipe must be flushed and dosed with treated water before it is connected, which takes two days, and that his team will need the section handed over with the pressure test certificates. His team cannot take on any new work in the week of 23 November because of the annual boiler inspection.
+
+8. Other points
+
+Lucan asked that the plan includes commissioning and a two-week monitoring period after the pipe goes live. Ingrid wants a progress report to the board on the first Thursday of every month. Bram asked for a single point of contact at the company and Kofi said it would be him. It was agreed to meet every Tuesday at 14:00 for 30 minutes, online.
+
+9. Actions noted (not yet allocated dates)
+
+Order the heat exchanger. Book the asbestos survey. Apply for permits. Tell the developer. Check the priority register. Reconcile the budget. Confirm the pipe delivery date with the supplier.

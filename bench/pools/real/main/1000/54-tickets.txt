@@ -1,0 +1,36 @@
+These are four support tickets that came in overnight for our game Ember Isles. Please write an individual, complete reply to each one, in a friendly and professional voice, signed "Mara, Player Support, Lanternfish Games". Where we can't promise something, say so honestly and explain the next step.
+
+**Ticket #48213**
+Player: Tobiasz_K
+Platform: PC
+Subject: Lost 14 hours of progress!!!
+
+I played last night until about 1am and the game said "Saving..." and then crashed. This morning my save is from three days ago. I lost my whole base on the second island and the dragon I spent two evenings taming. This is unacceptable, I paid 29.99 for this game. I want my progress back or a refund. I use the cloud save, if that helps. Version 1.4.2.
+
+**Ticket #48220**
+Player: sunnyvale_ines
+Platform: Console
+Subject: Charged twice for the Starlight pack
+
+Hi, I bought the Starlight Cosmetic Pack (4.99) yesterday and my bank shows two charges, both on 11 October. I only got the pack once in the game. My little brother was using my account, but he says he only pressed buy once. Can you check please? I have the two receipt emails with order numbers EI-77102 and EI-77109.
+
+**Ticket #48224**
+Player: grimmwald
+Platform: PC
+Subject: Suggestion + bug
+
+Love the game, been playing since the beta. Two things. First, the new fishing minigame is really great but the fish never bite when it is raining in the swamp region, and it rains there almost all the time. Is that intended? Second, could you add a way to rename pets? I called my fox "Kevin" at the start as a joke and I regret it now. Also, someone in the community Discord said that the next update will add multiplayer. Is this true?
+
+**Ticket #48231**
+Player: Anneliese Roth
+Platform: Mobile
+Subject: Can't log in after changing my email
+
+I changed the email address on my account last week because my old address was closed. Now when I try to log in, the game says "account not found". I tried the password reset, but the email never arrives, not even in the spam folder. I have a daughter who plays on my account every day and she is crying because her streak is gone. I'm not very good with technology. Please help me step by step. The old email was anneliese.roth@example.org and the new one is a.roth@example.org.
+
+Internal notes from the team, for your information:
+
+- Cloud saves for 1.4.2 are known to fail in rare cases if the game closes during the save step. Engineering can sometimes restore the previous version from server backups, which are kept for seven days, but only if we have the player's account ID. We cannot promise a result. Refunds for the game are handled by the store, not by us, and are only possible within 14 days of purchase or under two hours of play time, so Tobiasz does not qualify.
+- Double charges are usually a pre-authorisation that disappears within five working days. If both are real charges, we refund through the same store. Order numbers EI-77102 and EI-77109 both show as completed on our side, with different timestamps four minutes apart, so we think it's a real duplicate.
+- Pet renaming is on the roadmap but has no date. Multiplayer is not confirmed and we should not say it is. The fishing in rain is a known bug fixed in 1.4.3, planned for next Tuesday.
+- Email changes on mobile accounts sometimes create a second profile; support can merge them after verifying the purchase history.

@@ -1,0 +1,93 @@
+Necesito preparar la reunión del patronato y no he tenido tiempo de leer el informe entero. ¿Puedes hacerme un resumen sección por sección y, al final, una lista de recomendaciones concretas con prioridad y responsable? Si ves cifras que no cuadran entre secciones, señálalas.
+
+# Jardín Botánico de Valdeflores
+## Informe trimestral de gestión: tercer trimestre de 2026 (julio a septiembre)
+Elaborado por la dirección técnica para el patronato. Fecha de cierre: 3 de octubre de 2026.
+
+### 1. Resumen ejecutivo
+
+El tercer trimestre ha sido el más complejo del año por la combinación de una ola de calor en julio, la reapertura del invernadero de montaña y el inicio de las obras del nuevo sistema de riego. Recibimos 41.860 visitantes, un 6,2 % más que en el mismo trimestre de 2025 (39.410), aunque un 3,1 % menos de lo previsto en el presupuesto, que contaba con 43.200. Los ingresos totales fueron de 512.400 euros frente a unos gastos de 538.900, de modo que el déficit del trimestre es de 26.500 euros y el déficit acumulado del año asciende a 41.300 euros. La subvención autonómica de 90.000 euros se cobró íntegra en septiembre, por lo que la tesorería a 30 de septiembre es holgada: 187.600 euros.
+
+Los tres hechos que más pesan en la valoración del trimestre son: la pérdida de 212 ejemplares de la colección de helechos arborescentes durante la ola de calor, el éxito del programa escolar (9.870 alumnos, un récord) y el retraso de seis semanas en las obras de riego, que obliga a revisar el calendario de la segunda fase.
+
+### 2. Visitantes y ventas
+
+| Mes | Visitantes 2026 | Visitantes 2025 | Previsión presupuesto |
+|---|---|---|---|
+| Julio | 12.640 | 12.980 | 14.100 |
+| Agosto | 14.920 | 13.350 | 15.300 |
+| Septiembre | 14.300 | 13.080 | 13.800 |
+| Total | 41.860 | 39.410 | 43.200 |
+
+La caída de julio respecto del año anterior (un 2,6 %) se debe sobre todo a los siete días de cierre parcial por calor extremo, en los que solo se abrió el parque entre las 8:00 y las 12:30. En agosto se recuperó con las noches de apertura nocturna "Jardín a la luz de la luna", que atrajeron a 2.150 personas en seis fechas con una media de 358 por noche. Septiembre superó la previsión por primera vez en el año gracias a los grupos escolares.
+
+Reparto por tipo de entrada: general 44 %, reducida (jubilados, estudiantes, familias numerosas) 17 %, abono anual 8 %, grupos escolares 24 % y entradas gratuitas (menores de 6 años, personal acompañante) 7 %. El precio medio por visitante fue de 8,94 euros, frente a 8,71 en el tercer trimestre de 2025. Las ventas anticipadas por internet representaron el 34 % de las entradas de pago, ocho puntos más que hace un año. Se cerraron 3 incidencias de la pasarela de pago, de las cuales una (el 19 de agosto, de 2 horas y 40 minutos) provocó colas en taquilla y quejas en redes.
+
+### 3. Ingresos y gastos
+
+| Concepto | Ingresos (€) | Gastos (€) |
+|---|---|---|
+| Entradas y abonos | 374.100 | |
+| Tienda y vivero | 48.700 | 31.200 |
+| Cafetería (concesión) | 12.600 | |
+| Alquiler de espacios y eventos | 17.000 | 4.800 |
+| Subvenciones y donaciones | 60.000 | |
+| Personal | | 296.500 |
+| Mantenimiento de colecciones | | 74.300 |
+| Suministros (agua, energía) | | 58.900 |
+| Obras e inversiones menores | | 41.700 |
+| Comunicación y marketing | | 19.400 |
+| Administración y seguros | | 12.100 |
+| Total | 512.400 | 538.900 |
+
+Nota de la dirección: la subvención autonómica de 90.000 euros figura repartida contablemente en tres trimestres de 30.000 euros, por lo que este trimestre solo se imputan 30.000 euros dentro de la línea de subvenciones y donaciones, junto con 30.000 euros de donaciones de particulares y empresas. El gasto en agua fue un 38 % superior al previsto (22.800 euros frente a 16.500) por el riego de emergencia de julio, y la energía se mantuvo en línea con el presupuesto.
+
+### 4. Colecciones y conservación
+
+El herbario recibió 318 nuevos pliegos y se digitalizaron 1.240, con lo que el total digitalizado alcanza el 64 % de los 41.000 pliegos. El banco de semillas amplió su catálogo con 57 accesiones, entre ellas 11 especies amenazadas de la sierra de Altozano; las pruebas de germinación realizadas en septiembre dieron un 82 % de éxito de media, por encima del objetivo del 75 %.
+
+En las colecciones vivas, la ola de calor del 9 al 18 de julio, con máximas de 41 grados, causó la pérdida de 212 ejemplares de la colección de helechos arborescentes (el 31 % del total de 684). La causa principal fue el fallo de dos de las cuatro bombas de nebulización del umbráculo, que quedaron fuera de servicio durante 36 horas. Se han replantado 90 ejemplares procedentes del vivero propio y se han encargado 60 más a un jardín socio. Está pendiente determinar la compensación del seguro, cuya franquicia es de 8.000 euros.
+
+El invernadero de montaña reabrió el 22 de julio después de once meses de reforma. Alberga 143 especies de flora de alta montaña con un control de temperatura que, según los registros de agosto, se mantuvo dentro de un grado de la consigna el 96 % del tiempo.
+
+### 5. Educación y programas públicos
+
+El programa escolar atendió a 9.870 alumnos de 212 centros, frente a 7.640 alumnos del tercer trimestre de 2025. La cifra incluye las visitas de septiembre, que concentraron el 71 % del total. Se impartieron 388 talleres con una ocupación media del 87 %. La encuesta a los docentes (214 respuestas) dio una valoración media de 4,6 sobre 5; el aspecto peor valorado fue el tiempo disponible para el almuerzo (3,4).
+
+Entre los programas públicos destacan los 24 paseos guiados de fin de semana (media de 31 asistentes), el ciclo de conferencias "Plantas y clima" (cuatro sesiones, 410 asistentes en total) y el programa de voluntariado, que cuenta con 86 voluntarios activos, 14 más que en junio. Las horas de voluntariado del trimestre fueron 2.930.
+
+### 6. Obras e infraestructura
+
+La primera fase del nuevo sistema de riego (sectores A a D, 11 hectáreas) comenzó el 1 de julio con una duración prevista de 10 semanas. Una veta de roca no detectada en el estudio geotécnico obligó a modificar el trazado de la tubería principal en el sector C, lo que añadió seis semanas. La primera fase terminará previsiblemente el 21 de octubre, en lugar del 9 de septiembre. El sobrecoste estimado es de 38.000 euros sobre un contrato de 412.000, cantidad que aún no ha sido aprobada por el patronato. La segunda fase (sectores E a H) estaba prevista para enero y no puede empezar antes de marzo, ya que la época de brotación de las colecciones de primavera no admite zanjas abiertas.
+
+Otras actuaciones: sustitución de las dos bombas de nebulización averiadas (14.600 euros, pagadas en septiembre, imputadas a obras e inversiones menores), repintado de la verja norte y reparación del camino del arboreto, cerrado durante tres semanas por un desprendimiento.
+
+### 7. Tienda y vivero
+
+La tienda y el vivero facturaron 48.700 euros, un 11 % más que en el tercer trimestre de 2025, con un margen bruto de 17.500 euros (36 %). Los productos más vendidos fueron las plantas aromáticas del vivero (4.120 unidades), las semillas de la colección de flora autóctona (2.870 sobres) y la línea de cuadernos ilustrados con láminas del herbario. La pérdida de la responsable de tienda en agosto se cubrió con una persona del equipo de taquilla, pero el inventario de septiembre mostró diferencias de 1.340 euros en la zona de papelería, que se están investigando. El vivero propio produjo 6.300 plantas, de las cuales 90 se destinaron a reponer los helechos; esto redujo en unas 400 unidades la disponibilidad para la venta pública.
+
+Dos propuestas están sobre la mesa: abrir una tienda en línea limitada a semillas y papelería, con un coste estimado de puesta en marcha de 9.500 euros, y ampliar el horario del vivero los sábados por la tarde. Ninguna se ha presupuestado aún.
+
+### 8. Comunicación y redes
+
+El gasto en comunicación fue de 19.400 euros, un 8 % menos que el presupuestado (21.100). La campaña "Jardín a la luz de la luna" supuso 6.800 euros y generó el 78 % de las menciones del trimestre en redes sociales. La web recibió 168.000 visitas (un 14 % más que en el trimestre anterior) y el boletín cuenta con 11.240 suscriptores, con una tasa de apertura del 41 %. La incidencia de la pasarela de pago del 19 de agosto produjo 63 comentarios negativos en redes, y se respondió a todos en menos de 24 horas. La valoración media en el principal portal de opiniones es de 4,5 sobre 5 con 1.380 opiniones, frente a 4,6 en junio.
+
+El servicio de prensa organizó dos visitas para periodistas, una dedicada a la pérdida de los helechos y otra a la reapertura del invernadero de montaña. La cobertura de la reapertura fue positiva en seis medios locales y uno regional.
+
+### 9. Personal y seguridad
+
+La plantilla es de 41 personas (36 equivalentes a jornada completa). Hubo dos bajas voluntarias, un jardinero y la responsable de tienda, y una incorporación temporal de verano de cuatro monitores para los talleres. La rotación anual de la plantilla fija es del 9,8 %. Se registraron 5 accidentes laborales leves (3 cortes, 1 picadura con reacción alérgica, 1 torcedura) y ninguno con baja superior a siete días. Los 19 trabajadores de campo completaron la formación sobre golpe de calor antes del 31 de julio, pero la formación se hizo después de la primera semana de la ola de calor.
+
+Entre los visitantes hubo 17 incidencias de primeros auxilios, 11 de ellas por calor o mareos, y ninguna grave. El desfibrilador de la entrada principal se revisó en agosto.
+
+### 10. Riesgos y previsión para el cuarto trimestre
+
+Riesgos principales: el nuevo retraso de las obras (que puede extenderse si las lluvias de otoño anegan la zanja del sector C), la caída previsible de visitantes en noviembre, la compensación del seguro por los helechos y el aumento de precios de la energía a partir de diciembre. Para el cuarto trimestre se prevén 22.500 visitantes, ingresos de 238.000 euros y gastos de 251.000 euros, con lo que el déficit anual se situaría en unos 54.300 euros, dentro del margen de 60.000 euros aprobado por el patronato en diciembre del año pasado.
+
+### 11. Decisiones que se piden al patronato
+
+1. Aprobar el sobrecoste de 38.000 euros de la primera fase de riego.
+2. Autorizar el aplazamiento de la segunda fase a marzo de 2027.
+3. Decidir si se contrata un seguro específico para la colección de helechos arborescentes.
+4. Aprobar un plan de contingencia por calor extremo con cierre parcial automático a partir de 38 grados.
+5. Ratificar el calendario de actividades de otoño, que incluye la fiesta de la castaña del 7 y 8 de noviembre.

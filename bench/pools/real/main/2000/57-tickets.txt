@@ -1,0 +1,69 @@
+I work the evening shift at our call centre and these six tickets came in for the next shift to answer. Please write an individual, complete reply to each customer that I can send, with the right tone for each, and add a short internal note under each reply saying what we need to check or do on our side. Where a ticket doesn't give us enough information, say so in the reply and ask for what's missing.
+
+Company: Kestrel Connect, an independent reseller of mobile, broadband and landline services. We bill customers ourselves and buy network capacity wholesale. Our standard terms: 14-day cooling-off period for new contracts, 30-day notice for tariff changes, credit for outages longer than 24 hours at 1/30 of the monthly line rental per full day, and a 60 pound early termination fee in the first 12 months of an 18-month broadband contract. Goodwill credits above 25 pounds need a team leader's approval, and we never change a customer's phone number without a written request from the account holder.
+
+---
+
+TICKET KC-70412
+Channel: web form
+Received: Mon 12 Oct 2026, 08:41
+Customer: Henrietta Valdivia-Moore
+Account: KC-3391820
+Product: Fibre 150 broadband, 18-month contract, 34.99 pounds a month, started 2 June 2026
+
+My broadband has been dropping out several times every evening since about the end of September. Each drop lasts anywhere from two to ten minutes and I work from home so it is a real nuisance. I have restarted the router many times. Your chat assistant told me to wait 5 days and that there would be a callback. Nobody has called. I have kept a log, there were 19 drops last week, and I think I should get some money back. I am also thinking about leaving but I read that I would have to pay a fee. Please tell me exactly how much it would be.
+
+---
+
+TICKET KC-70418
+Channel: email
+Received: Mon 12 Oct 2026, 09:12
+Customer: Sipho Marchetti
+Account: KC-4820041
+Product: SIM-only plan, 20 GB, 12.00 pounds a month, rolling 30-day
+
+Hi, I got my latest bill and it is 31.40 and not 12. The extra comes from something called "data roaming 7.40" and "premium text 12.00". I was in Ireland for 3 days in September and I thought roaming was free like it was before. I have never sent a premium text. I want the charges removed. Also, I got an email last week saying my plan price will rise to 13.50 from 1 December. Is that allowed? I have not agreed to it.
+
+---
+
+TICKET KC-70425
+Channel: phone call note, written by agent Dilys
+Received: Mon 12 Oct 2026, 10:05
+Customer: Mr. Alaric Pennywhistle (aged 81)
+Account: KC-1104376
+Product: Landline and basic broadband, 29.50 pounds a month, no contract
+
+Customer says his landline has been dead since last Wednesday, 7 October. He lives alone and his only way to call the doctor is the landline, because his mobile does not get a signal in his house. He sounded anxious. His daughter lives far away. An engineer visit was booked by us for 9 October, but the engineer never came and no one told him. He was told the next available appointment is 21 October. He has not been given any alternative. He asked whether he is being charged while the line is dead. I told him I would pass the ticket on.
+
+---
+
+TICKET KC-70431
+Channel: web form
+Received: Mon 12 Oct 2026, 11:30
+Customer: Octavia Brandvold
+Account: none given
+Product: not stated
+
+I want to cancel my order. I placed it on Saturday on your website for a mobile phone and a 24-month contract and the courier says it will arrive tomorrow. I have changed my mind because I found a cheaper deal elsewhere. I do not want to pay anything. Also I didn't get an order confirmation email, only a text, so I am not sure the order is real. Please confirm cancellation today.
+
+---
+
+TICKET KC-70437
+Channel: email
+Received: Mon 12 Oct 2026, 12:18
+Customer: Fenwick and Daughters Bakery (contact: Zdenka Fenwick)
+Account: KC-5207719
+Product: three business mobile lines, 22.00 pounds each a month, 12-month contract started 1 March 2026
+
+We asked on 21 September to move our shop telephone number, which is currently with another provider, over to you as a fourth line. We were told it would take 5 working days. It has now been three weeks, and our customers cannot reach us because we told the old provider to close that line on the 30th. We have lost orders. Nobody answers the porting team phone number and the chat just sends us in circles. Please tell us today what is happening and when the number will work again. We also want compensation for lost orders. I can send our order records if you need them.
+
+---
+
+TICKET KC-70441
+Channel: social media message, copied in by agent Rhodri
+Received: Mon 12 Oct 2026, 13:47
+Customer: Leopold Achterberg
+Account: KC-2987450
+Product: SIM-only plan, 40 GB, 17.00 pounds a month, rolling 30-day
+
+Your app says I have used 52 GB this month but I know I haven't, I have been away working on an oil rig with no phone for 3 weeks and my phone was in a drawer. I think someone has cloned my SIM. I have been charged 17.00 plus 24.50 in extra data. I want you to block the SIM and send me a new one to my home address, which is 14 Larch Terrace, but I am not home until the 20th, so my brother Casimir might collect it. I do not want my number changed. Also I think the app has been showing the wrong data for some time. Casimir would bring my passport and a signed note from me. The only other thing I noticed is that a text about a "new device" arrived on the 4th, which my brother only read out to me today when I phoned him.

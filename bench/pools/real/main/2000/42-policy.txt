@@ -1,0 +1,67 @@
+I'm a postdoc about to apply for observing time at Kestrel Ridge Observatory, and I've been sent their observing time and data policy. Could you explain it clause by clause in plain language, say what it means for someone in my position in practice, and point out the risks or traps I should watch for (deadlines, ownership of data, authorship, penalties)? Please also list what I should ask the observatory before I submit.
+
+KESTREL RIDGE OBSERVATORY
+OBSERVING TIME, DATA AND CONDUCT POLICY
+Version 7, effective 1 January
+
+1. Scope
+
+This policy applies to everyone who applies for, receives or uses observing time on the 2.4 metre Harlow Telescope, the 0.8 metre Survey Telescope, or the instruments attached to them ("the facilities"), and to everyone who visits the site at Kestrel Ridge in person or controls the facilities remotely.
+
+2. Eligibility
+
+2.1 Applications for time may be made by researchers who hold a doctoral degree or are enrolled in a doctoral programme, and who are affiliated with a university or research institution that is a member of the Kestrel Consortium or has signed a user agreement with the Observatory.
+2.2 The Principal Investigator ("PI") named on the proposal is responsible for the proposal, for the use of the awarded time, and for compliance with this policy by every person acting on their behalf.
+2.3 A PI may not lead more than three proposals in any one call. A person may appear as co-investigator on any number of proposals.
+
+3. Calls for proposals and deadlines
+
+3.1 There are two calls each year, with deadlines on 15 March and 15 September at 23:59 Universal Time. Proposals received after the deadline will not be considered, and no exceptions are made for technical problems with the submission system unless the Observatory is at fault.
+3.2 Proposals must be submitted through the Observatory portal and may not exceed four pages including figures, plus one page of references. A technical justification, which states the instrument set-up and the exposure times, must be included.
+3.3 Applicants will be told the result of their proposal approximately eight weeks after the deadline.
+
+4. Review and allocation
+
+4.1 Proposals are ranked by a Time Allocation Committee ("the TAC") of ten external reviewers. Each proposal is read by at least three reviewers and ranked by scientific merit, feasibility and the suitability of the requested facility. Reviewers declare conflicts of interest, and do not take part in the ranking of any proposal in which they have a conflict.
+4.2 The Observatory reserves 20 percent of the time on each facility for its own staff projects and for time-critical events such as supernova follow-up (see section 6). The remaining 80 percent is allocated by the TAC, of which up to 15 percent may be allocated to members of the Kestrel Consortium before ranking.
+4.3 Rankings are final. Reviewers' comments are provided to PIs, but the Observatory does not enter into discussion of the ranking. An applicant who believes that the process was not followed correctly may write to the Director within 14 days of receiving the result.
+
+5. Use of awarded time
+
+5.1 Time is awarded in nights or part nights, in a specific semester. Time not used in the semester for which it is awarded lapses, and may not be carried over except where the Observatory decides that the loss was caused by instrument failure.
+5.2 Observations are carried out in one of two modes. In visitor mode the PI or a team member travels to the site or connects remotely and operates the instrument with the support of a telescope operator. In service mode the Observatory staff carry out the observations on behalf of the PI, according to the conditions set out in the proposal.
+5.3 If the weather or technical faults prevent observation, the Observatory will try to reschedule the time in the same semester. The Observatory does not compensate for lost time, and a refund of any fees is not available.
+5.4 A PI who cannot use the time must give at least 14 days' notice. Time cancelled with less notice counts as used for the purpose of the PI's record, and a repeated failure to use time (two nights or more in any 12 months without good reason) may reduce the priority of the PI's later proposals.
+
+6. Time-critical programmes
+
+6.1 The Observatory may interrupt scheduled observations for a transient event of exceptional scientific interest if the event is judged by the Director to need immediate follow-up. The PI whose time is interrupted will be informed as soon as possible and will receive replacement time in the same or next semester, when available.
+6.2 The Observatory is not liable for any costs of travel or accommodation incurred by a visiting observer whose time is interrupted under this section.
+
+7. Data ownership and proprietary period
+
+7.1 All data obtained with the facilities remain the property of the Observatory. The PI and the co-investigators named on the awarded proposal have the exclusive right to use the data for 12 months from the date on which the data are made available to them ("the proprietary period"). Data from programmes designated as survey or legacy programmes have no proprietary period.
+7.2 After the proprietary period, the data become public through the Observatory archive without further notice. A PI may apply once, in writing, for an extension of up to six months. An extension will be granted only for a good reason, such as the completion of a doctoral thesis.
+7.3 Calibration files and engineering data are public from the moment they are taken.
+7.4 A PI may share proprietary data with collaborators who are not named on the proposal only if they are first added as co-investigators through the Observatory portal. Sharing data with an unlisted person is a breach of this policy.
+
+8. Publication and acknowledgement
+
+8.1 Every publication, thesis, press release or presentation that uses data from the facilities must carry the following acknowledgement: "Based on observations obtained at Kestrel Ridge Observatory." The PI must send the Observatory a copy of the paper within 30 days of publication.
+8.2 The Observatory staff who give substantial scientific or technical support to the observations, such as writing special software or carrying out a non-standard observing procedure, should be offered co-authorship. The decision on co-authorship lies with the PI and the staff member concerned.
+8.3 If a PI has not published or submitted a paper within 36 months of the end of the proprietary period, the Observatory may ask them to explain the delay, and may reduce the priority of later proposals.
+
+9. Conduct and safety on site
+
+9.1 Visitors must follow the instructions of the telescope operator and of the site manager at all times. The summit road is closed to visitors without a permit between 18:00 and 08:00 in winter conditions.
+9.2 No lights may be used outside the buildings after sunset, except red lights approved by the Observatory. No drones or lasers may be operated on site without written permission.
+9.3 Alcohol is not permitted in the control building or the dome.
+9.4 Anyone who breaches section 9 may be asked to leave the site at their own cost. The Observatory may also refuse future access.
+
+10. Liability
+
+The Observatory is not liable for any loss or damage to the equipment, data or property of visitors, nor for injuries arising from visits, except where caused by its own gross negligence. Each visitor must have travel and health insurance valid for the site, which is at 2,350 metres above sea level.
+
+11. Changes to the policy
+
+The Director may amend this policy once a year. Changes take effect at the start of the next semester and do not apply to time already awarded.

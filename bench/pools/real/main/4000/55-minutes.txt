@@ -1,0 +1,91 @@
+These are my notes from yesterday's planning meeting at our hearing-aid clinic. We decided a lot but nobody wrote down who does what. Please turn them into a full project plan for the new fitting-room and recall programme, with a named owner for every task, dates, a risk list with ways to reduce each risk, and anything you think we forgot.
+
+MEETING NOTES
+Clinic: Brindlewood Hearing Care, main site at Castle Row
+Meeting: Autumn planning, Tuesday 6 October 2026, 14:00 to 16:10
+Present: Dr Annelise Voss (clinical lead, audiologist), Rutger Penhallow (practice manager), Sunita Karekar (senior hearing-aid dispenser), Corwin Tulloch (dispenser), Beatrix Almqvist (reception and bookings), Hugh Dembinski (finance, part time), Odile Marchetti (supplier liaison, joined by phone for items 3 and 4)
+Apologies: Fenella Rask (second audiologist, on leave until 19 October)
+Chair: Rutger. Notes: Beatrix, tidied by Sunita.
+
+1. Matters arising from the September meeting
+
+Rutger reported that the broken sound booth at the Castle Row site was repaired on 22 September and re-calibrated on 24 September. The calibration certificate is in the shared folder. The booth was out of use for 11 working days, and Dr Voss estimated that about 46 hearing tests were moved to the Thornby satellite room or to later dates. Beatrix said 9 patients still have not been rebooked and she will call them this week. Sunita asked that the rebooking list be checked against the recall list, because two of the nine are also due for a hearing-aid review.
+
+The new appointment reminder text messages went live on 1 September. Beatrix said missed appointments fell from 14 percent in August to 8 percent in September. Hugh asked whether that saves enough to cover the 0.06 charge per message. Beatrix said yes: 6 percent of roughly 620 appointments is 37 appointments, and each missed 45-minute slot is worth far more than the 640 or so messages cost. Agreed to keep the reminders.
+
+2. Fitting room extension
+
+The plan is to turn the old storage room next to reception into a second fitting room, so that fittings and tests no longer compete for the same two rooms. Rutger has two quotes. The first, from a local builder, is 18,400 including sound insulation, new flooring and a second door, with work taking three weeks. The second quote, 14,900, does not include the acoustic panels, which would be about 3,100 extra from a specialist, giving 18,000 in total and a longer schedule of five weeks because of two separate contractors.
+
+Dr Voss said the sound insulation matters more than the price, because fittings require background noise below 35 decibels to run real-ear measurements properly. She asked that whoever builds the room supplies a measurement report. Hugh said the clinic can pay up to 20,000 from savings without borrowing, but wants to keep 5,000 as a buffer, so the available amount is 15,000 from cash plus about 4,000 from the autumn income, which is tight. Corwin suggested a staged approach: do the room in November, buy the new real-ear measurement equipment in January.
+
+Decision: go with the first quote (18,400) provided the builder agrees in writing to a measurement report and to finish before 4 December. Rutger to negotiate a 10 percent deposit schedule rather than 30 percent. If the builder will not agree, the group meets again on 20 October.
+
+During the build, the reception area will be noisy. Beatrix asked that no hearing tests be booked in the room next to the work. Sunita proposed that the two loudest days, flooring and the second door, be scheduled on the Monday and Tuesday when the clinic already runs reduced hours. Rutger will ask the builder.
+
+3. Supplier change for hearing aids
+
+Odile reported on the supplier review. The clinic currently buys most of its aids from Halvard Acoustics. Their price rose 7 percent in September and their delivery time went from 3 days to 8 days. A second supplier, Nordlicht Audio, offers a comparable range at about 4 percent below the old price, with 4 day delivery, but a minimum order of 12 units a month, and a 60 day trial return period instead of 90. A third, Kestrel Ear Systems, is cheaper by 9 percent but only has two models in the small behind-the-ear size that about a quarter of the patients need.
+
+Sunita said patients care a great deal about the 90 day trial, as many first-time users need it. Odile said Halvard would likely keep the 90 days. Dr Voss said clinical quality is the first test: she wants to try three Nordlicht devices on staff and volunteer patients before agreeing anything. Hugh said the 12-unit minimum is fine since the clinic sells about 30 a month.
+
+Decision: no supplier switch yet. Odile to ask Halvard for a written price freeze for six months and a delivery promise of 4 days. In parallel, Nordlicht sends three sample devices. Sunita and Corwin test them over 3 weeks, and Dr Voss writes a short comparison. Decision on 17 November.
+
+4. Recall programme
+
+This was the longest discussion. About 410 patients have hearing aids that are over four years old and have not been seen for a review in 18 months or longer. Dr Voss is worried about two groups: patients with a steady loss in hearing, who stop using their aids without telling anyone, and patients with a device that no longer matches their hearing. She would like a recall letter and phone call, followed by a free 30-minute check, for everyone on the list.
+
+Hugh asked about the cost. At 30 minutes each, 410 checks is about 205 hours. Dr Voss said she does not expect more than 60 percent to come, so around 125 hours, which is about 16 working days of one audiologist. Rutger said that is not possible with the current rota, particularly while Fenella is away. Corwin proposed that dispensers do the basic check (device cleaning, battery or charger test, a comfort and use questionnaire) and the audiologist is only needed for patients whose answers show a problem. Dr Voss agreed that is safe, if the dispensers follow a written checklist and she signs off the checklist.
+
+Beatrix will need a script for the phone calls, a way to mark who was contacted, and a limit on how many calls to make, since she is also covering reception. Sunita said a letter first and a call only after two weeks of no reply would cut the number of calls by roughly half.
+
+The group agreed on a pilot with the 100 patients who have waited longest. Start letters on 26 October, run checks from 9 November, review at the end of December. Success means at least 50 of the 100 attend and that at least 10 percent of those who attend are found to need a new device or a re-fitting.
+
+Hugh also raised data protection. The recall letters use patient addresses and health information, so the mailing list must stay inside the booking system and not be copied to spreadsheets. Rutger will check that the existing patient consent covers recall contact; if not, a short consent line goes into the next appointment letter.
+
+5. Staffing and rota
+
+Fenella returns on 19 October. Dr Voss proposed that she takes the Thornby satellite room on Wednesdays and Fridays and the recall escalations on Thursday mornings. Corwin asked for one full day a week without patients to do the sample device trials and the checklist work. Rutger said that could be Thursday afternoon, with reception taking only urgent bookings. Beatrix pointed out that the pilot letters will bring a rise in calls in the week of 2 November, so she asked for the part-time receptionist, Ines, to be moved from two days to three days for six weeks. Hugh said that costs about 1,150 for the period and approved it, subject to the budget in item 6.
+
+6. Budget summary
+
+Hugh's current view for the quarter: fitting room 18,400; receptionist hours 1,150; reminder messages about 40 per month; recall letters (printing and postage for 100 letters) about 110; sample devices free of charge but return postage about 60. Expected income from the extra capacity of the second room is about 2,200 a month from January onward, based on 14 more fittings per month, which Hugh called cautious. Total spending this quarter is about 19,800, within the cash limit he set, but he warned that an unexpected equipment failure would hit the buffer.
+
+7. Patient complaints and feedback
+
+Beatrix summarised the complaints log for September. There were six written complaints and eleven verbal ones, compared with four and nine in August. Of the six written, three were about waiting times during the week the sound booth was out of use, one was about a dispenser who did not explain the charger clearly, one was about the car park, and one was about an invoice that showed the wrong aid model. The invoice error was traced to a mistake when the aid was swapped for a different size on the fitting day; Hugh has corrected the invoice and refunded the 35 difference. Sunita said the swap should have triggered a second check of the invoice and proposed adding a line to the dispenser checklist: "re-read the invoice against the final device before the patient leaves."
+
+Dr Voss asked about the positive feedback. Beatrix said 23 patients left comments on the paper cards in the waiting room, and 19 were warm, with several mentioning Corwin by name for his patience with a patient who had trouble with small buttons. Rutger asked that these be shared at the next staff lunch. The group agreed that the car park complaint cannot be fixed by the clinic, because the car park belongs to the council, but Beatrix will put a note on the website with the location of the two nearest accessible spaces and the bus stop.
+
+Decision: add the invoice check to the checklist from 12 October. Rutger will review the complaints log monthly and report any pattern in the first meeting of the following month.
+
+8. Training and equipment
+
+Dr Voss said the new real-ear measurement equipment, which would arrive after the fitting room is built, needs two days of training for each dispenser. The supplier offers an on-site course for up to four people at 1,600 for two days, which is cheaper than sending people away, but it needs a closed clinic or a quiet part of the building. Hugh said the course fee is not in the quarter's budget summary and would come out of the January budget. Corwin and Sunita said they would rather have the course after the room is finished, so the real equipment can be used in the room it will live in.
+
+Separately, Sunita reported that two of the four handheld otoscopes in use are over eight years old and one has a failing light. Replacement units cost about 210 each. Hugh approved buying two now, 420 in total, out of the equipment line. Sunita will order them and keep the receipts.
+
+Odile asked whether the clinic wants to join the supplier's loan scheme for demonstration aids, where the supplier lends up to six current models for a month without charge. The group agreed this would help the comparison in item 3, but Dr Voss said the loan devices must not be fitted to patients who have not given written consent for a trial device. Odile will find out whether the scheme has such a consent form, and if not, Dr Voss will write a one-page version.
+
+9. Satellite room at Thornby
+
+Rutger raised the question of the Thornby room, rented from the community hall for two days a week. The rent will rise from 180 to 215 a month in January. Fenella's proposed Wednesday and Friday cover would make it a three-day service. Rutger asked whether it is worth keeping. The room is used for about 38 appointments a month, and many of those patients are older people who cannot travel to Castle Row easily. Dr Voss said the clinic has a duty to those patients and the extra rent is small. Hugh agreed on cost grounds, as the room earns about 1,900 a month in fees. The group asked that the sound level in the room be measured once, because the hall hosts a toddler group on Thursdays and the noise may carry. Corwin will bring the borrowed meter on his next Wednesday visit.
+
+Decision: keep Thornby, accept the new rent, and ask for a six-month agreement with no further rise.
+
+10. Communication with patients about the building work
+
+Beatrix asked how patients should be told about the building work, since many of them are elderly and some rely on lip reading at the front desk, which becomes harder when there is drilling in the background. Dr Voss said noise during the work is a real accessibility problem, not just an irritation, and suggested three measures: a printed notice posted at the entrance and in the November appointment letters, a reminder in the text message the day before each visit, and a short script for reception so everyone gives the same information. Sunita added that patients with cochlear implants or very sensitive devices may be bothered by the sudden loud sounds and should be offered the Thornby room during the noisy days.
+
+Rutger said the builder has promised to keep the loudest work to between 08:00 and 12:00, and that the clinic can then move the busiest fitting appointments to the afternoon. Beatrix raised a concern that this would make the afternoons very full and leave no slack for urgent repairs. Corwin offered to take the early morning repair walk-ins on the build days so the audiologist can concentrate on fittings. Hugh asked that the reduced hours on Mondays and Tuesdays be announced at least three weeks ahead so that income is not lost through confusion.
+
+Decision: Beatrix drafts the notice and the reception script by 16 October. Sunita reviews the list of patients with implants and sensitive devices and flags them in the booking system. Rutger confirms the builder's noise hours in writing.
+
+11. Any other business
+
+- The clinic's website still lists the old opening hours. Beatrix to correct it this week.
+- Sunita raised the shortage of rechargeable-battery chargers for the loan stock; she counted only 4 working. Odile to order 6 more from the current supplier.
+- Dr Voss reminded everyone that the regulator's annual infection-control audit takes place in the first half of December, and that the new fitting room must be included in the cleaning log from the first day of use.
+- Corwin asked whether the clinic should take part in the hearing-awareness week in November. Rutger said yes in principle, but only if it does not clash with the build. Nobody volunteered to organise it. Left open.
+
+Next meeting: Tuesday 20 October, 14:00, or earlier if the builder refuses the conditions.

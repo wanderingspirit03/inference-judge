@@ -1,0 +1,34 @@
+Using these lecture notes, make me a study guide for the theory part of the driving test, with worked examples for the calculations and a quiz of fifteen questions with full answers. I teach at a driving school and want something I can hand to learners who struggle with stopping distances and priority rules.
+
+LECTURE 4: STOPPING DISTANCES, SPEED AND PRIORITY (Lacombe Valley Driving School, theory course)
+
+1. Stopping distance
+Total stopping distance = thinking distance + braking distance.
+Thinking distance is how far the vehicle travels while the driver notices a hazard and reacts. A typical reaction time is 0.7 seconds for an alert driver. It rises with tiredness, alcohol, medicines, distraction by a phone and age. Rule of thumb: thinking distance in metres is roughly the speed in km/h divided by 10, multiplied by 3. At 50 km/h that is about 15 m; at 90 km/h about 27 m.
+Braking distance depends on speed, road surface, tyre condition and the load. Rule of thumb on dry tarmac: braking distance in metres is (speed in km/h divided by 10) squared, multiplied by 0.4. At 50 km/h about 10 m; at 90 km/h about 32 m. On a wet road double it. On snow or ice multiply by about 5 to 10.
+Worked example: at 90 km/h on a wet road, thinking distance 27 m plus braking distance 64 m gives a stopping distance of about 91 m.
+
+2. Following distance
+Keep at least a two-second gap in good weather and four seconds when it is wet. To measure it, pick a fixed mark on the road. When the car in front passes it, count "one thousand and one, one thousand and two". You must not reach the mark before you finish.
+
+3. Speed limits (default, if no sign)
+Built-up areas: 50 km/h. Open road: 80 km/h. Dual carriageway: 100 km/h. Motorway: 130 km/h, or 110 in rain. New drivers in their first three years: 10 km/h lower on open roads and motorways.
+
+4. Priority rules
+At an unmarked crossroads, give way to traffic from the right. At a roundabout, give way to traffic already on it, unless a sign says otherwise. A vehicle turning left across a cycle lane gives way to cyclists going straight on. Emergency vehicles with blue lights and sirens always have priority: pull in safely and stop if needed, but do not run a red light to let them pass.
+
+5. Adverse conditions
+Adjust speed and distance, not only the gear. The table gives the usual approximate braking distance for a car at 50 km/h on different surfaces.
+
+| Surface | Braking distance at 50 km/h |
+|---|---|
+| Dry tarmac | 10 m |
+| Wet tarmac | 20 m |
+| Wet leaves | 30 m |
+| Packed snow | 50 m |
+| Ice | 100 m |
+
+In fog, drive at a speed that lets you stop within the distance you can see. Use dipped headlights and use fog lights only when visibility is under 50 m. In strong crosswinds, hold the wheel firmly and give cyclists and lorries extra room.
+
+6. Common errors
+Looking only at the car ahead and not at the road beyond it; confusing thinking distance with total distance; believing that ABS shortens braking distance on every surface; driving at the limit in poor conditions.

@@ -1,0 +1,66 @@
+Voici cinq tickets reçus ce matin par le support de notre quotidien régional, « La Gazette du Val-de-Sarne ». Rédigez une réponse complète et personnalisée pour chacun, avec le ton qui convient (poli, clair, sans jargon) et, quand c'est utile, les démarches précises à suivre. Si un ticket demande une décision que le support ne peut pas prendre seul, dites-le honnêtement et expliquez ce qui va se passer ensuite.
+
+---
+
+**Ticket n° 48213**
+Canal : formulaire du site
+Client : Mme Colette Brémond, abonnée « Intégrale papier + numérique » depuis 2014
+Objet : Journal non livré depuis trois semaines
+
+Bonjour,
+Je vis rue des Tilleuls à Saint-Aubert-le-Pont et mon journal n'arrive plus depuis le lundi 2 du mois dernier. J'ai appelé deux fois, on m'a répondu que « c'était noté ». Rien n'a changé. Mon mari est handicapé, il lit le journal tous les matins, c'est sa seule distraction. Je paie 38,90 € par mois par prélèvement et je trouve cela inadmissible. Je veux être remboursée pour les jours manqués, et surtout que le journal revienne.
+Colette Brémond
+
+Note interne : tournée n° 17, le porteur habituel a quitté la société en début de mois, la tournée a été reprise par un remplaçant le 14. Aucune réclamation enregistrée au dossier avant ce jour. Tarif journalier de l'abonnement : 1,30 €.
+
+---
+
+**Ticket n° 48219**
+Canal : courriel
+Client : M. Hugo Delacroix-Marin, abonné numérique uniquement (offre « Essentiel », 9,90 € par mois)
+Objet : Impossible de lire les articles sur mon téléphone
+
+Bonsoir,
+Depuis la mise à jour de votre application il y a une semaine, je vois un écran blanc quand j'ouvre un article, sauf pour les articles gratuits. Je me suis déconnecté et reconnecté, j'ai réinstallé l'application, rien n'y fait. J'ai un téléphone Android, version 11. Sur l'ordinateur tout fonctionne. J'ai l'impression que vous ne testez pas vos mises à jour. Si ce n'est pas réglé cette semaine, je résilie.
+H. Delacroix-Marin
+
+Note interne : bogue connu n° APP-771 sur Android 11 et 10, correctif prévu dans la version 5.4.2, publication annoncée pour jeudi prochain. Solution provisoire : ouvrir l'article depuis le navigateur du téléphone après connexion au site.
+
+---
+
+**Ticket n° 48227**
+Canal : courrier postal, saisi par l'accueil
+Client : Association « Les Amis du Moulin de Rochebelle » (contact : Mme Florence Aubertin, secrétaire)
+Objet : Demande de publication gratuite d'une annonce et correction d'une erreur
+
+Madame, Monsieur,
+Notre association organise le 21 septembre sa fête annuelle du Moulin, avec un marché de producteurs, une visite guidée et un concert. Votre édition du samedi 6 a annoncé la fête « le 12 septembre » et indiqué le mauvais lieu (la salle des fêtes au lieu du Moulin). Nous avons déjà reçu des appels de personnes mal informées. Pouvez-vous publier un rectificatif visible, et nous accorder, pour cette raison, un encart gratuit dans l'édition du 19 ? Nous joignons le texte souhaité.
+Avec nos remerciements anticipés,
+Florence Aubertin
+
+Note interne : l'erreur vient bien de la rubrique « Agenda » (fiche saisie le 3, date erronée). La politique de la rédaction prévoit un rectificatif en page Agenda dans l'édition suivante, sans frais. Les encarts gratuits sont accordés par la direction commerciale, au cas par cas, et la demande doit passer par M. Gaëtan Pruvost.
+
+---
+
+**Ticket n° 48230**
+Canal : chat
+Client : M. Sébastien Roux, non abonné, a acheté le numéro du week-end en kiosque
+Objet : Résiliation et remboursement d'un abonnement que je n'ai jamais souscrit
+
+Bonjour, je viens de recevoir un courriel de confirmation pour un « abonnement d'essai à 1 € pendant 2 mois, puis 24,90 € par mois ». Je n'ai jamais rien demandé. Je pense que c'est lié au code QR sur le journal du week-end, que j'ai scanné pour voir un reportage vidéo. J'ai l'impression qu'on m'a inscrit sans me le dire. Je veux que ce soit annulé tout de suite, que mon euro me soit rendu, et que mes données soient supprimées. Sinon j'écris à la CNIL.
+
+Note interne : le compte a été créé le jour même à 08 h 12 avec l'adresse de M. Roux, après le passage par la page d'offre accessible depuis le code QR. La case d'acceptation des conditions était cochée. Le prélèvement de 1 € est passé ce matin. Aucun accès aux articles n'a encore eu lieu. Le délégué à la protection des données est joignable à dpo@example.org.
+
+---
+
+**Ticket n° 48236**
+Canal : courriel
+Client : M. Thierry Lacombe, gérant de la boulangerie « Au Fournil des Halles » (annonceur, compte professionnel n° P-3092)
+Objet : Facture en double pour une annonce parue une seule fois
+
+Madame, Monsieur,
+Je viens de recevoir la facture F-2291 de 186,00 € pour une annonce « Recrute apprenti boulanger » parue le 11 dans les petites annonces professionnelles. Or j'ai déjà payé cette annonce par carte bancaire sur votre site le jour de la commande, le reçu est joint à ce courriel. Mon comptable refuse de payer deux fois. En plus, l'annonce devait paraître deux semaines de suite et je ne l'ai vue qu'une seule fois. Merci de m'indiquer si je dois payer cette facture, d'être remboursé du trop-perçu, et de faire paraître la deuxième insertion que j'ai payée.
+Cordialement,
+Thierry Lacombe
+
+Note interne : la commande web a bien été payée par carte le 8 (186,00 €, deux parutions, les 11 et 18). La facture F-2291 a été émise par erreur par le service comptabilité, car la commande web n'avait pas été rapprochée du compte professionnel. La parution du 18 n'a pas eu lieu : l'ordre de publication n'a jamais été transmis à la régie. La date limite de remise des annonces pour l'édition du 25 est le mardi à midi.

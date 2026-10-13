@@ -1,0 +1,134 @@
+I handle customer support for Marlowe Motors, a used car dealership, and I have ten tickets open that all need answers today. Please write an individual, complete reply to each one, in the right tone for that customer, using only what is in the ticket and in our standard terms at the top. If a ticket needs something I have not told you (like a decision from the manager), say so in a short note to me before the reply and write the reply so that it still works.
+
+OUR STANDARD TERMS (for reference):
+- Every car is sold with a 90-day / 3,000-mile warranty covering engine, gearbox, clutch, steering, brakes and electrical system. Tyres, wipers, bulbs, brake pads and discs, batteries and cosmetic damage are not covered.
+- Under the warranty, we repair at our workshop or at an approved garage; repairs elsewhere must be approved by us first, in writing.
+- Customers who buy at a distance (online or phone) have 14 days after delivery to cancel and return the car, provided it has been driven no more than 200 miles and is returned in the same condition. Customers who buy in person at the showroom do not have this right, but we offer a 7-day exchange on the same terms if they have a problem that is not their fault.
+- Part-exchange values are agreed in writing at the time of sale and are fixed.
+- Finance is arranged through an independent broker, Calderon Finance; we do not make decisions on credit or settle finance agreements ourselves.
+- Our complaints process: we acknowledge within 2 working days and give a full answer within 15 working days.
+- Showroom hours: Monday to Saturday, 9:00 to 18:00. Workshop: Monday to Friday, 8:00 to 17:30. Phone: 01632 960 114.
+
+---
+
+TICKET 1
+Ticket ID: MM-20481
+Received: Monday 6 October, 08:14
+Channel: Email
+Customer: Ravindra Okafor-Lindqvist
+Vehicle: 2019 Hatchback, silver, stock no. 7733, bought in person on 19 September, 41,200 miles at sale, now 42,150
+Subject: Engine warning light
+
+Hello. Eighteen days ago I bought the silver hatchback from you. This morning the orange engine warning light came on while I was on the motorway, and the car lost power for a few seconds before it recovered. I pulled over and the light stayed on. I drove home slowly. I am very worried because I bought the car partly on your word that it had been fully checked. I have a young child and I use the car for the school run and for work. I do not want to be told to come in next week. What do I do now? Is this covered?
+
+---
+
+TICKET 2
+Ticket ID: MM-20483
+Received: Monday 6 October, 09:02
+Channel: Web form
+Customer: Mrs. D. Aldworth
+Vehicle: 2016 Estate, blue, stock no. 7512, bought by phone and delivered on 24 September, 63,880 miles at delivery, now 64,010
+Subject: Return of car
+
+I would like to send the car back. When I saw it in person it is not the same colour as in the photos, it looks more grey than blue, and the seats feel hard. I did not buy it in person because I live 140 miles away. Please arrange for someone to collect the car and refund the full price of 7,450 pounds. I understand I have a right to do this.
+
+---
+
+TICKET 3
+Ticket ID: MM-20487
+Received: Monday 6 October, 10:40
+Channel: Phone (call notes by Priya)
+Customer: Mr. Szymon Wieczorek
+Vehicle: 2014 Saloon, black, stock no. 6981, bought in person on 2 July, now out of warranty
+Subject: Complaint, gearbox
+
+Caller says the automatic gearbox has started to jerk when changing between second and third gear. He took it to a garage near his home (Hartley Tyres and Service), who said the gearbox oil is dirty and the gearbox may need a rebuild, estimate 2,100 pounds. He wants us to pay because the car was sold only three months ago. He has already paid the garage 85 pounds for diagnosis. He sounded angry and said he will go to the press and leave reviews. Mileage at sale was 78,300, now 82,900, which is 4,600 miles since purchase.
+
+---
+
+TICKET 4
+Ticket ID: MM-20490
+Received: Monday 6 October, 11:25
+Channel: Email
+Customer: Aoife Brennan-Marsh
+Vehicle: Part-exchange of a 2012 compact car against stock no. 7801 (2020 crossover, green, 18,900 miles)
+Subject: Part exchange value
+
+Hi, I came in on Saturday and looked at the green crossover. The salesman, Dennis, valued my compact car at 3,200 pounds, but when I checked online the same cars are going for 4,000 or more. He said the valuation would be confirmed after an inspection. Can you confirm in writing that you will pay 3,800? I would like to buy on Saturday 11 October if the price is right. The crossover is advertised at 16,495 pounds. I am arranging finance through Calderon Finance and they say they need the final figures by Thursday.
+
+---
+
+TICKET 5
+Ticket ID: MM-20494
+Received: Monday 6 October, 13:05
+Channel: Email
+Customer: Gwendolyn Fairweather-Obi
+Vehicle: 2017 Hatchback, red, stock no. 7219, bought in person on 15 August, 52,600 miles at sale, now 54,300
+Subject: Thank you, and a question
+
+Dear Marlowe Motors, I just wanted to say thank you. The car has been wonderful and your sales person Clive was very patient with me. I have one question. The service book says the first service is due at 55,000 miles or in November. Do you do this? How much is it, and can I book a courtesy car? Also, the passenger side rear tyre has been losing pressure slowly over the past week, and I wondered whether that is something you would fix as part of the warranty.
+
+---
+
+TICKET 6
+Ticket ID: MM-20497
+Received: Monday 6 October, 14:30
+Channel: Email
+Customer: Bartholomew Nkemelu
+Vehicle: 2018 Van, white, stock no. 7640, bought in person on 30 July by Nkemelu Landscaping Ltd, 71,400 miles at sale, now 76,800
+Subject: Finance statement is wrong
+
+I have received a statement from the finance company saying that my monthly payment is 389 pounds. When I bought the van your salesman told me it would be 349 pounds a month for 48 months. That is a 40 pound difference, and over 48 months it is 1,920 pounds. I want this fixed immediately or I want to cancel the whole agreement and have my deposit of 2,500 pounds back. I have kept the original sales paperwork and it says 349. I am a small business and I cannot afford this.
+
+---
+
+TICKET 7
+Ticket ID: MM-20499
+Received: Monday 6 October, 15:48
+Channel: Web form
+Customer: Hyun-woo Pettersen
+Vehicle: None purchased. Enquiry about stock no. 7855 (2021 electric hatchback, grey, 12,300 miles, 21,995 pounds)
+Subject: Questions about the electric car
+
+I am thinking of buying the grey electric hatchback. Could you tell me: what is the battery state of health, does the warranty cover the battery, is there a home charger included, and can I get a test drive for a whole day and not only 20 minutes? I would also like to know if you can deliver to my house in Norwich (about 90 miles from you) and whether there is a charge for that. I would like an answer before the weekend because I am also looking at another dealer.
+
+---
+
+TICKET 8
+Ticket ID: MM-20502
+Received: Monday 6 October, 16:12
+Channel: Email
+Customer: Ottoline Prewitt
+Vehicle: 2015 Hatchback, white, stock no. 7390, bought in person on 11 September, 58,000 miles at sale, now 59,100
+Subject: V5C log book still not arrived
+
+Good afternoon. I bought the white hatchback almost four weeks ago and I still have not received the registration document (the V5C) in my name. At the time the salesman said it would take "a couple of weeks". I need it because my insurer has asked for a copy before they will renew my policy on 20 October, and without it they say they will charge me more. I have rung twice and each time I was told someone would call me back. Nobody has. Could you tell me exactly what is happening and when I will have it? I am also considering making a formal complaint.
+
+---
+
+TICKET 9
+Ticket ID: MM-20505
+Received: Monday 6 October, 16:40
+Channel: Web form
+Customer: Lucian Mbeki-Strand
+Vehicle: 2013 Convertible, red, stock no. 7088, bought in person on 3 October, 96,500 miles at sale, now 96,590
+Subject: Roof leaks and I want to swap
+
+I bought the red convertible on Friday. It rained on Saturday and water came in through the roof above the passenger seat and the carpet is wet. I have not even had it a week. I do not want it repaired, I want to swap it for a different car. I have looked at the stock list and I like the grey estate (stock no. 7599) at 9,250 pounds. The convertible cost me 6,900 pounds. I can pay the difference if you will accept the convertible back. I can bring it in tomorrow morning at 9:30.
+
+---
+
+TICKET 10
+Ticket ID: MM-20508
+Received: Monday 6 October, 17:05
+Channel: Email
+Customer: Philippa Dunmore-Achebe
+Vehicle: 2017 Crossover, orange, stock no. 7704, reserved with a 300 pound deposit on 27 September, not yet collected
+Subject: Deposit refund
+
+Hello, on 27 September I paid a 300 pound deposit to reserve the orange crossover, and the salesman promised to hold it for two weeks. Since then my circumstances have changed: my employer has told me that my job in the city ends in December and I do not think I can take on a loan now. I would like my deposit back please. I appreciate that I only reserved it in the showroom, but I do not think it is fair to keep it as the car has not even been sold to someone else, as far as I can see on your website. I paid by debit card. Please tell me how long a refund would take. I would also like to know whether you would keep the car for me for a few more weeks while I think, without a deposit.
+
+---
+
+Some more details that apply across the tickets. The workshop has a courtesy car available only for repairs under the warranty, and the manager, Mr. Halloran, is in the building until 18:00 today and again tomorrow. For ticket 6, Calderon Finance told us by phone this morning that the original quote of 349 pounds was based on a 5.9 percent interest rate and that the agreement actually signed says 7.9 percent; the signed agreement is held by them and we have not seen a copy yet. For ticket 3, the workshop notes show that the car had a gearbox oil change recorded on the pre-sale inspection sheet, signed by the mechanic on 27 June. For ticket 1, there is a free appointment at the workshop at 8:00 tomorrow, Tuesday, and today after 14:00, and the workshop has recovery cover available through our breakdown partner. For ticket 8, the sales ledger shows the paperwork to change the keeper's name was sent to the licensing authority on 15 September by post, and the dealership has not had the new document back; Mr. Halloran says it is normal for it to take up to five weeks and that the dealer can print a confirmation letter that insurers usually accept. For ticket 9, the workshop has not seen the car, and Mr. Halloran's rule is that a roof seal fault found within seven days is repaired free of charge under the in-person exchange policy if it is not caused by the customer, and an exchange is at his discretion; the grey estate is currently in stock with a 90-day warranty. For ticket 10, the reservation form signed by the customer says the deposit is refundable in full if the car is still unsold at the end of the reservation period and the customer cancels in writing, and that the dealership may keep up to 100 pounds of it as an administration fee if the car has been withdrawn from sale for the customer; the car is still on the website. Refunds go back to the original card and usually take 3 to 5 working days. For ticket 7, we do not have a battery health report to hand yet, but the workshop can run one on Wednesday. The car comes with a manufacturer's battery warranty of 8 years or 100,000 miles, from first registration in March 2021, and a home wall charger is not included but can be bought at cost price, 575 pounds fitted.

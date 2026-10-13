@@ -1,0 +1,95 @@
+I inherited this TypeScript module from a contractor who built the plant inventory for our botanical garden. Please explain what each part does, propose a refactoring that would make it easier to maintain, and write tests for the refactored version.
+
+```ts
+export type Zone = "tropical" | "alpine" | "desert" | "woodland";
+
+export interface Specimen {
+  id: string;
+  latinName: string;
+  commonName?: string;
+  zone: Zone;
+  acquired: string; // ISO date
+  bed: string;
+  health: number; // 0 to 100
+  lastWatered?: string;
+}
+
+export interface WateringRule {
+  zone: Zone;
+  everyDays: number;
+}
+
+const rules: WateringRule[] = [
+  { zone: "tropical", everyDays: 2 },
+  { zone: "alpine", everyDays: 5 },
+  { zone: "desert", everyDays: 21 },
+  { zone: "woodland", everyDays: 7 },
+];
+
+const inventory: Specimen[] = [];
+
+export function addSpecimen(s: Specimen): void {
+  for (const x of inventory) {
+    if (x.id === s.id) {
+      throw new Error("duplicate id " + s.id);
+    }
+  }
+  if (s.health < 0 || s.health > 100) {
+    throw new Error("health out of range");
+  }
+  inventory.push(s);
+}
+
+export function findByZone(zone: Zone): Specimen[] {
+  return inventory.filter((s) => s.zone === zone);
+}
+
+export function search(term: string): Specimen[] {
+  const t = term.toLowerCase();
+  return inventory.filter(
+    (s) =>
+      s.latinName.toLowerCase().includes(t) ||
+      (s.commonName !== undefined && s.commonName.toLowerCase().includes(t))
+  );
+}
+
+function daysBetween(a: string, b: string): number {
+  const ms = new Date(b).getTime() - new Date(a).getTime();
+  return Math.floor(ms / 86400000);
+}
+
+export function dueForWatering(today: string): Specimen[] {
+  const out: Specimen[] = [];
+  for (const s of inventory) {
+    const rule = rules.find((r) => r.zone === s.zone);
+    if (!rule) continue;
+    const since = s.lastWatered ?? s.acquired;
+    if (daysBetween(since, today) >= rule.everyDays) {
+      out.push(s);
+    }
+  }
+  return out;
+}
+
+export function markWatered(id: string, date: string): void {
+  const s = inventory.find((x) => x.id === id);
+  if (!s) throw new Error("not found: " + id);
+  s.lastWatered = date;
+}
+
+export function updateHealth(id: string, health: number): Specimen {
+  const s = inventory.find((x) => x.id === id);
+  if (!s) throw new Error("not found: " + id);
+  s.health = health;
+  return s;
+}
+
+export function atRisk(threshold = 40): string[] {
+  return inventory
+    .filter((s) => s.health < threshold)
+    .sort((a, b) => a.health - b.health)
+    .map((s) => `${s.commonName ?? s.latinName} (${s.bed}): ${s.health}`);
+}
+```
+
+Things I already worry about: the global inventory array makes testing painful, updateHealth does no validation although addSpecimen does, dates are plain strings, and the volunteers who use dueForWatering() on Monday mornings sometimes get specimens listed that were watered the same day. I also expect we will add a greenhouse module soon that needs the same watering logic with different rules, so keep that in mind.

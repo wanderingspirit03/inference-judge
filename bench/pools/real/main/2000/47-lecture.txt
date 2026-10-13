@@ -1,0 +1,48 @@
+These are my notes from the water treatment module of our lifeguard and pool plant operator course, and I have an assessment on Friday. Can you turn them into a proper study guide with worked examples that I can follow step by step, and then a quiz of about fifteen questions with full answers and explanations? Please keep the examples close to the numbers in my notes.
+
+Module 4: Pool water treatment and chemistry (Tideway Leisure Trust, operator training)
+Lecturer: Mr. Barnaby Osei, Head of Plant Operations
+
+1. Why we treat the water
+
+A pool is a warm bath shared by hundreds of people a day. Bathers bring sweat, skin cells, hair, sun cream and urine into the water, and these feed micro-organisms. Treatment has three jobs: remove the dirt that can be filtered, kill or inactivate germs, and keep the water chemically balanced so that the disinfectant works and the bathers and the building are not harmed. All three must run at once. A perfect filter with no disinfectant is not safe, and a high chlorine level with poor circulation is not safe either.
+
+2. The treatment loop
+
+Water leaves the pool by two routes, the surface overflow channels and the main drain at the deepest point. It goes to the balance tank, which collects the surge when bathers enter and keeps the pumps from running dry. From the balance tank the pump sends it through the hair and lint strainer, then the filters, then the chemical dosing points, then the heater, and finally back to the pool through inlets placed to spread the flow evenly.
+
+The turnover period is the time needed for the pump to move a volume of water equal to the whole pool. For the 25 metre main pool at Tideway the volume is 625 cubic metres. The design turnover is 4 hours.
+
+Worked example 1. Required flow rate = volume divided by turnover period = 625 divided by 4 = 156.25 cubic metres per hour. The plant at Tideway has two duty pumps, each rated at 90 cubic metres per hour at the working head. Together they give 180 cubic metres per hour, so the actual turnover is 625 divided by 180 = 3.47 hours, or about 3 hours 28 minutes. This is quicker than the design figure, so the plant meets the requirement with a margin. If one pump fails, the flow falls to 90 and the turnover period rises to 625 divided by 90 = 6.94 hours. That is well over the design figure, so we must reduce bather numbers to the limit given in the plant manual.
+
+3. Filtration
+
+Tideway uses high rate sand filters. Water is pushed down through a bed of graded sand, and particles get trapped in the spaces between the grains. As the bed fills with dirt, the pressure difference between the inlet and the outlet of the filter rises. When the difference reaches 0.5 bar above the clean figure, or once a week, whichever comes first, the filter is backwashed. Backwashing reverses the flow, lifts the sand and flushes the dirt to waste, and takes about 5 minutes followed by a rinse of 1 minute to settle the bed.
+
+The filter rate is the flow divided by the surface area of the filter bed. Each of our three filters has a bed area of 3.1 square metres. At 180 cubic metres per hour shared over three filters, each carries 60 cubic metres per hour, so the filter rate is 60 divided by 3.1 = 19.4 metres per hour. The plant manual allows up to 30 metres per hour for sand at this grade. Notes: a coagulant (flocculant) is dosed before the filter at 0.1 to 0.3 milligrams per litre to bind very fine particles together so that the sand can catch them.
+
+4. Disinfection with chlorine
+
+We dose sodium hypochlorite solution, which is liquid chlorine. When it dissolves, it forms hypochlorous acid, which is the active germ killer, and hypochlorite ion, which is much weaker. The balance between them depends on pH. At pH 7.2 about 62 percent of the free chlorine is the active acid, at pH 7.5 about 49 percent and at pH 8.0 only about 22 percent. This is the main reason why pH control matters so much: the same chlorine reading kills germs far more slowly in water with a high pH.
+
+Our targets at Tideway: free chlorine between 1.0 and 3.0 milligrams per litre (we aim for 1.5 in the main pool), pH between 7.2 and 7.6, total alkalinity between 80 and 120 milligrams per litre, and water temperature of 28 degrees in the main pool and 32 degrees in the teaching pool.
+
+Free chlorine is what is still available to kill germs. Combined chlorine, or chloramines, is chlorine that has reacted with sweat and urine. It smells strong, irritates eyes and lungs, and is a poor disinfectant. Combined chlorine equals total chlorine minus free chlorine. We keep it below 0.5 milligrams per litre. If it goes above 1.0, we must take action, which means more fresh water, a higher dose and, in serious cases, a shock dose and closure of the pool.
+
+Worked example 2. A test at 10:00 shows total chlorine 2.2 and free chlorine 1.4. Combined chlorine = 2.2 minus 1.4 = 0.8 milligrams per litre. That is above the 0.5 target but below the 1.0 action level. The operator should check bather load, increase fresh water make-up, and retest in an hour.
+
+Worked example 3. We want to raise free chlorine in the main pool from 1.0 to 1.5 milligrams per litre, so the rise is 0.5 milligrams per litre. Mass of chlorine needed = 0.5 grams per cubic metre times 625 cubic metres = 312.5 grams of chlorine. Our hypochlorite solution is 12 percent available chlorine, which means 120 grams per litre. Volume of solution = 312.5 divided by 120 = 2.6 litres. In practice the dose is added gradually through the dosing pump and not poured in at once.
+
+5. pH and alkalinity
+
+The pH is a measure of how acidic or alkaline the water is, and 7 is neutral. Hypochlorite solution is alkaline, so dosing it raises pH over time. We therefore add acid, normally carbon dioxide gas or dilute hydrochloric acid, to bring it back down. Total alkalinity is the water's ability to resist changes in pH, like a shock absorber. Too low and the pH swings wildly after each dose. Too high and the pH keeps creeping up and is hard to bring down. We raise alkalinity with sodium bicarbonate and lower it by careful acid dosing with aeration.
+
+Calcium hardness should be between 150 and 250 milligrams per litre. Soft water is aggressive and eats away at grout and plaster. Very hard water forms scale on heaters and tiles.
+
+6. Automatic control and testing
+
+Probes in a sample line measure pH and chlorine every few seconds and send the readings to the controller, which adjusts the dosing pumps. The controller is only as good as its probes. Every morning before opening, and every two hours while the pool is open, a member of staff takes a manual sample and tests it with a photometer. If the manual reading differs from the controller by more than 0.3 milligrams per litre for chlorine or 0.2 for pH, the probe is cleaned and recalibrated. All results go in the plant log with the time, the initials of the person testing, and any action taken.
+
+7. Safety of chemicals
+
+Never mix hypochlorite with acid. The reaction releases chlorine gas, which can seriously harm or kill. Store them in separate, bunded areas with separate delivery points. Dosing tanks and pipes are labelled and colour coded. Eyewash stations and the emergency shower must be tested weekly. Anyone handling chemicals must wear gloves, goggles and an apron.

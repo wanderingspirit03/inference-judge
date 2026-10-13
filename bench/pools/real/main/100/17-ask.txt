@@ -1,0 +1,1 @@
+I lead the IT office of a school district with twenty schools and four thousand laptops. Write a detailed plan for a yearly laptop refresh cycle, including budget, imaging, deployment, support, recycling and how to report results.

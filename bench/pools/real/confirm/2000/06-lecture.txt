@@ -1,0 +1,74 @@
+These are my lecture notes from the vet nursing course module on fluid therapy in small animals. Please turn them into a study guide for the exam, with worked examples for the calculations, and then a quiz of about ten questions with full answers.
+
+**Module 6: Fluid therapy in dogs and cats (lecture notes, week 9)**
+
+**1. Why we give fluids**
+- Three aims: replace a deficit (dehydration), cover ongoing losses (vomiting, diarrhoea, polyuria), and meet daily maintenance needs.
+- Fluids are not harmless. Too much, too fast causes overload, especially in cats and in animals with heart disease or kidney failure.
+
+**2. Types of fluid**
+- Crystalloids: isotonic (for example a balanced replacement solution or 0.9% saline) stay in the extracellular space; about 25% of the volume stays in the blood vessels after an hour.
+- Hypotonic maintenance fluids: only for maintenance, never for resuscitation, because they carry little sodium.
+- Colloids: large molecules that hold water inside vessels; used for low protein or shock under supervision of the vet.
+- Hypertonic saline (7.2%): small volume, rapid effect, short lasting, must be followed by isotonic fluid.
+
+**3. Assessing dehydration**
+- Percentage is estimated from skin tent, gum moistness, eye position, heart rate and capillary refill time.
+- Under 5%: not detectable. 5%: slightly tacky gums. 8%: skin tent persists, eyes slightly sunken. 10%: marked skin tent, dull and sunken eyes, fast pulse. 12% or more: shock, collapse.
+- Weigh the animal. Acute weight loss is the best measure of fluid loss.
+
+**4. Calculations**
+- Maintenance rate: 50 ml/kg/day for dogs over 10 kg is a safe working figure; smaller dogs and cats are often given 60 ml/kg/day.
+- Deficit (litres) = body weight (kg) x dehydration fraction. For example, a 20 kg dog 8% dehydrated has a deficit of 20 x 0.08 = 1.6 litres.
+- Replace the deficit over 12 to 24 hours, not all at once, unless the animal is in shock.
+- Total over 24 hours = deficit + maintenance + estimated ongoing losses.
+- Drip rate: drops per minute = (volume in ml x drops per ml of the giving set) / (time in minutes). A standard set gives 20 drops per ml; a paediatric set gives 60 drops per ml.
+
+**5. Shock doses**
+- Dog: up to 90 ml/kg of crystalloid in the first hour, given in boluses of one quarter to one third and reassessing after each.
+- Cat: up to 60 ml/kg, in smaller boluses of 10 to 15 ml/kg given over 15 minutes.
+- Reassess after every bolus: heart rate, pulse quality, gum colour, temperature of paws, breathing.
+
+**6. Routes**
+- Intravenous is the route of choice. Cephalic vein first. Use a catheter that is as short and as wide as the patient allows.
+- Subcutaneous: only for mild dehydration in stable animals; absorption is slow and unreliable if the animal is cold or in shock.
+- Intraosseous: for neonates and collapsed small animals when no vein can be found.
+- Oral: preferred if the animal is drinking and not vomiting.
+
+**7. Monitoring**
+- Check at least every four hours: body weight, urine output (target 1 to 2 ml/kg/hour), heart and breathing rate, mucous membranes, catheter site.
+- Signs of overload: clear nasal discharge, chemosis (swollen conjunctiva), cough, noisy breathing, rapid weight gain. Stop the fluids and call the vet.
+
+**8. Catheter care**
+- Wash hands, wear gloves, clip and clean the site with the surgical scrub.
+- Change the dressing every day and inspect for swelling, heat or pain; remove the catheter at the first sign of phlebitis.
+- Label the giving set with the date and time it was started; change it every 72 hours.
+
+**9. Special cases**
+- Cats with heart disease or hypertrophic cardiomyopathy: use about half the usual rate, small boluses of 5 ml/kg, and weigh twice a day. Rapid breathing at rest means stop.
+- Kidney failure: fluids are the main treatment, but urine output must be measured with a closed collection system; if output falls below 1 ml/kg/hour after rehydration, tell the vet at once because the animal may be overloaded.
+- Diabetic ketoacidosis: use saline first, add potassium once the vet has a blood result, and never use a fluid with glucose until the blood sugar has fallen.
+- Puppies and kittens: use paediatric giving sets, warm all fluids, and measure the rate with a syringe pump, since a few millilitres matter.
+- Blood loss: crystalloid alone dilutes the blood further. The vet may choose a blood transfusion; nurses prepare the cross-match and monitor for transfusion reactions (fever, tremor, vomiting, hives).
+
+**10. Worked example from the lecture**
+A 4 kg cat has been vomiting for three days and is judged to be 7% dehydrated. The deficit is 4 x 0.07 = 0.28 litres, which is 280 ml. Maintenance at 60 ml/kg/day is 240 ml. We replace the deficit over 12 hours, so 280 / 12 = 23 ml/hour. We also give maintenance over 24 hours, so 240 / 24 = 10 ml/hour. The starting rate is 23 + 10 = 33 ml/hour for the first 12 hours, then 10 ml/hour plus any ongoing losses measured during that time. If the cat vomits 30 ml in a four-hour period, we add 30 / 4 = 7.5 ml/hour to the rate.
+
+**10A. Adding things to the bag**
+- Potassium chloride is the commonest additive. Typical supplement is 20 mmol per litre when the blood potassium is 3.0 to 3.5 mmol/litre, and more only on the vet's instruction. The maximum safe rate is 0.5 mmol/kg/hour, so a 10 kg dog on a supplemented fluid at 20 mmol/litre must not run faster than 250 ml/hour. Always check this limit before setting the pump.
+- Label the bag clearly with the additive, the amount, the date and your initials. A bag without a label is thrown away.
+- Never add drugs to a bag of blood or to colloid. Never run calcium-containing fluid through the same line as blood.
+- Glucose 5% in water is not a replacement fluid. It is mainly water once the sugar is used, so it can cause low sodium if given in large volumes.
+
+**11. Revision checklist**
+- Know the dehydration signs by percentage.
+- Be able to do deficit, maintenance and drip-rate calculations without a calculator for simple weights.
+- Know the signs of overload and the first action.
+- Know which route suits which patient.
+- Know what to record on the fluid chart.
+
+**12. Common mistakes (from the case review session)**
+- Calculating deficit but forgetting the maintenance part.
+- Setting a pump in ml per hour when the order was in ml per kg per hour.
+- Giving potassium-supplemented fluid faster than 0.5 mmol/kg/hour.
+- Not warming fluids for small patients, so they become hypothermic.

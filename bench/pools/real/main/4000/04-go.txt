@@ -1,0 +1,371 @@
+Here is the order pricing package from our bookshop backend (Fernlea Books, we sell new and second-hand books online and ship across the country). Could you explain what each part does, review it honestly for bugs and design problems, and then write table-driven tests that cover the important cases? I would especially like to know whether the discount and shipping logic can give a wrong total.
+
+```go
+// Package pricing computes basket totals for the Fernlea Books online shop.
+package pricing
+
+import (
+	"errors"
+	"fmt"
+	"sort"
+	"strings"
+	"time"
+)
+
+// Money is an amount in pence.
+type Money int64
+
+// String formats the amount as pounds and pence.
+func (m Money) String() string {
+	sign := ""
+	if m < 0 {
+		sign = "-"
+		m = -m
+	}
+	return fmt.Sprintf("%s£%d.%02d", sign, m/100, m%100)
+}
+
+// Condition describes the state of a book.
+type Condition string
+
+const (
+	ConditionNew      Condition = "new"
+	ConditionGood     Condition = "good"
+	ConditionAcceptable Condition = "acceptable"
+)
+
+// Item is a line in a basket.
+type Item struct {
+	SKU        string
+	Title      string
+	Unit       Money
+	Quantity   int
+	Condition  Condition
+	WeightGram int
+	Preorder   bool
+}
+
+// Basket is the set of items a customer wants to buy.
+type Basket struct {
+	Items    []Item
+	Country  string
+	Voucher  string
+	Member   bool
+	PlacedAt time.Time
+}
+
+// Voucher describes a discount code.
+type Voucher struct {
+	Code       string
+	Percent    int
+	FixedOff   Money
+	MinSpend   Money
+	ValidFrom  time.Time
+	ValidUntil time.Time
+	NewOnly    bool
+}
+
+// Quote is the result of pricing a basket.
+type Quote struct {
+	Subtotal Money
+	Discount Money
+	Shipping Money
+	Tax      Money
+	Total    Money
+	Lines    []QuoteLine
+}
+
+// QuoteLine is the priced version of an item.
+type QuoteLine struct {
+	SKU   string
+	Qty   int
+	Gross Money
+}
+
+var (
+	ErrEmptyBasket   = errors.New("pricing: basket is empty")
+	ErrBadQuantity   = errors.New("pricing: quantity must be positive")
+	ErrUnknownVoucher = errors.New("pricing: unknown voucher")
+	ErrVoucherExpired = errors.New("pricing: voucher not valid at this time")
+	ErrMinSpend       = errors.New("pricing: minimum spend not reached")
+)
+
+// Pricer prices baskets using a voucher table and shipping rules.
+type Pricer struct {
+	Vouchers map[string]Voucher
+	Now      func() time.Time
+}
+
+// NewPricer returns a Pricer with the given vouchers.
+func NewPricer(vouchers []Voucher) *Pricer {
+	table := make(map[string]Voucher, len(vouchers))
+	for _, v := range vouchers {
+		table[strings.ToUpper(v.Code)] = v
+	}
+	return &Pricer{Vouchers: table, Now: time.Now}
+}
+
+// memberPercent is the standing discount for members on new books.
+const memberPercent = 5
+
+// freeShippingThreshold is the subtotal at which domestic shipping is free.
+const freeShippingThreshold Money = 2500
+
+// Price calculates the quote for a basket.
+func (p *Pricer) Price(b Basket) (Quote, error) {
+	if len(b.Items) == 0 {
+		return Quote{}, ErrEmptyBasket
+	}
+
+	var q Quote
+	var newBooksTotal Money
+	for _, it := range b.Items {
+		if it.Quantity <= 0 {
+			return Quote{}, fmt.Errorf("%w: %s", ErrBadQuantity, it.SKU)
+		}
+		gross := it.Unit * Money(it.Quantity)
+		q.Subtotal += gross
+		if it.Condition == ConditionNew {
+			newBooksTotal += gross
+		}
+		q.Lines = append(q.Lines, QuoteLine{SKU: it.SKU, Qty: it.Quantity, Gross: gross})
+	}
+
+	discount := Money(0)
+	if b.Member {
+		discount += newBooksTotal * memberPercent / 100
+	}
+
+	if b.Voucher != "" {
+		v, ok := p.Vouchers[strings.ToUpper(strings.TrimSpace(b.Voucher))]
+		if !ok {
+			return Quote{}, ErrUnknownVoucher
+		}
+		now := b.PlacedAt
+		if now.IsZero() {
+			now = p.Now()
+		}
+		if now.Before(v.ValidFrom) || now.After(v.ValidUntil) {
+			return Quote{}, ErrVoucherExpired
+		}
+		if q.Subtotal < v.MinSpend {
+			return Quote{}, ErrMinSpend
+		}
+		base := q.Subtotal
+		if v.NewOnly {
+			base = newBooksTotal
+		}
+		voucherOff := base*Money(v.Percent)/100 + v.FixedOff
+		discount += voucherOff
+	}
+
+	if discount > q.Subtotal {
+		discount = q.Subtotal
+	}
+	q.Discount = discount
+
+	q.Shipping = shippingFor(b, q.Subtotal-q.Discount)
+	q.Tax = taxFor(b.Items, q.Discount, q.Subtotal)
+	q.Total = q.Subtotal - q.Discount + q.Shipping
+	return q, nil
+}
+
+// shippingFor works out the delivery charge.
+func shippingFor(b Basket, afterDiscount Money) Money {
+	weight := 0
+	allPreorder := true
+	for _, it := range b.Items {
+		weight += it.WeightGram * it.Quantity
+		if !it.Preorder {
+			allPreorder = false
+		}
+	}
+	if allPreorder {
+		return 0
+	}
+
+	var base Money
+	switch strings.ToUpper(b.Country) {
+	case "GB", "":
+		switch {
+		case weight <= 500:
+			base = 299
+		case weight <= 2000:
+			base = 449
+		default:
+			base = 799
+		}
+		if afterDiscount >= freeShippingThreshold {
+			base = 0
+		}
+	case "IE":
+		base = 899 + Money(weight/1000)*150
+	default:
+		base = 1499 + Money(weight/1000)*250
+	}
+	return base
+}
+
+// taxFor returns the VAT included in the price. Books carry no VAT, so
+// only the discount-adjusted value of non-book items would matter; at the
+// moment the shop sells books only, so the result is always zero.
+func taxFor(items []Item, discount, subtotal Money) Money {
+	if len(items) == 0 || subtotal == 0 {
+		return 0
+	}
+	return 0
+}
+
+// SplitByCondition groups quote lines by the condition of the item sold,
+// sorted by condition name, for the warehouse pick list.
+func SplitByCondition(items []Item) map[Condition][]string {
+	out := make(map[Condition][]string)
+	for _, it := range items {
+		out[it.Condition] = append(out[it.Condition], it.SKU)
+	}
+	for c := range out {
+		sort.Strings(out[c])
+	}
+	return out
+}
+
+// HeaviestItem returns the SKU of the item with the largest line weight.
+func HeaviestItem(items []Item) (string, bool) {
+	if len(items) == 0 {
+		return "", false
+	}
+	best := items[0]
+	bestW := best.WeightGram * best.Quantity
+	for _, it := range items[1:] {
+		if w := it.WeightGram * it.Quantity; w > bestW {
+			best, bestW = it, w
+		}
+	}
+	return best.SKU, true
+}
+// BundleRule gives the cheapest book in every group of Size books for free,
+// used for the "three for two" promotions on paperbacks.
+type BundleRule struct {
+	Name  string
+	Size  int
+	Skus  map[string]bool
+}
+
+// BundleDiscount returns the value of the free books under the rule. Items
+// are expanded one copy at a time, sorted by price, and the cheapest copy in
+// each complete group is free.
+func BundleDiscount(items []Item, rule BundleRule) Money {
+	if rule.Size < 2 {
+		return 0
+	}
+	var prices []Money
+	for _, it := range items {
+		if !rule.Skus[it.SKU] {
+			continue
+		}
+		for i := 0; i < it.Quantity; i++ {
+			prices = append(prices, it.Unit)
+		}
+	}
+	sort.Slice(prices, func(i, j int) bool { return prices[i] > prices[j] })
+	var free Money
+	for start := 0; start+rule.Size <= len(prices); start += rule.Size {
+		free += prices[start+rule.Size-1]
+	}
+	return free
+}
+
+// Receipt renders a quote as plain text for the order confirmation email.
+func Receipt(b Basket, q Quote) string {
+	var sb strings.Builder
+	titles := make(map[string]string, len(b.Items))
+	for _, it := range b.Items {
+		titles[it.SKU] = it.Title
+	}
+	for _, l := range q.Lines {
+		fmt.Fprintf(&sb, "%-40s x%d  %s\n", titles[l.SKU], l.Qty, l.Gross)
+	}
+	fmt.Fprintf(&sb, "Subtotal: %s\n", q.Subtotal)
+	if q.Discount > 0 {
+		fmt.Fprintf(&sb, "Discount: -%s\n", q.Discount)
+	}
+	fmt.Fprintf(&sb, "Delivery: %s\n", q.Shipping)
+	fmt.Fprintf(&sb, "Total:    %s\n", q.Total)
+	return sb.String()
+}
+
+// EstimateDelivery returns the date a basket should arrive. Orders placed
+// before 14:00 on a weekday are dispatched the same day, and pre-orders are
+// held until the release date given for the SKU.
+func EstimateDelivery(b Basket, releases map[string]time.Time) time.Time {
+	dispatch := b.PlacedAt
+	cutoff := time.Date(dispatch.Year(), dispatch.Month(), dispatch.Day(), 14, 0, 0, 0, dispatch.Location())
+	if dispatch.After(cutoff) {
+		dispatch = dispatch.AddDate(0, 0, 1)
+	}
+	for _, it := range b.Items {
+		if it.Preorder {
+			if rel, ok := releases[it.SKU]; ok && rel.After(dispatch) {
+				dispatch = rel
+			}
+		}
+	}
+	for dispatch.Weekday() == time.Saturday || dispatch.Weekday() == time.Sunday {
+		dispatch = dispatch.AddDate(0, 0, 1)
+	}
+	days := 2
+	switch strings.ToUpper(b.Country) {
+	case "GB", "":
+	case "IE":
+		days = 4
+	default:
+		days = 8
+	}
+	return dispatch.AddDate(0, 0, days)
+}
+
+// Validate checks a basket for problems that should stop checkout before
+// pricing: duplicate SKUs, negative prices, missing conditions and an
+// unsupported destination country.
+func Validate(b Basket) []error {
+	var errs []error
+	seen := make(map[string]bool)
+	for i, it := range b.Items {
+		if it.SKU == "" {
+			errs = append(errs, fmt.Errorf("item %d: missing SKU", i))
+			continue
+		}
+		if seen[it.SKU] {
+			errs = append(errs, fmt.Errorf("item %d: duplicate SKU %s", i, it.SKU))
+		}
+		seen[it.SKU] = true
+		if it.Unit < 0 {
+			errs = append(errs, fmt.Errorf("item %d: negative price for %s", i, it.SKU))
+		}
+		switch it.Condition {
+		case ConditionNew, ConditionGood, ConditionAcceptable:
+		default:
+			errs = append(errs, fmt.Errorf("item %d: unknown condition %q for %s", i, it.Condition, it.SKU))
+		}
+		if it.WeightGram <= 0 {
+			errs = append(errs, fmt.Errorf("item %d: weight not set for %s", i, it.SKU))
+		}
+	}
+	country := strings.ToUpper(b.Country)
+	if len(country) != 0 && len(country) != 2 {
+		errs = append(errs, fmt.Errorf("country %q is not a two letter code", b.Country))
+	}
+	return errs
+}
+
+// TotalWeight returns the weight of the whole basket in grams.
+func TotalWeight(items []Item) int {
+	total := 0
+	for _, it := range items {
+		total += it.WeightGram * it.Quantity
+	}
+	return total
+}
+```
+
+A couple of things to bear in mind. The order service calls `Price` once when the basket page loads and again at checkout, and customers have complained that the total sometimes differs by a few pence between the two. Marketing also wants to start a "half price on second-hand" voucher next month, and a colleague warned me that stacking the member discount with a percentage voucher might give people more than they should get. If you find anything like that, please say exactly which input produces it.

@@ -1,0 +1,64 @@
+We are about to hand this specification to the developers, and I need a test plan for it before they start. Please write a complete test plan with numbered test cases (steps, test data and expected result for each), grouped by feature, including edge cases, negative cases and the non-functional checks you think are needed.
+
+# Product Specification: Table booking and waitlist for Saltwick Dining Group
+
+Version 0.9, owner: Beatrix Oduya, Product. Applies to the web booking widget and the host-stand tablet app at all 7 restaurants.
+
+## 1. Overview
+
+Guests can book a table online for 1 to 12 people. When no table is free at the requested time, they can join a waitlist for that date. Hosts manage the floor on a tablet. The system replaces the current phone-and-paper process.
+
+## 2. Booking rules
+
+2.1 A booking has a restaurant, a date, a time slot, a party size, a guest name, a mobile phone number and an optional note (maximum 200 characters).
+2.2 Time slots are every 15 minutes between the restaurant's opening time and 90 minutes before closing. Each restaurant defines its own opening hours per weekday and may mark single dates as closed.
+2.3 A booking can be made up to 60 days ahead and no later than 2 hours before the slot, except that hosts can add bookings at any time.
+2.4 Standard dining duration is 90 minutes for parties of 1 to 4, 120 minutes for parties of 5 to 8 and 150 minutes for parties of 9 to 12. A table is blocked for the duration plus a 15-minute turnover buffer.
+2.5 The system assigns a table automatically. It selects the smallest free table whose capacity is at least the party size and whose capacity is not more than the party size plus 2. Tables can be combined only if the restaurant has marked them as combinable, and only for parties of 7 or more.
+2.6 Parties larger than 8 pay a deposit of 10 euros per person by card at booking time. The deposit is refunded in full if the booking is cancelled at least 24 hours before the slot, and is otherwise kept. The deposit is subtracted from the final bill by the host.
+2.7 A guest may have at most 3 future bookings at one restaurant and at most 5 in total across all restaurants. The phone number identifies the guest.
+2.8 Restaurants have a daily cap on the number of covers booked online (default 80% of seated capacity) so that walk-in guests can be served.
+
+## 3. Confirmation and reminders
+
+3.1 After booking, the guest receives an SMS within 1 minute with the details and a link to change or cancel.
+3.2 24 hours before the slot, the guest receives a reminder SMS with a one-tap button to confirm or cancel. If a guest does not respond, the booking stays valid.
+3.3 Guests can change the time or party size from the link until 2 hours before the slot. A change is treated as a new availability check; if the new request cannot be met, the old booking stays.
+3.4 Cancellations free the table immediately. If a waitlist exists for that date, see section 4.
+
+## 4. Waitlist
+
+4.1 A guest may join a waitlist for a date, a party size and a time window (for example, 19:00 to 21:00). The waitlist is first come, first served.
+4.2 When a table that fits becomes free inside a waiting guest's window, the system sends an SMS offering the slot. The guest has 15 minutes to accept by tapping the link. If the offer is not accepted in 15 minutes, it moves to the next guest.
+4.3 If the freed slot is less than 3 hours away, the acceptance window is shortened to 8 minutes.
+4.4 A guest can be on at most 2 waitlists for the same date.
+4.5 When a guest accepts, the booking is created as in section 2 and the guest is removed from the waitlist. The deposit rule in 2.6 applies, and the offer payment must be made at acceptance.
+
+## 5. Host app
+
+5.1 The host sees a timeline of the floor by table, with bookings in colour: expected (blue), arrived (green), seated (grey), late by 15 minutes or more (amber), no-show (red).
+5.2 A booking is marked as late automatically 15 minutes after the slot and as a no-show after 30 minutes, unless the host marks the guest as arrived. A no-show releases the table and its deposit is kept.
+5.3 Hosts can create walk-in entries, move bookings between tables, override the table assignment, extend a seating by 15, 30 or 60 minutes, and block tables.
+5.4 When a host moves a booking to a table that creates a conflict with another booking, the app warns and requires confirmation.
+5.5 The host app works offline for up to 30 minutes and synchronises on reconnection. If two devices change the same booking while offline, the most recent change wins and the other device shows a notice.
+
+## 6. Reporting and permissions
+
+6.1 Managers can view a daily report: covers booked, covers seated, no-shows, cancellations, average party size, waitlist conversions.
+6.2 There are three roles: host (floor and bookings), manager (host plus reports and opening hours) and group admin (manager for every restaurant plus user management).
+
+## 6A. Payments and refunds
+
+6A.1 Deposits are taken by card through the group's payment provider; card details never reach the booking system, which stores only a payment reference. 6A.2 If a payment fails, the booking is held for 10 minutes so the guest can try another card, and is then released. 6A.3 A refund under rule 2.6 is issued automatically when the guest cancels through the link at least 24 hours before the slot; the system sends an SMS to confirm. 6A.4 If a booking is changed so that the party size drops to 8 or fewer, the deposit is refunded in full. If the party size rises above 8, the additional deposit is requested at the time of change and the change is not applied until it is paid. 6A.5 Hosts can waive a deposit forfeiture for a no-show, with a reason, but only managers can approve a waiver over 100 euros.
+
+## 6B. Special dates and closures
+
+6B.1 A manager can close a restaurant for a date, in which case all existing bookings for that date are cancelled and the guests receive an SMS with a link to rebook at another restaurant of the group, and any deposits are refunded. 6B.2 On dates marked "special menu" (for example 24 December and 14 February), the slot interval is 30 minutes, the standard dining duration is 120 minutes for all party sizes, and a deposit of 15 euros per person applies to parties of 5 or more. 6B.3 A manager can set a maximum party size per restaurant, lower than 12, for example 8 at the smallest restaurant.
+
+## 6C. Data retention
+
+6C.1 Guest names and phone numbers are deleted 18 months after the last booking. 6C.2 A guest can ask to be deleted by replying STOP to any SMS; the system then removes the personal data within 24 hours, keeping an anonymised booking record for reporting. 6C.3 Guest notes are visible to hosts and managers only.
+
+## 7. Non-functional requirements
+
+7.1 The widget loads in less than 2 seconds on a mobile connection (4G). 7.2 The availability check takes less than 1 second at the 95th percentile. 7.3 The system supports 300 concurrent guests browsing. 7.4 Guest phone numbers are not shown to hosts until 24 hours before the booking time. 7.5 The widget works in English, French and Italian, and is accessible according to WCAG 2.1 level AA.

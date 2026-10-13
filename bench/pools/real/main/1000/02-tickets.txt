@@ -1,0 +1,30 @@
+Bitte schreib zu jedem dieser drei Tickets eine eigene, vollständige Antwort an den Kunden. Die Antworten sollen höflich, konkret und mit klaren nächsten Schritten sein. Wo uns Informationen fehlen, sag bitte, was wir noch klären müssen.
+
+**Ticket #48213 - Kategorie: Wareneingang - Priorität: hoch**
+Von: Sabine Dornfeld, Einkauf, Kleinmetall Hartung GmbH
+Betreff: Palette fehlt, Lieferschein trotzdem quittiert
+
+Guten Tag, am Dienstag hat Ihr Fahrer bei uns 12 Paletten Schrauben (Artikel KM-4410) abgeliefert. Auf dem Lieferschein stehen 12 Paletten, aber im Lager haben wir nur 11 gefunden. Unser Mitarbeiter hat den Schein leider schon abgezeichnet, bevor er nachgezählt hat. Die fehlende Palette brauchen wir dringend, weil am Freitag eine Montage bei einem Kunden beginnt. Wie gehen wir jetzt vor? Und werden wir die Palette berechnet bekommen?
+
+Notiz Support: Laut Scanner wurden am Dienstag um 14:12 Uhr im Lager Nord 12 Paletten verladen. Die Fahrerin ist erst am Donnerstag wieder im Dienst.
+
+**Ticket #48230 - Kategorie: Lagergebühren - Priorität: normal**
+Von: Jonas Wiechert, Wiechert Gartenbedarf
+Betreff: Rechnung Oktober viel zu hoch
+
+Hallo, auf meiner Oktoberrechnung stehen 1.480 Euro Lagergebühren. Im September waren es 920 Euro, und ich habe nicht mehr eingelagert. Im Vertrag steht ein Preis von 6,50 Euro pro Palettenplatz und Monat. Das wären bei meinen 140 Plätzen genau 910 Euro. Wo kommen die übrigen Posten her? Ich bitte um eine genaue Aufstellung und eine korrigierte Rechnung.
+
+Notiz Support: In der Rechnung sind 140 Plätze zu 6,50 Euro (910 Euro), dazu 36 Plätze im Außenbereich zu 9,00 Euro (324 Euro) und eine Umlagerung von 246 Euro enthalten. Die Summe wäre damit 1.480 Euro. Der Kunde hat im Vertrag keinen Außenbereich. Ob er den Platz bestellt hat, ist unklar.
+
+**Ticket #48244 - Kategorie: Sendungsverfolgung - Priorität: niedrig**
+Von: Lena Brockmann, Privatkundin
+Betreff: Paket seit sechs Tagen "im Lager"
+
+Guten Tag, mein Paket mit einem Fahrradsattel zeigt seit sechs Tagen den Status "im Lager". Die Bestellung wurde bei einem Onlineshop aufgegeben, der Ihr Lager nutzt. Der Shop sagt, er könne nichts tun. Können Sie mir sagen, wann das Paket verschickt wird? Ich brauche es für eine Radtour am übernächsten Wochenende und würde sonst stornieren.
+
+Notiz Support: Das Paket liegt in Zone C, Regal 14. Es ist als Sperrgut markiert, weil der Sattel in einem übergroßen Karton steckt. Sperrgut wird nur montags und donnerstags abgeholt. Die nächste Abholung ist Donnerstag.
+
+**Hinweise für alle drei Antworten**
+- Unterschrift: Team Kundenservice, Nordhafen Logistik, Telefon 0800 555 0142
+- Antwortzeit laut Servicevereinbarung: hohe Priorität vier Stunden, normale Priorität ein Arbeitstag, niedrige Priorität drei Arbeitstage
+- Gutschriften bis 100 Euro kann der Kundenservice selbst freigeben, darüber hinaus die Lagerleitung (Frau Okafor)

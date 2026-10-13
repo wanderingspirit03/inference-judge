@@ -1,0 +1,1 @@
+Our parcel-locker network keeps getting complaints about full lockers and slow pickup. Write a detailed analysis of the likely causes and a step-by-step improvement programme, with measures to track, owners for each action and a rough timeline.

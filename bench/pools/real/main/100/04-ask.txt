@@ -1,0 +1,1 @@
+Wir betreiben ein Leihradsystem in einer mittelgroßen Stadt und wollen die Räder besser auf die Stationen verteilen. Schreibe bitte eine ausführliche Anleitung mit Methoden, Beispielen und einem Vergleich der Vor- und Nachteile.

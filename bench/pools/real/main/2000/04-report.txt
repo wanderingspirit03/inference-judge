@@ -1,0 +1,61 @@
+Please read our quarterly report below and give me a section-by-section summary, then a set of concrete recommendations for the board meeting next week. I'd particularly like you to flag anything that looks risky or that the board should question.
+
+# Thistledown Brewing Co. — Q3 Operations and Commercial Review
+
+Prepared by Gwen Ashworth-Bell, Operations Manager. Period: 1 July to 30 September. Distribution: board, head brewer, sales lead.
+
+## 1. Headline summary
+
+Q3 was our strongest quarter by volume. We brewed 412 hectolitres against 360 in Q2, a rise of 14 percent, and sold 389 hectolitres. Revenue was 318,400, up from 281,900. Gross margin fell from 41 percent to 38 percent. The fall is mostly explained by the cost of cans and by the extra spend on the summer cold-chain contract. A second fermentation vessel (the 20 hl "Fenwick") came into use on 14 July and removed the bottleneck that limited us in spring.
+
+## 2. Production
+
+Brewing days: 58, compared with 51 in Q2. Average batch size was 7.1 hl, because the new vessel allows double batches for the pale ale. Losses were 5.6 percent of volume brewed (23 hl), up from 4.1 percent. Of the loss, 9 hl came from one batch of the seasonal wheat beer, which was discarded in August after a lab test showed a bacterial infection. The cause was a worn gasket on the transfer pump, replaced on 19 August. Since then three consecutive batches passed all tests. The head brewer, Anselm Rourke, has added a weekly gasket inspection to the cleaning schedule.
+
+Product mix by volume sold: pale ale 46 percent, lager 24 percent, stout 12 percent, seasonal wheat beer 11 percent, trial lines 7 percent.
+
+## 3. Sales
+
+| Channel | Q2 revenue | Q3 revenue | Change |
+|---|---|---|---|
+| Pubs and bars (draught) | 112,300 | 131,500 | +17% |
+| Retail (cans, supermarkets and shops) | 94,800 | 108,200 | +14% |
+| Online and taproom | 52,100 | 57,900 | +11% |
+| Events and festivals | 22,700 | 20,800 | -8% |
+
+Events fell because two festivals were cancelled in August due to bad weather. The sales lead, Dalia Ferrante, reports that pub customers rose from 61 to 68 accounts, with five new accounts coming from the coastal towns. Two supermarket listings were won in September and will start shipping in the next quarter, but the first purchase orders have not been confirmed in writing.
+
+## 4. Costs and margin
+
+Cost of goods rose to 197,400. Malt and hops were stable. Packaging increased by 22 percent per can after our supplier's price rise in July; we were told it would be reversed in October, but the supplier has not confirmed. Cold-chain delivery for the summer cost 14,600, against 6,900 planned. The extra cost came from refrigerated vans hired for the coastal accounts. Energy cost 11,900, in line with last quarter.
+
+Operating costs excluding goods were 79,300, giving an operating profit of 41,700. The Fenwick vessel was financed with a loan of 48,000, and the first instalment of 4,000 was paid in September.
+
+## 5. Quality and compliance
+
+The lab ran 142 tests in the quarter, against 120 in Q2. Failures: 4 (2.8 percent). The wheat beer infection accounts for one. The other three were minor haze issues in stout that were corrected by a change to filtration. The annual duty audit took place on 11 September with no findings. The environmental permit renewal is due on 30 November and the application has been drafted, but not submitted.
+
+## 5a. Customer feedback
+
+The taproom survey collected 214 responses in the quarter, against 160 in Q2. The average score was 4.4 out of 5. The most frequent comment was a request for more low-alcohol beer: 38 respondents asked for it, and 11 mentioned the lack of a gluten-free option. Complaints concerned the queue on Saturdays (19 mentions) and the closing time of 21:00 (9 mentions). Dalia Ferrante proposes a trial of a 0.5 percent pale ale in Q4 using a small batch on the old 5 hl vessel, which would cost about 2,100 in ingredients and cleaning time. Online orders had 3.2 percent returns, almost all from damaged cardboard cartons; the carrier has agreed to a new carton design, and we will test it with 400 orders.
+
+## 5b. Sustainability
+
+Water use per litre of beer was 4.3 litres, down from 4.9 in Q2, because the Fenwick vessel has a closed cooling loop. Spent grain (about 62 tonnes in the quarter) went to two local farms at no charge, and one farm now collects it twice a week. Waste glass and cardboard were recycled. Gas use per hectolitre rose slightly, from 38 to 41 kWh, because the new vessel was run partly empty during commissioning in July.
+
+## 6. People
+
+Headcount at the end of the quarter: 17 (14 full-time). We hired a packaging operator in July. Overtime hours rose to 310 from 190, concentrated on canning days. One brewer left in September and has not been replaced. Safety: one reportable incident, a minor hand injury during keg handling, no lost days.
+
+## 7. Risks and outlook
+
+- Can price: if the supplier keeps the July price, margin in Q4 is expected to stay near 37 percent.
+- Winter volume: pub trade usually grows by 8 to 10 percent in Q4, while festivals disappear. The stout is expected to double in volume.
+- Single point of failure on the canning line: one operator trained on the seamer.
+- Cash: the closing balance was 63,000, which covers about three weeks of total costs.
+
+## 8. Requests to the board
+
+1. Approve the purchase of a second, smaller canning seamer at 18,500.
+2. Agree the Q4 budget of 330,000 revenue and 36 percent gross margin.
+3. Decide whether to hire a second brewer now or wait for the supermarket orders.

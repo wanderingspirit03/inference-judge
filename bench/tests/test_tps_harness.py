@@ -159,6 +159,18 @@ def test_short_replies_are_invalid_and_score_zero(mocks, pool, tmp_path,
     assert headline(out) == 0.0
 
 
+def test_an_invalid_request_keeps_the_answer_it_got(mocks, honest, pool, tmp_path):
+    """Whoever asks why a request was refused needs the answer itself, not its
+    hash. A valid one keeps the hash only: the file stays small."""
+    import hashlib
+    out = tps(mocks("truncate").url, tmp_path, pool)
+    assert out["records"] and not any(r["ok"] for r in out["records"])
+    for r in out["records"]:
+        assert r["text"] and hashlib.sha1(r["text"].encode("utf-8")).hexdigest() == r["text_sha1"]
+    assert any(r["ok"] for r in honest["records"])
+    assert not any("text" in r for r in honest["records"] if r["ok"])
+
+
 def test_lie_usage_is_caught_by_counting_the_text_not_the_usage(mocks, pool,
                                                                 tmp_path):
     out = tps(mocks("lie_usage").url, tmp_path, pool)
@@ -280,9 +292,10 @@ def test_open_loop_poisson_is_seeded(mocks, pool, tmp_path):
 # what goes over the wire
 # --------------------------------------------------------------------------
 @contextlib.contextmanager
-def capture_server(n_tokens: int, usage: int | None, finish: str = "length"):
-    """Answers every chat request with n_tokens ws tokens and records the
-    request bodies."""
+def capture_server(n_tokens: int, usage: int | None, finish: str = "length",
+                   delay_s: float = 0.0):
+    """Answers every chat request with n_tokens ws tokens, after delay_s, and
+    records the request bodies."""
     bodies: list[dict] = []
 
     class Handler(BaseHTTPRequestHandler):
@@ -292,6 +305,7 @@ def capture_server(n_tokens: int, usage: int | None, finish: str = "length"):
             body = json.loads(self.rfile.read(
                 int(self.headers.get("content-length") or 0)))
             bodies.append(body)
+            time.sleep(delay_s)
             self.send_response(200)
             self.send_header("Content-Type", "text/event-stream")
             self.end_headers()
@@ -338,6 +352,15 @@ def test_every_request_pins_length_eos_nonce_and_thinking(pool, tmp_path):
     assert len(heads) == 6                            # a fresh nonce each
     summary = json.loads((tmp_path / "summary.json").read_text())
     assert summary["chat_template_kwargs"] == {"enable_thinking": False}
+
+
+def test_extra_body_fields_reach_every_request_and_the_summary(pool, tmp_path):
+    with capture_server(OSL, OSL) as (url, bodies):
+        tps(url, tmp_path, pool, "--tps-load", "offline", "--requests", "3",
+            "--extra-body", '{"min_tokens": 7}')
+    assert len(bodies) == 3 and all(b["min_tokens"] == 7 for b in bodies)
+    summary = json.loads((tmp_path / "summary.json").read_text())
+    assert summary["extra_body"] == {"min_tokens": 7}
 
 
 def test_usage_is_recorded_but_never_trusted(pool, tmp_path):
@@ -497,3 +520,188 @@ def test_a_mix_needs_the_closed_loop(mocks, pool, tmp_path):
     with pytest.raises((SystemExit, ValueError)):
         tps(mocks("honest").url, tmp_path, pool, "--isl", MIX,
             "--tps-load", "open", "--rate", "5")
+
+
+# --------------------------------------------------------------------------
+# Whole requests: a pool row that names its input size is sent as written
+# --------------------------------------------------------------------------
+WHOLE_SIZES = (16, 48, 96)
+
+
+def whole_rows(sizes=WHOLE_SIZES, per_size: int = 40) -> list[dict]:
+    """Rows {"id", "isl", "prompt"}. With the harness's 3-word reference line
+    in front, a row is its size or up to four words under it, never over."""
+    return [{"id": f"w-{size}-{i}", "isl": size,
+             "prompt": " ".join(f"s{size}r{i}w{j}" for j in range(size - 3 - i % 2))}
+            for size in sizes for i in range(per_size)]
+
+
+def whole_pool(path: Path, rows: list[dict] | None = None) -> Path:
+    metrics.write_jsonl(str(path), whole_rows() if rows is None else rows)
+    return path
+
+
+def whole_run(rows: list[dict], isl=list(WHOLE_SIZES), **spec) -> "harness._TpsRun":
+    from tokenizer import load_tokenizer
+    return harness._TpsRun(None, harness.TpsSpec(
+        load="closed", levels=[1], isl=isl, osl=OSL, prompts=rows, **spec),
+        load_tokenizer("ws"))
+
+
+def test_a_whole_request_goes_out_as_written_behind_the_reference_line():
+    rows = whole_rows()
+    by_id = {r["id"]: r for r in rows}
+    run = whole_run(rows)
+    for size in (16, 48, 96, 16, 48, 96):
+        prompt_id, content, reused = run.prompt(size)
+        head, _, body = content.partition("\n\n")
+        assert head.startswith("Request reference: ") and not reused
+        assert by_id[prompt_id]["isl"] == size        # from its own size's rows
+        assert body == by_id[prompt_id]["prompt"]     # not cut, not padded
+    assert whole_run(rows, nonce=False).prompt(48)[1] in {r["prompt"] for r in rows}
+
+
+def test_whole_requests_are_measured_under_their_own_size(mocks, tmp_path):
+    out = tps(mocks("honest").url, tmp_path / "o", whole_pool(tmp_path / "p.jsonl"),
+              "--isl", "16,48,96", "--concurrency", "1", "--warm-cycles", "1")
+    recs = out["records"]
+    assert [r["isl"] for r in recs[:6]] == [16, 48, 96, 16, 48, 96]
+    assert all(r["prompt_id"].startswith(f"w-{r['isl']}-") for r in recs)
+    assert all(r["isl"] - 4 <= r["isl_client"] <= r["isl"] for r in recs)
+    assert {r["isl_client"] for r in recs} - set(WHOLE_SIZES)   # some are under
+    s = level(out)
+    assert s["n_invalid"] == 0 and set(s["by_isl"]) == {"16", "48", "96"}
+    assert out["prompts"] == "whole" and out["isl_tol"] == 0.3
+
+
+def test_a_cut_pool_says_so_in_the_summary(honest):
+    assert honest["prompts"] == "cut"
+
+
+@pytest.mark.parametrize("words, what", [(14, "too long"), (7, "too short")])
+def test_a_whole_request_that_does_not_fit_its_size_is_refused(words, what):
+    rows = whole_rows()
+    rows[3] = {"id": "w-16-odd", "isl": 16,
+               "prompt": " ".join(f"x{j}" for j in range(words))}
+    with pytest.raises(SystemExit, match=f"w-16-odd.*{what}"):
+        whole_run(rows)
+    whole_run(rows, isl=[48, 96])        # a size that is not measured is not checked
+
+
+def test_isl_tol_sets_how_far_under_its_size_a_whole_request_may_be():
+    rows = whole_rows(sizes=(96,))
+    rows[0]["prompt"] = " ".join(f"x{j}" for j in range(60))   # 63 of 96 with the line
+    with pytest.raises(SystemExit, match="w-96-0.*too short"):
+        whole_run(rows, isl=96)
+    whole_run(rows, isl=96, isl_tol=0.4)
+
+
+class _ZerosCount:
+    """A word is a token and so is every 0: the reference line varies in length."""
+
+    def count(self, text: str) -> int:
+        return len(text.split()) + text.count("0")
+
+
+def test_the_reference_line_is_sized_the_same_way_every_time():
+    from tokenizer import load_tokenizer
+    assert harness.nonce_bounds(load_tokenizer("ws")) == (3, 3)
+    lo, hi = harness.nonce_bounds(_ZerosCount())
+    assert 3 <= lo < hi
+    assert all(harness.nonce_bounds(_ZerosCount()) == (lo, hi) for _ in range(3))
+
+
+def test_a_whole_request_is_judged_the_same_on_every_load():
+    """The check does not depend on which reference lines a load happens to draw."""
+    lo, hi = harness.nonce_bounds(_ZerosCount())
+
+    def load(words: int) -> None:
+        rows = [{"id": "w-96-0", "isl": 96, "prompt": " ".join("x" for _ in range(words))}]
+        harness._TpsRun(None, harness.TpsSpec(load="closed", levels=[1], isl=96, osl=OSL,
+                                              prompts=rows), _ZerosCount())
+
+    for _ in range(5):
+        load(96 - hi)                       # the longest line still fits
+        with pytest.raises(SystemExit, match="too long"):
+            load(96 - hi + 1)
+        with pytest.raises(SystemExit, match="too short"):
+            load(67 - lo)                   # one under 0.7 of 96 with the shortest
+
+
+def test_a_size_with_no_whole_request_is_refused():
+    with pytest.raises(SystemExit, match="no request of size 96"):
+        whole_run(whole_rows(sizes=(16, 48)))
+    rows = whole_rows()
+    spent = frozenset(r["id"] for r in rows if r["isl"] == 48)
+    with pytest.raises(SystemExit, match="no request of size 48"):
+        whole_run(rows, exclude_ids=spent)
+
+
+def test_a_pool_may_not_mix_whole_and_cut_rows():
+    rows = whole_rows() + [{"id": "plain", "prompt": "a b c d e f g h"}]
+    with pytest.raises(SystemExit, match="mixes"):
+        whole_run(rows)
+
+
+def test_a_size_that_runs_out_of_whole_requests_flags_its_repeats():
+    run = whole_run(whole_rows(per_size=2))
+    seen = [run.prompt(16) for _ in range(5)]
+    assert [reused for _, _, reused in seen] == [False, False, True, True, True]
+    assert not run.prompt(48)[2]          # another size still has fresh rows
+    assert run.sampler.n_reused == 3
+
+
+def test_special_tokens_in_an_answer_are_counted_but_not_read_as_junk(tmp_path):
+    """A server asked to show its special tokens (skip_special_tokens: false)
+    fills the rest of a forced-length answer with them once the model is done.
+    They are tokens the engine produced, so they count; they are not text, so
+    the junk check reads the answer without them."""
+    tokenizers = pytest.importorskip("tokenizers")
+    from tokenizers import models, pre_tokenizers
+    vocab = {"[UNK]": 0, **{f"w{i}": i + 1 for i in range(OSL)}}
+    hf = tokenizers.Tokenizer(models.WordLevel(vocab, unk_token="[UNK]"))
+    hf.pre_tokenizer = pre_tokenizers.Whitespace()
+    hf.add_special_tokens(["<pad>"])
+    tok_path = tmp_path / "tokenizer.json"
+    hf.save(str(tok_path))
+    words = [f"w{i}" for i in range(OSL // 2)]
+
+    class Padded(BaseHTTPRequestHandler):
+        protocol_version = "HTTP/1.0"
+
+        def do_POST(self) -> None:          # noqa: N802
+            self.rfile.read(int(self.headers.get("content-length") or 0))
+            self.send_response(200)
+            self.send_header("Content-Type", "text/event-stream")
+            self.end_headers()
+            parts = [("" if i == 0 else " ") + w for i, w in enumerate(words)]
+            parts += ["<pad>"] * (OSL - len(words))
+            for part in parts:
+                self.wfile.write(("data: " + json.dumps({"choices": [{
+                    "index": 0, "delta": {"content": part},
+                    "finish_reason": None}]}) + "\n\n").encode())
+            self.wfile.write(("data: " + json.dumps({"choices": [{
+                "index": 0, "delta": {}, "finish_reason": "length"}]})
+                + "\n\n").encode())
+            self.wfile.write(b"data: [DONE]\n\n")
+
+        def log_message(self, *args: object) -> None:
+            pass
+
+    pool = tmp_path / "pool.jsonl"
+    metrics.write_jsonl(str(pool), [{"id": f"p{i}", "prompt": "w1 w2 w3"}
+                                    for i in range(8)])
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Padded)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    try:
+        out = tps(f"http://127.0.0.1:{server.server_port}/v1", tmp_path / "o",
+                  pool, "--tps-load", "offline", "--requests", "3",
+                  "--tokenizer", str(tok_path))
+    finally:
+        server.shutdown()
+        server.server_close()
+    assert level(out)["n_invalid"] == 0
+    d4, cr = metrics.text_sanity(" ".join(words))
+    for r in out["records"]:
+        assert r["tokens_client"] == OSL
+        assert r["distinct4"] == round(d4, 4) and r["compression"] == round(cr, 4)

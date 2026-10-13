@@ -1,0 +1,49 @@
+Our company is about to sign this ground handling agreement with a regional airline and I am not a lawyer. Could you go through it clause by clause in plain language, tell me what each clause means for us in practice, and point out the risks to us as the handler?
+
+**GROUND HANDLING SERVICES AGREEMENT**
+
+between Kestrel Ground Services Ltd ("the Handler") and Brannock Regional Airways Ltd ("the Airline").
+
+**1. Services.** The Handler shall provide the following services at Dunmore Airport for each flight operated by the Airline: passenger check-in, baggage loading and unloading, aircraft marshalling, push-back, cabin cleaning and potable water service (together "the Services"). Additional services may be requested by the Airline and shall be charged at the rates in Schedule 2.
+
+**2. Term.** This Agreement starts on 1 January 2027 and continues for three years. It renews automatically for successive periods of one year unless either party gives written notice of non-renewal at least ninety days before the end of the current period.
+
+**3. Charges.** The Airline shall pay the fees in Schedule 1. Fees are adjusted on each 1 January by the percentage change in the national consumer price index over the previous twelve months, with no cap. The Handler shall invoice monthly in arrears and the Airline shall pay within sixty days of the invoice date. Late payments carry interest at four percentage points above the central bank base rate.
+
+**4. Service levels.** The Handler shall complete turnaround of a narrow-body aircraft within thirty-five minutes of the aircraft's on-block time, provided that the aircraft arrives no later than fifteen minutes after its scheduled arrival time. If the Handler fails to meet this standard on more than five percent of turnarounds in any calendar month, the Airline may deduct three percent of that month's fees for each full percentage point above five percent, up to a maximum deduction of fifteen percent.
+
+**5. Baggage.** The Handler is responsible for baggage from the moment it is accepted at check-in until it is delivered to the aircraft hold, and from the aircraft hold until it is placed on the arrivals belt. The Handler's liability for loss of or damage to baggage is limited to the amount the Airline is itself liable for to the passenger under applicable law, and in any event not more than 1,300 units of account per passenger.
+
+**6. Damage to aircraft.** The Handler shall be liable for damage to aircraft caused by its negligence or that of its employees. Liability for damage to an aircraft is limited to two million euros per incident. The Handler shall carry insurance of at least that amount. The Handler shall not be liable for damage that is not reported to its shift supervisor in writing before the aircraft leaves the stand.
+
+**7. Indemnity.** The Airline shall indemnify the Handler against claims by third parties arising from the Airline's operations, except to the extent caused by the Handler's gross negligence or wilful misconduct. The Handler shall indemnify the Airline against claims by third parties for injury to persons or damage to property caused by the Handler's negligence.
+
+**8. Equipment and staff.** The Handler shall supply all ground equipment and appropriately trained staff. The Airline shall supply, at its own cost, any equipment specific to its aircraft type and shall give the Handler's staff the training necessary to use it. Costs of training time shall be borne by the Handler.
+
+**9. Force majeure.** Neither party is liable for delay or failure caused by events beyond its reasonable control, including severe weather, airport closures and government action. Strikes by the Handler's own employees do not count as events beyond its reasonable control.
+
+**10. Termination.** Either party may terminate this Agreement with immediate effect by written notice if the other commits a material breach that is not remedied within thirty days of notice. The Airline may also terminate on sixty days' notice if the Handler fails the service level in clause 4 in any three months out of twelve. The Handler has no right to terminate for convenience.
+
+**10A. Safety and compliance.** The Handler shall perform the Services in accordance with the airport operator's ramp safety rules and the aviation authority's requirements as they apply from time to time. If the Airline considers that the Handler's staff are not following a procedure in the Airline's own operations manual, it may instruct them to stop work. The Handler shall not be in breach of clause 4 for any delay resulting from such an instruction unless the instruction was unreasonable. Where the Airline's manual conflicts with the airport operator's rules, the airport operator's rules prevail.
+
+**10B. Security of personnel.** The Handler's staff who work airside must hold valid airport passes. The Handler shall pay for the passes and for background checks. The Airline shall notify the Handler promptly of any security instruction that affects ramp staff and shall reimburse the Handler for the reasonable cost of additional staff needed to comply with an instruction that goes beyond the airport operator's standing requirements.
+
+**10C. Insurance.** In addition to the aircraft damage cover in clause 6, the Handler shall maintain employers' liability insurance and public liability insurance of at least five million euros per incident. The Handler shall give the Airline a copy of each certificate on request. The Airline shall maintain aviation liability insurance of the kind and amount customary for an airline of its size and shall name the Handler as an additional insured for claims arising from the Services.
+
+**10D. Fuel and de-icing.** Fuelling and de-icing are not included in the Services. Where the Airline asks the Handler's staff to supervise a fuelling or de-icing operation carried out by a third party, the Handler shall do so as an additional service under Schedule 2 and shall not be responsible for the quality of the fuel or fluid.
+
+**10E. Subcontracting.** The Handler may subcontract cabin cleaning and potable water service to a company approved by the Airline, such approval not to be unreasonably withheld. The Handler remains responsible for the acts of its subcontractors as if they were its own acts. The Handler may not subcontract baggage handling or marshalling.
+
+**10F. Assignment.** Neither party may assign this Agreement without the written consent of the other, except that the Airline may assign it to a company that controls it or is controlled by it. If control of the Handler changes, the Airline may terminate on thirty days' notice.
+
+**10G. Notices.** Notices must be in writing and sent to the addresses in Schedule 3. A notice sent by email is valid only if it is also sent by courier on the same day.
+
+**11. Confidentiality.** Each party shall keep the other's commercial information confidential during the term and for five years after.
+
+**12. Governing law.** This Agreement is governed by the law of Norland. Disputes shall be resolved by the courts of Norland.
+
+**Schedule 1 (summary of fees).** Narrow-body turnaround: 1,150 euros. Wide-body turnaround: 2,400 euros. Additional baggage handling: 0.90 euros per bag above 80 bags per flight. Night surcharge between 23:00 and 05:00: 12 percent.
+
+**Schedule 2 (additional services).** Ground power unit, per hour or part hour: 85 euros. Air-start unit, per use: 140 euros. Lavatory service: 95 euros. Extra staff on request at less than twelve hours' notice, per person per hour: 48 euros. Supervision of fuelling or de-icing, per aircraft: 110 euros. Handling of a diverted flight that was not on the schedule: 1,650 euros for a narrow-body aircraft, payable in full whether or not the aircraft leaves again the same day.
+
+**Schedule 3 (addresses for notices).** The Handler: Kestrel Ground Services Ltd, Hangar 4, Dunmore Airport, attention of the Managing Director. The Airline: Brannock Regional Airways Ltd, Operations Centre, 12 Quay Road, Dunmore, attention of the Head of Station Operations.

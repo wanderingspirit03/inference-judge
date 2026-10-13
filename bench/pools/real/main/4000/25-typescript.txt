@@ -1,0 +1,379 @@
+Here is the inventory module from our seed bank's internal tool (Thornfield Seed Vault). Could you explain what each part does in plain terms for a new developer, propose a refactoring that makes it easier to maintain and test, and write the tests (Vitest is fine) for the refactored version? Please point out any place where the current logic could give a wrong answer about whether a seed lot is still usable.
+
+```typescript
+// inventory.ts - accessions, storage positions, viability checks and
+// regeneration planning for the Thornfield Seed Vault.
+
+export type Species = {
+  code: string;            // e.g. "AVE-SAT"
+  latinName: string;
+  commonName: string;
+  storageClass: "orthodox" | "intermediate";
+  baselineViability: number; // percent germination expected from fresh seed
+  retestIntervalYears: number;
+};
+
+export type Accession = {
+  id: string;
+  speciesCode: string;
+  collectedOn: string;      // ISO date
+  collectorId: string;
+  originCountry: string;
+  seedCount: number;
+  initialViability: number; // percent
+  position?: StoragePosition;
+  status: "active" | "depleted" | "regeneration" | "quarantine";
+};
+
+export type StoragePosition = {
+  freezer: number;
+  shelf: number;
+  box: number;
+};
+
+export type GerminationTest = {
+  accessionId: string;
+  testedOn: string;         // ISO date
+  seedsSown: number;
+  seedsGerminated: number;
+};
+
+export type Withdrawal = {
+  accessionId: string;
+  date: string;
+  seeds: number;
+  requestedBy: string;
+  purpose: "research" | "restoration" | "testing" | "duplicate";
+};
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+const FREEZER_COUNT = 6;
+const SHELVES_PER_FREEZER = 8;
+const BOXES_PER_SHELF = 20;
+const MIN_SEEDS_FOR_ACTIVE = 500;
+const REGENERATION_THRESHOLD = 85; // percent of initial viability
+const SAFE_VIABILITY_FLOOR = 60;   // absolute percent
+
+export function yearsBetween(from: string, to: string): number {
+  const a = new Date(from).getTime();
+  const b = new Date(to).getTime();
+  return (b - a) / (365 * DAY_MS);
+}
+
+export function germinationRate(test: GerminationTest): number {
+  if (test.seedsSown === 0) return 0;
+  return Math.round((test.seedsGerminated / test.seedsSown) * 1000) / 10;
+}
+
+export function latestTest(
+  tests: GerminationTest[],
+  accessionId: string
+): GerminationTest | undefined {
+  let latest: GerminationTest | undefined;
+  for (const t of tests) {
+    if (t.accessionId !== accessionId) continue;
+    if (!latest || t.testedOn > latest.testedOn) {
+      latest = t;
+    }
+  }
+  return latest;
+}
+
+export function seedsRemaining(
+  accession: Accession,
+  withdrawals: Withdrawal[]
+): number {
+  let remaining = accession.seedCount;
+  for (const w of withdrawals) {
+    if (w.accessionId === accession.id) {
+      remaining -= w.seeds;
+    }
+  }
+  return remaining;
+}
+
+export function isRetestDue(
+  accession: Accession,
+  species: Species,
+  tests: GerminationTest[],
+  today: string
+): boolean {
+  const last = latestTest(tests, accession.id);
+  const since = last ? last.testedOn : accession.collectedOn;
+  return yearsBetween(since, today) >= species.retestIntervalYears;
+}
+
+export function viabilityStatus(
+  accession: Accession,
+  tests: GerminationTest[]
+): "good" | "declining" | "critical" | "unknown" {
+  const last = latestTest(tests, accession.id);
+  if (!last) return "unknown";
+  const rate = germinationRate(last);
+  if (rate < SAFE_VIABILITY_FLOOR) return "critical";
+  if (rate < accession.initialViability * (REGENERATION_THRESHOLD / 100)) {
+    return "declining";
+  }
+  return "good";
+}
+
+export function needsRegeneration(
+  accession: Accession,
+  species: Species,
+  tests: GerminationTest[],
+  withdrawals: Withdrawal[]
+): boolean {
+  if (accession.status === "regeneration") return false;
+  const remaining = seedsRemaining(accession, withdrawals);
+  if (remaining < MIN_SEEDS_FOR_ACTIVE) return true;
+  const status = viabilityStatus(accession, tests);
+  return status === "critical" || status === "declining";
+}
+
+export function allocatePosition(
+  occupied: StoragePosition[],
+  storageClass: Species["storageClass"]
+): StoragePosition | null {
+  // Intermediate seeds go in freezers 5 and 6 only (drier room).
+  const freezers =
+    storageClass === "intermediate" ? [5, 6] : [1, 2, 3, 4, 5, 6];
+  const taken = new Set(
+    occupied.map((p) => `${p.freezer}-${p.shelf}-${p.box}`)
+  );
+  for (const freezer of freezers) {
+    for (let shelf = 1; shelf <= SHELVES_PER_FREEZER; shelf++) {
+      for (let box = 1; box <= BOXES_PER_SHELF; box++) {
+        if (!taken.has(`${freezer}-${shelf}-${box}`)) {
+          return { freezer, shelf, box };
+        }
+      }
+    }
+  }
+  return null;
+}
+
+export function formatPosition(p: StoragePosition | undefined): string {
+  if (!p) return "unassigned";
+  const f = String(p.freezer).padStart(2, "0");
+  const s = String(p.shelf).padStart(2, "0");
+  const b = String(p.box).padStart(3, "0");
+  return `F${f}-S${s}-B${b}`;
+}
+
+export function parsePosition(text: string): StoragePosition | null {
+  const match = /^F(\d{2})-S(\d{2})-B(\d{3})$/.exec(text);
+  if (!match) return null;
+  const position = {
+    freezer: parseInt(match[1], 10),
+    shelf: parseInt(match[2], 10),
+    box: parseInt(match[3], 10),
+  };
+  if (position.freezer > FREEZER_COUNT) return null;
+  return position;
+}
+
+export type WithdrawalCheck =
+  | { ok: true }
+  | { ok: false; reason: string };
+
+export function checkWithdrawal(
+  accession: Accession,
+  withdrawals: Withdrawal[],
+  request: Withdrawal
+): WithdrawalCheck {
+  if (accession.status === "quarantine") {
+    return { ok: false, reason: "accession is in quarantine" };
+  }
+  if (accession.status === "depleted") {
+    return { ok: false, reason: "accession is depleted" };
+  }
+  const remaining = seedsRemaining(accession, withdrawals);
+  if (request.seeds <= 0) {
+    return { ok: false, reason: "seed count must be positive" };
+  }
+  if (request.seeds > remaining) {
+    return { ok: false, reason: "not enough seeds remaining" };
+  }
+  // Keep a reserve for the long-term collection unless it is a duplicate
+  // being sent to the partner vault.
+  const reserve = Math.floor(accession.seedCount * 0.5);
+  if (request.purpose !== "duplicate" && remaining - request.seeds < reserve) {
+    return { ok: false, reason: "withdrawal would breach the reserve" };
+  }
+  return { ok: true };
+}
+
+export type RegenerationPlanItem = {
+  accessionId: string;
+  speciesCode: string;
+  reason: string;
+  targetSeeds: number;
+  plantsNeeded: number;
+};
+
+export function planRegeneration(
+  accessions: Accession[],
+  speciesByCode: Map<string, Species>,
+  tests: GerminationTest[],
+  withdrawals: Withdrawal[],
+  seedsPerPlant = 40
+): RegenerationPlanItem[] {
+  const plan: RegenerationPlanItem[] = [];
+  for (const a of accessions) {
+    const species = speciesByCode.get(a.speciesCode);
+    if (!species) continue;
+    if (!needsRegeneration(a, species, tests, withdrawals)) continue;
+    const remaining = seedsRemaining(a, withdrawals);
+    const status = viabilityStatus(a, tests);
+    const reason =
+      remaining < MIN_SEEDS_FOR_ACTIVE
+        ? `only ${remaining} seeds left`
+        : `viability is ${status}`;
+    const targetSeeds = Math.max(a.seedCount, 2000);
+    const plantsNeeded = Math.ceil(targetSeeds / seedsPerPlant);
+    plan.push({
+      accessionId: a.id,
+      speciesCode: a.speciesCode,
+      reason,
+      targetSeeds,
+      plantsNeeded,
+    });
+  }
+  return plan.sort((x, y) => y.plantsNeeded - x.plantsNeeded);
+}
+
+export function summariseByCountry(
+  accessions: Accession[]
+): Record<string, { accessions: number; seeds: number }> {
+  const result: Record<string, { accessions: number; seeds: number }> = {};
+  for (const a of accessions) {
+    const entry = result[a.originCountry] ?? { accessions: 0, seeds: 0 };
+    entry.accessions += 1;
+    entry.seeds += a.seedCount;
+    result[a.originCountry] = entry;
+  }
+  return result;
+}
+
+export function retestSchedule(
+  accessions: Accession[],
+  speciesByCode: Map<string, Species>,
+  tests: GerminationTest[],
+  today: string
+): { accessionId: string; dueSinceYears: number }[] {
+  const due: { accessionId: string; dueSinceYears: number }[] = [];
+  for (const a of accessions) {
+    if (a.status !== "active") continue;
+    const species = speciesByCode.get(a.speciesCode);
+    if (!species) continue;
+    if (isRetestDue(a, species, tests, today)) {
+      const last = latestTest(tests, a.id);
+      const since = last ? last.testedOn : a.collectedOn;
+      due.push({
+        accessionId: a.id,
+        dueSinceYears:
+          Math.round(
+            (yearsBetween(since, today) - species.retestIntervalYears) * 10
+          ) / 10,
+      });
+    }
+  }
+  return due.sort((x, y) => y.dueSinceYears - x.dueSinceYears);
+}
+
+export type PositionConflict = {
+  position: string;
+  accessionIds: string[];
+};
+
+export function findPositionConflicts(
+  accessions: Accession[]
+): PositionConflict[] {
+  const byPosition = new Map<string, string[]>();
+  for (const a of accessions) {
+    if (!a.position) continue;
+    const key = formatPosition(a.position);
+    const list = byPosition.get(key) ?? [];
+    list.push(a.id);
+    byPosition.set(key, list);
+  }
+  const conflicts: PositionConflict[] = [];
+  for (const [position, accessionIds] of byPosition) {
+    if (accessionIds.length > 1) {
+      conflicts.push({ position, accessionIds });
+    }
+  }
+  return conflicts.sort((a, b) => a.position.localeCompare(b.position));
+}
+
+export type DuplicateManifestLine = {
+  accessionId: string;
+  latinName: string;
+  seeds: number;
+  germinationPercent: number | null;
+  collectedOn: string;
+};
+
+export function buildDuplicateManifest(
+  accessions: Accession[],
+  speciesByCode: Map<string, Species>,
+  tests: GerminationTest[],
+  withdrawals: Withdrawal[],
+  maxSeedsPerAccession = 250
+): DuplicateManifestLine[] {
+  const lines: DuplicateManifestLine[] = [];
+  for (const a of accessions) {
+    if (a.status !== "active") continue;
+    const species = speciesByCode.get(a.speciesCode);
+    if (!species) continue;
+    const alreadySent = withdrawals
+      .filter((w) => w.accessionId === a.id && w.purpose === "duplicate")
+      .reduce((sum, w) => sum + w.seeds, 0);
+    if (alreadySent >= maxSeedsPerAccession) continue;
+    const last = latestTest(tests, a.id);
+    lines.push({
+      accessionId: a.id,
+      latinName: species.latinName,
+      seeds: Math.min(
+        maxSeedsPerAccession - alreadySent,
+        seedsRemaining(a, withdrawals)
+      ),
+      germinationPercent: last ? germinationRate(last) : null,
+      collectedOn: a.collectedOn,
+    });
+  }
+  return lines.sort((x, y) => x.latinName.localeCompare(y.latinName));
+}
+
+export function releaseFromQuarantine(
+  accession: Accession,
+  inspectionPassed: boolean,
+  occupied: StoragePosition[],
+  species: Species
+): Accession {
+  if (accession.status !== "quarantine") return accession;
+  if (!inspectionPassed) {
+    return { ...accession, status: "depleted" };
+  }
+  const position = accession.position ?? allocatePosition(occupied, species.storageClass);
+  return {
+    ...accession,
+    status: "active",
+    position: position ?? undefined,
+  };
+}
+
+export function collectionHealth(
+  accessions: Accession[],
+  tests: GerminationTest[]
+): { good: number; declining: number; critical: number; unknown: number } {
+  const counts = { good: 0, declining: 0, critical: 0, unknown: 0 };
+  for (const a of accessions) {
+    if (a.status === "depleted") continue;
+    counts[viabilityStatus(a, tests)] += 1;
+  }
+  return counts;
+}
+```
+
+Some background. Staff use the retest schedule every Monday to decide which lots to take out of the freezers, and the regeneration plan is sent to the grow-out partner each quarter. Withdrawals are entered by the curator through a form that calls `checkWithdrawal`. We recently had a case where a lot of wild barley that looked fine in the tool turned out to have almost no living seed, so I'd like to understand how that could happen.

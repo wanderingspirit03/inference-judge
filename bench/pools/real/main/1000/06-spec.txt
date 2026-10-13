@@ -1,0 +1,41 @@
+Please write a complete test plan for this spec, with numbered test cases (steps, input data, expected result) grouped by feature, plus the edge cases and negative tests you think we have missed. Flag any place where the spec itself is unclear or contradicts itself.
+
+# Product spec: Milk Round - delivery tracker for Dunmore Valley Farm Cooperative
+Version 0.9, owner: Fenella Archer
+
+## Overview
+Dunmore Valley Cooperative has 38 member farms. Every day, one lorry collects milk from a fixed route of farms and brings it to the dairy. Milk Round is a simple app, used on a tablet in the lorry cab, that records each pickup and lets farmers see their own pickups on a web page.
+
+## Users
+- Driver: records pickups, one route per day.
+- Farmer: views own pickups and monthly total.
+- Office staff: edits routes, corrects errors, exports monthly totals.
+
+## Feature 1: Recording a pickup
+1.1 The driver chooses today's route from a list. A route has between 4 and 12 farms in a fixed order.
+1.2 At each farm the driver enters the litres read from the tank gauge. The value must be a whole number between 50 and 12,000.
+1.3 The driver enters the milk temperature in degrees Celsius with one decimal. If it is above 6.0, the app shows a red warning and the driver must choose a reason (warm weather, cooler fault, late pickup, other) before saving.
+1.4 The app records the time automatically. The driver cannot edit it.
+1.5 A pickup can be saved offline. When the tablet has a connection again, saved pickups are uploaded in the order they were made. If the same farm is picked up twice on the same day, the second one is marked "duplicate" and sent to office staff for review.
+1.6 The driver can skip a farm with a reason (gate locked, no milk, farmer absent). A skipped farm records zero litres.
+
+## Feature 2: Farmer web page
+2.1 A farmer signs in with the email address and a six digit code sent by text message.
+2.2 The page shows the last 30 days of pickups for that farm only: date, time, litres, temperature.
+2.3 The monthly total in litres is shown at the top of the page and updated within five minutes of upload.
+2.4 A farmer can flag a pickup as wrong. The flag adds a note and notifies office staff by email.
+
+## Feature 3: Office tools
+3.1 Staff can add, remove and reorder farms on a route. Changes apply from the next day.
+3.2 Staff can correct a pickup. The original value is kept and shown in an audit list with the staff member's name.
+3.3 Staff can export a CSV of all pickups for a month. Columns: farm id, date, time, litres, temperature, status.
+3.4 Exports are available from the third day of the next month.
+
+## Payments note
+The cooperative pays farmers on litres. A pickup marked "duplicate" is not counted until staff accept or reject it. Corrections made after export are included in the next month's export, not the current one.
+
+## Performance and devices
+The driver app must open in under four seconds on the cooperative's tablets, which run in portrait orientation only. The farmer page must work on a phone with a slow connection and load the 30 day list in under five seconds.
+
+## Out of scope
+Quality testing results from the dairy lab, payment calculation, and any language except English.

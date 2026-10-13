@@ -22,7 +22,7 @@ Every path uses the same scripts. Only the target file and a few hardware steps 
 | path | where it starts | what has been run |
 |---|---|---|
 | CPU mock, on a laptop | [Try it on a laptop first](#try-it-on-a-laptop-first) | The judge and the loop run end to end on a laptop. Part of that run uses a stand-in judge; the section says which. |
-| Google Cloud TPU v6e | [A TPU VM](#a-tpu-vm) | The model server was brought up by hand on a v6e-4. `setup/tpu.sh`, bootstrap and a judged run have not yet been run on TPU hardware. The scripts are tested with fakes. |
+| Google Cloud TPU v6e | [A TPU VM](#a-tpu-vm) | On one v6e-4, `setup/tpu.sh`, bootstrap, a baseline, a 10-launch calibration and a rehearsal have run. No research loop has run on a TPU. Later script changes are tested with fakes only. |
 | NVIDIA GPU | [An NVIDIA GPU machine](#an-nvidia-gpu-machine) | The scripts are built and tested on a laptop with fakes. Nothing has run on a real GPU. |
 
 Expect the first run on real hardware to find something. If you only want a speed table for a server you already have, you do not need this page: `uv run bench/measure.py URL --model NAME` needs no setup (see `README.md`).
@@ -54,7 +54,7 @@ Everything about the machine, the engine, the model and the metric comes from on
 | file | machine | state |
 |---|---|---|
 | `targets/cpu-mock.yaml` | none: a mock server, any laptop | runs end to end |
-| `targets/v6e4-gemma4-26b-tps.yaml` | Google Cloud TPU v6e-4 | `runnable: false`; the sealed launch is marked NOT PROVEN in the file |
+| `targets/v6e4-gemma4-26b-tps.yaml` | Google Cloud TPU v6e-4 | `runnable: true`, with weaker isolation (see the file's header) |
 | `targets/gpu-gemma4-26b-tps.yaml` | one NVIDIA GPU | `runnable: false`; never run on a GPU |
 | `targets/sketch-tpu-8chip.yaml` | an eight-chip TPU | a sketch: it validates and shows a plan, and nothing more |
 
@@ -208,12 +208,19 @@ A target with `runnable: false` gets neither the clock nor the lock. `run.sh` re
 
 ### A TPU VM
 
-**What has been proven.** The model server of `targets/v6e4-gemma4-26b-tps.yaml` was brought up by hand on a v6e-4, with the flags in `research/experiments/baseline-tpu/launch.sh`. `setup/tpu.sh` is tested with fakes (`setup/tests/test_tpu.py`). `setup/tpu.sh`, bootstrap and a judged run have not yet completed on a TPU. The target ships as `runnable: false`, and its sealed launch is marked NOT PROVEN in the file's header. Read that header first.
+**What has been proven.** On 2026-10-13, on one on-demand v6e-4 (zone `us-east5-b`), with `targets/v6e4-gemma4-26b-tps.yaml`:
+
+- `setup/tpu.sh` and bootstrap ran to the end. A new, empty cache disk needed steps by hand: formatting it with the label, making the cache directories and downloading the model. The model step also refused the folder layout that a current `huggingface_hub` writes. The script has since been changed for all three (it makes the directories, prints the format and download commands, and accepts the newer layout). Those changes are tested with fakes only (`setup/tests/test_tpu.py`) and have not run on a TPU.
+- The chip gate passed only with `--network host --privileged`. No locked-down set of flags reached the chips, and `tools/tpu_seal_probe.sh` tried. The target therefore ships as `runnable: true` with those flags. Its isolation is weaker than a full seal, and results say so: `isolation.seal` reads "weaker: privileged, network=host".
+- The judge (`bench/run.sh`) measured a baseline (`VERDICT BASELINE`) and a 10-launch calibration (`VERDICT CALIBRATED`). In the rehearsal, a candidate identical to the baseline was correctly `REJECTED`.
+- The spend guard (`tools/tpu_deadman.sh`) was armed, saved the results to the disk every hour, and the VM deleted itself at the deadline. `--reset-clock` was used.
+
+**What has not.** No research loop has run on a TPU. The rehearsal's `buildfail` case was not run. That session measured on an earlier speed pool, with prompts cut to an exact length at three input sizes. The pool has since been replaced by whole requests and the judge has changed, so its numbers are not comparable with a run of the current code, and none is published. Nothing has been measured on a TPU with the current pool and judge. Read the target file's header first.
 
 What the TPU steps do (`setup/tpu.sh`):
 
 1. Count the chips, using the target's `probes.present` and falling back to the device nodes under `/dev/vfio` and `/dev/accel`.
-2. Mount the disk whose ext4 label is `provision.cache_disk.label` at `provision.cache_disk.mount`, and add it to `/etc/fstab` with `nofail`.
+2. Mount the disk whose ext4 label is `provision.cache_disk.label` at `provision.cache_disk.mount`, and add it to `/etc/fstab` with `nofail`. When the disk lacks the directories named by `provision.cache_disk.hf_cache` and `compile_cache` (a new disk), make them.
 3. Load the engine image from the disk's tar when it is not in the Docker store at its pinned digest, falling back to `docker pull` by digest, and check the digest.
 4. Run the **chip gate**: start the engine image the way a real launch starts it, with the target's own `docker_flags` and `env`, and require `jax.devices()` to list every chip.
 5. Stop there, with exit 3, if the target is `runnable: false`.
@@ -223,7 +230,7 @@ What the TPU steps do (`setup/tpu.sh`):
 
 The order that works:
 
-1. **Create the VM** with your cloud tools, matching the target's `accelerator` section, and attach the cache disk named in its `provision.cache_disk`. No script creates the VM for you; the `provision` fields `zone`, `runtime_version` and `mode` are notes for the person who does. Create it as a plain TPU VM and not through a queued resource, because the spend guard below is not written for a queued-resource node.
+1. **Create the VM** with your cloud tools, matching the target's `accelerator` section, and attach the cache disk named in its `provision.cache_disk`. No script creates the VM for you; the `provision` fields `zone`, `runtime_version` and `mode` are notes for the person who does. Create it as a plain TPU VM and not through a queued resource, because the spend guard below is not written for a queued-resource node. A brand-new disk has no label: format it once with `sudo mkfs.ext4 -L <label> -m 0 /dev/<disk>`. Bootstrap prints this line and never formats a disk itself. When bootstrap's model step says the disk's Hugging Face cache has no snapshot, run the download command it prints once, then run bootstrap again. That command is the same Hub download that bootstrap does for a target without a cache disk, done once onto the disk. The first launch then compiles everything, because the disk's compile cache is empty.
 2. **Copy the checkout** to the VM and become root (see [Bootstrap the machine](#bootstrap-the-machine)).
 3. **Arm the spend guard first.** `tools/tpu_deadman.sh` is a systemd timer on the VM that deletes it at a deadline, whether or not anyone is connected:
 
@@ -235,7 +242,7 @@ The order that works:
    ```
 
    `arm` checks that it can authenticate, and exits 3 with the timer still armed when it cannot confirm that deletion would work. It cannot test the delete permission without deleting, so treat exit 3 as "not proven". While armed, the guard copies the results, leaderboard, calibration, reference, the researcher's repository and state, the logs and the compile seed to the cache disk every hour, and once more before the delete, under `inference-judge-saved/` on the disk. Before that last copy it stops the loop (the driver, the runner and the heartbeat), so nothing is written while it copies; a judged run still in flight is killed and leaves no verdict, and stopping can take up to 6 minutes. At the deadline it tries `gcloud compute tpus tpu-vm delete` five times. If all five fail it halts the VM, which may not stop the billing. Check the VM list from your laptop after any deadline. Size the guard to cover the reference, the calibration, the rehearsal and the loop together.
-4. **Bootstrap, first pass.** It stops after the chip gate with exit 3 and prints what to do next.
+4. **Bootstrap, first pass.** For a `runnable: false` target it stops after the chip gate with exit 3 and prints what to do next. The shipped v6e-4 target is `runnable: true` with flags that reached the chips, so its first pass runs to the end. Continue from [Log the agent in](#log-the-agent-in), and use steps 5 to 8 only if the gate fails.
 5. **If the gate says the target's flags cannot reach the chips**, find flags that can. Bootstrap prints this exact command:
 
    ```bash
@@ -243,7 +250,7 @@ The order that works:
    ```
 
    The probe tries the strongest container seal first and ends with a line `engine.docker_flags: ...`. If it reports no working set, the node is faulty: delete it and create another.
-6. **Edit the target once, completely.** Put the probe's flags into `engine.docker_flags` as a YAML list, without `--network none` (the judge adds it) and without the `-e NAME=VALUE` pairs. Put each pair into `engine.env` as `NAME: VALUE`. Set `runnable: true`.
+6. **Edit the target once, completely.** Put the probe's flags into `engine.docker_flags` as a YAML list, without `--network none` (the judge adds it) and without the `-e NAME=VALUE` pairs. Put each pair into `engine.env` as `NAME: VALUE`. Set `runnable: true` if it is not already.
 7. **Run bootstrap again**, to the end. Every step is safe to repeat. Then continue from [Log the agent in](#log-the-agent-in).
 8. **Copy the edited target back to your laptop** and commit it, or the next fresh VM stops at the same gate.
 
@@ -343,7 +350,7 @@ env -u SUDO_USER runuser -u bench -- /opt/bench/run.sh --calibrate calibrate-1 \
   2>&1 | tee /var/log/inference-judge/calibrate-1.log
 ```
 
-It must end with `VERDICT CALIBRATED`. It writes `/opt/bench/calibration/<target id>.json`, which holds `sigma_L`, the launch-to-launch noise, and the minimum detectable effect, the smallest gain the judge will call real. Without this file every candidate ends `INCONCLUSIVE`. `calibrate-1` is just an id, and a second calibration needs a new one.
+It must end with `VERDICT CALIBRATED`. It writes `/opt/bench/calibration/<target id>.json`, which holds `sigma_L`, the launch-to-launch noise, and the minimum detectable effect, the smallest gain the judge will call real. Without this file every candidate ends `INCONCLUSIVE`. `calibrate-1` is just an id, and a second calibration needs a new one. If one launch is not a measurement, the run stops at that launch and ends with `VERDICT INVALID`. The reasons name the launch and say why, for example `invalid_requests in K2: ...`, followed by `the calibration stopped at launch 2 of 10`. Nothing is installed. Fix the cause, then run the calibration again under a new id.
 
 The command looks odd for a reason. `--calibrate` and `--confirm` are operator modes, and `run.sh` refuses every flag when it is entered through `sudo`, because that is the door the researcher's runner uses. `runuser` enters as `bench` without `sudo`, and `env -u SUDO_USER` covers the case where your root shell itself came from `sudo`.
 
@@ -546,7 +553,8 @@ Fix the cause and run the same command again, with the same `--target` and the s
 | `docker cannot start a container with the GPU` | The NVIDIA container toolkit is missing or not configured. | `nvidia-ctk runtime configure --runtime=docker`, then `systemctl restart docker`. |
 | `gpu gate FAILED` | The engine image did not start with the GPU, or sees fewer GPUs than the target wants. | Read the lines under it. The usual causes are a container toolkit that is not configured, a driver too old for the image, an image entrypoint that `engine.docker_flags` does not clear (`--entrypoint=` clears one), or flags that hide a GPU. |
 | `the host shows N chip(s) ... target wants M` (TPU) | Wrong accelerator type for this VM, or a broken node. | Delete the node and create it again. |
-| `no disk with the ext4 label '...' is attached to this VM` | The cache disk is not attached. | Attach it with your cloud tools. The label must be the one in `provision.cache_disk.label`. The message prints a command you can adapt. |
+| `no disk with the ext4 label '...' is attached to this VM` | The cache disk is not attached, or it is attached and was never formatted. | Attach it with your cloud tools. The label must be the one in `provision.cache_disk.label`. The message prints a command you can adapt, and for a disk that was never formatted, a `mkfs.ext4 -L <label>` line (it erases that disk). |
+| `the disk's Hugging Face cache has no <snapshot path>` | The disk does not hold this model revision: it is a new disk, or `model.revision` changed. | Run the download command the message prints, then run bootstrap again. |
 | `... is not at the pinned digest after load and pull` | The disk's image tar is missing or damaged, and the pull did not give the pinned digest either. | Check that `engine.image` and the disk's tar agree. |
 | `chip gate: the node is healthy but the target's launch flags cannot reach the chips` | The node works, and the target's flags do not. | Do not recreate the node. Run the `tools/tpu_seal_probe.sh` command the message prints, then fix `engine.docker_flags` and `engine.env`. |
 | `chip gate FAILED ... DELETE AND RECREATE THE NODE` | The node cannot start a TPU session with any flags. | Delete the node, create another, attach the disk and run again. |
@@ -574,6 +582,6 @@ If you have to stop and think, delete or stop the machine first and start again 
 - **The laptop rehearsal runs the Claude adapter only, with a stand-in agent.**
 - **With Codex or Pi, the driver's fallback step repeats the same model.** The adapters map `primary` and `fallback` to whatever model the tool is configured for. The step runs that model again for `IJ_FALLBACK_SESSIONS` sessions (default 3) before the driver pauses. Set `IJ_FALLBACK_MODEL` to another model name for a real second model, or `IJ_FALLBACK_SESSIONS=0` to skip the step. `research/adapters/README.md` explains this.
 - **The laptop rehearsal's quick tier uses a stand-in judge.** Only `LOCALBOX_TIER=2` runs the real one.
-- **The TPU and GPU paths have not completed a run on real hardware.** See [A TPU VM](#a-tpu-vm) and [An NVIDIA GPU machine](#an-nvidia-gpu-machine) for what exactly has and has not been run.
+- **The GPU path has not run on real hardware, and no research loop has run on a TPU.** On a TPU, a baseline, a calibration and a rehearsal have run. See [A TPU VM](#a-tpu-vm) and [An NVIDIA GPU machine](#an-nvidia-gpu-machine) for what exactly has and has not been run.
 - **Some target keys are accepted and not read.** `your-first-target.md` lists them.
 - **The guard is a tripwire.** The scripts in `research/guard/` catch an agent that drifts and explain the rule; they do not stop a process the agent starts. The boundary is the Unix ownership that `setup/harden_research.sh` sets. `setup/check.sh` confirms it on an installed box.

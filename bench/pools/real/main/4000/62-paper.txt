@@ -1,0 +1,100 @@
+Our maintenance firm wrote up an internal study on whether vibration monitoring can predict elevator door failures, and I am going to submit it to a trade journal. Please write a detailed peer review of the methods and results sections below, as a demanding referee would: strengths, major concerns, minor concerns, questions for the authors, and a clear recommendation on whether it should be published.
+
+Predicting Door-Operator Failures in Passenger Elevators from Vibration Signatures: A Fourteen-Month Field Study
+
+Authors: Ingrid Halvorsen-Mbeki, Casimir Delaney, Thuy Anh Brightwell
+Affiliation: Reliability Group, Corbel & Lyle Lift Services
+
+Methods
+
+2.1 Study population
+
+We studied 184 passenger elevators serviced by Corbel & Lyle in the northern service region between 1 March 2025 and 30 April 2026. The elevators were located in 61 buildings: 33 residential blocks, 17 offices, 7 hospitals or care homes, and 4 retail centres. Elevators were included if they had a sliding door operator of one of the two types most common in the fleet (type A, a belt-driven operator, n = 121; type B, a linear-motor operator, n = 63) and if they had been in service for at least two years at the start of the study. We excluded elevators scheduled for modernisation within the study period (n = 9) and elevators with an operator replaced in the previous 12 months (n = 14). The buildings were not chosen at random: we selected those with a technician who agreed to fit and check the sensors, which may favour well-run buildings.
+
+2.2 Sensors and data collection
+
+A small three-axis accelerometer with a sampling rate of 1,600 Hz was fixed to the header of the car door of each elevator. The device recorded a 6 second window around each door opening and closing, and stored a summary of each window on a local memory card. The summary included the root-mean-square acceleration in three frequency bands (below 40 Hz, 40 to 200 Hz and 200 to 800 Hz), the peak acceleration, the duration of the door movement in milliseconds, and the number of reversals (times the door stopped and moved back). Summaries were uploaded once a day through the building's network connection. For 17 elevators, the connection was unreliable, and data were collected by technicians on monthly visits. In total we gathered 41.2 million door cycles. Door cycles with a duration below 1.5 seconds or above 12 seconds were considered sensor errors and removed (0.6 percent of all cycles).
+
+2.3 Outcome definition
+
+The outcome was a door-operator failure, defined as a callout in which the technician's report recorded a fault in the door operator, its drive, belt, rollers, sill or lock, and the elevator was out of service for any time. Callouts caused by a user blocking the door, a power cut, or a fault in the controller were not counted. The classification was made by one of the authors (C.D.) from the free-text technician report, and a second author (T.A.B.) independently checked a random 15 percent sample of 52 reports, agreeing on 49 of them (94 percent). In total there were 143 failures in 112 elevators.
+
+2.4 Features and model
+
+For each elevator and each day, we computed the mean of each summary measure over the preceding 7 days and over the preceding 28 days, and the difference between the two. We also included elevator age, door type, building type, average cycles per day, and the number of failures in the previous year. Because the failures are rare events, we defined a positive example as any elevator-day within 14 days before a failure, and a negative example as any elevator-day with no failure in the following 30 days. Days between 15 and 30 days before a failure were left out to avoid ambiguous labels.
+
+We trained a gradient-boosted tree model. The data were divided into training, validation and test sets by time: March to December 2025 for training (with the last two months used for validation to choose the settings), January to April 2026 for testing. The model produced a daily risk score. An alert was raised for an elevator when the score exceeded a threshold, chosen on the validation set to give 80 percent recall. After an alert, no new alert was raised for the same elevator for 14 days.
+
+2.5 Comparison methods
+
+We compared the model with two baselines. The first was the existing calendar-based schedule, in which every elevator is visited every 8 weeks. The second was a simple rule: alert when the weekly mean of the 40 to 200 Hz band exceeds the elevator's own median by more than 50 percent. We did not compare with other published methods because our data and sensors are different.
+
+2.6 Statistical analysis
+
+We report precision, recall, and the area under the precision-recall curve for the test period, with 95 percent confidence intervals from 1,000 bootstrap resamples of elevators. To estimate the practical value, we calculated the number of alerts per elevator-year, the median warning time before a failure, and the estimated cost, using an average callout cost of 410 and an average planned visit cost of 95. We did not adjust for multiple comparisons, since only three outcomes are reported.
+
+Results
+
+3.1 Description of the data
+
+Over the 14 months, 143 door-operator failures occurred in 112 elevators: 96 in type A and 47 in type B. Fifty-seven failures (40 percent) were belt or roller wear, 31 (22 percent) were sill or guide obstruction or wear, 27 (19 percent) were lock or contact faults, and 28 (19 percent) were drive or motor faults. The failure rate was 0.67 per elevator-year for type A and 0.52 for type B. Residential blocks had a higher rate (0.78) than offices (0.49) and hospitals (0.51). The training set contained 94 failures, the validation set 22, and the test set 27 failures in 24 elevators.
+
+Table 1. Performance in the test period (January to April 2026)
+
+| Method | Alerts | Precision | Recall | Median warning (days) |
+|---|---|---|---|---|
+| Calendar visits (8 weeks) | 1,096 visits | 2.1% | 71% | not applicable |
+| Simple band rule | 312 | 6.4% | 52% | 5 |
+| Gradient-boosted model | 138 | 13.8% | 70% | 9 |
+
+The gradient-boosted model detected 19 of the 27 test failures (70 percent recall) with 138 alerts, giving a precision of 13.8 percent. This is below the 80 percent recall chosen on the validation set, where the model reached 81 percent recall with 15.2 percent precision. The area under the precision-recall curve was 0.21 (95 percent interval 0.14 to 0.31), compared with 0.09 (0.05 to 0.15) for the simple rule. Of the 8 failures the model missed, 5 were lock or contact faults, which produce little change in vibration.
+
+3.2 Warning time
+
+For the 19 detected failures, the median time from the first alert to the failure was 9 days (interquartile range 4 to 12). In 6 of the 19 cases, the warning time was 3 days or less, which would be hard to use in practice, since a technician visit takes on average 4 days to schedule. In the four cases where the alert was raised more than 10 days before failure and a visit followed, a technician found a worn belt or a damaged roller. We did not record whether those components would have failed without the visit.
+
+3.3 Importance of features
+
+The most important features were the change in the 200 to 800 Hz band between the 7 day and 28 day averages, the number of reversals per 1,000 cycles, and the duration of the closing movement. Elevator age and prior failures were less important than we had expected. The model for type B doors had lower recall (58 percent) than the model for type A doors (75 percent), although the difference is based on 8 and 19 test failures, and the interval is wide.
+
+3.4 Alerts per elevator and false alarms
+
+The model produced 138 alerts in the test period, equal to 2.2 alerts per elevator-year. Of these, 119 did not precede a failure within 14 days. We inspected 40 of the false alerts in the field. In 11 of them, the technician found a problem that had not yet caused a failure (a loosened belt, a bent guide), in 9 the cause was a temporary obstruction such as a building delivery, and in 20 nothing was found. If the 11 are counted as useful, the practical precision rises to 21.7 percent, but we did not test this on the other 79 false alerts.
+
+3.5 Cost estimate
+
+Under the 8 week schedule, the 184 elevators received 1,096 visits in the test period, which cost 104,120 at 95 each. A strategy that used only model alerts for these elevators would have involved 138 visits (13,110) plus the 8 missed failures at 410 each (3,280) and the 19 detected failures, assuming each was prevented by a visit at 95 (1,805), a total of 18,195. We therefore estimate a saving of roughly 85,900 in the four months. This calculation assumes that a visit prevents every failure it is triggered for, and that the planned visits under the calendar schedule are only used for door operator maintenance. In practice, the calendar visit also covers safety checks required by regulation, which cannot be removed.
+
+3.6 Sensitivity analyses
+
+When we moved the cut-off between training and test data by two months, recall at the validation threshold fell to 63 percent and precision to 11.9 percent. When we removed the 17 elevators with manual data collection, precision rose to 15.4 percent. When we used a 21 day positive window instead of 14 days, recall rose to 74 percent but median warning time fell to 7 days.
+
+3.7 Performance by failure cause
+
+Table 2. Test-period failures detected by the gradient-boosted model, by cause
+
+| Cause | Failures in test period | Detected | Recall |
+|---|---|---|---|
+| Belt or roller wear | 9 | 8 | 89% |
+| Sill or guide wear or obstruction | 5 | 4 | 80% |
+| Lock or contact fault | 7 | 2 | 29% |
+| Drive or motor fault | 6 | 5 | 83% |
+| All causes | 27 | 19 | 70% |
+
+Detection was good for mechanical wear and weak for lock and contact faults, which are typically electrical and sudden. The confidence interval for lock and contact recall is wide (4 to 71 percent) because only seven failures were available. We did not train a separate model for these faults.
+
+3.8 Performance by building type
+
+Hospital and care home elevators (7 buildings, 22 elevators) generated 11 alerts in the test period, of which 4 preceded a failure (precision 36 percent). Residential elevators (33 buildings, 102 elevators) generated 94 alerts, 11 of them correct (12 percent). Office and retail elevators together generated 33 alerts, with 4 correct (12 percent). The higher precision in hospitals may reflect their greater daily cycle counts, which gives the model more data per day, but it may also reflect the more careful cleaning of sills and tracks. We did not test either explanation.
+
+3.9 Missing data and sensor faults
+
+Over the study, 23 of the 184 sensors had at least one gap of more than 5 days without data, and 6 sensors failed completely and were replaced. During the test period, 4.8 percent of elevator-days had no usable data. Missing days were not imputed, and the model gave no score for the next day when the 7 day window contained fewer than 4 days of data. Of the 27 test failures, 3 occurred in elevators whose sensor was down in the preceding week, and none of these was detected.
+
+3.10 Technician feedback
+
+After the test period, 9 of the 12 technicians who answered a short questionnaire said that most alerts were not useful when they arrived without a reason. They asked for the system to show which measure had moved. When a short explanation was added to 30 later alerts (not part of the test set), technicians reported finding a cause in 14 cases (47 percent), but this was informal and was not compared with a control group. Technicians also pointed out that three of the buildings had changed their door cleaning routine during the study, which could change the vibration signature without any change in the mechanical condition.
+
+3.11 Calibration and stability of the score
+
+We checked whether the risk score is a reliable estimate of probability by grouping test-period elevator-days into five bands by score. In the lowest three bands, together containing 91 percent of elevator-days, the observed rate of a failure within 14 days was 0.04 percent, well below the model's mean predicted value of 0.1 percent, so the model overestimates risk at the low end. In the top band, the observed rate was 1.9 percent against a mean predicted value of 3.6 percent. We did not recalibrate the score. The score for an individual elevator was also unstable from one day to the next: for the 19 detected failures, the score stayed above the threshold on every day between the first alert and the failure in only 7 cases, and in the others it dropped below the threshold for one or more days before rising again. Because alerts are suppressed for 14 days after the first, this instability did not create more alerts, but it would affect any plan to use the score as a continuous measure of condition.

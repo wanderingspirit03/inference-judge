@@ -15,8 +15,9 @@
 #     the model directory, the served name, the host and the port. vLLM's
 #     default context length is the model's own maximum, and the engine refuses
 #     to start when its KV cache cannot hold one such request. If it does, this
-#     target needs its own baseline with --max-model-len 9216 (the largest
-#     input here is 8000 tokens plus 512 out), named in provision.baseline;
+#     target needs its own baseline with --max-model-len 6144 (the TPU
+#     target's; the largest input here is 4000 tokens plus 512 out), named in
+#     provision.baseline;
 #   - memory: the weights are ~52 GB unquantised (BF16), which leaves ~25 GB of
 #     an 80 GB card for the KV cache and the runtime. A smaller card cannot
 #     hold them; hbm_gb_per_chip below is what bootstrap checks;
@@ -78,10 +79,19 @@ metric:
   # fixed order (the same for candidate and incumbent), and the headline is
   # the whole-answer speed over the mix: the 512 tokens over the time from
   # sending the request to the last token. Sizes count the user text; the chat
-  # template adds a few tokens. The sizes are the TPU target's, so the two
-  # are asked the same question; nothing about them is tuned for a GPU.
-  isl: [100, 1000, 2000, 4000, 8000]
+  # template adds a few tokens. The sizes, the pool and isl_tol are the TPU
+  # target's, so the two are asked the same question; nothing about them is
+  # tuned for a GPU. A size is a class of request, not an exact length: the
+  # pool below holds whole requests, each sent as written under its own size,
+  # at most that many tokens and at least (1 - isl_tol) of it.
+  isl: [100, 1000, 2000, 4000]
+  isl_tol: 0.3
   osl: 512
+  # The TPU target's: its server hides special tokens from the text it
+  # returns, and the ruler counts an answer from that text, so some answers
+  # re-counted short. The same engine on a GPU is expected to do the same;
+  # not verified here.
+  extra_body: {skip_special_tokens: false}
   # One level only: with [1] the headline is the single-stream speed. Adding a
   # higher level would make it a throughput number.
   concurrency: [1]
@@ -94,8 +104,8 @@ metric:
   # The longest silence allowed between two tokens of one answer. A block with
   # a stall is dropped, and a launch with every block stalled is INVALID.
   stall_ms: 1000
-  # Windows sized on the TPU target (a request ~4 s, a pass over the five
-  # sizes ~21 s); verify that a window still holds a few passes here.
+  # Windows sized on the TPU target (a request ~4 s, a pass over the four
+  # sizes ~17 s); verify that a window still holds a few passes here.
   ramp_s: 5
   window_s: 60
   # The candidate alone first, for one 45 s window: a loser costs one launch
@@ -103,8 +113,12 @@ metric:
   screen_window_s: 45
   design: abba
   blocks: 2
-  prompt_pool: /opt/bench/pools/gemma4-main.jsonl
-  confirm_pool: /opt/bench/pools/gemma4-confirm.jsonl    # disjoint from prompt_pool
+  # Whole requests written for this project (pools/real/, one file each): 64
+  # per size in the main pool, 24 in the confirm pool. A candidate run sends
+  # no request twice, and a faster server uses more of them in a window
+  # (pools/real_pool.py has the sum): check the pool is deep enough here.
+  prompt_pool: /opt/bench/pools/gemma4-real-main.jsonl
+  confirm_pool: /opt/bench/pools/gemma4-real-confirm.jsonl    # disjoint from prompt_pool
   length_tol: 0.01
 # How long a launch may take to answer /v1/models: loading 52 GB of weights
 # from disk. A guess. A server that exits is given up on at once; this is for
@@ -118,7 +132,8 @@ probes:
 budgets: {build_s: 1200, compile_s: 1800, health_s: 1800, run_s: 5400}   # the TPU target's; verify
 reference:
   dir: reference/gpu-gemma4-26b-tps
-  prompts: /opt/bench/pools/gemma4-quality-prompts.jsonl
+  # The TPU target's 240 prompts: the ones that fit its 6144 context.
+  prompts: /opt/bench/pools/gemma4-quality-prompts-6144.jsonl
   tasks: /opt/bench/pools/gemma4-quality-tasks.jsonl
   # The reference answers come from three cold launches of the baseline, 128
   # tokens each (these are also the defaults for a real engine).

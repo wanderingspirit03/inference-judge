@@ -1,0 +1,162 @@
+I'm about to take this design doc to our architecture review on Thursday and I would like it torn apart before then. Please give me a section-by-section critique, name the two or three alternatives you think we should have considered and say what they would have cost or saved us, and then write an implementation plan with phases, owners by role, and the main risks.
+
+# Design: Donor Appointment and Collection Platform (DACP)
+
+Author: Henrike Sauvageot, platform lead, Marrowbridge Regional Blood Service
+Status: Draft 3, for architecture review
+Last edited: 14 October
+
+## 1. Background
+
+Marrowbridge Regional Blood Service collects whole blood and plasma across eleven fixed donor centres and about forty mobile sessions a month, held in church halls, factory canteens and school gyms. We supply nine hospitals in the Marrow valley. In a normal year we collect roughly 74,000 units of whole blood and 21,000 plasma donations.
+
+Today the whole process runs on three systems that do not talk to each other well. Appointments are booked in a hosted calendar tool that our call centre staff and a public web form both write to. Donor eligibility is checked on paper questionnaires at the session and then typed into a ten-year-old desktop application called Haemo-Desk. Collected units are labelled with pre-printed barcode sheets and tracked in a separate inventory database that the laboratory owns. Reconciling these three takes two people most of every Monday.
+
+The problems we want to fix are these:
+
+- Donors double-book or fail to show up. Our no-show rate at mobile sessions is 19 percent, and each empty slot costs a nurse's hour plus single-use supplies that are opened but not used.
+- Eligibility data is typed twice, once by the nurse and once by an administrator, and the two copies disagree in about 2 percent of records.
+- When a hospital reports a transfusion reaction, tracing a unit back to its donor and forward to the other components made from the same donation takes up to a working day.
+- We cannot tell a donor in real time that their blood type is urgently needed.
+
+## 2. Goals and non-goals
+
+Goals:
+
+1. One system of record for donors, appointments, screening answers, and collected units.
+2. Online self-booking with reminders by text message and email, and waiting list handling when a session fills.
+3. Digital screening at the session on a tablet, with deferral rules applied automatically and signed off by a nurse.
+4. Unit labelling and traceability from vein to hospital, with a full audit trail.
+5. Targeted calls to donors by blood group when stocks fall below thresholds.
+
+Non-goals for this phase: replacing the laboratory's testing instruments or their middleware, handling donations of organs or tissue, and building a donor-facing mobile app. A responsive website is enough.
+
+## 3. Constraints
+
+- Regulation requires that every collected unit can be traced for thirty years. Records may never be hard-deleted inside that period, even if the donor asks for deletion; we must explain this to donors and restrict processing instead.
+- The service has no on-call developers at night. Collections happen from 07:00 to 21:00 and the system must be usable throughout, but a four-hour maintenance window after midnight is acceptable.
+- Mobile sessions often have poor connectivity. The screening and collection screens must work offline for up to a full session day and sync afterwards.
+- The team is five engineers, one tester, and a part-time security officer. We run on a single cloud region chosen by the regional health authority.
+- Budget for the build is 410,000 for the year, of which 90,000 is held back for training and the cutover.
+
+## 4. Architecture overview
+
+DACP is a modular monolith written in Kotlin with a PostgreSQL 16 database. We chose a monolith because the team is small and the domain is tightly coupled: a screening answer can defer a donor, which cancels future appointments, which changes forecasts. Splitting it into services would give us distributed transactions in exactly the places where we need simple ones.
+
+The modules are:
+
+- Donor registry: identity, contact details, consent, blood group (once confirmed by the laboratory), deferrals.
+- Scheduling: sites, sessions, slots, bookings, waiting lists, reminders.
+- Screening: the questionnaire, the rules engine, nurse sign-off.
+- Collection: donation events, unit identifiers, bag labels, adverse events during donation.
+- Inventory bridge: an adapter to the laboratory's inventory database.
+- Outreach: stock thresholds, donor targeting, message sending.
+- Audit: an append-only event log written by every other module.
+
+Each module owns its tables, exposes a Kotlin interface to the others, and may not read another module's tables directly. A build-time check enforces this.
+
+Clients are a public web application for donors, a staff web application for call centre and site managers, and an offline-capable tablet application for nurses. The tablet application is a progressive web app that stores work in a local database in the browser and syncs when a connection returns.
+
+## 5. Data model
+
+The central records are:
+
+- `donor`: a surrogate id, name, date of birth, contact details, preferred language, confirmed blood group, consent flags.
+- `session`: a site, a date, a start and end time, a capacity per hour, and a state of open, full, closed, or cancelled.
+- `booking`: a donor, a slot, a donation type of whole blood or plasma, a state, and a reminder history.
+- `screening`: a donor, a session, the answers given, the outcome (eligible, temporarily deferred, permanently deferred), and the nurse who signed it off.
+- `donation`: a screening, a unit identifier, start and end time, volume, any adverse event, and the bag lot numbers.
+- `deferral`: a donor, a reason code, a start date, and an end date or the word permanent.
+
+Unit identifiers follow the national format of a three-letter site prefix, a six-digit sequence, and a check character. Sequences are allocated in blocks to each tablet before a session starts so that offline tablets never collide.
+
+Personally identifying data lives in the donor registry schema. All other modules refer to donors by surrogate id only. Reports for hospitals and for the regulator are generated from a separate reporting schema that holds the unit identifier but no names.
+
+## 6. Offline operation
+
+A nurse tablet downloads, before a session, the list of booked donors with their last-known deferrals, the questionnaire version, the rules version, and a block of unit identifiers. During the session every action is written to a local queue. When the tablet sees the network, it posts the queue in order. The server applies each item idempotently, keyed by a client-generated id, and answers with any conflict.
+
+The conflicts we expect are few: a donor was deferred centrally after the tablet downloaded its data, or a booking was cancelled. In both cases the tablet shows the nurse a warning at the next sync, and the donation record is kept, flagged for review by a medical officer. We do not want software to refuse a collection that already happened.
+
+## 7. Eligibility rules
+
+Rules are stored as versioned data, not code. A rule has a question reference, a condition, an outcome, and a deferral length. Examples: a tattoo in the last four months gives a four-month deferral; a body weight below 50 kilograms gives a temporary deferral until the donor reports a higher weight; certain medicines give a permanent deferral.
+
+A medical officer edits rules in a staff screen; changes require a second medical officer to approve before they go live. The engine always shows the nurse which rule fired and its wording, because the nurse, not the software, makes the final decision. The nurse can override a temporary deferral only with a written reason, and permanent deferrals cannot be overridden at the session at all.
+
+## 8. Outreach and forecasting
+
+Every night at 02:00 a job computes projected stock by blood group for each of the next fourteen days from the laboratory's inventory feed, expected expiries (red cells last forty-two days, platelets five), and scheduled collections. When projected stock falls below a configured threshold, the outreach module selects eligible donors of that group who have not donated within the minimum interval and have consented to messages, ranks them by distance to the nearest open session, and sends invitations in waves of two hundred. It stops sending when the open slots are filled. A donor cannot receive more than one stock appeal in any ten-day period.
+
+## 9. Security and privacy
+
+Health data about donors is special category data. We apply the following:
+
+- Sign-in for staff uses the authority's identity provider with two-factor authentication. Donors sign in with an email link, with no password.
+- Roles are call centre, site manager, nurse, medical officer, laboratory liaison, and administrator. Nurses can see screening answers only for donors booked at their own session.
+- All access to a screening record is written to the audit log with user, time, and reason.
+- Data at rest is encrypted by the database host; the screening answers column is additionally encrypted with an application key held in the cloud key service.
+- Backups are taken every hour and kept for thirty days. A restore is rehearsed every quarter.
+
+## 10. Migration
+
+Haemo-Desk holds 310,000 donor records. We will migrate in three passes: a dry run into a test environment with a data quality report, a rehearsal cutover over one weekend, and the real cutover on a weekend in March. Records with conflicting blood groups, missing birth dates, or duplicates by name and date of birth go to a manual queue for the call centre, which we estimate at around 6,000 records. The old calendar tool is switched to read-only on the Friday and retired a month after cutover.
+
+## 11. Rollout
+
+We start with the two busiest fixed centres, then the mobile team, then the remaining centres. Each stage has an exit check: no unreconciled units for two weeks, no screening forms on paper, and a nurse satisfaction survey of at least seven out of ten.
+
+## 12. Interfaces
+
+Donors and staff use a JSON API over HTTPS, versioned in the path. The tablet application uses the same API plus one bulk endpoint, `POST /sync`, which accepts an ordered batch of up to 500 queued actions and returns a per-item result. The main resources are `/sessions`, `/slots`, `/bookings`, `/donors`, `/screenings` and `/donations`. List endpoints use cursor pagination; none of them accept free-text search on donor names, because name search is only offered through the staff application and is logged.
+
+Outbound messages go through a single messaging port with two adapters, one for text and one for email. The port takes a template id, a language and a set of merge fields, never a free-form body, so that every message a donor can receive has been reviewed by the communications team. Delivery receipts come back through a webhook and are attached to the booking's reminder history.
+
+The inventory bridge is the only module that speaks the laboratory's protocol. It writes one record per completed donation and reads stock levels every fifteen minutes. If the laboratory database is unreachable, the bridge queues writes in our database and raises an alert when the oldest queued item is more than thirty minutes old. Nothing else in DACP waits on the bridge.
+
+## 13. Capacity and performance
+
+Peak load is predictable. Booking traffic spikes for about twenty minutes after a stock appeal goes out; we expect no more than 300 booking requests a minute at those moments, even for the largest appeal. Session day load is dominated by tablet syncs: a busy mobile session of 120 donors produces roughly 1,500 queued actions, posted in batches over a few minutes.
+
+A single database instance with 8 vCPUs and 32 GB of memory handles this several times over. We will run two application instances behind a load balancer for availability, not for throughput. The database has one synchronous standby in a second availability zone, and a failover is expected to take under two minutes.
+
+The one query we worry about is the nightly forecast, which joins collections, expiries and inventory over a fourteen-day horizon. We will run it against a read replica and cap it at ten minutes; if it exceeds that, the previous night's forecast stays in force and an alert is raised.
+
+## 14. Failure modes
+
+| Failure | Effect | Response |
+|---|---|---|
+| Tablet loses power mid-session | Local queue may be lost if not yet persisted | Every action is written to local storage before the screen advances; nurse sees a recovery prompt on restart |
+| Two tablets use the same identifier block | Duplicate unit identifiers | Blocks are allocated centrally with a unique constraint; a tablet that cannot get a block cannot start a session |
+| Messaging provider outage | Reminders not delivered | Retry for six hours, then show affected bookings to the call centre |
+| Rules version changes during a session | Nurse sees different outcomes than a colleague | A tablet keeps the rules version it downloaded for the whole session and reports it with every screening |
+| Laboratory feed stale | Forecast based on old stock | Forecast screen shows the age of the feed and outreach is paused if it is older than six hours |
+| Wrong blood group recorded by a donor | Targeted appeals reach the wrong people | Blood group is taken only from the laboratory's confirmed result, never from the donor |
+
+## 15. Testing and quality
+
+The tester will maintain a regression suite that covers the booking flow end to end, the rules engine with a table of two hundred screening scenarios supplied by the medical officers, and offline sync with deliberately interrupted connections. Rules changes cannot be approved until the scenario table has been run against the new version and the differences have been read by the approving officer.
+
+We will run a load test of the booking flow before each stock-appeal season, a restore rehearsal each quarter, and an external penetration test before the first centre goes live and again before the mobile team does. Defects that touch unit identifiers, screening outcomes or the audit log are treated as the highest severity and block a release.
+
+Training is separate from the test plan but linked to it. Each nurse completes a one-hour practice session on a training tenant with fictional donors, and every site gets a printed one-page guide for the offline mode, because that is where staff will be least confident.
+
+## 16. Cost and staffing
+
+| Item | Estimate |
+|---|---|
+| Engineering (five people, ten months) | 250,000 |
+| Cloud hosting for the year | 38,000 |
+| Messaging fees at expected volumes | 14,000 |
+| External security testing | 18,000 |
+| Tablets and mounts for 11 centres and the mobile team | 0 (reuse existing) |
+| Training and cutover (held back) | 90,000 |
+
+The total is 410,000. The estimate for engineering assumes no hire is needed, which depends on the part-time security officer staying at two days a week. If the officer leaves, we need to hire or contract before the penetration test.
+
+## 17. Open questions
+
+- Who owns the rules for plasma donations, where the interval and protein tests differ from whole blood?
+- Do we send text messages through our own gateway or through the authority's contract?
+- The laboratory says its inventory database cannot take more than about ten writes per second. Mobile sync at the end of a busy day could exceed that. We have not measured it.
+- Is thirty-year retention satisfied by the database backups alone, or do we need a separate archive?

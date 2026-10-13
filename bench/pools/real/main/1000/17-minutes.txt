@@ -1,0 +1,32 @@
+These are the minutes from our pharmacy leadership meeting. Please turn them into a complete project plan for the medicines safety work, with named owners, dates, dependencies and a risk register, and mention anything that was left unclear or that two people seem to have understood differently.
+
+**St. Alder Hospital Pharmacy - Leadership meeting, Wednesday 14 October, 14:00 to 15:10**
+Present: Beatrix Oyelaran (chief pharmacist, chair), Hamid Safi (clinical lead), Corin Tully (stores manager), Elspeth Gray (technician lead), Yusuf Adeyemi (IT liaison), Nadia Petrov (quality)
+Minutes: Nadia Petrov
+
+**1. Fridge temperature incident**
+On 6 October the ward 7 medicines fridge was found at 11.2 degrees Celsius (acceptable range 2 to 8). The log shows it was out of range for about nine hours overnight. Stock worth 3,900 pounds, mostly insulin and two biologic injections, was quarantined. Hamid will ask the manufacturers whether any can be used. Corin said that the alarm sounded but the phone it was set to call was off. Beatrix asked for a decision on a networked alarm system; Yusuf said the quote is 7,400 pounds for the 14 fridges and needs a ward network point in three places.
+
+**2. Controlled drug audit**
+The quarterly audit found one discrepancy of 2 ampoules on the surgical ward, now explained as a recording error. Elspeth said the new double-signature check will begin on all wards from 2 November. Beatrix wants the ward managers briefed beforehand, not after.
+
+**3. Electronic prescribing upgrade**
+The supplier proposes to upgrade the prescribing system on 21 November, a Saturday, with downtime of up to six hours. Yusuf said the pharmacy needs a paper fallback process, and Hamid said junior doctors need a one page guide. Nadia raised that the last upgrade overran by four hours. It was agreed to ask the supplier for a rollback plan in writing. Nobody was sure who in the hospital approves the downtime window; Beatrix thinks it is the clinical safety officer, Yusuf thinks it is the operations director.
+
+**4. Staffing**
+Two technician posts are vacant. Elspeth proposes using agency staff for six weeks, at roughly 31 pounds an hour. Beatrix would like to wait for interviews on 28 October but accepted that cover is thin from 9 November, when one person starts maternity leave. Decision postponed to next week.
+
+**5. Antibiotic stewardship**
+Hamid reported that the use of broad-spectrum antibiotics fell by 8 percent compared with last quarter. A target of 10 percent was set by the board. He will bring ward-level figures next month.
+
+**6. Any other business**
+Corin noted that the loading bay delivery window will change from 8 to 10 in the morning to 7 to 9 starting 1 November.
+
+**Actions recorded**
+- Hamid: manufacturer advice on quarantined stock, by Friday
+- Yusuf: confirm network points and fridge alarm quote, by 23 October
+- Elspeth: start double-signature check, 2 November
+- Nadia: ask the supplier for a rollback plan, by 20 October
+- Beatrix: decide on agency staff, 21 October
+
+Next meeting: Wednesday 21 October, 14:00.

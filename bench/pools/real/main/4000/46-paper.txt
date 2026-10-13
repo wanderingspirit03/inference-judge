@@ -1,0 +1,90 @@
+A colleague and I wrote up the methods and results of a trial we ran at our newspaper, and we are about to submit it to a journal on media economics. Please act as a demanding peer reviewer. I'd like a detailed review that covers the design, the statistics, whether the conclusions follow from the numbers, threats to validity, and what you would require in a revision. Rank your concerns by importance and be specific about what analysis or additional data would resolve each one.
+
+Title: Does a curated email digest improve digital subscriber retention at a regional daily? A randomised trial at the Harrowgate Courier
+
+Authors: Odile Thackeray and Benedikt Rowanfield, Audience Research Desk, Harrowgate Courier
+
+Abstract (short form). We randomised 18,000 digital subscribers of a regional newspaper to receive no additional email, a weekly digest of local court, council and schools reporting, or a daily personalised email of up to five articles. Retention at 90 days was 81.2 percent in the control arm, 83.9 percent in the weekly arm and 82.6 percent in the daily arm. The weekly digest raised retention by 2.7 percentage points (95 percent CI 1.3 to 4.1); the daily email by 1.4 points (0.0 to 2.8). Effects were concentrated among subscribers who joined on a promotional price and among those who had read fewer than four articles in their first month.
+
+1. Background
+
+Regional newspapers in our market have lost most of their print readers over twenty years and now depend on digital subscriptions. At the Courier, about 31,000 people pay for digital access at an average of 9.40 pounds a month, and about 2.3 percent of them cancel each month. Newsroom managers believe that subscribers cancel because they do not form a habit of visiting the site, and that reminders to read local stories will reduce cancellations. The editorial team was, however, concerned that a daily email would feel like marketing and train readers to wait for the email instead of coming to the site.
+
+We tested two designs. The weekly digest is edited by a human, appears on Saturday morning, and carries six stories chosen by the news editor, with a short note by the reporter. The daily email is produced by a ranking program that selects up to five unread stories for each subscriber from the last 24 hours, based on the subscriber's reading history and the town or district they chose at sign-up.
+
+2. Methods
+
+2.1 Population. All digital-only subscribers who had been active (paid in the last billing cycle) on 3 March were eligible, except staff, free-trial users, and subscribers who had opted out of all marketing email. This gave 19,126 eligible subscribers. Of these, 1,126 were excluded because the email address bounced in the two weeks before randomisation, leaving 18,000.
+
+2.2 Randomisation. Subscribers were assigned at random to one of three arms in equal numbers (6,000 each) using a seeded pseudo-random number generator, stratified by tenure (under six months, six to twenty-four months, over twenty-four months) and by plan type (full price or promotional price). Assignment was made by a person not involved in the later analysis. Subscribers were not told they were part of a trial; this was approved by the company's data protection officer on the grounds that the emails fell within existing marketing consent.
+
+2.3 Interventions. Control subscribers received the standard account emails (receipts, renewals, password resets) and a monthly company newsletter, as before. Weekly-arm subscribers also received the digest every Saturday for twelve weeks. Daily-arm subscribers also received a personalised email every day at 06:45 for twelve weeks. Subscribers who unsubscribed from the digest or daily email stopped receiving it but stayed in their assigned arm for analysis.
+
+2.4 Outcomes. The primary outcome was retention at 90 days after the start date of 10 March, defined as the subscription still being active (not cancelled and not lapsed for non-payment) on 8 June. Secondary outcomes were the number of days with at least one site visit in weeks 5 to 12, the number of articles read per active week, and the email unsubscribe rate. All outcomes were taken from the billing system and the site's analytics logs.
+
+2.5 Analysis. We compared each treatment arm with control by intention to treat, using a difference in proportions with a normal-approximation confidence interval for the primary outcome and a logistic regression adjusted for the stratification variables as a sensitivity check. We tested whether effects differed by tenure and plan type by adding interaction terms. Visit counts were compared by the Mann-Whitney test. We did not adjust for multiple comparisons in the primary analysis because we pre-specified two treatment-versus-control tests; the subgroup analyses should be read as exploratory.
+
+2.6 Sample size. We assumed 81 percent baseline retention at 90 days and aimed to detect a difference of 2.5 percentage points with 80 percent power at a two-sided 5 percent significance level. This required about 5,300 per arm; we used 6,000 to allow for bounces and unexpected losses.
+
+3. Results
+
+3.1 Balance and flow. The arms were balanced on tenure, plan type, district and prior reading activity (Table 1). Between randomisation and the start date, 62 subscribers cancelled before receiving any email (22 control, 19 weekly, 21 daily); we kept them in the analysis as not retained. Over the twelve weeks, 11.8 percent of the weekly arm and 19.4 percent of the daily arm unsubscribed from the additional email.
+
+Table 1. Baseline characteristics by arm
+
+| Characteristic | Control (n=6,000) | Weekly (n=6,000) | Daily (n=6,000) |
+|---|---|---|---|
+| Joined under 6 months before | 24.1% | 23.8% | 24.4% |
+| Promotional price | 38.5% | 38.9% | 38.2% |
+| Mean articles read in prior 30 days | 11.3 | 11.1 | 11.4 |
+| Chose a city-centre district | 46.0% | 45.7% | 46.4% |
+
+3.2 Primary outcome. Retention at 90 days was 81.2 percent (4,872 of 6,000) in the control arm, 83.9 percent (5,034) in the weekly arm and 82.6 percent (4,956) in the daily arm. The weekly digest increased retention by 2.7 percentage points (95 percent CI 1.3 to 4.1; p < 0.001). The daily email increased it by 1.4 points (95 percent CI 0.0 to 2.8; p = 0.046). The adjusted odds ratios from the logistic model were 1.19 (1.08 to 1.31) for the weekly arm and 1.09 (1.00 to 1.19) for the daily arm.
+
+3.3 Secondary outcomes. In weeks 5 to 12, active weeks in the control arm included a mean of 2.4 days with a site visit. The weekly arm averaged 2.6 days and the daily arm 3.1 days (both p < 0.001 against control). Articles read per active week were 5.2 in control, 5.5 in the weekly arm and 6.4 in the daily arm. In other words, the daily email produced more reading than the digest but less retention.
+
+3.4 Subgroups. The effect of the weekly digest on retention was 4.6 points among promotional-price subscribers (n=2,334 in that arm) and 1.5 points among full-price subscribers. The interaction was significant at the 5 percent level (p = 0.03). Among subscribers who joined under six months before, the weekly effect was 3.9 points and the daily effect 2.8 points; among those with over twenty-four months' tenure, the effects were 1.1 and 0.4 points, with confidence intervals including zero.
+
+Table 2. Retention at 90 days by arm and plan type
+
+| Plan type | Control | Weekly | Daily |
+|---|---|---|---|
+| Full price | 85.0% | 86.5% | 85.9% |
+| Promotional | 74.9% | 79.5% | 77.1% |
+
+3.5 Light readers. We split subscribers by whether they had read fewer than four articles in their first month. Among 3,402 light readers (all arms), retention in the control arm was 69.8 percent and the weekly digest raised it by 6.1 points. Among heavier readers the weekly effect was 1.4 points. This split was not pre-specified.
+
+3.6 Unsubscribes and complaints. Unsubscribing from the daily email was more common among subscribers in the city-centre districts (22.1 percent) than in the outlying villages (15.6 percent). The customer service desk logged 41 complaints that mentioned the emails, of which 33 were in the daily arm.
+
+3.7 Email delivery and engagement. Open rates, as recorded by the email platform, averaged 46 percent for the weekly digest and 31 percent for the daily email across the twelve weeks. Click-through rates were 9.8 percent and 6.2 percent. Open rates for the daily email fell from 42 percent in week one to 26 percent in week twelve, while the weekly digest fell from 51 percent to 43 percent. Open tracking is unreliable for subscribers who block images, and we treat these figures as indicative only.
+
+3.8 Robustness. A logistic regression that added prior reading activity, district and sign-up channel as covariates changed the odds ratios by less than 0.02 in either arm. Dropping the 62 subscribers who cancelled before the start date raised the weekly effect to 2.8 points and the daily effect to 1.5 points. A complete-case analysis of the 90-day outcome is identical to the main analysis because no subscriber had a missing outcome.
+
+Table 3. Secondary outcomes in weeks 5 to 12
+
+| Outcome | Control | Weekly | Daily |
+|---|---|---|---|
+| Days with a visit per active week | 2.4 | 2.6 | 3.1 |
+| Articles read per active week | 5.2 | 5.5 | 6.4 |
+| Unsubscribed from the extra email | not applicable | 11.8% | 19.4% |
+| Customer complaints mentioning email | 2 | 6 | 33 |
+
+4. Discussion
+
+The weekly human-edited digest produced a retention gain of about 2.7 points. At the Courier's average revenue per subscriber of 9.40 pounds a month, a gain of 2.7 points in 90-day retention among 31,000 subscribers is worth, on a simple calculation, about 7,800 pounds a month in preserved revenue in the first quarter after rollout, though this is a first-order estimate and assumes the effect lasts. The digest costs roughly one half-day of the news editor's time each week and a small platform fee.
+
+The daily email increased reading more than the digest but did not increase retention by more. One possible reading is that the daily email improves habit but also annoys a share of subscribers, as the higher unsubscribe and complaint rates suggest. A second reading is that what matters for retention is the sense of editorial selection, not volume. We did not test either explanation directly.
+
+The concentration of effects among promotional-price and light-reading subscribers suggests that the digest helps people who are least anchored to the product. This is consistent with the view that cancellations are partly a habit problem. It also suggests that the benefit of the digest may fall if the subscriber base shifts toward heavier readers.
+
+4.1 Practical implications. The newsroom has asked whether to adopt the weekly digest permanently. On our evidence the answer is probably yes, provided the news editor can continue to select the stories. The daily email is harder to justify. It produced a modest and borderline retention gain at the cost of a fifth of recipients opting out and most of the complaints. If the company wants a daily product, we suggest testing a version with a lower frequency, such as three days a week, and an easier way to choose topics before sending it to everyone.
+
+We also note that the digest is an editorial product as well as a retention tool. Reporters told us in interviews after the trial that it gave their court and council coverage a wider audience than it had on the site alone, and the news editor reported that the selection task helped her see which local stories were being missed. These are anecdotes and we have not measured them.
+
+5. Limitations
+
+Several limitations apply. First, 90 days is short; we do not know whether retained subscribers stay beyond six months. We plan to extend follow-up to twelve months. Second, on 24 April, in week seven, the Courier launched a redesigned website and a new app. This applied to all arms but could interact with the email effect, for example by making links in the digest land on a more attractive page. Third, the outcome is subscription status and not reading satisfaction; we have no survey data. Fourth, 1,126 subscribers with bounced addresses were excluded, and these are likely to be less engaged than average, so our results apply to reachable subscribers. Fifth, the study took place in one market, with one newsroom, and a particularly strong court reporting team whose work formed the core of the digest.
+
+6. Ethics and data
+
+The trial was reviewed by the company's data protection officer and the editor in chief. No subscriber was denied any service they had paid for. Individual-level data were held in the company's analytics warehouse and analysed there; the shared dataset used for the tables in this paper has no names or email addresses and has been rounded so that no cell in any subgroup contains fewer than ten subscribers. The pre-registration, written before the start date, is held internally and is available to reviewers on request. The ranking program used for the daily email is proprietary, and we describe its inputs but not its code.

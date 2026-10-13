@@ -1,0 +1,108 @@
+Somos el equipo de calidad de una cadena de ópticas y nos han pasado la especificación de la nueva aplicación de citas y pedidos de gafas. Necesito un plan de pruebas completo: casos de prueba concretos con pasos, datos de entrada y resultado esperado, agrupados por función, e incluye también las pruebas de límites, errores y seguridad que la especificación no menciona pero que deberíamos hacer.
+
+ESPECIFICACIÓN DE PRODUCTO
+Aplicación "VistaClara": citas, graduaciones y pedidos de gafas
+Óptica Mirador, cadena de 23 tiendas
+Versión 1.2 del documento, 5 de octubre de 2026
+Responsable del producto: Fermín Salazar-Ochoa
+
+1. Objetivo
+
+VistaClara permite a los clientes de Óptica Mirador reservar cita para una revisión visual, consultar su graduación, encargar gafas y lentillas y seguir el estado del pedido. También permite al personal de las tiendas registrar la graduación después de una revisión, preparar el pedido y avisar al cliente. La aplicación existirá como página web adaptada a móviles y como aplicación para iOS y Android. Esta versión no incluye pagos de lentillas por suscripción, que se tratarán en la versión 2.
+
+2. Usuarios y roles
+
+2.1 Cliente: persona registrada con correo electrónico y contraseña. Puede ver sus citas, su graduación vigente y su historial de pedidos.
+2.2 Óptico-optometrista: personal con titulación que realiza revisiones y registra graduaciones. Solo puede ver las citas de su tienda.
+2.3 Dependiente: personal de tienda que prepara pedidos, gestiona la caja y atiende al cliente. No puede modificar graduaciones, pero sí verlas.
+2.4 Responsable de tienda: puede ver los informes de su tienda y modificar horarios y bajas del personal.
+2.5 Administrador central: gestiona catálogo, precios, promociones y las 23 tiendas.
+
+3. Registro e inicio de sesión
+
+3.1 El cliente se registra con nombre, apellidos, fecha de nacimiento, correo electrónico, teléfono móvil y contraseña. La contraseña debe tener al menos 10 caracteres, con una mayúscula, una minúscula y un número.
+3.2 Tras el registro se envía un correo con un enlace de confirmación que caduca a las 48 horas. Sin confirmar el correo, el cliente no puede reservar citas.
+3.3 Un menor de 14 años no puede registrarse. Entre 14 y 17 años, la cuenta exige el correo de un padre, madre o tutor, que debe aceptar un enlace antes de que se active.
+3.4 Después de 5 intentos fallidos de inicio de sesión en 15 minutos, la cuenta se bloquea durante 30 minutos y se envía un aviso al correo del cliente.
+3.5 La sesión caduca tras 20 minutos de inactividad en la web y tras 14 días en la aplicación móvil, salvo que el cliente cierre la sesión antes.
+3.6 El personal inicia sesión con el usuario corporativo y un segundo factor mediante código de un solo uso. El código es válido durante 60 segundos.
+
+4. Reserva de citas
+
+4.1 El cliente elige tienda, tipo de cita y fecha. Los tipos de cita son: revisión visual completa (30 minutos), revisión para lentillas (45 minutos), ajuste de gafas (15 minutos) y revisión infantil (40 minutos, solo para menores de 14 años acompañados).
+4.2 El sistema muestra únicamente los huecos libres. Un hueco está libre si hay al menos un óptico-optometrista disponible durante toda la duración de la cita y la sala de revisión está libre.
+4.3 No se pueden reservar citas con menos de 2 horas de antelación ni con más de 60 días de antelación.
+4.4 Un cliente puede tener como máximo 3 citas futuras al mismo tiempo, y solo una de cada tipo.
+4.5 Al confirmar la cita se envía un correo y un mensaje de texto. Un recordatorio se envía 24 horas antes y otro 2 horas antes.
+4.6 El cliente puede cambiar o cancelar su cita hasta 4 horas antes sin coste. Con menos de 4 horas, el cambio no está permitido en la aplicación y debe llamar a la tienda. Si un cliente no acude a dos citas seguidas sin avisar, la aplicación le pide que confirme por teléfono la siguiente.
+4.7 Si el óptico-optometrista cae enfermo, la tienda puede reasignar las citas a otro profesional. Si no es posible, el sistema avisa a los clientes afectados y les propone los tres primeros huecos libres en esa tienda o en otra a menos de 10 kilómetros.
+4.8 Para dos citas simultáneas en la misma tienda a la misma hora, la segunda reserva debe ser rechazada con el mensaje "El hueco acaba de ser ocupado, elija otro".
+
+5. Graduación y ficha del cliente
+
+5.1 Tras la revisión, el óptico-optometrista registra para cada ojo: esfera (de -20,00 a +20,00 dioptrías, pasos de 0,25), cilindro (de -8,00 a +8,00, pasos de 0,25), eje (de 0 a 180 grados, números enteros), adición (de 0,75 a 3,50, pasos de 0,25) y distancia pupilar (de 50 a 75 mm, en pasos de 0,5). La distancia pupilar se registra una sola vez para ambos ojos, y puede además registrarse por separado para cada ojo.
+5.2 Si el cilindro es distinto de cero, el eje es obligatorio. Si el cilindro es cero, el eje debe estar vacío.
+5.3 La graduación es válida durante 24 meses para adultos y 12 meses para menores de 18 años. Después de ese plazo, la aplicación la muestra como "caducada" y no permite encargar gafas graduadas ni lentillas con ella.
+5.4 Una graduación firmada no puede modificarse. Si hay un error, el óptico-optometrista crea una nueva graduación que sustituye a la anterior, y la antigua queda en el historial marcada como "anulada" con el motivo.
+5.5 El cliente puede ver su graduación y descargarla en PDF. El PDF incluye nombre, fecha, tienda, profesional y todos los valores, y un número de colegiado del profesional.
+5.6 Los datos de salud son datos de categoría especial. Se almacenan cifrados, solo el personal de la tienda donde se hizo la revisión y el cliente pueden verlos, y cada consulta se registra con usuario, fecha y hora.
+
+6. Pedidos de gafas
+
+6.1 El cliente o el dependiente elige montura del catálogo, tipo de lente (monofocal, bifocal, progresiva), material (orgánico 1,50, orgánico 1,60, orgánico 1,67), tratamientos (antirreflejante, filtro de luz azul, endurecido, fotocromático) y color.
+6.2 El sistema comprueba que el tipo de lente sea compatible con la graduación: una adición mayor que cero exige bifocal o progresiva, y una esfera con valor absoluto superior a 6,00 recomienda índice 1,60 o superior. Si el cliente elige un índice inferior, se muestra una advertencia y debe confirmar que lo ha entendido.
+6.3 El precio se calcula sumando montura, lentes y tratamientos, menos la promoción vigente. Dos promociones no se pueden combinar, salvo la de socio (10 por ciento), que se aplica al final.
+6.4 El pedido exige un anticipo del 30 por ciento en tienda o por pago con tarjeta en la aplicación. El pago con tarjeta lo gestiona un proveedor externo, y la aplicación no almacena números de tarjeta.
+6.5 El plazo de entrega prometido es de 5 días laborables para lentes orgánicas 1,50 sin tratamientos especiales, de 8 días para el resto y de 12 días para progresivas con fotocromático.
+6.6 Estados del pedido: recibido, en laboratorio, en montaje, listo para recoger, entregado y cancelado. Cada cambio de estado envía un mensaje al cliente. El estado "listo para recoger" envía además un recordatorio a los 7 días, y a los 30 días el sistema avisa a la tienda para decidir si se devuelve el stock.
+6.7 El cliente puede cancelar un pedido hasta que pase a "en laboratorio" con devolución íntegra del anticipo. Después, el anticipo no se devuelve, pero se puede ceder a un nuevo pedido en los 60 días siguientes.
+6.8 Si la montura elegida no tiene existencias en la tienda, el sistema la pide al almacén central, lo que añade 2 días laborables, e informa al cliente al confirmar el pedido.
+
+7. Lentillas
+
+7.1 El cliente puede encargar lentillas solo con una revisión para lentillas vigente (menos de 12 meses) y una graduación no caducada.
+7.2 Las lentillas se piden por cajas. Una caja contiene 30 lentillas diarias, 6 mensuales o 2 quincenales, según el producto. El máximo por pedido es de 12 cajas.
+7.3 Si el cliente intenta cambiar de marca o de curva base respecto a la ficha, el sistema bloquea el pedido y pide revisión con el profesional.
+7.4 Las lentillas se envían a domicilio en 2 o 3 días laborables, o se recogen en tienda. El envío es gratuito a partir de 40 euros.
+
+8. Informes
+
+8.1 El responsable de tienda puede ver, por semana y por mes: citas reservadas, citas atendidas, ausencias, pedidos recibidos y entregados, y tiempo medio entre pedido y entrega.
+8.2 El administrador central ve los mismos informes por tienda y para toda la cadena, y puede exportarlos a una hoja de cálculo.
+
+9. Requisitos no funcionales
+
+9.1 Las páginas principales deben cargarse en menos de 2 segundos con conexión 4G.
+9.2 El sistema debe soportar 1.500 usuarios simultáneos, con picos los lunes por la mañana y los días de promoción.
+9.3 La aplicación debe cumplir con la normativa de protección de datos, y permitir al cliente descargar o borrar sus datos. La baja se ejecuta en 30 días, salvo los datos que la ley obliga a conservar.
+9.4 La web debe cumplir el nivel AA de accesibilidad, algo fundamental para un público con problemas de visión: tamaños de letra ajustables, buen contraste y compatibilidad con lectores de pantalla.
+9.5 Disponibilidad objetivo del 99,5 por ciento mensual, con mantenimiento solo entre las 02:00 y las 05:00.
+
+10. Notificaciones
+
+10.1 Los mensajes se envían por correo y por mensaje de texto. El cliente puede desactivar los mensajes de promoción en su perfil, pero no los mensajes de citas, pedidos y seguridad.
+10.2 Si el envío de un mensaje de texto falla (número no válido o sin cobertura), el sistema lo reintenta una vez a los 10 minutos y, si vuelve a fallar, lo envía por correo.
+10.3 Los mensajes no pueden enviarse entre las 21:30 y las 08:00, salvo los códigos de verificación y los avisos de bloqueo de cuenta. Los mensajes retenidos se envían a las 08:00.
+10.4 Cada mensaje incluye el nombre de la tienda, la fecha y hora de la cita o el número de pedido, y un enlace para gestionarlo. Los enlaces caducan a los 7 días y contienen un identificador que no revela datos personales.
+
+11. Catálogo y precios
+
+11.1 El administrador central da de alta cada montura con referencia, marca, material, medidas (ancho de lente, puente, varilla), color, precio y fotografías. Una montura sin al menos una fotografía no se muestra al cliente.
+11.2 Los precios se guardan con dos decimales e incluyen el impuesto. Un cambio de precio entra en vigor a la hora indicada y no afecta a pedidos ya confirmados.
+11.3 Las promociones tienen fecha de inicio y fin, tiendas a las que se aplican y un tope de unidades. Una promoción no puede crearse con la fecha de fin anterior a la de inicio, ni con un descuento superior al 50 por ciento sin la aprobación de un segundo administrador.
+11.4 Las monturas que se retiran del catálogo desaparecen de las búsquedas, pero siguen visibles en los pedidos anteriores.
+11.5 El stock de cada tienda se actualiza al recibir mercancía, al confirmar un pedido y al entregarlo. Si dos dependientes reservan la última unidad a la vez, solo una reserva se acepta.
+
+12. Caja y entrega
+
+12.1 Al entregar un pedido, el dependiente comprueba la identidad del cliente con el código que aparece en la aplicación o con el número de pedido y un documento de identidad.
+12.2 La entrega exige cobrar el 70 por ciento restante. Se admite efectivo, tarjeta y vale de regalo. Si el cliente paga con vale, el importe del vale se descuenta y el resto se cobra por otro medio.
+12.3 El sistema emite una factura numerada, sin saltos en la numeración, y la envía por correo. Una factura emitida no puede modificarse, solo rectificarse con una factura de abono.
+12.4 El cliente dispone de 30 días desde la entrega para solicitar un ajuste gratuito de las gafas y de 60 días para reclamar si no se adapta a las lentes progresivas. En ese caso, el dependiente abre una incidencia, que la tienda debe resolver en 10 días.
+12.5 Las gafas con una incidencia abierta no pueden marcarse como "entregado" hasta que la incidencia se cierre.
+
+13. Integraciones
+
+13.1 El laboratorio recibe los pedidos mediante un fichero que se genera cada hora, y devuelve los cambios de estado en otro fichero. Si un pedido aparece en el fichero del laboratorio con un número desconocido, se ignora y se registra el error.
+13.2 El proveedor de pagos informa del resultado de cada cobro. Si el pago queda pendiente más de 15 minutos, el pedido se mantiene en "recibido" y se avisa al cliente de que no se ha completado el pago.
+13.3 La aplicación se conecta con el sistema de contabilidad de la cadena una vez al día, a las 23:00, y envía un resumen de facturas y cobros por tienda. Si la conexión falla, el envío se repite durante tres noches seguidas y después se avisa al administrador.

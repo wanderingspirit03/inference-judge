@@ -1,0 +1,163 @@
+I'm the station manager at Radio Pennyfield and I've been copied into this thread for two weeks without having answered anything. Could you write the detailed reply I should send to the whole group that settles every open point, one by one, and then give me a list of actions with names and dates? Where people disagree please pick a side and explain why, and where we lack information say what we need to find out.
+
+---
+
+From: Odile Brandvold <odile.brandvold@example.org>
+To: Pennyfield Board <board@example.org>; Station Team <team@example.org>
+Date: Mon, 6 Oct, 09:12
+Subject: Autumn schedule, transmitter, and the grant: three things at once
+
+Hello everyone,
+
+I am writing as board chair because three matters have landed on top of each other and I would like us to decide them together rather than one by one.
+
+1. The arts council grant. We were told in September that our application for 18,500 euros towards the new studio equipment was shortlisted. The final decision comes on 31 October. If we get it, we must spend it by 31 March and match it with 20 percent of our own money (3,700 euros).
+2. The transmitter at the Hollin Hill site. The rental agreement with the tower owner ends on 31 December. They have sent a new offer at 4,200 euros a year, up from 2,900.
+3. The autumn schedule. Several presenters have left or cut their hours, and we have gaps on Tuesday and Thursday evenings and most of Saturday morning.
+
+Please reply by Friday if you can. I know everyone is busy, but I do not want us to arrive at the November board meeting with nothing agreed.
+
+Odile
+
+---
+
+From: Teodor Salvesen <teodor.salvesen@example.org>
+To: Odile Brandvold <odile.brandvold@example.org>; Pennyfield Board <board@example.org>; Station Team <team@example.org>
+Date: Mon, 6 Oct, 11:47
+Subject: Re: Autumn schedule, transmitter, and the grant: three things at once
+
+Thanks Odile. My view as technical volunteer, short version:
+
+The tower owner's price is too high for what we get. The Hollin Hill site covers about 60 percent of the town and the valley, but the valley side is the part with fewer listeners. I have measured signal on the walking route between Pennyfield and Marsh End and the signal there is poor anyway. I think we should ask the tower owner for a two year deal at 3,300 a year. If they refuse, we can move the antenna to the roof of the Fenwick Library, which has offered us a free spot. The library roof is lower and we would lose maybe 25 percent of coverage in the north, but the south and the town centre, where most of our listeners live, would improve slightly.
+
+On the grant, I need the money to arrive before we can order anything, and the equipment supplier says lead time is five weeks. So if the decision is 31 October and we have to spend by 31 March, there is no problem, but we should not start spending our own matching money until we know.
+
+On the schedule, I would rather we run automated music in the gaps than have bad shows. Our best hours are the evening slots where we have a real person and a theme.
+
+Teodor
+
+---
+
+From: Pilar Echeverría <pilar.echeverria@example.org>
+To: Teodor Salvesen <teodor.salvesen@example.org>; Odile Brandvold <odile.brandvold@example.org>; Pennyfield Board <board@example.org>; Station Team <team@example.org>
+Date: Mon, 6 Oct, 14:03
+Subject: Re: Autumn schedule, transmitter, and the grant: three things at once
+
+I disagree with Teodor on the library roof. We have talked about this before and the problem is not only coverage. The library council will want us to sign a licence that lets them end it with two months' notice, and the roof is shared with the cooling unit for the reading room. The last time they made a similar arrangement with the youth radio group, the group lost its spot in the spring because of building works. We would be back where we started with no time to react.
+
+I would rather pay the 4,200. It is 1,300 more a year, which is about 108 euros a month. We can find that. Our regular donors give about 1,150 a month and the Thursday quiz night brings in 200 a month.
+
+On the schedule, I have three people who would like to start new shows if we give them a time slot: Wenzel wants a Tuesday evening jazz hour, Amara wants a Saturday morning children's story slot, and Ilse wants a Thursday evening local news round-up, but she can only do it every second week. I think we should say yes to all three on a trial of eight weeks and review in December.
+
+Pilar (volunteer coordinator)
+
+---
+
+From: Rhys Okonkwo-Hale <rhys.okonkwo-hale@example.org>
+To: Pilar Echeverría <pilar.echeverria@example.org>; Teodor Salvesen <teodor.salvesen@example.org>; Odile Brandvold <odile.brandvold@example.org>; Pennyfield Board <board@example.org>; Station Team <team@example.org>
+Date: Tue, 7 Oct, 08:30
+Subject: Re: Autumn schedule, transmitter, and the grant: three things at once
+
+Treasurer here. Some numbers, because I do not think we are all looking at the same ones.
+
+Our bank balance on 30 September was 9,640 euros. Fixed monthly costs (rent for the studio, electricity, music licensing, insurance, the part-time bookkeeper) are 2,310. Income from donors and the quiz night is as Pilar says about 1,350 a month, and the local council's small annual contribution of 6,000 arrives in April. So we run at a monthly deficit of roughly 960 before the council money, which is 460 per month on average once we include the annual contribution. That means we have around 21 months of reserve at the current pace, but less if the transmitter rises.
+
+I agree with Pilar that we can pay the higher price if we have to, but I would first try Teodor's counter offer of 3,300. The tower owner has been difficult in the past but they also have a vacant tenant, since the mobile operator left the tower in August. I would not be surprised if they were open to a deal.
+
+On the grant: the 20 percent match is 3,700 euros. I propose that we take it from the reserve and that we do not accept any new commitment for another year without a funding source. I would also like the board to know that the music licence is going up by about 8 percent in January, which is another 190 euros a year.
+
+One other point nobody has raised: the insurer asked in September whether the library roof or the tower is covered for the aerial. If we move, the premium may change.
+
+Rhys
+
+---
+
+From: Amara Dlamini <amara.dlamini@example.org>
+To: Pilar Echeverría <pilar.echeverria@example.org>; Station Team <team@example.org>
+Date: Tue, 7 Oct, 12:15
+Subject: Saturday morning children's slot
+
+Hi Pilar, thanks for putting my name forward. To be clear about what I am offering: a Saturday slot from 9:00 to 10:00, with stories read by me and by invited parents and children, plus one song request at the end. I would need a producer or at least someone to run the desk for me for the first two weeks, because I have not used the new mixing desk. I can record some episodes in advance at the school hall if the equipment is available, but I need to know before the end of October whether the slot is mine because I have to tell the parents' group.
+
+I can do it for eight weeks and I would be happy to review in December.
+
+Amara
+
+---
+
+From: Ilse Vandermeulen <ilse.vandermeulen@example.org>
+To: Pilar Echeverría <pilar.echeverria@example.org>; Station Team <team@example.org>
+Date: Tue, 7 Oct, 17:41
+Subject: Re: Thursday news round-up
+
+Hello Pilar and all,
+
+About the Thursday evening news slot: I can do twenty minutes every second Thursday at 19:00. I have a friend, Dorrit, who works at the local paper and might do the other weeks, but I have not yet asked her properly. I also need to flag that I am not a trained journalist. I would present local events, council decisions and notices, with short interviews, not investigations. If the board wants something more formal, I am not the right person.
+
+If we could do a first show on 23 October, that would give me time to book the guests. One more question: who is responsible for what we say? Last time a presenter mentioned a local shop owner by name and he complained. We should have a simple rule about this.
+
+Ilse
+
+---
+
+From: Wenzel Aarden <wenzel.aarden@example.org>
+To: Pilar Echeverría <pilar.echeverria@example.org>; Odile Brandvold <odile.brandvold@example.org>
+Date: Wed, 8 Oct, 07:55
+Subject: Jazz hour
+
+Pilar, Odile, quick one. I'd like Tuesday 20:00 to 21:00 for the jazz hour, but I only have a collection of about 400 albums on CD and about 150 on vinyl, and I understand the new music licence reporting requires every track to be logged. Is there a form I can fill in, or do I need to use the software on the desk? I have never used it. Could someone show me? I am free on Sunday afternoon.
+
+Wenzel
+
+---
+
+From: Teodor Salvesen <teodor.salvesen@example.org>
+To: Wenzel Aarden <wenzel.aarden@example.org>; Pilar Echeverría <pilar.echeverria@example.org>; Odile Brandvold <odile.brandvold@example.org>; Station Team <team@example.org>
+Date: Wed, 8 Oct, 09:20
+Subject: Re: Jazz hour
+
+Wenzel, use the logging sheet on the desk, one line per track with artist, title, and duration. I will type them into the licence portal every Monday. The desk software logs automatically only for tracks played from the server, not from CD. I can show you the desk on Sunday at 14:00 if that works, and I can show Amara in the same session if she is free. It would be better to do all of the desk training in one go.
+
+Also, on the question of who runs the desk for Amara, I can do Saturday mornings for the first two weeks. After that she should be fine.
+
+Teodor
+
+---
+
+From: Odile Brandvold <odile.brandvold@example.org>
+To: Pennyfield Board <board@example.org>; Station Team <team@example.org>
+Date: Wed, 8 Oct, 18:02
+Subject: Re: Autumn schedule, transmitter, and the grant: three things at once
+
+Thank you all. Summarising where I think we are, please correct me:
+
+- Transmitter: Teodor and Rhys want to counter at 3,300 for two years. Pilar prefers to accept 4,200 and not risk the library roof. Nobody has yet asked the tower owner anything.
+- Grant: decision on 31 October. Match of 3,700 from reserve (Rhys). No spending of own money until the decision (Teodor).
+- Schedule: Pilar proposes three new shows on an eight week trial: Tuesday jazz (Wenzel), Saturday children's (Amara), Thursday news on alternate weeks (Ilse). Teodor would rather run automation than weak shows. Training session on Sunday at 14:00.
+- Open: who writes to the tower owner, what the news rule is, what happens on the weeks when Ilse's slot is empty.
+
+I would like the station manager to answer these because it is operational. Station manager, can you reply to the group?
+
+Odile
+
+---
+
+From: Pilar Echeverría <pilar.echeverria@example.org>
+To: Odile Brandvold <odile.brandvold@example.org>; Pennyfield Board <board@example.org>; Station Team <team@example.org>
+Date: Thu, 9 Oct, 10:10
+Subject: Re: Autumn schedule, transmitter, and the grant: three things at once
+
+One more thing I forgot. The Saturday morning slot will need a safeguarding check for the parents who read on air, since children will be in the studio or recording at the school hall. We did this for the summer workshop and the form is on the shared drive. I can sort it if someone confirms the volunteers' names. Also, Ilse's point about naming people is fair; let us write one paragraph and put it on the wall in the studio. The paragraph should say that anything about a named private person must be checked with the station manager before broadcast.
+
+Pilar
+
+---
+
+From: Rhys Okonkwo-Hale <rhys.okonkwo-hale@example.org>
+To: Odile Brandvold <odile.brandvold@example.org>; Pennyfield Board <board@example.org>; Station Team <team@example.org>
+Date: Thu, 9 Oct, 15:36
+Subject: Re: Autumn schedule, transmitter, and the grant: three things at once
+
+Odile, one correction to your summary: I did not say no spending of own money, that was Teodor. I said take the match from the reserve. Also the council contribution arrives in April, so if we get the grant, the match is paid in March out of a lower balance than today. Looking at the next six months, I estimate our balance at 31 March to be about 3,550 euros without the grant, assuming the transmitter goes to 4,200 from January, and about minus 150 after paying the match, which is not possible. That is too thin to promise the match from the reserve alone. I would want the board to see that table before any decision, and I will circulate it on Monday.
+
+Rhys

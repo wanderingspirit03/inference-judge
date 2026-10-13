@@ -1,0 +1,36 @@
+Here's the spec for our berth and fish-landing system. Please produce a complete test plan: test cases grouped by feature, each with an ID, preconditions, steps, expected result and priority, plus a short section on test data and environments. Add the negative and boundary cases, and list anything in the spec that is unclear or contradictory and needs a decision.
+
+PRODUCT SPEC: Berth Booking and Landing Declarations (v1.2), Port of Selmouth Harbour Authority
+
+1. Overview
+Fishing skippers use a web page and a mobile app to reserve a berth, declare landings and pay harbour dues. Harbour staff use a back-office screen to approve and audit declarations.
+
+2. Berths
+2.1 The harbour has 46 berths in three zones: A (large trawlers, 14 berths, up to 24 m), B (medium boats, 20 berths, up to 15 m) and C (small boats, 12 berths, up to 9 m).
+2.2 A vessel may use a berth in its own zone or in a larger zone, never a smaller one.
+2.3 Reservations run for a minimum of 12 hours and a maximum of 14 days. Reservations may not overlap on the same berth.
+2.4 Visiting vessels (registered in another harbour) may stay at most 7 nights in any 30 days.
+
+3. Accounts
+3.1 A skipper registers with a vessel registration number, a vessel length and an email address. The registration number must match the national register through a lookup service. If the lookup service is down, the registration is held as "pending" and the skipper can look but not book.
+3.2 One account can hold up to 3 vessels.
+
+4. Landing declarations
+4.1 A declaration must be submitted within 2 hours of landing and always before the catch leaves the harbour area.
+4.2 It lists species, weight in kilograms (to one decimal place) and the fishing area code. Species come from a fixed list of 60 codes.
+4.3 The weight total per declaration must not exceed the vessel's quota for the species. Quotas are loaded each Monday from a spreadsheet by an administrator. If a declaration would exceed a quota, it is accepted but flagged for inspection, and the skipper sees a warning.
+4.4 Declarations cannot be edited after submission. A correction is made by a new declaration marked "amendment" that links to the original and needs staff approval.
+
+5. Dues and payment
+5.1 Berth dues are 1.20 per metre of vessel length per night, plus 8 percent of the first sale value for catches of shellfish landed on site. Dues are calculated at the end of the stay.
+5.2 Payment is by card within 14 days. Overdue accounts cannot make new reservations.
+5.3 A vessel that departs earlier than reserved is charged for the reserved nights unless it cancels at least 24 hours before.
+
+6. Notifications
+Skippers receive an email when a reservation is confirmed, 24 hours before arrival, and when a declaration is flagged. Weather warnings for gale force 8 or above are sent to all vessels with a current reservation.
+
+7. Roles
+Skipper, Harbour clerk (can approve amendments and see all declarations), Inspector (read-only, can export declarations as CSV) and Administrator (quota upload, berth management).
+
+8. Non-functional
+Pages load in under 3 seconds on a mobile connection. The mobile app must work offline for declarations and send them when a signal returns. All times are shown in local time with daylight saving handled correctly.

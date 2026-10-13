@@ -1,0 +1,25 @@
+Peux-tu rédiger une évaluation détaillée de ce passage, comme le ferait un relecteur d'une revue d'urbanisme ? Je voudrais les forces, les faiblesses de la méthode, les problèmes d'interprétation des résultats, les analyses manquantes et une recommandation finale argumentée.
+
+Titre : L'effet des tontes différées sur la biodiversité florale et la perception des habitants dans les parcs urbains
+
+2. Méthode
+
+2.1 Sites. L'étude a été menée en 2023 dans douze parcs de la ville de Saint-Orval (190 000 habitants), d'une surface comprise entre 0,8 et 6 hectares. Dans chaque parc, nous avons choisi une pelouse de 1 000 m² environ. Six pelouses ont été tondues toutes les deux semaines (régime « classique ») et six ont été tondues une seule fois, à la mi-juillet (régime « différé »). L'attribution a été décidée par le service des espaces verts, qui a réservé le régime différé aux parcs où les jardiniers étaient volontaires.
+
+2.2 Relevés floraux. Entre mai et septembre, un botaniste a réalisé quatre relevés par pelouse, dans cinq quadrats de 1 m² placés au hasard. Pour chaque quadrat, il a compté le nombre d'espèces de plantes à fleurs en fleur. Nous avons ensuite calculé la richesse moyenne par pelouse et par date.
+
+2.3 Enquête auprès des habitants. En juillet, un questionnaire a été distribué à l'entrée de chaque parc, un samedi matin. Les visiteurs ont évalué sur une échelle de 1 à 5 l'aspect du parc (« Ce parc vous paraît-il bien entretenu ? »). Au total, 482 personnes ont répondu : 231 dans les parcs classiques et 251 dans les parcs différés. Nous n'avons pas relevé l'âge ni le quartier des répondants.
+
+2.4 Analyses. Nous avons comparé la richesse florale entre les deux régimes avec un test t de Student sur les moyennes par pelouse (n = 6 par groupe). Les notes d'aspect ont été comparées par un test de Mann-Whitney sur l'ensemble des réponses individuelles. Le seuil de signification est fixé à 0,05.
+
+3. Résultats
+
+3.1 Richesse florale. La richesse moyenne en juillet était de 14,2 espèces par quadrat (écart-type 2,9) dans les pelouses différées contre 5,8 (écart-type 1,7) dans les pelouses classiques, soit une différence de 8,4 espèces (t = 6,0 ; p < 0,001). En septembre, après la tonte des pelouses différées, les moyennes étaient de 7,1 et de 5,2 espèces (p = 0,09).
+
+3.2 Perception. La note moyenne d'aspect était de 3,2 dans les parcs différés (n = 251) et de 3,9 dans les parcs classiques (n = 231), ce qui est significatif (p < 0,001). Dans les commentaires libres, 38 personnes ont jugé les pelouses différées « abandonnées » ; 22 ont écrit qu'elles aimaient voir « de vraies fleurs ».
+
+3.3 Coûts. Les équipes ont consacré en moyenne 41 heures de travail par pelouse classique pendant la saison et 9 heures par pelouse différée. Nous n'avons pas mesuré les coûts de ramassage du foin.
+
+4. Discussion
+
+Nos résultats démontrent que la tonte différée multiplie par deux et demi la richesse florale des pelouses urbaines et qu'elle réduit sensiblement les coûts d'entretien. Toutefois, la perception négative des habitants constitue un obstacle ; nous recommandons donc de généraliser la tonte différée à l'ensemble des parcs de la ville, accompagnée d'une campagne d'information. Les limites de l'étude tiennent à la durée d'une seule saison.

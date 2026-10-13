@@ -1,0 +1,190 @@
+Could you give this a proper code review and then write a full set of unit tests for it? I wrote it for the frame shop at Halden Cycles to plan which frame batches go through the paint booth each week, and I'm not sure the batching and the lead time logic are right. Tell me what is wrong or fragile, what you would change, and show the tests with pytest.
+
+```python
+"""paint_plan.py - weekly paint booth planning for the Halden Cycles frame shop.
+
+Frames arrive from welding as orders. Each order has a frame model, a colour,
+a quantity and a due date. The booth can only hold one colour per run, and a
+colour change needs a flush. We group orders into runs, sort the runs, and
+report which orders will be late.
+"""
+
+from __future__ import annotations
+
+import csv
+import datetime as dt
+import io
+from collections import defaultdict
+from dataclasses import dataclass, field
+
+BOOTH_CAPACITY = 24          # frames per run
+RUN_MINUTES = 95             # minutes to paint and cure one run
+FLUSH_MINUTES = 40           # minutes to flush when the colour changes
+SHIFT_MINUTES = 8 * 60       # one working shift
+SHIFTS_PER_DAY = 2
+
+COLOUR_FAMILIES = {
+    "gloss black": "dark",
+    "matt black": "dark",
+    "forest green": "dark",
+    "signal red": "bright",
+    "sunrise orange": "bright",
+    "pearl white": "light",
+    "sky blue": "light",
+}
+
+
+@dataclass
+class Order:
+    order_id: str
+    model: str
+    colour: str
+    quantity: int
+    due: dt.date
+    rush: bool = False
+
+    def family(self) -> str:
+        return COLOUR_FAMILIES.get(self.colour.lower(), "other")
+
+
+@dataclass
+class Run:
+    colour: str
+    orders: list = field(default_factory=list)
+    frames: int = 0
+
+    def room(self) -> int:
+        return BOOTH_CAPACITY - self.frames
+
+    def add(self, order: Order, count: int) -> None:
+        self.orders.append((order, count))
+        self.frames += count
+
+    def earliest_due(self) -> dt.date:
+        return min(o.due for o, _ in self.orders)
+
+
+def parse_orders(text: str) -> list:
+    """Read orders from CSV text with a header row."""
+    orders = []
+    reader = csv.DictReader(io.StringIO(text))
+    for row in reader:
+        due = dt.datetime.strptime(row["due"], "%Y-%m-%d").date()
+        qty = int(row["quantity"])
+        if qty < 0:
+            raise ValueError("negative quantity for " + row["order_id"])
+        orders.append(
+            Order(
+                order_id=row["order_id"],
+                model=row["model"],
+                colour=row["colour"].strip().lower(),
+                quantity=qty,
+                due=due,
+                rush=row.get("rush", "") == "yes",
+            )
+        )
+    return orders
+
+
+def build_runs(orders: list) -> list:
+    """Group orders into booth runs, one colour per run."""
+    by_colour = defaultdict(list)
+    for order in orders:
+        by_colour[order.colour].append(order)
+
+    runs = []
+    for colour, group in by_colour.items():
+        group.sort(key=lambda o: o.due)
+        current = Run(colour)
+        for order in group:
+            left = order.quantity
+            while left > 0:
+                take = min(left, current.room())
+                current.add(order, take)
+                left -= take
+                if current.room() == 0:
+                    runs.append(current)
+                    current = Run(colour)
+        if current.frames > 0:
+            runs.append(current)
+    return runs
+
+
+def order_runs(runs: list) -> list:
+    """Sort runs: rush first, then earliest due date, then by colour family
+    so that similar colours sit next to each other."""
+    def key(run: Run):
+        has_rush = any(o.rush for o, _ in run.orders)
+        family = run.orders[0][0].family()
+        return (not has_rush, run.earliest_due(), family)
+
+    return sorted(runs, key=key)
+
+
+def minutes_for(runs: list) -> int:
+    total = 0
+    previous = None
+    for run in runs:
+        if previous is not None and previous.colour != run.colour:
+            total += FLUSH_MINUTES
+        total += RUN_MINUTES
+        previous = run
+    return total
+
+
+def schedule(runs: list, start: dt.date) -> dict:
+    """Return a map of order_id to the date its last frame is finished."""
+    finish = {}
+    day = start
+    minutes_used = 0
+    capacity_per_day = SHIFT_MINUTES * SHIFTS_PER_DAY
+    previous = None
+    for run in runs:
+        cost = RUN_MINUTES
+        if previous is not None and previous.colour != run.colour:
+            cost += FLUSH_MINUTES
+        if minutes_used + cost > capacity_per_day:
+            day += dt.timedelta(days=1)
+            minutes_used = 0
+        minutes_used += cost
+        for order, _ in run.orders:
+            finish[order.order_id] = day
+        previous = run
+    return finish
+
+
+def late_orders(orders: list, finish: dict) -> list:
+    late = []
+    for order in orders:
+        done = finish.get(order.order_id)
+        if done is not None and done > order.due:
+            late.append((order.order_id, (done - order.due).days))
+    late.sort(key=lambda item: item[1], reverse=True)
+    return late
+
+
+def weekly_report(text: str, start: dt.date) -> str:
+    orders = parse_orders(text)
+    runs = order_runs(build_runs(orders))
+    finish = schedule(runs, start)
+    late = late_orders(orders, finish)
+    lines = [
+        f"runs: {len(runs)}",
+        f"booth minutes: {minutes_for(runs)}",
+        f"late orders: {len(late)}",
+    ]
+    for order_id, days in late:
+        lines.append(f"  {order_id} is {days} day(s) late")
+    return "\n".join(lines)
+
+
+if __name__ == "__main__":
+    sample = (
+        "order_id,model,colour,quantity,due,rush\n"
+        "H-1001,Trail 29,Forest Green,30,2026-03-04,\n"
+        "H-1002,City 700,Pearl White,12,2026-03-03,yes\n"
+        "H-1003,Trail 29,Forest Green,10,2026-03-06,\n"
+        "H-1004,Gravel X,Signal Red,24,2026-03-05,\n"
+    )
+    print(weekly_report(sample, dt.date(2026, 3, 2)))
+```

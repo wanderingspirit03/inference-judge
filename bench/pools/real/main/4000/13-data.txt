@@ -1,0 +1,141 @@
+I work in the transport team at Lowmere City Council and I have to present the third-quarter figures for the Pedal Lowmere bike-share scheme to the transport committee next Thursday. Could you write me a proper analysis of the data below, with the main findings, anything surprising, what the numbers say about the day-pass price change and the station imbalances, and a set of recommended next steps with an honest note on how far the data supports each one? Please also list any questions the committee is likely to ask and what we would need to answer them.
+
+BACKGROUND
+
+Pedal Lowmere has operated since April two years ago. At the end of September it had 12 stations with 252 docks in total and a fleet of 230 bikes, of which 40 are e-bikes. The scheme is operated for the council by a contractor; the council pays a fixed annual fee and keeps all fare income. On 1 August the day-pass price rose from 3.50 pounds to 4.50 pounds. Annual membership (60 pounds a year) and the student rate (25 pounds a year, valid with a university card) did not change. A day pass allows unlimited trips of up to 30 minutes each within one calendar day. A trip is counted when a bike is unlocked at one station and returned to any station of the scheme. Data below covers Q3, 1 July to 30 September (92 days). The tables come from the contractor's quarterly export; I have checked that the totals agree between tables.
+
+TABLE 1: TRIPS BY MONTH
+
+| Month | Trips | Days | Avg trips per day | Rainy days |
+|---|---|---|---|---|
+| July | 41,230 | 31 | 1,330 | 9 |
+| August | 44,870 | 31 | 1,447 | 11 |
+| September | 43,090 | 30 | 1,436 | 14 |
+| Q3 total | 129,190 | 92 | 1,404 | 34 |
+
+TABLE 2: TRIPS BY USER TYPE AND MONTH
+
+| User type | July | August | September | Q3 total | Avg trip (min) |
+|---|---|---|---|---|---|
+| Annual member | 23,730 | 26,240 | 21,080 | 71,050 | 14.2 |
+| Day pass | 8,900 | 8,300 | 7,710 | 24,910 | 27.6 |
+| Student | 8,600 | 10,330 | 14,300 | 33,230 | 12.9 |
+| All | 41,230 | 44,870 | 43,090 | 129,190 | 16.4 |
+
+TABLE 3: AVERAGE DAILY TRIPS, RAINY AND DRY DAYS (rounded)
+
+| Month | Rainy days | Avg trips on rainy day | Dry days | Avg trips on dry day |
+|---|---|---|---|---|
+| July | 9 | 1,020 | 22 | 1,457 |
+| August | 11 | 1,160 | 20 | 1,606 |
+| September | 14 | 1,090 | 16 | 1,739 |
+
+TABLE 4: STATIONS, Q3
+
+Empty means the share of opening hours with no bike available to take. Full means the share of opening hours with no free dock to return to. Van visits are the number of times the contractor's rebalancing van stopped at the station to move bikes.
+
+| Station | Docks | Trips started | Trips ended | Net (ended minus started) | Empty % | Full % | Van visits |
+|---|---|---|---|---|---|---|---|
+| Riverside Quay | 20 | 18,420 | 17,900 | -520 | 14.2 | 3.1 | 61 |
+| Central Station | 36 | 24,310 | 23,880 | -430 | 21.5 | 1.4 | 88 |
+| Old Market | 24 | 11,980 | 12,410 | +430 | 6.8 | 9.6 | 34 |
+| University Gate | 28 | 15,760 | 15,300 | -460 | 17.9 | 2.2 | 57 |
+| Hospital Lane | 16 | 6,240 | 6,590 | +350 | 3.1 | 12.4 | 19 |
+| Kestrel Park | 22 | 9,870 | 10,240 | +370 | 4.4 | 8.7 | 26 |
+| Harbour Row | 26 | 13,150 | 12,870 | -280 | 11.6 | 4.0 | 48 |
+| Greenfield Road | 14 | 5,310 | 5,700 | +390 | 2.0 | 14.1 | 12 |
+| Tannery Yard | 20 | 8,640 | 8,350 | -290 | 5.2 | 6.3 | 22 |
+| Westbrook Library | 16 | 4,970 | 5,230 | +260 | 1.8 | 15.8 | 9 |
+| Stadium Approach | 18 | 7,420 | 7,350 | -70 | 9.4 | 5.5 | 31 |
+| Fairview Estate | 12 | 3,120 | 3,370 | +250 | 1.2 | 18.6 | 8 |
+| All stations | 252 | 129,190 | 129,190 | 0 | | | 415 |
+
+TABLE 4A: TRIPS BY TIME OF DAY (all days, all users)
+
+| Time band | Trips | Share of trips |
+|---|---|---|
+| 05:30 to 07:00 | 4,980 | 3.9% |
+| 07:00 to 09:30 | 27,640 | 21.4% |
+| 09:30 to 12:00 | 14,320 | 11.1% |
+| 12:00 to 14:30 | 17,260 | 13.4% |
+| 14:30 to 16:30 | 14,110 | 10.9% |
+| 16:30 to 19:00 | 30,850 | 23.9% |
+| 19:00 to 23:30 | 20,030 | 15.5% |
+| Total | 129,190 | 100% |
+
+TABLE 4B: WEEKDAYS AND WEEKENDS
+
+There were 66 weekdays and 26 weekend days in the quarter. No public holidays fell in the period.
+
+| Day type | Trips | Avg trips per day | Share of annual trips | Share of student trips | Share of day-pass trips |
+|---|---|---|---|---|---|
+| Weekday | 98,560 | 1,493 | 81.0% | 84.0% | 52.6% |
+| Weekend | 30,630 | 1,178 | 19.0% | 16.0% | 47.4% |
+
+TABLE 4C: TEN BUSIEST ORIGIN AND DESTINATION PAIRS
+
+| From | To | Trips |
+|---|---|---|
+| Central Station | University Gate | 3,410 |
+| University Gate | Central Station | 2,980 |
+| Riverside Quay | Central Station | 2,760 |
+| Central Station | Riverside Quay | 2,310 |
+| Harbour Row | Riverside Quay | 2,040 |
+| Riverside Quay | Harbour Row | 1,870 |
+| Old Market | Central Station | 1,650 |
+| Kestrel Park | Old Market | 1,420 |
+| Hospital Lane | Central Station | 1,180 |
+| Stadium Approach | Harbour Row | 1,030 |
+
+About 9.8 per cent of all trips (roughly 12,660) ended at the station where they started. Almost all of these were day-pass trips and leisure rides, mostly at Kestrel Park, Riverside Quay and Old Market.
+
+TABLE 5: FAULT REPORTS BY CATEGORY
+
+| Category | Reports | Median hours to repair |
+|---|---|---|
+| Punctured tyre | 212 | 20 |
+| Brakes | 148 | 14 |
+| Chain or drivetrain | 131 | 26 |
+| Dock fault | 97 | 52 |
+| Lock mechanism | 64 | 31 |
+| E-bike battery | 53 | 44 |
+| Vandalism | 41 | 70 |
+| Other | 29 | 36 |
+| Total | 775 | 26 |
+
+TABLE 6: MEMBERSHIP
+
+| Date | Annual members | Student members | Day passes sold in quarter |
+|---|---|---|---|
+| 30 June | 3,410 | 1,260 | |
+| 30 September | 3,480 | 2,150 | |
+| Q3 | | | 6,980 |
+
+NOTES FROM THE CONTRACTOR'S REPORT
+
+E-bikes made up 17 per cent of the fleet and took part in roughly 24 per cent of trips: about 8.4 trips per e-bike per day, against 5.6 for a standard bike. E-bike trips averaged 17.8 minutes and standard bike trips 15.9 minutes. Most e-bike battery faults occurred at Riverside Quay, Harbour Row and University Gate, which are the three stations with the longest uphill return routes.
+
+Rebalancing is done by two vans working weekdays 06:30 to 14:30 and one van on Saturdays. The contractor estimates that each van visit costs the council about 14 pounds in labour and fuel, and that vans currently move bikes mainly from the "full" stations to the "empty" ones in the morning only. No evening rebalancing is done. The contractor says that adding an evening shift of one van would cost around 38,000 pounds a year.
+
+The contractor also reports that the university's autumn term began on Monday 22 September, and that the university has confirmed it expects 600 more students to join in the next intake than in the year before. Two applications for new stations have been received from residents' associations (Fairview Estate asked for more docks; Kestrel Park asked for a second station at the north gate), and the council has a capital budget of 96,000 pounds for new docks this year. A new dock station of 16 docks costs about 41,000 pounds installed, and an additional 8-dock extension to an existing station costs about 17,500 pounds.
+
+QUESTIONS ALREADY RAISED BY COUNCILLORS
+
+Councillor Abernethy-Wyld has written to ask whether the August price rise "drove people away from the scheme or just moved them into a cheaper product". Councillor Tamsin Odhiambo wants to know whether the stations in the poorer eastern wards, Fairview Estate and Greenfield Road, are used enough to justify keeping them, since they are the quietest in the scheme. The deputy chair of the committee asked for "one figure that tells us whether the scheme is working", and the contractor has suggested trips per bike per day, which was 6.1 over the quarter. Finally, the university's sustainability office has asked whether the council would consider a station inside the new science campus when it opens next year.
+
+BUDGET OPTIONS UNDER DISCUSSION
+
+| Option | Approximate cost | Notes |
+|---|---|---|
+| Evening rebalancing van, one year | 38,000 | Contractor estimate |
+| New 16-dock station | 41,000 | Installed cost |
+| 8-dock extension of an existing station | 17,500 | Installed cost |
+| Capital budget available for docks this year | 96,000 | Cannot be carried over |
+
+DATA CAVEATS
+
+- Rainy day means any day with 2 mm or more of rain recorded at the council depot. It does not distinguish light showers from all-day rain.
+- Station "Empty %" and "Full %" are measured only during opening hours, 05:30 to 23:30.
+- Student trips were not separated from annual trips before 1 July of last year, so earlier comparisons are not possible.
+- The contractor's system does not record the purpose of the trip, and journeys by day pass holders cannot be linked to individuals.
+- The September fare-income figure has not yet been reconciled with the bank statements, so I have not included income here.

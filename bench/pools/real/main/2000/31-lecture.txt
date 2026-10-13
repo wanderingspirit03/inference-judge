@@ -1,0 +1,75 @@
+These are my notes from the internal training lecture on pathfinding at our studio, Lanternfish Games, given to the new gameplay programmers. I have a test on Thursday. Could you turn them into a proper study guide with worked examples I can follow by hand, and then a quiz of about ten questions with full answers? Please fix anything in my notes that looks wrong.
+
+LECTURE 4: PATHFINDING AND NAVIGATION FOR NPCs
+Speaker: Tomasz Wierzbicki (senior gameplay programmer)
+
+1. Why this matters
+
+Nearly every character in our current game, "Tidewalkers", has to get from A to B on a map with walls, water and moving crowds. Players forgive a lot, but they never forgive an enemy that walks into a wall or a companion that gets lost. Pathfinding runs every frame for dozens of agents, so it has to be correct and cheap. Budget: 0.5 ms per frame in total on the console target.
+
+2. Representing the world
+
+Three options:
+- Grid: divide the map into square cells, each walkable or not. Simple, easy to debug, but memory heavy on large maps and paths look jagged (only 4 or 8 directions).
+- Waypoint graph: designers place nodes by hand and connect them. Very cheap, but paths look robotic and designers have to maintain it.
+- Navigation mesh (navmesh): a set of convex polygons covering the walkable surface. Agents move between polygons through shared edges. Far fewer nodes than a grid, and paths are smooth after a clean-up step. This is what we use for all open areas.
+
+For the examples in this lecture we use a grid, because you can do it on paper.
+
+3. Breadth-first search and Dijkstra
+
+Breadth-first search (BFS) explores outward from the start in rings. It finds the path with the fewest steps when every step costs the same. It does not care about terrain cost. Dijkstra's algorithm fixes that: it keeps a priority queue ordered by the total cost from the start (called g), always expands the cheapest node, and updates neighbours if it finds a cheaper route to them. When the goal comes off the queue, its g is the cheapest cost. Dijkstra explores in all directions equally, which wastes work when the goal is far away in one direction.
+
+4. A* search
+
+A* adds a guess of the remaining distance to the goal, called the heuristic h. The queue is ordered by f = g + h. Nodes that look closer to the goal are expanded first. If h never overestimates the real remaining cost (it is "admissible"), A* still finds the cheapest path. If h is also consistent (h of a node is never more than the step cost to a neighbour plus h of that neighbour), a node never needs to be expanded twice.
+
+Common heuristics on a grid:
+- Manhattan distance, |dx| + |dy|: for 4-direction movement.
+- Chebyshev distance, max(|dx|, |dy|): for 8-direction movement when diagonals cost the same as straight steps.
+- Octile distance: for 8-direction movement when diagonals cost 1.4 (about the square root of 2) and straight steps cost 1. Formula: 1 * (dx + dy) + (1.4 - 2) * min(dx, dy).
+- Euclidean distance: always admissible but usually too small on a grid, so A* explores more than needed.
+
+Tomasz stressed: if h is too large (inadmissible, say 2 times Manhattan), A* runs faster but can return paths that are not the cheapest. Sometimes this is fine for background NPCs. For the player's companion we want the true optimum.
+
+5. Worked example from the lecture
+
+4-direction grid, every step costs 1. Start S at (0,0), goal G at (3,1). A wall occupies (1,0) and (1,1). Cells (1,2) and beyond are free.
+
+- Open list: S with g = 0, h = |3-0| + |1-0| = 4, f = 4.
+- Expand S. Neighbours: (1,0) is a wall, (0,1) is free, (0,-1) is outside the map. So we add (0,1) with g = 1, h = 3 + 0 = 3, f = 4.
+- Expand (0,1). Neighbours: (1,1) is a wall, (0,2) is free, (0,0) is closed. Add (0,2): g = 2, h = 3 + 1 = 4, f = 6.
+- Expand (0,2). Neighbours: (1,2) free. Add (1,2): g = 3, h = 2 + 1 = 3, f = 6.
+- Expand (1,2). Neighbours: (2,2) free, (1,1) wall. Add (2,2): g = 4, h = 1 + 1 = 2, f = 6.
+- Expand (2,2). Neighbours: (3,2) and (2,1). Add (2,1): g = 5, h = 1, f = 6. Add (3,2): g = 5, h = 1, f = 6.
+- Expand either one. Take (2,1): neighbour (3,1) is the goal, with g = 6, h = 0, f = 6.
+- Expand the goal. Path: S, (0,1), (0,2), (1,2), (2,2), (2,1), G. Cost 6.
+
+Tomasz noted that Dijkstra would have expanded 3 more cells on this map, such as those at the bottom of the grid.
+
+6. Making paths look natural
+
+A* on a grid returns a list of cells. Moving through their centres looks stiff. Three clean-ups:
+1. Line-of-sight smoothing: starting from the first node, skip ahead to the furthest node you can reach in a straight line without hitting an obstacle, then repeat from there. Cheap and effective.
+2. The funnel algorithm: on a navmesh, once we know the sequence of polygons, we find the shortest path through the shared edges by tightening a "funnel" of left and right corners. Gives the optimal path inside the corridor.
+3. Steering: agents follow the path using seek and arrive behaviours, with a small look-ahead so they cut corners softly.
+
+7. Dealing with moving things
+
+- Dynamic obstacles (doors, crates the player can push) are handled by marking navmesh tiles dirty and rebuilding that tile only, which takes about 2 ms on the worker thread. Agents re-plan when their next polygon has changed.
+- Other agents: we do not put them in the A* graph. We use local avoidance (reciprocal velocity obstacles) on top of the path. Two agents walking toward each other each step aside by half.
+- Crowd congestion: when more than 8 agents want the same corridor, the later ones wait at a queue marker instead of pushing.
+
+8. Performance tips from the lecture
+
+- Never run a path search in the same frame it was requested. Put requests in a queue and give the system a budget of 0.5 ms per frame; unfinished searches continue next frame.
+- Cache paths for static destinations, such as "go to your workbench".
+- Use hierarchical pathfinding for the big overworld: split the map into 32 by 32 clusters, find a path between cluster entrances first, then refine inside each cluster only as the agent approaches.
+- Use a binary heap for the open list. A plain array makes each pop O(n) and killed the old prototype.
+- Store g and parent in flat arrays indexed by node number, not in objects.
+
+9. Debugging checklist
+
+If an NPC will not move: is the start on the navmesh (snap it)? Is the goal reachable (flood fill from the start)? Is the agent radius larger than the doorway? Is the heuristic too heavy? Is the path request stuck in the queue?
+
+Homework: implement A* with octile distance on the 64 by 64 test map and compare nodes expanded against Dijkstra.

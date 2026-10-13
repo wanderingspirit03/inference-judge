@@ -1,0 +1,117 @@
+Below is our quarterly operations review for the Harrowgate Glassworks furnace and finishing site. I have to present it to the board on Thursday and I have not had time to read it properly. Please give me a section-by-section summary, then a list of the recommendations you would make to the board, ordered by how urgent they are.
+
+---
+
+HARROWGATE GLASSWORKS LTD
+Quarterly Operations Review, Q3 (July to September)
+Prepared by: Marit Oyelaran, Head of Operations
+Circulated to: Board of Directors, Site Leadership Team
+Status: Final draft for board meeting
+
+1. Executive summary
+
+The third quarter was the first full quarter with Furnace 2 running on the new oxy-fuel burner package, and the results are mixed. Output of saleable glass rose to 4,310 tonnes against a plan of 4,150 tonnes, a gain of 3.9 percent. Natural gas use per tonne of melted glass fell by 11.2 percent compared with the same quarter last year, which is better than the 8 percent we promised the board in March. Against that, our overall yield from melt to shipped product slipped from 81.4 percent to 79.8 percent, mostly because of a bad six weeks in the annealing lehr at the finishing hall. Customer returns rose in the month of August and one large order of laboratory bottles for Pellam Scientific was rejected in full. Two reportable injuries occurred, both minor. The quarter ended with a cash position that is healthy, but the planned cold repair of Furnace 1 now looks like it cannot be delayed past next autumn.
+
+2. Production and yield
+
+Furnace 1 (the older end-port regenerative furnace) produced 1,880 tonnes of saleable glass, 6 percent under plan, because it ran at reduced pull from 12 July to 2 August while the crown was monitored after a hot spot was found on the north side. Furnace 2 produced 2,430 tonnes, 12 percent over plan. Its pull rate averaged 71 tonnes per day against a design figure of 68.
+
+Yield loss by cause, as a share of all glass melted:
+
+- Forming rejects (wall thickness, cords, seeds): 8.9 percent
+- Annealing breakage and stress rejects: 6.4 percent
+- Packing and handling breakage: 2.1 percent
+- Customer returns credited back: 1.3 percent
+- Cullet that could not be recycled because of contamination: 1.5 percent
+
+The annealing figure is the main concern. Lehr 3 in the finishing hall had two failed heating zones between 20 July and 28 August. The maintenance log shows that the zone controller was replaced on 21 July, but the replacement part was the wrong rating and tripped twice. The correct part arrived on 30 August. During those weeks the line was run at lower speed with a flatter temperature profile, which cut throughput by about 14 percent and produced a visible rise in stress rejects, particularly on thick-walled jars.
+
+3. Energy and emissions
+
+The oxy-fuel package on Furnace 2 cut gas use to 3.46 gigajoules per tonne melted, down from 3.90 a year ago. Electricity use rose by 0.21 gigajoules per tonne because of the on-site oxygen plant, so the net energy saving is smaller than the gas figure suggests. We estimate the net saving at 7.6 percent. Carbon dioxide from combustion fell by 9.8 percent per tonne. Nitrogen oxides at the stack are the open issue: the monthly average on Furnace 2 was 780 milligrams per cubic metre in July, 910 in August and 840 in September. Our permit limit is 1,000 milligrams, but the regulator has told us informally that it expects new installations to hold below 800. The burner vendor, Calder Combustion, has proposed a staged-air adjustment that it says will bring the figure down by about 15 percent for a one-off fee of 38,000 pounds.
+
+Furnace 1 remains on the old regenerative system and has not changed. Its nitrogen oxide level sits at around 1,150 milligrams per cubic metre under a derogation that expires in June of next year. This is a hard date and is discussed again under risks.
+
+4. Quality and customers
+
+Complaints rose from 19 in Q2 to 31 in Q3. The breakdown was 12 for chips and surface defects, 9 for dimensional problems, 6 for colour variation in amber glass, 3 for contamination (stones and unmelted batch) and 1 for wrong labelling. The single biggest event was the Pellam Scientific order of 62,000 laboratory bottles, shipped on 14 August and rejected on 3 September after the customer found cords in the neck finish that caused leaks under their vacuum test. We have agreed to replace the full lot at our cost, estimated at 118,000 pounds including freight and the lost slot on the line. Root cause work found that the bottles came from a period when the Furnace 1 forehearth temperature drifted by about 9 degrees because of the crown hot spot, and our inline inspection camera was set to a tolerance suited to the wider necks we normally make, so it did not catch them.
+
+Colour variation in amber was traced to inconsistent addition of iron sulphide in the batch house during two weeks when the second batch operator was on leave. The batch scales have been recalibrated and a second sign-off added.
+
+On the positive side, on-time delivery was 94.7 percent against a target of 93, and two new customers signed supply agreements, a regional brewer and a cosmetics packager.
+
+5. Safety and people
+
+There were two reportable injuries. The first was a cut to the hand of a packer on 9 August when a broken jar was handled without the correct glove. The second was a sprained ankle at the cullet yard on 22 September on an uneven surface after rain. Lost time totalled 11 days. The rolling twelve-month injury rate is 3.1 per million hours worked, down from 3.8. Safety training for the three new furnace operators was completed on schedule. Staff turnover in the quarter was 4.2 percent annualised, but we lost our only qualified lehr technician to a competitor in October, and the role is currently covered by an agency contractor at roughly twice the cost.
+
+An employee survey in September had a 71 percent response rate. Scores on safety culture were high at 4.3 out of 5. Scores on communication from management were low at 3.0, with night-shift comments most frequently asking for earlier notice about schedule changes.
+
+6. Maintenance and capital projects
+
+The Furnace 2 oxy-fuel project closed out at 2.96 million pounds against a budget of 3.10 million, which is under budget by 4.5 percent. The lehr 3 controller upgrade is now a priority. The compressed-air system leak survey found 23 leaks, estimated to waste 6 percent of compressor output, and 17 are fixed. The new inline inspection camera for the narrow-neck line was ordered on 18 September at a price of 164,000 pounds with delivery in January.
+
+The cold repair of Furnace 1 is the largest item. A full rebuild of the regenerators and a partial crown replacement is estimated at 6.4 million pounds with a ten-week shutdown. Engineers from the refractory supplier inspected the crown in July and said it could probably run another twelve months with careful monitoring but gave no guarantee. We should plan the shutdown for the quieter trading period in January to March of the year after next, or sooner if the crown deteriorates.
+
+7. Raw materials and cullet
+
+Batch materials were supplied without interruption. Soda ash cost rose 7 percent in August under the annual price clause, and sand cost was flat. The supplier of our high-purity sand, Tilbury Quarry Products, delivered 14 loads with iron content above the agreed limit of 0.015 percent, which forced us to add more decolourising agent in clear glass and raised the batch cost per tonne by about 1.40 pounds on those days. We have issued a formal notice and asked for a credit of 9,300 pounds. The supplier has promised a response by the end of October and has offered to install a second sieving stage at its own plant.
+
+Cullet is the most useful raw material we have, because every 10 percent of cullet in the batch saves roughly 2.5 percent of melting energy. The average cullet ratio on Furnace 2 was 38 percent and on Furnace 1 it was 31 percent. External cullet from the bottle bank contract was 2,900 tonnes in the quarter, but 1.5 percent of everything melted had to be rejected because of ceramics, metal caps and heat-resistant glass mixed in. We trialled a new optical sorter on the incoming cullet line in September on a hire basis. It removed 82 percent of the ceramic and stone pieces that previously got through. Purchase of a permanent unit is quoted at 410,000 pounds, and the payback from reduced contamination and a higher cullet ratio is estimated at about three years.
+
+8. Product segments and customers
+
+Revenue and volume by segment, with the change against the same quarter last year:
+
+| Segment | Tonnes shipped | Revenue (GBP m) | Change in revenue |
+|---|---|---|---|
+| Food and drink containers | 2,460 | 5.92 | +5.1% |
+| Laboratory and pharmaceutical | 640 | 2.71 | -3.4% |
+| Cosmetics and perfumery | 520 | 1.84 | +12.8% |
+| Decorative and tableware | 390 | 1.04 | +1.9% |
+| Specialty and architectural | 300 | 0.33 | -8.0% |
+
+The decline in the laboratory segment is directly connected to the Pellam rejection and one other customer pausing orders while it audits our complaint handling. The cosmetics segment grew fastest and has the best margin, at about 19 percent against 9 percent for food and drink. The architectural segment is small and has been loss-making for two years because short runs require frequent colour changes on Furnace 2. We recommend that the board decide in the Q4 meeting whether to continue it.
+
+Our five largest customers account for 58 percent of revenue, down from 63 percent a year ago. The biggest single customer, a national brewery group, accounts for 17 percent and its contract is due for renewal in March. Its buyer has indicated that price will be the main topic and has asked for a recycled-content commitment of at least 60 percent by weight, which our current cullet ratios on Furnace 1 would not support.
+
+9. Follow-up on Q2 actions
+
+At the last review the Site Leadership Team agreed six actions. Their status is as follows.
+
+1. Complete the Furnace 2 oxy-fuel commissioning. Done on 12 July.
+2. Reduce complaint response time to under five working days. Partly done. The average fell from 9.1 to 6.4 working days, but the Pellam case took 12 days to receive a first formal answer.
+3. Introduce a second sign-off on batch weighing. Done in September, after the amber problem showed it was needed.
+4. Agree a rebuild plan for Furnace 1 with the refractory supplier. Open. A proposal was received but a firm cost and schedule are not yet agreed.
+5. Replace the forklift fleet's gas trucks with electric units. Delayed. Two of six trucks have been delivered because the charging points were not installed in time.
+6. Roll out the improved shift handover form. Done on all shifts, though night shift compliance is only 70 percent.
+
+10. Finance
+
+Revenue for the quarter was 11.84 million pounds against a plan of 11.30 million. Operating profit was 1.37 million, or 11.6 percent of revenue, below last year's 12.4 percent because of the Pellam provision of 118,000 pounds and higher agency labour costs. Gas prices were stable under our fixed contract until March. Cash at quarter end was 4.2 million pounds, with no drawn debt. A reserve of 1.5 million has been earmarked from retained profit for the Furnace 1 rebuild, which leaves a large gap that would have to be financed.
+
+11. Risks
+
+The main risks recorded this quarter are:
+
+1. Furnace 1 crown failure before a planned shutdown. A failure would stop about 45 percent of output for an estimated twelve to sixteen weeks. Likelihood is rated medium, impact severe.
+2. Expiry of the nitrogen oxide derogation on Furnace 1 in June. If the rebuild has not begun, we would need to install abatement equipment, which has been quoted at 1.9 million pounds, or reduce its output.
+3. Loss of skilled staff in annealing and forming. Only one person in the company is fully trained on lehr control.
+4. Quality escapes from the narrow-neck line until the new camera arrives.
+5. Rising electricity prices, because the oxygen plant has made Furnace 2 more exposed to power costs.
+
+12. Outlook for Q4
+
+We expect output of about 4,200 tonnes. The staged-air adjustment would be done during the planned two-day maintenance stop in November if approved. We will complete the leak repairs, hire a permanent lehr technician, and run a trial of tighter inline inspection settings manually until the camera is installed. The board is asked to consider the Furnace 1 rebuild timing and financing at its next meeting.
+
+13. Decisions requested from the board
+
+The Site Leadership Team asks the board to take the following decisions at its next meeting.
+
+1. Approve the 38,000 pound staged-air adjustment on Furnace 2.
+2. Approve purchase of the permanent optical cullet sorter at 410,000 pounds, subject to a final quotation.
+3. Give direction on the timing of the Furnace 1 rebuild and authorise the finance director to open talks with lenders for the gap above the 1.5 million reserve.
+4. Decide whether to continue the architectural glass segment.
+5. Approve a retention payment for the lehr technician role and the cost of a trainee to build depth of skill.
+
+Marit Oyelaran
+Head of Operations

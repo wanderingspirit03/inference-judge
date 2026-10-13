@@ -1,0 +1,98 @@
+Below are the notes from our last two planning meetings about moving the Harrowgate University Library into the refurbished Aldous Building over the summer. Could you turn them into a full project plan with named owners, dates, dependencies, a risk register and a short list of decisions I still need to get signed off? Please keep the owners and dates exactly as they appear in the notes, and tell me wherever the notes contradict themselves or leave a gap.
+
+---
+
+HARROWGATE UNIVERSITY LIBRARY
+Aldous Building Move: Planning Group
+Minutes of meeting 4, Tuesday 3 March
+
+Present: Marguerite Osei (University Librarian, chair), Tobias Lindqvist (Head of Collections), Priya Nandakumar (Head of Library Systems), Callum Brightwater (Estates Project Manager), Ines Valdivia (Head of User Services), Dmitri Kowalczyk (Special Collections Curator), Hannah Oyelaran (Finance Business Partner), Wei-Jun Salcedo (Student Union representative), Gareth Pryce (minutes).
+Apologies: Fatima Rahimi (Head of Digital Scholarship), who sent comments by email, noted under item 6.
+
+1. Minutes of meeting 3 and matters arising
+
+The minutes of meeting 3 were agreed with one correction: the Aldous Building handover from the contractor is planned for Friday 19 June, not Friday 12 June as written. Callum confirmed that 19 June is the date in the contract and that the earlier date was the contractor's first estimate. Matters arising: the survey of the compact shelving in the old basement stack has been completed (see item 3), and the quotation from the removals firm, Pennant & Crake, has been received (see item 4).
+
+2. Overall timetable and the closure period
+
+Marguerite reminded the group that the Senate has approved a single closure of the main library from Monday 6 July to Friday 14 August, six weeks, and that the new building must be open to readers when the autumn term begins on Monday 14 September. That leaves a margin of four weeks after the closure ends, which she wants to keep as contingency and not plan into the schedule. Ines asked whether a phased reopening, with the ground floor open first, is still being considered. Marguerite said it is not the plan but it is the fallback if the fit-out slips; the decision point is Friday 24 July, when Callum will report on the state of floors 1 and 2.
+
+Wei-Jun said students were worried about the six weeks coinciding with the resit period, which runs from Monday 10 August to Friday 21 August. Ines agreed to arrange a temporary reading room with 60 seats in the Student Union's Fenwick Room, with a click-and-collect service for the 2,000 most requested short-loan items. Hannah said no budget had been set aside for the reading room and asked for a costed proposal. Action: Ines to produce the costed proposal for the temporary reading room by Friday 20 March.
+
+3. Collections: what moves and what does not
+
+Tobias reported on the collection audit. The library holds about 412,000 print volumes. After the weeding exercise approved at meeting 2, he expects to move 351,000 volumes to the Aldous Building and to send about 38,000 to the off-site store at Larkmoor, which leaves roughly 23,000 volumes for withdrawal or donation. He stressed that the withdrawal list has not yet been reviewed by the subject librarians and the figure may move by a few thousand either way. The basement compact shelving survey found that bays 14 to 22 are too deformed to dismantle safely and will have to be scrapped, not reused; the other 31 bays can be relocated to the Larkmoor store. Callum asked that the scrap contractor be told by the end of April, because the basement must be empty before the asbestos clearance team arrives on Monday 6 July.
+
+Dmitri raised the position of Special Collections. About 9,400 items, including the Penhallow Bequest of maps and the Eldritch Press archive, need a climate-controlled move and cannot be loaded onto the general removal lorries. He proposed that the move happen in a separate week, Monday 22 June to Friday 26 June, before the main closure, with the reading room closed to visitors for that week only. Tobias was concerned that this would overlap with the building handover and the first access for the shelving installers. Callum said the shelving installers have access to floors 1 and 2 from Monday 22 June, which means the two activities would be on different floors, since Special Collections is on floor 3. Dmitri also noted that the strongroom door in the new building has not yet been commissioned and that nothing can be moved in until the environmental monitoring has run clean for ten consecutive days. Callum said the monitoring could begin no earlier than Monday 8 June if the plant is commissioned on time. Ten days from 8 June would end on Thursday 18 June, so the date works, but only just. No decision was taken on whether to risk the Special Collections move before the handover date of 19 June. Dmitri was asked to write up the conditions under which he would accept the move.
+
+Action: Tobias to circulate the final withdrawal list to subject librarians by Friday 27 March, with comments due by Friday 17 April.
+Action: Dmitri to write up the conditions for the Special Collections move by Friday 13 March.
+
+4. Removals contract
+
+Hannah presented the quotation from Pennant & Crake: 184,000 pounds for moving 351,000 volumes, the 31 compact bays and the furniture, plus 22,500 pounds for the Special Collections move as a separate lot. Together with the Larkmoor transport, which is priced separately at 31,200 pounds, the total comes to 237,700 pounds. The approved project budget for the move is 245,000 pounds, which leaves 7,300 pounds of contingency, less than three per cent. Hannah said she was not comfortable with this and asked that the group either find a saving or ask the Estates Committee for a contingency of at least ten per cent. Priya suggested that the library staff could box and label the lowest-use journal runs themselves, which Pennant & Crake had said would reduce the quotation by about 14,000 pounds. Tobias thought that was realistic only if student helpers were hired, which would cost money too. Marguerite asked Hannah to model both options.
+
+The group also discussed whether to tender the contract. Hannah said the university's procurement rules require a competitive process above 100,000 pounds, which means that the quotation from Pennant & Crake cannot be accepted directly and two further quotations are needed. Callum said he had already approached two other firms, Whitlow Freight and Dunmore Relocations, and expects their quotations by Friday 27 March. Award of the contract needs to happen by Friday 10 April so that the removals firm can plan crews for July.
+
+Action: Hannah to model the two savings options and the ten per cent contingency request by Friday 20 March.
+Action: Callum to obtain two further quotations by Friday 27 March and to bring an evaluation to meeting 5.
+
+5. Library systems and the new building
+
+Priya reported that the RFID gates, self-service kiosks and the new wayfinding screens are all part of the fit-out contract, but the library management system configuration is hers. The shelf-location codes in the catalogue must be remapped from the old building's scheme to the new one before the books are moved, and her team has so far mapped about 40 per cent of the locations. She needs the final floor plans with bay numbers from Callum before she can finish; the current drawings are revision C and the final set, revision F, is promised by Friday 10 April. She estimates 15 working days of work once she has them, and she wants to run a full test load into the training copy of the system before the closure starts. That test must be finished by Friday 26 June at the latest, which gives her a comfortable margin only if the drawings arrive on time.
+
+Priya also explained that books will be moved in shelf order and that the removals crews will use trolleys labelled with the new bay numbers, so any mistake in the location mapping will put books in the wrong place and will be hard to detect afterwards. She proposed a sample audit of 500 randomly chosen shelf positions in the first week after the closure ends, and Tobias agreed to supply four staff for it. During the closure the catalogue will show all print items as unavailable except for the 2,000 short-loan items in the temporary reading room, and the electronic collections will be unaffected. Ines asked who would tell readers about this, and Priya said the message would go on the catalogue banner from Monday 15 June. Wei-Jun asked that the banner also link to the temporary reading room page, which was agreed.
+
+Action: Callum to provide revision F of the floor plans by Friday 10 April.
+Action: Priya to complete the location mapping within 15 working days of receiving them, and to run the test load by Friday 26 June.
+
+6. Communications and comments received from Digital Scholarship
+
+Ines proposed a communications plan with three stages: an announcement to all staff and students at the start of the summer term on Monday 20 April, a reminder with the temporary reading room details on Monday 15 June, and a reopening campaign in the first week of September. The group agreed in principle. Wei-Jun asked that postgraduate researchers be contacted individually, since many of them hold long loans, and Ines agreed that every borrower with more than 20 items on loan would be written to by Friday 29 May with a recall date of Friday 26 June.
+
+Fatima's emailed comments were read out. She asked that the digitisation of the Penhallow maps, which is currently scheduled to run in the Digital Scholarship studio during July, be moved to the new building's studio, which will not be ready until October, or else be brought forward to June so that the maps are not moved twice. Dmitri said that the maps can only be taken to the studio after the pre-move condition survey, which is not scheduled until the week of 8 June. No decision was reached. Marguerite asked Dmitri and Fatima to meet and propose a single approach before the next meeting.
+
+7. Staffing and health and safety
+
+Marguerite noted that 62 library staff are affected and that about a third of them will be on annual leave during part of the closure. Tobias said the packing of the library's own materials, such as staff offices and the reference desk, would need volunteers, and that staff must be given manual handling training before the closure. Callum said the university's safety office could run two sessions, and the group agreed on Wednesday 17 June and Thursday 18 June. Gareth pointed out that the second date clashes with the end of the environmental monitoring for the strongroom, which Dmitri would want to attend; Dmitri said he could manage both.
+
+8. Fit-out progress, access and security
+
+Callum gave a short update on the fit-out. Floors 3 and 4 are structurally complete and the lifts passed their first inspection last week; floors 1 and 2 are about two weeks behind the contractor's programme because of a delay in delivering the raised access flooring. The contractor has promised to recover the time by working Saturdays in April, but Callum said he does not yet have that in writing. The ground-floor entrance, where the new RFID gates sit, is the last area to be finished, with a target of Friday 5 June for practical completion.
+
+Ines raised accessibility. The old building had two step-free routes that were frequently out of order, and she asked for a walk-through of the Aldous Building with the disability support team before the handover. Callum agreed to arrange it for the week of 1 June and said the contractor would be asked to attend. Wei-Jun asked whether the quiet study rooms on floor 4 would have the hearing loops that were in the original specification; Callum said they had been value-engineered out in January and he would check whether they can be reinstated. Marguerite said she would not accept a reopening without them and asked Hannah to find the money if needed. Hannah estimated 11,800 pounds and said it would have to come out of the same contingency already under pressure.
+
+Priya asked about swipe-card access. During the closure the new building will be used by removals crews, shelving installers and library staff, and she wants a separate access group in the card system for each so that crews cannot enter the strongroom or the server room. Callum said the security team need names a week in advance. Action: Priya to agree the access groups with the security team by Friday 12 June.
+
+9. Risks raised during the meeting
+
+The following risks were noted without being assessed. First, the contractor may miss the 19 June handover, which would compress everything. Second, the strongroom monitoring might fail on any day, restarting the ten-day count. Third, the removals contract is unawarded and the budget contingency is thin. Fourth, the location mapping depends on drawings that have not been issued. Fifth, the temporary reading room has no budget or confirmed space. Sixth, the withdrawal list is not yet reviewed, so volumes sent to the Larkmoor store could change. Marguerite asked Gareth to keep a formal risk register and bring it to meeting 5.
+
+10. Any other business and date of next meeting
+
+Hannah asked that all spending requests related to the move quote the project code AB-2026-MOVE. The next meeting, number 5, will be on Tuesday 7 April at 10:00 in the Fenwick Room's meeting annexe, and the papers are due by Friday 3 April.
+
+Meeting closed at 11:40.
+
+Appendix A: Estates programme extract tabled by Callum Brightwater
+
+| Milestone | Date | Source |
+|---|---|---|
+| Ground-floor practical completion | Fri 5 June | Contractor programme |
+| Strongroom plant commissioned, monitoring starts | Mon 8 June | Contractor programme |
+| Building handover | Fri 19 June | Contract |
+| Shelving installers access floors 1 and 2 | Mon 22 June | Contract |
+| Asbestos clearance team in old basement | Mon 6 July | Estates |
+| Main library closes | Mon 6 July | Senate |
+| Main library closure ends | Fri 14 August | Senate |
+| Autumn term begins | Mon 14 September | Academic calendar |
+
+Callum noted that the programme has no float between commissioning of the strongroom plant and the handover, and that the shelving installers need about five weeks for floors 1 and 2, which would end on Friday 24 July only if they start on 22 June and work without interruption. He did not think five weeks was enough if the access flooring delay is not recovered.
+
+---
+
+Email from Marguerite Osei to Gareth Pryce, sent Thursday 5 March, 16:12
+
+Gareth, one thing I forgot to say on Tuesday. The Vice-Chancellor's office has asked for a one-page summary of the move plan for the Estates Committee papers, due Friday 27 March, and I would like you to base it on whatever plan you put together from the minutes. I also want a clear sense of what the critical path is, because I suspect it runs through the handover, the strongroom monitoring and the Special Collections move. Please also tell me what you think we should drop if the handover slips by two weeks.
+
+Marguerite

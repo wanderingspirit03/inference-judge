@@ -1,0 +1,51 @@
+Here are two weeks of production figures from our print shop. I need to give a written account of how the presses are doing to the owners on Friday, and I'm not good with spreadsheets. Could you analyse the data properly, covering the main findings for each press, the days that stand out and what might explain them, how big the waste problem is in money terms, and a list of concrete next steps I could take? Explain any calculation you do so I can repeat it.
+
+Background. Thornfield and Yeo Printers runs three presses from one building.
+- P1 is a four-colour sheet-fed offset press, used for brochures, catalogues and packaging. It runs two shifts, from 06:00 to 22:00.
+- P2 is a two-colour offset press, used for forms, stationery and leaflets. It runs one shift, 07:00 to 15:30.
+- P3 is a digital press for short runs, proofs and personalised mailings. It runs one shift, 08:00 to 17:00.
+
+The table below has one row per press per working day, from Monday 14 September to Friday 25 September 2026. Columns: jobs is the number of jobs started on the press that day; sheets_run is the total number of sheets that went through the press, including waste; waste_sheets is the number of sheets thrown away (set-up sheets, misprints and damaged sheets); downtime_min is the total minutes the press was stopped unplanned, for example for a breakdown or a plate or blanket problem; reprints is the number of jobs that had to be printed again because the customer or our own quality check rejected them.
+
+Costs and prices we use: paper and ink and plates for a wasted sheet come to 0.031 pounds on P1, 0.018 pounds on P2 and 0.012 pounds on P3. An hour of press time is costed at 118 pounds for P1, 74 pounds for P2 and 52 pounds for P3. A reprint costs about 410 pounds in extra materials and labour on average. Our target waste rate is 4 percent on P1, 5 percent on P2 and 1 percent on P3.
+
+date,press,jobs,sheets_run,waste_sheets,downtime_min,reprints
+2026-09-14,P1,7,36506,2266,26,1
+2026-09-14,P2,7,20863,1187,31,0
+2026-09-14,P3,12,3790,63,6,0
+2026-09-15,P1,3,41538,1987,62,0
+2026-09-15,P2,9,19051,1353,41,0
+2026-09-15,P3,16,3133,26,10,0
+2026-09-16,P1,5,39686,2375,11,0
+2026-09-16,P2,9,17472,1239,20,0
+2026-09-16,P3,16,3496,46,14,0
+2026-09-17,P1,4,37787,4100,212,3
+2026-09-17,P2,7,20495,1178,34,0
+2026-09-17,P3,14,2742,35,10,1
+2026-09-18,P1,6,33631,1630,70,0
+2026-09-18,P2,5,21443,1570,29,2
+2026-09-18,P3,13,3377,37,15,0
+2026-09-21,P1,6,35350,1421,18,1
+2026-09-21,P2,7,21369,1733,52,1
+2026-09-21,P3,14,3632,9,4,2
+2026-09-22,P1,5,40363,2151,47,0
+2026-09-22,P2,6,18436,1334,37,0
+2026-09-22,P3,15,3182,30,3,2
+2026-09-23,P1,5,34870,1407,50,0
+2026-09-23,P2,0,0,0,480,0
+2026-09-23,P3,12,3384,48,19,0
+2026-09-24,P1,6,39429,1891,21,2
+2026-09-24,P2,8,18222,1142,23,1
+2026-09-24,P3,16,3800,39,20,0
+2026-09-25,P1,3,40576,1819,59,1
+2026-09-25,P2,6,17333,1004,46,0
+2026-09-25,P3,16,3118,40,8,0
+
+Notes from the shop floor:
+- On Thursday 17 September a blanket on P1 was damaged during the second shift and the press was stopped while it was changed. The job running at the time was a 16-page brochure in four colours, which was reprinted twice, and a third job was rejected afterwards.
+- On Wednesday 23 September the dryer motor on P2 failed in the morning. A replacement was fitted by an engineer the same afternoon. No work was run on P2 that day, and the jobs were moved to P1 and P3.
+- On Monday 21 September P3 was given the new toner batch. The operator says it feels "much cleaner" and the figures for that day show it, but four jobs were rejected for colour on Monday and Tuesday.
+- P1 was running a mix of packaging and brochures. Packaging jobs need more setup sheets than brochures.
+- The night shift on P1 changed supervisor on Monday 14 September. The new supervisor is Hallam Prewitt.
+- Maintenance planned a service of P2 for Friday 25 September but postponed it to October because of the dryer motor repair.
+- We have not recorded planned stops, such as plate changes, in the downtime column. Those are in a different log.

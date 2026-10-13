@@ -1,0 +1,1 @@
+Write a Python program for a hotel booking startup that finds overlapping reservations, detects double bookings, and calculates room occupancy per night for a given month, with clear comments and a full set of unit tests.

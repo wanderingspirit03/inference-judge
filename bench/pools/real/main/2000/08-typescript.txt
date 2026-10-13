@@ -1,0 +1,172 @@
+This module handles hold requests and loan renewals for our university library's catalogue service. Please explain what each part does, propose a refactoring that would make it easier to maintain, and write tests for the refactored version (Vitest is fine). If you see bugs in the current version, point them out as you go.
+
+```ts
+import { randomUUID } from "node:crypto";
+
+export type Role = "undergraduate" | "postgraduate" | "staff" | "visitor";
+
+export interface Patron {
+  id: string;
+  name: string;
+  role: Role;
+  finesPence: number;
+  suspended: boolean;
+}
+
+export interface Item {
+  id: string;
+  title: string;
+  isbn?: string;
+  loanType: "standard" | "short" | "reference";
+  copies: number;
+  availableCopies: number;
+}
+
+export interface Loan {
+  id: string;
+  patronId: string;
+  itemId: string;
+  borrowedOn: Date;
+  dueOn: Date;
+  renewals: number;
+  returnedOn?: Date;
+}
+
+export interface Hold {
+  id: string;
+  patronId: string;
+  itemId: string;
+  placedOn: Date;
+  status: "waiting" | "ready" | "cancelled" | "fulfilled";
+}
+
+const LOAN_DAYS: Record<Role, number> = {
+  undergraduate: 21,
+  postgraduate: 42,
+  staff: 60,
+  visitor: 7,
+};
+
+const MAX_RENEWALS: Record<Role, number> = {
+  undergraduate: 2,
+  postgraduate: 4,
+  staff: 6,
+  visitor: 0,
+};
+
+const FINE_BLOCK_PENCE = 1000;
+const MAX_ACTIVE_HOLDS = 5;
+
+export class LibraryService {
+  private loans: Loan[] = [];
+  private holds: Hold[] = [];
+
+  constructor(
+    private patrons: Map<string, Patron>,
+    private items: Map<string, Item>,
+  ) {}
+
+  placeHold(patronId: string, itemId: string): Hold {
+    const patron = this.patrons.get(patronId);
+    const item = this.items.get(itemId);
+    if (!patron || !item) throw new Error("Unknown patron or item");
+    if (patron.suspended) throw new Error("Account suspended");
+    if (patron.finesPence >= FINE_BLOCK_PENCE) throw new Error("Fines too high");
+    if (item.loanType === "reference") throw new Error("Reference items cannot be held");
+
+    const active = this.holds.filter(
+      (h) => h.patronId === patronId && (h.status === "waiting" || h.status === "ready"),
+    );
+    if (active.length > MAX_ACTIVE_HOLDS) throw new Error("Too many holds");
+    if (active.some((h) => h.itemId === itemId)) throw new Error("Already on hold");
+
+    const hold: Hold = {
+      id: randomUUID(),
+      patronId,
+      itemId,
+      placedOn: new Date(),
+      status: item.availableCopies > 0 ? "ready" : "waiting",
+    };
+    if (hold.status === "ready") item.availableCopies--;
+    this.holds.push(hold);
+    return hold;
+  }
+
+  borrow(patronId: string, itemId: string, today = new Date()): Loan {
+    const patron = this.patrons.get(patronId);
+    const item = this.items.get(itemId);
+    if (!patron || !item) throw new Error("Unknown patron or item");
+    if (patron.suspended) throw new Error("Account suspended");
+    if (item.loanType === "reference") throw new Error("Reference items cannot be borrowed");
+
+    const ready = this.holds.find(
+      (h) => h.patronId === patronId && h.itemId === itemId && h.status === "ready",
+    );
+    if (ready) {
+      ready.status = "fulfilled";
+    } else {
+      if (item.availableCopies <= 0) throw new Error("No copies available");
+      item.availableCopies--;
+    }
+
+    const days = item.loanType === "short" ? 3 : LOAN_DAYS[patron.role];
+    const due = new Date(today);
+    due.setDate(due.getDate() + days);
+    const loan: Loan = {
+      id: randomUUID(),
+      patronId,
+      itemId,
+      borrowedOn: today,
+      dueOn: due,
+      renewals: 0,
+    };
+    this.loans.push(loan);
+    return loan;
+  }
+
+  renew(loanId: string, today = new Date()): Loan {
+    const loan = this.loans.find((l) => l.id === loanId);
+    if (!loan || loan.returnedOn) throw new Error("No such active loan");
+    const patron = this.patrons.get(loan.patronId)!;
+    const item = this.items.get(loan.itemId)!;
+
+    if (patron.suspended) throw new Error("Account suspended");
+    if (loan.renewals >= MAX_RENEWALS[patron.role]) throw new Error("Renewal limit reached");
+    if (loan.dueOn < today) throw new Error("Loan is overdue");
+
+    const waiting = this.holds.some((h) => h.itemId === item.id && h.status === "waiting");
+    if (waiting) throw new Error("Item requested by another patron");
+
+    const days = item.loanType === "short" ? 3 : LOAN_DAYS[patron.role];
+    loan.dueOn.setDate(loan.dueOn.getDate() + days);
+    loan.renewals += 1;
+    return loan;
+  }
+
+  giveBack(loanId: string, today = new Date()): number {
+    const loan = this.loans.find((l) => l.id === loanId);
+    if (!loan || loan.returnedOn) throw new Error("No such active loan");
+    loan.returnedOn = today;
+
+    const item = this.items.get(loan.itemId)!;
+    const next = this.holds
+      .filter((h) => h.itemId === item.id && h.status === "waiting")
+      .sort((a, b) => a.placedOn.getTime() - b.placedOn.getTime())[0];
+    if (next) {
+      next.status = "ready";
+    } else {
+      item.availableCopies++;
+    }
+
+    const lateDays = Math.max(
+      0,
+      Math.floor((today.getTime() - loan.dueOn.getTime()) / 86_400_000),
+    );
+    const fine = lateDays * 25;
+    this.patrons.get(loan.patronId)!.finesPence += fine;
+    return fine;
+  }
+}
+```
+
+Context: this class lives in memory today and is rebuilt from the database on every deployment. We plan to back it with a real store, and the front desk staff have complained that reference items sometimes show as available to hold. The loan period for staff was changed from 42 to 60 days in September.

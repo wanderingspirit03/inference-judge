@@ -1,0 +1,78 @@
+Here is the design doc for our new aeration control system at the Marsh Lane treatment works. Please critique it honestly, suggest at least two real alternatives to the main approach, and then write an implementation plan I can take to the project board. I am especially worried about the failure behaviour, because the operators do not trust anything that touches the blowers.
+
+# Design: Adaptive Aeration Control for Marsh Lane Works
+
+Author: Pieter Vandenhoek, process engineering
+Status: Draft 3, for review
+Reviewers: Lena Okafor (operations), Dmitri Salvesen (electrical), Anouk Rademaker (compliance)
+
+## 1. Background
+
+Marsh Lane treats about 38,000 cubic metres of sewage a day for roughly 140,000 people. The biological stage consists of four parallel aeration lanes. Each lane has three zones with fine bubble diffusers, fed by a shared header from three turbo blowers (B1, B2, B3). Today the blowers run on a fixed schedule built from a diurnal curve that the operators adjust by hand, usually twice a day, and again whenever a storm arrives.
+
+Aeration is the biggest single use of electricity on site, about 52 percent of the 6.1 GWh we bought last year. Effluent ammonia is also our tightest consent limit: 3 mg/L as a rolling 24-hour mean, with a hard cap of 8 mg/L on any composite sample. We exceeded the daily mean on 11 days last year, nine of them during the cold weeks of January and February.
+
+## 2. Problem
+
+The fixed schedule over-aerates at night, when the load is low, and under-aerates in the morning peak, when the load rises faster than the operators can react. Dissolved oxygen (DO) in zone 2 of lane 3 swung between 0.4 and 4.1 mg/L on a typical weekday last month. Low DO risks ammonia breakthrough. High DO wastes energy and damages the floc, which then settles badly in the clarifiers.
+
+## 3. Goals
+
+1. Keep zone DO within 1.5 to 2.5 mg/L for 90 percent of the time.
+2. Cut aeration energy by at least 12 percent over a full year.
+3. Never reduce the number of ammonia consent days met compared with the manual regime.
+4. Let an operator take back control of any lane in under 10 seconds.
+
+Non-goals: replacing the PLC, changing the diffuser layout, or controlling the return sludge pumps.
+
+## 4. Proposed design
+
+### 4.1 Overview
+
+We add a supervisory controller that runs on a new industrial PC in the blower hall cabinet. It reads DO, ammonium and nitrate probes from the existing PLC over OPC UA every 10 seconds, computes a DO setpoint for each zone, and writes the setpoints back to the PLC. The PLC keeps its own proportional-integral loops that move the zone air valves and the blower speed. The controller never writes valve positions or blower speeds directly.
+
+### 4.2 Setpoint logic
+
+For each zone the controller uses a cascade. The outer loop looks at the ammonium reading in zone 3 of each lane. If ammonium at the end of the lane is above 1.0 mg/L, it raises the DO setpoint of zones 1 to 3 in steps of 0.2 mg/L. If ammonium is below 0.4 mg/L for 30 minutes, it lowers the setpoints in the same steps. Setpoints are clamped to 1.0 to 3.0 mg/L. The inner loop is the existing PLC DO control.
+
+We also add a feed-forward term from the inflow meter. When inflow rises by more than 15 percent within 20 minutes, setpoints go up by 0.3 mg/L at once, before the ammonium probe can see the change. This addresses the morning peak and the storm response.
+
+### 4.3 Blower sequencing
+
+The controller does not choose which blowers run. The PLC keeps the existing most-open-valve logic: header pressure is held constant, and the blower count follows demand. We only expect the lower DO setpoints at night to reduce the header demand enough that one blower can drop out.
+
+### 4.4 Data and logging
+
+Every cycle the controller writes the inputs, setpoints and a reason code to a local time series store, which is copied to the historian every five minutes. Operators see the current setpoints and the reason code on a new page of the existing SCADA screens. All changes of setpoint are also written to the audit log with the controller version.
+
+### 4.5 Operator override
+
+Each lane gets a new key switch on the local panel, with positions Auto, Manual and Off. In Manual, the PLC ignores the controller and uses the last operator setpoint. A button on the SCADA screen does the same for all lanes, and requires a second operator to confirm.
+
+## 5. Failure behaviour
+
+If the controller stops writing for 60 seconds, the PLC holds the last setpoint for 5 minutes and then reverts to the fixed schedule. If a probe reading is out of range or flat-lined for 20 minutes, the controller marks that lane as degraded and holds the setpoints at 2.0 mg/L. If the OPC UA link drops, the PLC reverts after the same 60 seconds. When the controller returns, it does not take over again until an operator presses acknowledge.
+
+The industrial PC has a single power supply on the plant UPS. We do not plan redundancy for the first release. A watchdog restarts the service if it does not complete a cycle in 30 seconds.
+
+## 6. Safety and compliance
+
+The controller can only move setpoints inside the clamp range, which the PLC enforces again on its own side. Any change to the clamp range requires a PLC program change under our existing management of change procedure. Anouk has confirmed that the consent monitoring does not change, since the composite sampler and the online ammonium analyser at the outfall are independent of the new system.
+
+## 7. Testing
+
+We will build a simple model of one lane in the plant simulator from the last two years of historian data and replay the January weeks. The acceptance test is that the simulated controller meets the DO band and reduces energy against the recorded manual operation. After that, we run it on lane 4 only for eight weeks, with lanes 1 to 3 as the control group. Lane 4 is chosen because it has the newest probes.
+
+## 8. Rollout
+
+Weeks 1 to 4: hardware, network and OPC UA tags. Weeks 5 to 8: simulation and tuning. Weeks 9 to 16: lane 4 trial. Weeks 17 to 24: lanes 1 to 3 one at a time, with a two-week hold between lanes. Go or no-go decision at the end of week 16 by Lena and Anouk jointly.
+
+## 9. Cost
+
+Industrial PC and cabinet work: 14,000. Network switch and firewall: 6,500. Two additional ammonium probes for lane 4: 11,000. Engineering time, internal: about 60 days. Contractor for PLC changes: 18,000. Expected annual saving at 12 percent of aeration energy: about 32 MWh a month, or 380 MWh a year, which is roughly 57,000 a year at our current price of 0.15 per kWh. Simple payback is therefore a little under one year after the trial, and about eighteen months counting the trial period itself.
+
+## 10. Open questions
+
+- Do we have enough probe maintenance capacity? Probes drift, and today they are cleaned every two weeks.
+- Should the feed-forward term use the inflow meter or the upstream pump station level?
+- Who owns the controller software after the contractor leaves?

@@ -1,0 +1,95 @@
+These are the notes from our planning meeting at the workshop on Tuesday, and they're messy because I typed them while people were talking. Please turn them into a full project plan for the showroom move and the new dining range: workstreams, owners, dates, dependencies, risks with mitigations, and what we need to decide still. If something in the notes contradicts something else, flag it rather than guessing.
+
+---
+
+HOLLOWAY & SIMS JOINERY, MEETING NOTES
+Date: Tuesday 14 October, 07:30 to 09:10, in the workshop canteen
+Present: Gerda Holloway (owner, chairing), Anselm Sims (co-owner, production), Bridie Callaghan (sales and showroom), Dov Rahimi (finishing shop lead), Katya Brzezinski (purchasing and stock), Lowell Nwosu (workshop apprentice, taking notes for the first time, apologies for gaps), Hester Quill (bookkeeper, joined for item 4 only)
+Apologies: Tomasz Ferreira (CNC operator, on holiday until 20 October)
+
+ITEM 1. Showroom move
+
+Background for Lowell: the landlord of the town centre showroom on Cutler Street has given notice that the lease ends on 31 January. Gerda found a unit on the Brindle Lane industrial estate, 340 square metres, next to the workshop, which means the showroom would be a two minute walk from the production floor. Rent is lower (2,150 a month against 3,400 on Cutler Street) but there is no passing trade.
+
+Bridie said that passing trade is about 30 percent of showroom sales, from what she has counted over the last year, but she admitted she counts by asking customers how they found us and not everybody answers. The other 70 percent are appointments, repeat customers, and architects. She thinks an appointment-only showroom works if we put money into the website and a proper booking calendar. Anselm worried that people who just walk in at Cutler Street are the ones who buy a 600 euro chair and then come back for a 4,000 euro table.
+
+Gerda said the decision is made, the lease is not renewable and the new unit is the only one that suits us. The question is how to do it without closing for more than ten days. Agreed that the target opening date at Brindle Lane is Saturday 7 February. Agreed that Cutler Street stays open until 24 January and the last week is a clearance sale.
+
+The new unit needs work before we can use it: the landlord will paint and fix the roof lights by 15 December (confirmed by email last Thursday, according to Gerda). We have to install lighting, partition walls for three room sets, a reception desk, and a small meeting area. Dov suggested we build the reception desk and the shelves ourselves in the workshop in November, as they can be a display of our own work. Anselm said he can spare the bench time only if the dining range prototypes (item 2) do not slip.
+
+Quote from the electrician for lighting and sockets: 6,800 euros, valid until 31 October. Gerda wants a second quote. Katya will ask her contact Wilmot Electrics, who did the workshop extraction.
+
+Action: Gerda to get the signed lease for Brindle Lane back from the solicitor. Bridie to draft the layout plan for the three room sets by 31 October. Katya to get second electrical quote by 24 October.
+
+ITEM 2. New dining range, "Orchard" collection
+
+The Orchard range is a dining table (extending, seats six to ten), six dining chairs, a sideboard and a bench. Anselm showed the first drawings. Material is European oak, with an optional ash version for the chairs. The target price for the 180 centimetre table is 2,450 euros, and the chair 340 euros. The competitor we compared to is selling a similar table at 2,900 euros, but it is veneer, not solid.
+
+Production: Tomasz is the only one trained to run the CNC router for the chair legs and the table leaf mechanism. He is back on 20 October. Anselm wants to make two prototypes of each item before committing to a first batch of 12 tables and 72 chairs. Prototype deadline: 28 November. First batch goal: ready for the showroom opening on 7 February, but Anselm said this is "very tight, maybe not realistic" because the oak for the first batch has to be air-dried for at least four weeks after planing, and Katya's supplier has only given a delivery date of 17 November for the first load.
+
+Dov asked about finishing. The range will use a hard wax oil and not lacquer, which means each table takes about 3 days between coats, and a spraying booth is not needed. He estimates 11 working days to finish a batch of 12 tables if he works alone, but he would need Lowell to help with sanding. Anselm agreed that Lowell can be moved to finishing for two weeks in January.
+
+Katya raised that the extending mechanism hardware (a German-made runner, 78 euros a set) has a lead time of nine weeks. If we order now it arrives by mid-December. If we wait for prototype approval it arrives in late January, which would make the first batch impossible. Gerda decided: order hardware for 14 tables now (1,092 euros), and accept the risk of changing it if the prototype fails. Hester later confirmed this is within the monthly purchasing limit.
+
+Action: Katya to order runners for 14 tables this week. Anselm to finalise drawings by 24 October. Tomasz to start chair leg prototypes on 21 October. Dov to test three finish samples on offcuts by 7 November.
+
+ITEM 3. Orders in hand and the autumn backlog
+
+Anselm reported the current backlog: 23 open orders, worth about 71,000 euros, of which 9 are kitchens or built-in wardrobes that need fitting on site. The oldest is the Marlowe wardrobe promised for 10 October, now late. He said the delay was due to a wrong hinge delivery. He believes two more orders will be late by a week or so.
+
+Bridie said that some customers had been told "eight weeks" and are now at eleven. She wants a standard message to send to late customers. Gerda agreed. Gerda also said we should stop quoting eight weeks and quote ten until the move is over, whatever the workload looks like. Anselm said ten is still optimistic with the showroom and Orchard in parallel and suggested twelve for built-in work. No agreement was reached: Gerda wants ten for everything, Anselm wants twelve for built-in work and ten for freestanding furniture.
+
+Bridie asked whether we should take on a temporary fitter for November and December. Anselm said yes. Cost about 2,600 euros a month for a freelance fitter. Gerda to decide.
+
+ITEM 4. Money (Hester joined)
+
+Hester gave a rough picture. The workshop had a cash balance of 48,200 euros on 10 October. Expected costs for the move and Orchard together: electrician 6,800, partition walls 4,500, showroom fixtures and furniture from our own stock at cost 3,000, signage 1,900, website and booking system 2,400, removal costs 1,800, double rent for January (Cutler Street 3,400 plus Brindle Lane 2,150) of which the Brindle Lane part is already counted as a normal expense, Orchard materials for the prototypes and first batch about 21,000, hardware 1,092, temporary fitter about 5,200 for two months.
+
+Hester said that the total, excluding the Orchard first batch materials, is around 21,500 euros. Adding Orchard takes it to around 43,000. That leaves almost nothing from the balance, and incoming payments from customers over the same period are uncertain. She asked whether the bank overdraft facility of 15,000 euros could be used if needed. Gerda said yes but she does not want to.
+
+Gerda asked Hester to prepare a month by month cash forecast from now to the end of March by Friday 24 October. Hester said she needs the order list with expected payment dates from Anselm and Bridie.
+
+Anselm noticed that the 43,000 figure and the sum of the items were not obviously the same. Hester said she was doing it in her head and will check it. (Lowell's note: I added up the list in the notes and I get 6,800 + 4,500 + 3,000 + 1,900 + 2,400 + 1,800 + 2,150 + 21,000 + 1,092 + 5,200 = 49,842 including the Brindle Lane January rent. Excluding the 21,000 for Orchard materials it is 28,842. I think the numbers were off. Hester please check.)
+
+ITEM 5. Website, photos and the launch
+
+Bridie said the product photos on the website are four years old and half of the products shown are no longer made. A photographer, Imke Danvers, quoted 1,600 euros for a day of photography at the workshop, covering about 25 items, plus 400 euros for the Orchard range once finished. Bridie wants to do the general shoot in the first week of December, before the move, and the Orchard shoot in late January when the prototypes are finished and the first pieces exist.
+
+Dov said the shoot in December is too early because the workshop will be in disorder from packing. Bridie replied that the shoot is in the workshop only for the process photographs and the furniture can be photographed at the showroom on Cutler Street, which still has the set dressing. Agreed on that: furniture shots at Cutler Street on 2 December, process shots in the workshop on 3 December.
+
+The launch event at Brindle Lane on 7 February: Bridie proposes an open weekend with a small talk by Anselm on solid wood, coffee and a local bakery. Invitations to former customers, architects, and the local newspaper. Budget 900 euros. Gerda agreed in principle, to be confirmed after Hester's forecast.
+
+ITEM 6. Health and safety, and housekeeping
+
+Dov reported that the dust extraction in the finishing shop failed its annual check on 3 October because the airflow at two points is below the required value. The contractor will return on 28 October to adjust the filters, cost 480 euros. Until that is done, sanding of oak should be done only at the extraction arm on bench 2. Katya noted that this affects Orchard if sanding is done in the finishing shop.
+
+Lowell asked about the first aid kit, which has no eye wash bottle. Gerda: Katya to order that today.
+
+Fire drill is due before the end of the month. Dov to organise, Wednesday 29 October at 10:00.
+
+ITEM 7. Cutler Street clearance sale and the removal
+
+Bridie proposed that the clearance sale run from Saturday 17 January to Saturday 24 January, with floor models and ex-display pieces reduced by 20 to 40 percent depending on age. She counted 31 pieces in the showroom today: 9 chairs, 6 tables, 4 sideboards, 7 smaller items (stools, shelves, mirrors) and 5 pieces with visible marks. She thinks about 20 of them will sell in the sale week, which leaves 11 to move to Brindle Lane and use as room set furniture. Anselm said that is a good number, because he does not want to spend bench time building room set pieces when Orchard needs the capacity.
+
+Gerda raised the question of whether to advertise the sale before the move is announced to regular customers. Bridie said the note on the website (item 8) should go first, on 1 November, then an email to the customer list of about 640 addresses on 5 January, and a notice in the window from 10 January. Dov asked whether the sale pieces could be collected at a later date. Bridie said no: anything sold must leave by 24 January, because the keys go back to the landlord on 31 January and the week after the sale is needed for the removal.
+
+Removal plan, as far as it was discussed:
+
+- The removal firm, Penhallow Transport, quoted 1,800 euros for two vans and three people for two days. Gerda wants to compare this with hiring a van and doing it with our own staff. Anselm said no: our own staff would lose two days of production, which costs more than the difference.
+- Packing materials (blankets, corner protectors, wrap) about 220 euros, Katya to order.
+- Removal days: Monday 26 and Tuesday 27 January. The reception desk and shelving from the workshop should be installed in the new unit by Friday 23 January so the pieces can go straight onto the floor.
+- The landlord at Cutler Street will do a final inspection on 30 January. Bridie to photograph all walls and floors on 26 January before anything is moved so there is a record of the condition. Gerda remembered that the deposit of 6,800 euros (two months rent) should be returned within 28 days if there is no damage, and that there was a dispute about a scratch on the floor last time. Hester to put the deposit in the cash forecast as returned in early March, not February.
+
+Bridie asked what happens if the electrical work or the partition walls at Brindle Lane are not finished by 23 January. Gerda said that the fallback is to open on 7 February with only one room set finished and the other two shown with temporary walls of plywood and paint. Anselm did not like this and said that the better fallback would be to postpone the opening to 14 February. No decision. Agreed that the decision point is Friday 16 January: if the electrician has not finished all sockets and lights by then, postpone to 14 February.
+
+Action: Bridie to write the sale plan and price list by 5 December. Katya to order packing materials in early January. Gerda to confirm the removal booking with Penhallow Transport by 14 November. Hester to add the deposit and the sale income to the forecast.
+
+ITEM 8. Any other business
+
+Anselm said he is going to lose Tomasz for a week in December for a family wedding abroad, dates not yet confirmed. Tomasz is the only CNC operator, so Anselm would like to train a second person. Lowell volunteered. Anselm said he would think about it, after the finishing work in January.
+
+Bridie suggested we post a short note to customers about the move on the website and in the shop starting 1 November. Agreed. Gerda asked Bridie to write it and show her first.
+
+Next meeting: Tuesday 28 October, 07:30, same place. Items proposed: second electrician quote, Hester's forecast, hardware order confirmation, lead times to quote customers.
+
+Notes taken by Lowell Nwosu. Please send corrections to Gerda.

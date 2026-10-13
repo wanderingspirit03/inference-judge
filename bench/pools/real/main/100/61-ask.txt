@@ -1,0 +1,1 @@
+Explain how crew scheduling for a small airline with six aircraft can be set up so that duty-time limits are always respected, then work through a full sample week of rosters for twelve pilots and six cabin crew.

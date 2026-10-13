@@ -1,0 +1,40 @@
+I'm about to take this design doc to our architecture review. Could you critique it honestly, suggest at least two realistic alternatives to the approach in section 4, and then write an implementation plan with phases, estimates and what could go wrong?
+
+# Design: Self-service course reserves for the Thornbury University Library
+
+Author: Wen Hartmann, Library Systems
+Status: Draft for review
+Last updated: 14 October
+
+## 1. Background
+Each term, lecturers send the library lists of readings that students need for a course. Today these arrive by email, and two staff members (Reserves Desk) check the catalogue by hand, scan chapters when copyright allows, and add the items to a shelf at the front desk or to the course page on the learning platform. In the last autumn term the desk handled 412 lists, with a median turnaround of 6.5 working days. Lecturers complain about the delay, and about not knowing what was approved.
+
+## 2. Goals
+- Lecturers submit a list through a web form and see the status of each item.
+- Staff see a queue sorted by course start date.
+- Approved scanned chapters appear on the learning platform automatically.
+- Median turnaround falls to 3 working days.
+
+## 3. Non-goals
+Buying new books (stays with the acquisitions team), changing the catalogue software, and anything for postgraduate research collections.
+
+## 4. Proposed approach
+We build a small web application with its own database. Lecturers sign in through the university single sign-on. Each submitted item is matched against the catalogue by ISBN using the catalogue's search interface. If the match is found and a copy is on the shelf, the item is marked "available". If the item is a book chapter, a copyright check runs against a table of licence rules that staff maintain by hand, and the item goes either to "scan" or to "refuse". The application stores scanned files on the library's file server and publishes a link to the learning platform using its public interface once a day, at 02:00.
+
+## 5. Data
+Four tables: lecturers, courses, lists and items. An item has an ISBN, a chapter range, a state (submitted, matched, scan, refused, ready) and a staff note. Files are named by item identifier.
+
+## 6. Risks and open questions
+- The catalogue search interface allows 60 requests per minute. A long list has 80 items.
+- The licence table has 140 rules and is owned by one person, who retires in March.
+- Single sign-on returns a staff number, not an email address, so notifications need a second lookup.
+- No decision yet on how long scanned files are kept after term ends.
+
+## 7. Rollout
+Pilot with the Faculty of Education (31 courses) in the spring term. Full launch for the following autumn term.
+
+## 8. Effort
+We estimate 55 working days for one developer, and 10 days of staff time for testing. Hosting is on the existing virtual machine, so no new costs are expected.
+
+## 9. Success measures
+We will compare the spring pilot with the same faculty's autumn figures: median turnaround, share of lists finished before the first week of term, and the number of emails the Reserves Desk receives per list. A short survey goes to every lecturer who submits through the form. We also count how many items are refused by the copyright check, and how many of those staff later overturn by hand, because a high number would mean the licence table is wrong.

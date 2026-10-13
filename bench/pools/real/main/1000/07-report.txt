@@ -1,0 +1,28 @@
+This is our quarterly review for the bike-share scheme, which I need to present to the council's transport committee on Thursday. Please write a section-by-section summary I can read out, and then a list of recommendations that follow from it, with the reasons. If any figure in the report looks inconsistent, say so.
+
+# Quarterly Operations Review: Q3, Tamsworth Cycle Share
+Prepared by: Operations team. Period: 1 July to 30 September.
+
+## 1. Headline figures
+The scheme ran 62 stations and 740 bikes throughout the quarter. Trips totalled 218,400, up 14 percent on Q2 (191,600) and 9 percent on Q3 last year. Average trip length was 17.2 minutes. Registered members rose from 9,850 to 11,020, and 38 percent of trips were by day-pass users. Revenue was 412,000 pounds against a budget of 395,000 pounds. Operating costs were 441,000 pounds, giving a gap of 29,000 pounds.
+
+## 2. Availability
+The target is that a rider finds a bike at a station at least 92 percent of the time. We reached 89.4 percent across the scheme. The shortfall was concentrated at nine stations near the university and the railway station, which were empty for more than 20 percent of weekday mornings. Stations on the east side, by contrast, were full (no free dock) 15 percent of weekday evenings. Rebalancing vans made 1,930 moves, but ran on two days each week with only one van because of a driver vacancy.
+
+## 3. Fleet condition
+Of 740 bikes, 96 were taken out for repair at some point, with a median repair time of 3.1 days. Brake faults were the most common cause (41 bikes), followed by chain and gear faults (27) and flat tyres (18). The remaining ten had a mix of lights, seats and locks. Seventeen bikes were reported stolen or lost, compared with eleven last quarter. The workshop has two mechanics; a third has been approved but not yet hired.
+
+## 4. Customer feedback
+The support line received 3,260 contacts, of which 61 percent were about a bike not unlocking or a charge that looked wrong. The average wait to reach an agent was 4 minutes 40 seconds, against a target of two minutes. The app rating on the store was 3.9 out of 5. The most common complaint in free-text reviews was finding stations empty at peak times.
+
+## 5. Safety
+There were 14 reported incidents involving riders, none serious. Nine happened on the Mill Road corridor, where the council's cycle lane works have narrowed the road since mid-August. No incident involved a faulty bike.
+
+## 6. Weather and demand
+August was warm and dry and produced 41 percent of the quarter's trips. September had eight rainy days, and trips on those days were about 35 percent lower than on dry weekdays.
+
+## 7. Finance
+The cost gap is mostly explained by repairs and replacement parts (62,000 pounds against 48,000 budgeted) and by overtime for the rebalancing team. Income from advertising on the bikes was 18,000 pounds, which was on budget.
+
+## 8. Next quarter
+Planned work includes adding six new stations around the hospital, hiring the third mechanic and a second van driver, and trialling a discount for riders who return bikes to emptier stations.

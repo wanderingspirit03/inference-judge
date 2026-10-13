@@ -1,0 +1,142 @@
+Please review the design of this MySQL schema for our tea import business and tell me what you would change: keys, data types, missing constraints, indexes, and anything that will cause wrong numbers in reports. Then rewrite the seven queries at the end so they are correct and efficient, and explain each rewrite in a few sentences. I am not a database specialist, so say it in terms I can pass on to our contractor.
+
+```sql
+-- Mistral Leaf Trading: purchasing, stock and wholesale sales
+-- MySQL 8.0
+
+CREATE TABLE supplier (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255),
+    country VARCHAR(100),
+    contact_email VARCHAR(255),
+    organic_cert VARCHAR(50)
+);
+
+CREATE TABLE tea (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    supplier_id INT,
+    name VARCHAR(255),
+    type VARCHAR(50),             -- green, black, oolong, white, pu-erh, herbal
+    harvest_year VARCHAR(10),
+    origin_region VARCHAR(100),
+    price_per_kg FLOAT,           -- purchase price in EUR
+    sku VARCHAR(30)
+);
+
+CREATE TABLE shipment (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    supplier_id INT,
+    arrived DATETIME,
+    container_ref VARCHAR(40),
+    customs_cost FLOAT,
+    freight_cost FLOAT
+);
+
+CREATE TABLE shipment_line (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    shipment_id INT,
+    tea_id INT,
+    kg FLOAT,
+    price_per_kg FLOAT,
+    best_before VARCHAR(10)       -- stored as text like '2027-06'
+);
+
+CREATE TABLE customer (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255),
+    kind VARCHAR(30),             -- cafe, shop, restaurant, online
+    city VARCHAR(100),
+    email VARCHAR(255),
+    credit_limit FLOAT
+);
+
+CREATE TABLE sale (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT,
+    sold_on DATETIME,
+    status VARCHAR(20),           -- open, shipped, paid, cancelled
+    discount_percent FLOAT
+);
+
+CREATE TABLE sale_line (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sale_id INT,
+    tea_id INT,
+    kg FLOAT,
+    unit_price FLOAT              -- selling price per kg in EUR
+);
+
+CREATE TABLE stock_adjustment (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tea_id INT,
+    kg FLOAT,                     -- negative for losses
+    reason VARCHAR(100),
+    adjusted_at DATETIME
+);
+
+-- Rows today: tea 640, shipment 1,900, shipment_line 9,800, customer 1,350,
+-- sale 41,000, sale_line 190,000, stock_adjustment 3,100.
+
+-- Query A: current stock of each tea in kg
+SELECT t.name,
+       (SELECT SUM(kg) FROM shipment_line WHERE tea_id = t.id)
+     - (SELECT SUM(kg) FROM sale_line sl
+          JOIN sale s ON s.id = sl.sale_id
+         WHERE sl.tea_id = t.id AND s.status <> 'cancelled')
+     + (SELECT SUM(kg) FROM stock_adjustment WHERE tea_id = t.id) AS stock_kg
+FROM tea t;
+
+-- Query B: gross margin per tea for 2026
+SELECT t.name,
+       SUM(sl.kg * sl.unit_price) AS revenue,
+       SUM(sl.kg * t.price_per_kg) AS cost,
+       SUM(sl.kg * sl.unit_price) - SUM(sl.kg * t.price_per_kg) AS margin
+FROM sale_line sl
+JOIN sale s ON s.id = sl.sale_id
+JOIN tea t ON t.id = sl.tea_id
+WHERE YEAR(s.sold_on) = 2026
+GROUP BY t.name
+ORDER BY margin DESC;
+
+-- Query C: customers who bought in 2025 but not yet in 2026
+SELECT c.name, c.email
+FROM customer c
+WHERE c.id IN (SELECT customer_id FROM sale WHERE sold_on LIKE '2025%')
+  AND c.id NOT IN (SELECT customer_id FROM sale WHERE sold_on LIKE '2026%');
+
+-- Query D: lots that expire within 90 days and are still in stock
+SELECT t.name, l.best_before, l.kg
+FROM shipment_line l
+JOIN tea t ON t.id = l.tea_id
+WHERE l.best_before < DATE_FORMAT(DATE_ADD(NOW(), INTERVAL 90 DAY), '%Y-%m')
+ORDER BY l.best_before;
+
+-- Query E: top five customers by revenue per city, excluding cancelled sales
+SELECT c.city, c.name, SUM(sl.kg * sl.unit_price * (1 - s.discount_percent / 100)) AS revenue
+FROM customer c
+JOIN sale s ON s.customer_id = c.id
+JOIN sale_line sl ON sl.sale_id = s.id
+WHERE s.status != 'cancelled'
+GROUP BY c.city, c.name
+ORDER BY c.city, revenue DESC;
+
+-- Query F: landed cost per kg of each shipment line,
+-- spreading customs and freight by weight
+SELECT sh.container_ref, t.name,
+       l.price_per_kg + (sh.customs_cost + sh.freight_cost) / SUM(l.kg) AS landed_per_kg
+FROM shipment sh
+JOIN shipment_line l ON l.shipment_id = sh.id
+JOIN tea t ON t.id = l.tea_id
+GROUP BY sh.container_ref, t.name, l.price_per_kg, sh.customs_cost, sh.freight_cost;
+
+-- Query G: customers whose unpaid sales exceed their credit limit
+SELECT c.name, c.credit_limit,
+       SUM(sl.kg * sl.unit_price) AS unpaid
+FROM customer c
+JOIN sale s ON s.customer_id = c.id
+JOIN sale_line sl ON sl.sale_id = s.id
+WHERE s.status IN ('open', 'shipped')
+GROUP BY c.id
+HAVING unpaid > c.credit_limit
+ORDER BY unpaid DESC;
+```

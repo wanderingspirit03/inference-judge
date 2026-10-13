@@ -1,0 +1,26 @@
+Can you go through this table from our kindergarten network and write me an analysis I can take to the board on Thursday? I want the main findings, anything odd that needs explaining, and a list of next steps with a sensible order.
+
+Context: Birchwood Early Years runs six kindergartens in the Harlow Valley. The table below shows the autumn term (September to December) for each site. "Places" is the licensed capacity, "Enrolled" is the average number of children on the register, "Attendance" is the average share of enrolled children present per day, "Staff" is full-time-equivalent educators, "Absence days" is staff sick days in the term, and "Cost per child" is total running cost divided by average enrolled children, in euros per month. The fee we charge is 640 euros per month at every site, and the municipal subsidy is 210 euros per enrolled child per month.
+
+| Site | Places | Enrolled | Attendance | Staff | Absence days | Cost per child |
+|---|---|---|---|---|---|---|
+| Alder Lane | 60 | 58 | 91% | 9.5 | 41 | 812 |
+| Brook House | 48 | 36 | 88% | 7.0 | 22 | 934 |
+| Chapel Meadow | 75 | 74 | 93% | 12.0 | 57 | 801 |
+| Dunmore Street | 40 | 39 | 84% | 6.5 | 63 | 868 |
+| Elm Court | 52 | 44 | 90% | 8.0 | 19 | 846 |
+| Fieldgate | 36 | 21 | 86% | 5.0 | 12 | 1,047 |
+| **Network** | **311** | **272** | **90%** | **48.0** | **214** | **853** |
+
+Notes from the operations team:
+
+1. Fieldgate opened its second room in September after the council asked us to take over a waiting list. Eleven of the 21 children joined in the last three weeks of October, so the average enrolment is lower than the current register, which stood at 27 on 1 December.
+2. Dunmore Street lost its deputy manager in October, and two of the six staff there were on long-term sick leave for part of November. Parents complained twice about late pick-up times. Attendance fell to 79% in the week before the autumn break.
+3. Brook House has had the same 36 children since the start of term. The manager says four families moved away in the summer and the new intake in January is already full.
+4. Chapel Meadow is our largest site and has the highest absence days in the network, but its absence rate per member of staff is close to the average. A norovirus outbreak closed two classrooms for four days in November.
+5. Elm Court spent 11,400 euros on a new roof for the outdoor shelter in October, which is included in the cost per child figure. Without it the figure would be about 821.
+6. We changed the food supplier at all sites in September. The supplier invoice per child per month fell from 61 euros to 54 euros, but two sites reported complaints about portion sizes.
+
+For the previous autumn term, the network average cost per child was 819 euros, attendance was 92%, and staff absence days were 171 across 45.5 full-time equivalents. Enrolment was 281 on average, so we are currently down about 3% on the year, even though two sites have grown.
+
+One more thing the board will ask: the finance director thinks we should close one of the two smallest sites at the end of the school year and move the children to a neighbouring site. I do not want a recommendation on that from you, only what the numbers can and cannot tell us about it. Please also point out where you are unsure because the data is too thin, and say which extra figures we should collect before the next meeting, such as waiting lists, staff turnover, and parent satisfaction scores.

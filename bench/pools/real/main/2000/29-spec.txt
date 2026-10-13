@@ -1,0 +1,71 @@
+Attached is the product spec for the new job allocation feature in our dispatch console. Could you write a complete test plan for it, with test cases grouped by area, each with preconditions, steps and expected results, plus the edge cases and non-functional checks you think we are missing? Our testers will work from your plan directly, so please be specific.
+
+PRODUCT SPECIFICATION: AUTOMATIC JOB ALLOCATION, Northgate Cab Dispatch Console, release 6.2
+Owner: Farid Haddad (product). Reviewed by: Joanna Mbeki (dispatch supervisor), Ken Aoyama (engineering)
+
+1. Overview
+
+Northgate Cabs runs a dispatch centre that takes about 2,400 bookings a day by phone, app and the hotel desk portal. Today dispatchers assign each job to a driver by hand. This release adds automatic allocation: when a booking is confirmed, the system proposes the best available vehicle and, if the dispatcher has enabled automatic mode, offers the job to that driver without a dispatcher touching it. Dispatchers keep the ability to override at any time.
+
+2. Definitions
+
+- Job: a booking with a pickup address, optional destination, pickup time (now or later), passenger count and requirements.
+- Driver status: Offline, Available, Offered, On job, Break.
+- Zone: one of 14 named areas of the city, each with a polygon boundary.
+- Requirement: wheelchair ramp, child seat, estate car, or pet friendly. A job may have several.
+
+3. Functional requirements
+
+3.1 Candidate selection
+FR-1. For an immediate job, the system considers every driver with status Available whose last known position is no more than 6 km in a straight line from the pickup.
+FR-2. A candidate must satisfy every requirement on the job. A vehicle with a ramp counts as having an estate car only if its profile also says so.
+FR-3. A candidate must have room for the passenger count. A job with more than four passengers needs a six-seat vehicle.
+FR-4. Candidates are ranked by estimated time of arrival (ETA) from the routing service. If the routing service does not answer within 2 seconds, straight-line distance is used instead and the job is marked "approximate ETA".
+FR-5. If two candidates differ by less than 60 seconds of ETA, the driver who has waited longest since their last job is preferred.
+
+3.2 Offers
+FR-6. The top candidate receives an offer on the driver tablet showing pickup, destination, estimated fare and requirements. The driver has 20 seconds to accept or decline.
+FR-7. If the driver accepts, status becomes On job and the job is assigned. If the driver declines or the timer runs out, the offer goes to the next candidate. After three failed offers, the job is returned to the manual queue with a red flag.
+FR-8. A driver who declines or ignores three offers in a row is set to Break automatically and the supervisor is notified.
+FR-9. A driver can only hold one offer at a time. A driver with status Offered is not a candidate for another job.
+
+3.3 Pre-booked jobs
+FR-10. A job with a pickup time more than 30 minutes ahead stays in the pre-book list. The system starts allocation 20 minutes before pickup time.
+FR-11. For a pre-booked job, drivers who will finish their current job within 15 minutes and whose destination is within 6 km of the pickup are also candidates, with the finish time added to the ETA.
+FR-12. If no driver is found 10 minutes before pickup, the supervisor sees an alert.
+
+3.4 Manual override
+FR-13. A dispatcher can reassign any job that has not yet started, with a mandatory reason chosen from a list. An override cancels any open offer on that job.
+FR-14. A dispatcher can switch automatic mode on or off per zone. The setting takes effect for jobs confirmed after the switch.
+FR-15. When automatic mode is off, the system still shows the ranked candidate list as a suggestion.
+
+3.5 Special cases
+FR-16. A job from the hotel desk portal marked "VIP" bypasses ranking and goes first to drivers with a rating of 4.8 or above.
+FR-17. A job whose pickup is outside all zones is never allocated automatically and goes straight to the manual queue.
+FR-18. During a driver shift change window (05:45 to 06:15 and 17:45 to 18:15), the radius in FR-1 is extended to 9 km.
+FR-19. If the passenger cancels while an offer is open, the offer is withdrawn on the tablet within 3 seconds and the driver sees a message "Job cancelled".
+
+3.6 Reporting and supervisor tools
+FR-20. The supervisor screen shows, per zone, the number of Available drivers, open offers, jobs in the manual queue and the average time from confirmation to acceptance over the last 30 minutes.
+FR-21. A daily report lists for each driver the number of offers received, accepted, declined and timed out, and the average acceptance time. The report is available by 06:00 for the previous day.
+FR-22. A supervisor can export the allocation audit log for a chosen job number as a CSV file with one row per offer.
+FR-23. A supervisor can set a driver to Break or Offline from the console. If the driver holds an open offer at that moment, the offer is withdrawn and passed to the next candidate without counting as a decline.
+
+4. Non-functional requirements
+
+NFR-1. The time between booking confirmation and the first offer shown on the tablet is under 4 seconds for 95 percent of jobs at a load of 40 bookings per minute.
+NFR-2. The system must survive a restart of the allocation service without losing any open offer: open offers are restored from the database within 10 seconds.
+NFR-3. If the routing service is down, allocation continues in approximate mode and the supervisor sees a banner.
+NFR-4. Every allocation decision is written to an audit log with the candidate list, the reason for the choice and timestamps. Logs are kept for 13 months.
+NFR-5. Driver positions older than 90 seconds are considered stale, and the driver is excluded from candidates.
+NFR-6. The dispatcher console keeps working with the automatic mode toggle visible in browsers released in the last two years.
+
+5. Out of scope
+
+Fare calculation changes, payment, driver app redesign, and corporate account billing are not part of this release. Jobs shared between several passengers are not supported.
+
+6. Open questions
+
+Q1. Should the 20-second offer timer be longer for drivers who are currently driving and must stop to read the offer? Joanna thinks 25 seconds, Farid wants to measure first.
+Q2. What happens to a pre-booked job that is allocated and then the driver goes offline? The draft assumes it returns to the pre-book list, but this needs to be confirmed with Ken.
+Q3. How are VIP jobs treated when no driver has a rating of 4.8 or above nearby?

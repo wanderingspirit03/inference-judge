@@ -1,0 +1,187 @@
+This is the quoting package for our solar installation company, written by a contractor who has moved on. I need you to explain what each part does, review it for bugs and design problems, and write table-driven tests for the functions that matter most.
+
+```go
+// Package quote calculates system size, price and payback for a rooftop solar installation.
+package quote
+
+import (
+	"errors"
+	"fmt"
+	"math"
+	"sort"
+)
+
+const (
+	PanelWatts       = 410
+	PanelAreaM2      = 1.95
+	InstallBaseCost  = 1800.0
+	PanelCost        = 215.0
+	InverterCostPerK = 140.0
+	TariffPerKWh     = 0.31
+	ExportPerKWh     = 0.07
+	SelfUseShare     = 0.45
+)
+
+// Roof describes one plane of a roof.
+type Roof struct {
+	Name        string
+	AreaM2      float64
+	TiltDegrees float64
+	Azimuth     float64 // degrees from north, 180 is due south
+	ShadingPct  float64
+}
+
+// Quote is the result of a calculation.
+type Quote struct {
+	Panels       int
+	SystemKW     float64
+	AnnualKWh    float64
+	TotalCost    float64
+	AnnualSaving float64
+	PaybackYears float64
+}
+
+var ErrNoRoof = errors.New("no usable roof area")
+
+// usableArea returns the area that can take panels, leaving a margin around the edges.
+func usableArea(r Roof) float64 {
+	if r.AreaM2 <= 0 {
+		return 0
+	}
+	return r.AreaM2 * 0.8
+}
+
+// orientationFactor reduces yield for roofs that do not face south.
+func orientationFactor(azimuth float64) float64 {
+	diff := math.Abs(azimuth - 180)
+	if diff > 180 {
+		diff = 360 - diff
+	}
+	switch {
+	case diff <= 30:
+		return 1.0
+	case diff <= 60:
+		return 0.9
+	case diff <= 90:
+		return 0.78
+	default:
+		return 0.6
+	}
+}
+
+// tiltFactor reduces yield for very flat or very steep roofs.
+func tiltFactor(tilt float64) float64 {
+	if tilt >= 25 && tilt <= 45 {
+		return 1.0
+	}
+	if tilt < 25 {
+		return 0.95 - (25-tilt)*0.004
+	}
+	return 0.97 - (tilt-45)*0.006
+}
+
+// RoofYield returns the annual kWh produced per installed kW on a roof.
+func RoofYield(r Roof, sunHours float64) float64 {
+	base := sunHours * 365 * 0.82
+	y := base * orientationFactor(r.Azimuth) * tiltFactor(r.TiltDegrees)
+	y = y * (1 - r.ShadingPct/100)
+	return y
+}
+
+// PanelsFor returns how many panels fit on a roof.
+func PanelsFor(r Roof) int {
+	return int(usableArea(r) / PanelAreaM2)
+}
+
+// Build prices a system that uses the best roofs first, up to maxPanels panels in total.
+func Build(roofs []Roof, sunHours float64, maxPanels int) (Quote, error) {
+	if len(roofs) == 0 {
+		return Quote{}, ErrNoRoof
+	}
+	ranked := make([]Roof, len(roofs))
+	copy(ranked, roofs)
+	sort.Slice(ranked, func(i, j int) bool {
+		return RoofYield(ranked[i], sunHours) > RoofYield(ranked[j], sunHours)
+	})
+
+	remaining := maxPanels
+	var panels int
+	var annual float64
+	for _, r := range ranked {
+		if remaining <= 0 {
+			break
+		}
+		n := PanelsFor(r)
+		if n > remaining {
+			n = remaining
+		}
+		kw := float64(n*PanelWatts) / 1000
+		annual += kw * RoofYield(r, sunHours)
+		panels += n
+		remaining -= n
+	}
+	if panels == 0 {
+		return Quote{}, ErrNoRoof
+	}
+
+	kw := float64(panels*PanelWatts) / 1000
+	cost := InstallBaseCost + float64(panels)*PanelCost + kw*1000*InverterCostPerK/1000
+	used := annual * SelfUseShare
+	exported := annual - used
+	saving := used*TariffPerKWh + exported*ExportPerKWh
+
+	q := Quote{
+		Panels:       panels,
+		SystemKW:     kw,
+		AnnualKWh:    annual,
+		TotalCost:    cost,
+		AnnualSaving: saving,
+		PaybackYears: cost / saving,
+	}
+	return q, nil
+}
+
+// Summary formats a quote for the customer letter.
+func (q Quote) Summary() string {
+	return fmt.Sprintf("%d panels (%.2f kW), about %.0f kWh a year, price %.2f, saving %.2f a year, payback %.1f years",
+		q.Panels, q.SystemKW, q.AnnualKWh, q.TotalCost, q.AnnualSaving, q.PaybackYears)
+}
+
+// LifetimeSaving estimates the total saving over the given number of years, allowing
+// for a fixed yearly loss of panel output.
+func (q Quote) LifetimeSaving(years int, degradationPct float64) float64 {
+	total := 0.0
+	factor := 1.0
+	for y := 0; y < years; y++ {
+		total += q.AnnualSaving * factor
+		factor *= 1 - degradationPct/100
+	}
+	return total - q.TotalCost
+}
+
+// BestRoof returns the name of the roof with the highest yield per installed kW.
+func BestRoof(roofs []Roof, sunHours float64) (string, error) {
+	if len(roofs) == 0 {
+		return "", ErrNoRoof
+	}
+	best := roofs[0]
+	for _, r := range roofs[1:] {
+		if RoofYield(r, sunHours) > RoofYield(best, sunHours) {
+			best = r
+		}
+	}
+	return best.Name, nil
+}
+
+// Discount applies a percentage discount between 0 and 100 to the total cost.
+func (q *Quote) Discount(pct float64) error {
+	if pct < 0 || pct > 100 {
+		return fmt.Errorf("invalid discount %.1f", pct)
+	}
+	q.TotalCost = q.TotalCost * (1 - pct/100)
+	q.PaybackYears = q.TotalCost / q.AnnualSaving
+	return nil
+}
+```
+
+A few facts about how it is used. Customers' roofs usually have one to three planes. The sun-hours value comes from a regional table and is typically between 2.8 and 4.2. Last month a customer with a north-facing roof was quoted a payback of 9 years, which our sales manager says is impossible, and a quote for a very small roof came back with a payback of "+Inf".

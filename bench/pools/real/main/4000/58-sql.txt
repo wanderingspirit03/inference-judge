@@ -1,0 +1,266 @@
+Here is the database for our shipyard's job tracking, plus the queries the office runs every week. The reports are getting slow and last month someone found duplicate entries in the timesheets. Can you review the design, point out what is wrong or risky, suggest the indexes we need, and rewrite each query with an explanation of what you changed and why?
+
+```sql
+-- Harbourgate Shipyard: job tracking (PostgreSQL)
+
+CREATE TABLE vessels (
+    vessel_id      SERIAL PRIMARY KEY,
+    name           VARCHAR(80) NOT NULL,
+    imo_number     VARCHAR(12),
+    owner_name     VARCHAR(120),
+    owner_email    VARCHAR(120),
+    vessel_type    VARCHAR(30),
+    length_m       NUMERIC(6,2),
+    year_built     INTEGER
+);
+
+CREATE TABLE berths (
+    berth_id       SERIAL PRIMARY KEY,
+    berth_code     VARCHAR(10) NOT NULL,
+    max_length_m   NUMERIC(6,2),
+    has_crane      BOOLEAN DEFAULT FALSE
+);
+
+CREATE TABLE jobs (
+    job_id         SERIAL PRIMARY KEY,
+    vessel_id      INTEGER REFERENCES vessels(vessel_id),
+    berth_id       INTEGER REFERENCES berths(berth_id),
+    job_type       VARCHAR(30),
+    status         VARCHAR(20),
+    opened_on      DATE,
+    due_on         DATE,
+    closed_on      DATE,
+    quoted_eur     NUMERIC(12,2),
+    description    TEXT
+);
+
+CREATE TABLE workers (
+    worker_id      SERIAL PRIMARY KEY,
+    full_name      VARCHAR(100),
+    trade          VARCHAR(30),
+    hourly_rate    NUMERIC(6,2),
+    hired_on       DATE,
+    active         BOOLEAN DEFAULT TRUE
+);
+
+CREATE TABLE timesheets (
+    entry_id       SERIAL PRIMARY KEY,
+    job_id         INTEGER REFERENCES jobs(job_id),
+    worker_id      INTEGER REFERENCES workers(worker_id),
+    work_date      DATE,
+    hours          NUMERIC(4,2),
+    note           TEXT
+);
+
+CREATE TABLE materials (
+    material_id    SERIAL PRIMARY KEY,
+    sku            VARCHAR(30),
+    description    VARCHAR(200),
+    unit           VARCHAR(10),
+    unit_cost_eur  NUMERIC(10,2),
+    stock_qty      NUMERIC(10,2)
+);
+
+CREATE TABLE job_materials (
+    job_id         INTEGER REFERENCES jobs(job_id),
+    material_id    INTEGER REFERENCES materials(material_id),
+    quantity       NUMERIC(10,2),
+    issued_on      DATE
+);
+
+CREATE TABLE invoices (
+    invoice_id     SERIAL PRIMARY KEY,
+    job_id         INTEGER REFERENCES jobs(job_id),
+    issued_on      DATE,
+    amount_eur     NUMERIC(12,2),
+    paid_on        DATE,
+    status         VARCHAR(15)
+);
+
+CREATE TABLE inspections (
+    inspection_id  SERIAL PRIMARY KEY,
+    job_id         INTEGER REFERENCES jobs(job_id),
+    inspector      VARCHAR(100),
+    inspected_on   DATE,
+    result         VARCHAR(10),
+    comments       TEXT
+);
+
+CREATE TABLE subcontractors (
+    sub_id         SERIAL PRIMARY KEY,
+    company_name   VARCHAR(120),
+    speciality     VARCHAR(40),
+    day_rate_eur   NUMERIC(8,2),
+    insurance_until DATE
+);
+
+CREATE TABLE sub_assignments (
+    assignment_id  SERIAL PRIMARY KEY,
+    job_id         INTEGER REFERENCES jobs(job_id),
+    sub_id         INTEGER REFERENCES subcontractors(sub_id),
+    start_date     DATE,
+    end_date       DATE,
+    days_billed    INTEGER
+);
+
+CREATE TABLE certificates (
+    cert_id        SERIAL PRIMARY KEY,
+    worker_id      INTEGER REFERENCES workers(worker_id),
+    cert_name      VARCHAR(60),
+    issued_on      DATE,
+    expires_on     DATE
+);
+
+-- Sample data used by the office when testing
+INSERT INTO vessels (name, imo_number, owner_name, owner_email, vessel_type, length_m, year_built)
+VALUES ('Marta Lindqvist', '9301182', 'Lindqvist Fisheries', 'office@lindqvist.example.org', 'trawler', 38.50, 1998),
+       ('Sea Heron', '9455210', 'Northquay Ferries', 'ops@northquay.example.org', 'ferry', 61.20, 2007),
+       ('Anselm', NULL, 'J. Brandvold', 'brandvold@example.org', 'yacht', 17.80, 2015);
+
+INSERT INTO berths (berth_code, max_length_m, has_crane)
+VALUES ('A1', 25.00, FALSE), ('B2', 45.00, TRUE), ('C3', 70.00, TRUE);
+
+-- Query 1: open jobs with the vessel and berth, ordered by due date
+SELECT j.job_id, v.name, b.berth_code, j.job_type, j.due_on
+FROM jobs j, vessels v, berths b
+WHERE j.vessel_id = v.vessel_id
+  AND j.berth_id = b.berth_id
+  AND j.status <> 'closed'
+  AND j.status <> 'cancelled'
+ORDER BY j.due_on;
+
+-- Query 2: labour cost per job
+SELECT j.job_id,
+       (SELECT SUM(t.hours * w.hourly_rate)
+        FROM timesheets t, workers w
+        WHERE t.job_id = j.job_id AND t.worker_id = w.worker_id) AS labour_eur
+FROM jobs j
+WHERE j.opened_on >= '2026-01-01';
+
+-- Query 3: material cost per job, with jobs that have no materials left out
+SELECT jm.job_id, SUM(jm.quantity * m.unit_cost_eur) AS material_eur
+FROM job_materials jm
+JOIN materials m ON m.material_id = jm.material_id
+GROUP BY jm.job_id;
+
+-- Query 4: margin report. Quote minus labour minus materials
+SELECT j.job_id, v.name, j.quoted_eur,
+       COALESCE(l.labour_eur, 0) AS labour_eur,
+       COALESCE(mm.material_eur, 0) AS material_eur,
+       j.quoted_eur - COALESCE(l.labour_eur, 0) - COALESCE(mm.material_eur, 0) AS margin_eur
+FROM jobs j
+JOIN vessels v ON v.vessel_id = j.vessel_id
+LEFT JOIN (
+    SELECT t.job_id, SUM(t.hours * w.hourly_rate) AS labour_eur
+    FROM timesheets t JOIN workers w ON w.worker_id = t.worker_id
+    GROUP BY t.job_id
+) l ON l.job_id = j.job_id
+LEFT JOIN (
+    SELECT jm.job_id, SUM(jm.quantity * m.unit_cost_eur) AS material_eur
+    FROM job_materials jm JOIN materials m ON m.material_id = jm.material_id
+    GROUP BY jm.job_id
+) mm ON mm.job_id = j.job_id
+WHERE j.status = 'closed'
+ORDER BY margin_eur;
+
+-- Query 5: overdue jobs and how many days late they are
+SELECT j.job_id, v.name, v.owner_email, CURRENT_DATE - j.due_on AS days_late
+FROM jobs j
+JOIN vessels v ON v.vessel_id = j.vessel_id
+WHERE j.due_on < CURRENT_DATE
+  AND j.closed_on IS NULL
+  AND j.status NOT IN ('cancelled');
+
+-- Query 6: workers who logged more than 10 hours on one day
+SELECT w.full_name, t.work_date, SUM(t.hours) AS total_hours
+FROM timesheets t
+JOIN workers w ON w.worker_id = t.worker_id
+GROUP BY w.full_name, t.work_date
+HAVING SUM(t.hours) > 10
+ORDER BY t.work_date DESC;
+
+-- Query 7: unpaid invoices older than 30 days with the owner's contact
+SELECT i.invoice_id, v.owner_name, v.owner_email, i.amount_eur, i.issued_on
+FROM invoices i
+JOIN jobs j ON j.job_id = i.job_id
+JOIN vessels v ON v.vessel_id = j.vessel_id
+WHERE i.paid_on IS NULL
+  AND i.issued_on < CURRENT_DATE - 30
+  AND i.status != 'void';
+
+-- Query 8: vessels that have had more than one failed inspection
+SELECT v.name, COUNT(*) AS failures
+FROM vessels v
+JOIN jobs j ON j.vessel_id = v.vessel_id
+JOIN inspections ins ON ins.job_id = j.job_id
+WHERE ins.result = 'fail'
+GROUP BY v.name
+HAVING COUNT(*) > 1;
+
+-- Query 9: berth usage in the last 90 days (days occupied per berth)
+SELECT b.berth_code,
+       SUM(LEAST(COALESCE(j.closed_on, CURRENT_DATE), CURRENT_DATE) - GREATEST(j.opened_on, CURRENT_DATE - 90)) AS days_used
+FROM berths b
+LEFT JOIN jobs j ON j.berth_id = b.berth_id
+WHERE j.opened_on IS NULL OR j.opened_on <= CURRENT_DATE
+GROUP BY b.berth_code
+ORDER BY days_used DESC;
+
+-- Query 10: materials below reorder level, based on the last 60 days of use
+SELECT m.sku, m.description, m.stock_qty,
+       (SELECT COALESCE(SUM(jm.quantity), 0)
+        FROM job_materials jm
+        WHERE jm.material_id = m.material_id
+          AND jm.issued_on > CURRENT_DATE - 60) / 60.0 * 14 AS two_week_need
+FROM materials m
+WHERE m.stock_qty < (SELECT COALESCE(SUM(jm.quantity), 0)
+                     FROM job_materials jm
+                     WHERE jm.material_id = m.material_id
+                       AND jm.issued_on > CURRENT_DATE - 60) / 60.0 * 14;
+
+-- Query 11: search for jobs by words in the description
+SELECT job_id, description
+FROM jobs
+WHERE LOWER(description) LIKE '%' || LOWER('rudder') || '%';
+
+-- Query 12: monthly invoiced and collected totals this year
+SELECT TO_CHAR(issued_on, 'YYYY-MM') AS month,
+       SUM(amount_eur) AS invoiced,
+       SUM(CASE WHEN paid_on IS NOT NULL THEN amount_eur ELSE 0 END) AS collected
+FROM invoices
+WHERE EXTRACT(YEAR FROM issued_on) = 2026
+GROUP BY TO_CHAR(issued_on, 'YYYY-MM')
+ORDER BY month;
+
+-- Query 13: subcontractor cost per job, only assignments that have finished
+SELECT a.job_id, s.company_name, a.days_billed * s.day_rate_eur AS sub_cost_eur
+FROM sub_assignments a
+JOIN subcontractors s ON s.sub_id = a.sub_id
+WHERE a.end_date < CURRENT_DATE;
+
+-- Query 14: workers whose welding or crane certificate expires within 60 days
+SELECT w.full_name, c.cert_name, c.expires_on
+FROM workers w
+JOIN certificates c ON c.worker_id = w.worker_id
+WHERE w.active = TRUE
+  AND c.cert_name IN ('welding', 'crane operator')
+  AND c.expires_on BETWEEN CURRENT_DATE AND CURRENT_DATE + 60
+ORDER BY c.expires_on;
+
+-- Query 15: the five most expensive jobs per vessel type this year
+SELECT vessel_type, job_id, total_cost
+FROM (
+    SELECT v.vessel_type, j.job_id,
+           COALESCE((SELECT SUM(t.hours * w.hourly_rate) FROM timesheets t
+                     JOIN workers w ON w.worker_id = t.worker_id
+                     WHERE t.job_id = j.job_id), 0)
+         + COALESCE((SELECT SUM(jm.quantity * m.unit_cost_eur) FROM job_materials jm
+                     JOIN materials m ON m.material_id = jm.material_id
+                     WHERE jm.job_id = j.job_id), 0) AS total_cost,
+           ROW_NUMBER() OVER (PARTITION BY v.vessel_type ORDER BY j.quoted_eur DESC) AS rn
+    FROM jobs j
+    JOIN vessels v ON v.vessel_id = j.vessel_id
+    WHERE j.opened_on >= '2026-01-01'
+) ranked
+WHERE rn <= 5;
+```

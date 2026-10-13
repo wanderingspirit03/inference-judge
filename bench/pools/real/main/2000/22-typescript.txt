@@ -1,0 +1,198 @@
+Please explain what each part of this TypeScript module does, propose a refactoring that would make it easier to maintain, and write tests for the refactored version. It's the eligibility and appointment logic for the Riverbend Blood Service booking site, and it has grown messy over the last year. I'd like to know where the hidden bugs are before we add platelet donations.
+
+```typescript
+export type DonationType = "whole" | "plasma" | "platelets";
+
+export interface Donor {
+  id: string;
+  birthDate: string; // ISO date
+  weightKg: number;
+  lastDonation?: { date: string; type: DonationType };
+  deferredUntil?: string; // ISO date
+  haemoglobin?: number; // g/L, from the last screening
+  sex: "f" | "m";
+}
+
+export interface Slot {
+  id: string;
+  centre: string;
+  start: string; // ISO datetime
+  capacity: number;
+  booked: number;
+  types: DonationType[];
+}
+
+export interface Booking {
+  slotId: string;
+  donorId: string;
+  type: DonationType;
+  createdAt: string;
+}
+
+const DAY = 24 * 60 * 60 * 1000;
+
+const WAIT_DAYS: Record<DonationType, number> = {
+  whole: 84,
+  plasma: 14,
+  platelets: 7,
+};
+
+export function ageOn(birthDate: string, on: Date): number {
+  const b = new Date(birthDate);
+  let age = on.getFullYear() - b.getFullYear();
+  if (
+    on.getMonth() < b.getMonth() ||
+    (on.getMonth() === b.getMonth() && on.getDate() < b.getDate())
+  ) {
+    age--;
+  }
+  return age;
+}
+
+export function eligibility(
+  donor: Donor,
+  type: DonationType,
+  on: Date
+): { ok: boolean; reason?: string } {
+  const age = ageOn(donor.birthDate, on);
+  if (age < 18) return { ok: false, reason: "under 18" };
+  if (age > 70) return { ok: false, reason: "over 70" };
+  if (donor.weightKg < 50) return { ok: false, reason: "under 50 kg" };
+
+  if (donor.deferredUntil && new Date(donor.deferredUntil) > on) {
+    return { ok: false, reason: "deferred until " + donor.deferredUntil };
+  }
+
+  if (type === "whole" || type === "platelets") {
+    const min = donor.sex === "f" ? 125 : 135;
+    if (donor.haemoglobin !== undefined && donor.haemoglobin < min) {
+      return { ok: false, reason: "haemoglobin too low" };
+    }
+  }
+
+  if (donor.lastDonation) {
+    const last = new Date(donor.lastDonation.date);
+    const days = Math.floor((on.getTime() - last.getTime()) / DAY);
+    const wait = WAIT_DAYS[donor.lastDonation.type];
+    if (days < wait) {
+      return { ok: false, reason: `wait ${wait - days} more days` };
+    }
+  }
+
+  return { ok: true };
+}
+
+export function openSlots(
+  slots: Slot[],
+  type: DonationType,
+  centre?: string
+): Slot[] {
+  return slots
+    .filter((s) => s.types.includes(type))
+    .filter((s) => !centre || s.centre === centre)
+    .filter((s) => s.booked < s.capacity)
+    .sort((a, b) => a.start.localeCompare(b.start));
+}
+
+export function nextEligibleDate(donor: Donor, type: DonationType): Date {
+  let date = new Date();
+  if (donor.lastDonation) {
+    const last = new Date(donor.lastDonation.date);
+    const wait = WAIT_DAYS[donor.lastDonation.type];
+    const earliest = new Date(last.getTime() + wait * DAY);
+    if (earliest > date) date = earliest;
+  }
+  if (donor.deferredUntil) {
+    const deferred = new Date(donor.deferredUntil);
+    if (deferred > date) date = deferred;
+  }
+  if (type === "platelets" && donor.lastDonation?.type === "whole") {
+    // platelets need a longer gap after a whole blood donation
+    const extra = new Date(
+      new Date(donor.lastDonation.date).getTime() + 28 * DAY
+    );
+    if (extra > date) date = extra;
+  }
+  return date;
+}
+
+export class BookingService {
+  private bookings: Booking[] = [];
+
+  constructor(
+    private slots: Slot[],
+    private donors: Map<string, Donor>,
+    private now: () => Date = () => new Date()
+  ) {}
+
+  book(donorId: string, slotId: string, type: DonationType): Booking {
+    const donor = this.donors.get(donorId);
+    if (!donor) throw new Error("unknown donor");
+    const slot = this.slots.find((s) => s.id === slotId);
+    if (!slot) throw new Error("unknown slot");
+
+    if (!slot.types.includes(type)) {
+      throw new Error("slot does not offer " + type);
+    }
+    if (slot.booked >= slot.capacity) {
+      throw new Error("slot is full");
+    }
+
+    const result = eligibility(donor, type, new Date(slot.start));
+    if (!result.ok) {
+      throw new Error("not eligible: " + result.reason);
+    }
+
+    const existing = this.bookings.find(
+      (b) => b.donorId === donorId && b.slotId === slotId
+    );
+    if (existing) return existing;
+
+    const booking: Booking = {
+      slotId,
+      donorId,
+      type,
+      createdAt: this.now().toISOString(),
+    };
+    this.bookings.push(booking);
+    slot.booked += 1;
+    return booking;
+  }
+
+  cancel(donorId: string, slotId: string): boolean {
+    const index = this.bookings.findIndex(
+      (b) => b.donorId === donorId && b.slotId === slotId
+    );
+    if (index < 0) return false;
+    this.bookings.splice(index, 1);
+    const slot = this.slots.find((s) => s.id === slotId);
+    if (slot) slot.booked -= 1;
+    return true;
+  }
+
+  upcoming(donorId: string): Booking[] {
+    const now = this.now().getTime();
+    return this.bookings
+      .filter((b) => b.donorId === donorId)
+      .filter((b) => {
+        const slot = this.slots.find((s) => s.id === b.slotId);
+        return slot ? new Date(slot.start).getTime() > now : false;
+      });
+  }
+
+  reminderList(hoursAhead: number): { donorId: string; start: string }[] {
+    const now = this.now().getTime();
+    const limit = now + hoursAhead * 60 * 60 * 1000;
+    const out: { donorId: string; start: string }[] = [];
+    for (const b of this.bookings) {
+      const slot = this.slots.find((s) => s.id === b.slotId);
+      if (!slot) continue;
+      const t = new Date(slot.start).getTime();
+      if (t > now && t <= limit) {
+        out.push({ donorId: b.donorId, start: slot.start });
+      }
+    }
+    return out;
+  }
+}
+```

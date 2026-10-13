@@ -1,0 +1,124 @@
+I have been asked to referee the manuscript below for a music education journal. It is the methods and results part of a study done in a youth orchestra. Please write a detailed peer review: a summary of what the authors claim, an assessment of the design and the statistics, specific numbered concerns (including any numbers that do not agree with each other), what additional analyses or information you would ask for, and a recommendation on whether to publish.
+
+---
+
+PEER MENTORING IN SECTIONAL REHEARSALS AND ITS ASSOCIATION WITH SIGHT-READING PROGRESS AND ATTENDANCE IN A REGIONAL YOUTH ORCHESTRA
+
+Manuscript submitted to the Journal of Ensemble Music Education. Sections 3 and 4 only (Methods; Results). The Introduction, Discussion and References are provided separately.
+
+3. METHODS
+
+3.1 Setting and participants
+
+The study took place in the Alderbank Youth Orchestra, a regional ensemble that rehearses on Saturday mornings during three school terms and admits players aged 11 to 18 by audition. In the autumn term of the study year the orchestra had 74 registered players: 31 violins, 9 violas, 8 cellos, 4 double basses, 8 woodwind, 9 brass and 5 percussion. Players were grouped into a senior orchestra (grades 6 to 8, 41 players) and a junior orchestra (grades 4 to 5, 33 players). Participation in the study was voluntary; written consent was obtained from players and, for those under 16, from a parent. Seventy of the 74 players (94.6 percent) consented. The remaining four, all in the junior orchestra, were excluded from analysis but took part in rehearsals as normal.
+
+The mean age of the 70 participants was 14.2 years (standard deviation 2.1). Forty-one participants identified as girls, 27 as boys and 2 as another gender or preferred not to say. The median number of years of instrumental study was 5 (range 2 to 10).
+
+3.2 Design
+
+We used a non-randomised comparison with a waiting-list element. The junior and senior orchestras had separate conductors and rehearsal rooms. In the first half of the school year (autumn and spring terms; 22 rehearsals), the senior orchestra used a peer mentoring structure in sectional rehearsals and the junior orchestra continued its usual practice. In the summer term (10 rehearsals), the junior orchestra adopted peer mentoring. We therefore have two periods. In Period 1 the senior orchestra is the intervention group and the junior orchestra is the comparison group. In Period 2 both groups use peer mentoring.
+
+The assignment of orchestras to conditions was made by the music director, on the grounds that the senior orchestra's section leaders were more experienced and better suited to mentoring. We acknowledge that this is a limitation.
+
+3.3 Intervention
+
+In the peer mentoring structure, each 90-minute rehearsal included a 30-minute sectional in which each string and wind section was divided into groups of three or four players. Each group contained one mentor (a player from the upper half of the section by audition rank) and two or three mentees. Mentors were trained in two 60-minute workshops by the first author before the start of the term. Mentors were asked to (a) work with the group on the hardest passage of the week's repertoire, (b) model one sight-reading strategy per rehearsal (for example, scanning for key signature changes and rhythmic hazards before playing), and (c) record, on a one-page form, which strategy was used and how many bars the group read through. Groups were reassigned every four rehearsals. Conductors did not attend the sectionals.
+
+The comparison condition consisted of 30 minutes of sectional work led by the conductor or an assistant tutor with the whole section together, at the discretion of the tutor.
+
+3.4 Measures
+
+Sight-reading. At the first rehearsal (T0), at the end of the autumn term (T1, after 11 rehearsals), at the end of the spring term (T2, after 22 rehearsals), and at the end of the summer term (T3, after 32 rehearsals), each player sight-read a short unseen excerpt, which was recorded and scored by two raters who were blind to condition and time point. Excerpts were composed by the second author at the player's grade level and varied in key and metre across time points. Scoring used a 40-point rubric (pitch accuracy 15, rhythm accuracy 15, continuity and tempo 10). Inter-rater agreement was assessed on a random subset of 56 recordings (20 percent of all) and was ICC(2,1) = 0.88 for the total score.
+
+Attendance. Attendance was recorded by section leaders at the start of each rehearsal. Each player's attendance rate was the proportion of rehearsals attended in the period.
+
+Self-efficacy. At T0 and T2 players completed an 8-item questionnaire on confidence in reading new music (five-point scale; Cronbach's alpha = 0.84 at T0 and 0.86 at T2).
+
+Practice time. Players reported weekly practice minutes on the same questionnaires; these are self-reported and we report them as descriptive only.
+
+3.5 Analysis
+
+For sight-reading scores we fitted linear mixed models with random intercepts for players and fixed effects of time (T0 to T2), group (senior or junior) and the group by time interaction, with age and years of study as covariates. The primary outcome was the group by time interaction for T0 to T2. Attendance was compared with a Mann-Whitney U test because the distribution was skewed. Self-efficacy was compared with independent-samples t-tests on change scores. For Period 2 we describe the change in the junior orchestra from T2 to T3 using paired t-tests. We did not adjust for multiple comparisons. The significance level was set at 0.05. Analyses were performed in R.
+
+Missing data. Players who left the orchestra during the year (n = 3 in the senior orchestra, n = 2 in the junior orchestra) were included in the models using the time points they completed. Players who were absent at a test session (n = 6 across all sessions) were not given a make-up test.
+
+3.6 Ethics and data
+
+The study was approved by the ethics committee of the authors' institution (reference 2024-117). The orchestra's management agreed that results would be reported without identifying individual players. Scores were stored under anonymous codes. Rehearsal attendance and audition rank were supplied by the orchestra's administrator and linked by code.
+
+4. RESULTS
+
+4.1 Participant flow and baseline
+
+Of 70 participants, 41 were in the senior orchestra and 29 in the junior orchestra. Table 1 shows baseline values.
+
+Table 1. Baseline characteristics (mean, standard deviation)
+
+| Measure | Senior (n = 41) | Junior (n = 29) |
+|---|---|---|
+| Age (years) | 15.9 (1.4) | 11.9 (0.9) |
+| Years of study | 6.8 (1.9) | 3.4 (1.1) |
+| Sight-reading score at T0 (of 40) | 24.6 (5.2) | 15.8 (4.7) |
+| Self-efficacy at T0 (of 5) | 3.6 (0.7) | 2.9 (0.8) |
+| Weekly practice (minutes, self-report) | 212 (84) | 138 (61) |
+
+Seniors were older, had studied for longer and scored higher at baseline on every measure. All differences were significant at p < 0.001 (details omitted).
+
+4.2 Sight-reading
+
+Table 2 shows the mean scores at each time point.
+
+Table 2. Sight-reading score (mean, standard deviation; maximum 40)
+
+| Time point | Senior | Junior |
+|---|---|---|
+| T0 | 24.6 (5.2) | 15.8 (4.7) |
+| T1 | 27.9 (5.0) | 17.2 (4.9) |
+| T2 | 30.3 (4.8) | 18.0 (5.1) |
+| T3 | 31.0 (4.9) | 21.4 (5.0) |
+
+Over T0 to T2, the senior orchestra improved by 5.7 points and the junior orchestra by 2.2 points. In the mixed model, the group by time interaction was significant (estimate = 3.5 points, 95 percent CI 1.9 to 5.1, p < 0.001). We interpret this as evidence that peer mentoring accelerated sight-reading progress. From T2 to T3, the junior orchestra improved by 3.4 points (paired t(26) = 4.1, p < 0.001) during the term in which it adopted peer mentoring, whereas the senior orchestra, which continued the structure, improved by 0.7 points (paired t(37) = 1.3, p = 0.20). The improvement in the junior orchestra during Period 2 was larger than the improvement during Period 1 (3.4 points over one term versus 2.2 points over two terms), which supports the conclusion that the intervention is effective.
+
+Subgroup analysis by section: among string players the senior-junior interaction was 3.9 points (p < 0.001) and among wind and brass players it was 2.4 points (p = 0.09, n = 17 in the two groups combined). We interpret the smaller effect in winds and brass as reflecting the lower number of mentors with strong sight-reading skills in those sections.
+
+4.3 Attendance
+
+Mean attendance in Period 1 was 91.3 percent in the senior orchestra (median 95.5, interquartile range 86.4 to 100) and 84.7 percent in the junior orchestra (median 90.9, interquartile range 77.3 to 95.5). The difference was significant (U = 412, p = 0.012). In the junior orchestra, attendance rose from 84.7 percent in Period 1 to 90.2 percent in Period 2 (p = 0.03). The senior orchestra's attendance in Period 2 was 90.6 percent, essentially unchanged.
+
+4.4 Self-efficacy
+
+Self-efficacy in reading new music rose by 0.7 points in the senior orchestra (from 3.6 to 4.3) and by 0.2 points in the junior orchestra (from 2.9 to 3.1) between T0 and T2. The difference in change scores was significant (t(66) = 3.2, p = 0.002).
+
+4.5 Practice time
+
+Self-reported weekly practice was 212 minutes in the senior orchestra at T0 and 245 minutes at T2; in the junior orchestra it was 138 at T0 and 141 at T2. We did not test these differences formally.
+
+4.6 Mentor effects
+
+Among the 12 senior players who acted as mentors in at least eight rehearsals, the improvement in their own sight-reading score from T0 to T2 was 7.1 points, compared with 5.0 points for the 29 senior players who were mentees only. The difference was significant (p = 0.04). The mentors' scores at baseline (26.9) were higher than the non-mentors' (23.7).
+
+4.7 Mentor strategy logs
+
+The mentor forms were completed for 71 percent of sectionals. The most frequently recorded strategy was scanning for key signature and accidentals (38 percent of logged sectionals), followed by clapping rhythms first (27 percent), and counting through rests (14 percent). The mean number of bars read per sectional was 46 (standard deviation 21). There was no association between the number of logged bars and the player's improvement (r = 0.11).
+
+4.8 Adverse observations
+
+Two junior players and one senior player told the conductors that they felt anxious about being corrected by their peers. In the spring term, one section leader in the senior orchestra reported that two mentees had stopped attending sectionals. These observations were not part of a systematic survey.
+
+4.9 Robustness checks
+
+Because the groups differed so much at baseline, we repeated the primary analysis in a subsample of 28 senior and 29 junior players matched on baseline sight-reading score within three points. The group by time interaction in this subsample was 2.6 points (95 percent CI 0.7 to 4.5, p = 0.008). Excluding the five players who left the orchestra gave an interaction of 3.7 points (p < 0.001). Adding the number of rehearsals attended as a covariate reduced the interaction to 2.9 points (p = 0.004). We also repeated the analysis using only the pitch accuracy subscore and only the rhythm subscore; the interactions were 1.4 points (p = 0.006) and 1.2 points (p = 0.03) respectively, and 0.9 points (p = 0.01) for the continuity subscore.
+
+The raters' mean scores differed slightly: rater A scored 0.8 points higher than rater B on average. We analysed the mean of the two raters. When only rater A's scores were used the interaction was 3.6 points, and when only rater B's scores were used it was 3.3 points.
+
+4.10 Summary of effects
+
+Table 3. Summary of between-group differences in change, T0 to T2
+
+| Outcome | Senior change | Junior change | Difference | p |
+|---|---|---|---|---|
+| Sight-reading (points of 40) | +5.7 | +2.2 | 3.5 | < 0.001 |
+| Self-efficacy (points of 5) | +0.7 | +0.2 | 0.5 | 0.002 |
+| Self-reported practice (minutes per week) | +33 | +3 | 30 | not tested |
+
+Attendance is not included in Table 3 because it was measured only as a level in each period and not at T0.

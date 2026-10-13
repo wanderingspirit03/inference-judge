@@ -1,0 +1,104 @@
+Below are the methods and results sections of a manuscript our operations team wants to submit to a hospitality management journal. I have been asked to referee it. Please write a detailed peer review: a summary of the claims, an assessment of the design and the statistics, the major concerns, the minor points, and a recommendation (accept, minor revision, major revision or reject) with your reasoning.
+
+# Menu Simplification and Kitchen Performance in a Multi-Site Restaurant Group: A Cluster-Controlled Study
+
+Authors: Rosalind Achterberg, Kofi Mbeki-Larsen, Teodora Vuković
+Affiliation: Operations Research Unit, Tallowfield Hospitality Group
+
+## 2. Methods
+
+### 2.1 Setting
+
+Tallowfield Hospitality Group operates 31 full-service restaurants in four regions of the same country, under three brands: Harbour Table (seafood and grills, 11 sites), Olive & Ember (Mediterranean, 12 sites) and The Copper Spoon (regional comfort food, 8 sites). All sites use the same point-of-sale system, the same inventory software and the same central purchasing contracts. Menus are set by brand, not by site, and contain between 54 and 71 items.
+
+### 2.2 Design
+
+We conducted a cluster-controlled study with the restaurant as the unit of allocation. Twenty-four sites were eligible: they had been open for at least 18 months, had a head chef in post for at least six months, and were not scheduled for refurbishment during the study. The remaining seven sites were excluded for these reasons (refurbishment, 3; new head chef, 2; seasonal opening only, 2).
+
+The 24 eligible sites were formed into 12 pairs matched on brand, region and average weekly covers (within 15 percent). Within each pair, one site was assigned to the intervention and the other to control by a coin toss made by the first author in the presence of the regional directors. The study ran for 16 consecutive weeks from 5 May to 24 August 2026: a four-week baseline period in which all sites operated normally, followed by a 12-week intervention period. Sites were told the allocation at the end of the baseline period.
+
+### 2.3 Intervention
+
+Intervention sites reduced their menu by 30 percent. The reduction was made in three steps, each designed by the brand's executive chef together with the head chef of the site: (a) removal of the items with the lowest sales mix in the previous 12 months, subject to keeping at least four vegetarian main courses and at least one dish per allergen group; (b) a shared prep list in which any ingredient that appeared in at least three remaining dishes was prepared in batches twice a day, at 10:00 and 16:30, in quantities set from a simple forecast based on the same weekday in the previous four weeks; and (c) a weekly 30-minute meeting in which the head chef reviewed the waste log. Control sites kept their existing menus and prep routines. Both groups received the same training in waste logging.
+
+### 2.4 Outcomes
+
+The primary outcome was food waste, measured in kilograms per 100 covers. Secondary outcomes were: median ticket time (minutes from order to the kitchen marking the last dish as ready), food cost as a percentage of food sales, guest satisfaction (mean score on a five-point scale from the post-meal survey sent by email to guests who booked through the group's website), and staff overtime (hours per week per site, taken from payroll).
+
+Covers per week and food sales were collected as secondary measures of demand, to check that any change was not caused by a loss of business.
+
+### 2.5 Data collection
+
+Food waste was weighed by kitchen staff at the end of every service. Staff used a calibrated scale to weigh three bins (preparation waste, spoilage and plate waste) and entered the weights on a tablet. Ticket times and covers were exported automatically from the point-of-sale system. Food cost used inventory counts taken every Monday. Guest satisfaction was collected for all bookings made through the website, which account for approximately 38 percent of covers. Payroll data were provided by the finance department.
+
+### 2.6 Statistical analysis
+
+We analysed data at the site-week level. For each outcome we fitted a linear mixed model with fixed effects for period (baseline or intervention), group (intervention or control) and their interaction, and random intercepts for site and for matched pair. The interaction coefficient is the difference-in-differences estimate and is reported with a 95 percent confidence interval. The analysis followed the intention-to-treat principle: all sites were analysed in the group to which they were allocated. We did not adjust for multiple comparisons, because the five secondary outcomes were considered to be of separate operational interest. The significance level was 0.05, two-sided. Analyses used R version 4.4.
+
+The sample size was not calculated before the study; the number of pairs was set by the number of eligible sites. A post hoc calculation showed that 12 pairs give 80 percent power to detect a difference of 1.9 kg per 100 covers in the primary outcome, assuming a between-site standard deviation of 2.4.
+
+### 2.7 Ethics and data handling
+
+The study was an evaluation of an operational change within the company and was approved by the group's management board. Kitchen staff were informed of the study by their head chefs and were free to decline to take part in the end-of-study questionnaire, which was anonymous. Guest survey responses were stored without names or email addresses, and no guest could be identified from the data supplied to the authors. Payroll data were supplied as weekly totals per site, so no individual employee's hours were visible. No external funding was received; the cost of the additional training and of the auditors' travel, 18,400 euros in total, was met by the group's operations budget. The first and second authors are employees of the group and the third author is a regional operations manager for two of the participating regions.
+
+## 3. Results
+
+### 3.1 Flow of sites and data
+
+All 24 sites completed the study. One intervention site (Harbour Table, coastal region) closed for 3 weeks in week 9 because of flooding; its data for those weeks are missing and were not imputed. A further two control sites introduced menu reductions of their own during the intervention period: one removed 6 items from week 10 after a supplier problem, and one removed 4 items from week 13 for seasonal reasons. Both were kept in the control group. In total the analysis includes 381 site-weeks and approximately 690,000 covers.
+
+### 3.2 Baseline characteristics
+
+| Characteristic | Intervention (n = 12) | Control (n = 12) |
+|---|---|---|
+| Harbour Table / Olive & Ember / Copper Spoon | 4 / 5 / 3 | 4 / 5 / 3 |
+| Seats, mean | 112 | 109 |
+| Covers per week, mean | 1,840 | 1,795 |
+| Menu items, mean | 63 | 62 |
+| Head chef tenure in months, median | 21 | 24 |
+| Food waste, kg per 100 covers | 9.8 | 9.6 |
+| Median ticket time, minutes | 21.4 | 21.1 |
+| Food cost, % of food sales | 31.2 | 30.9 |
+| Guest satisfaction, 1 to 5 | 4.21 | 4.19 |
+| Staff overtime, hours per week | 14.6 | 14.2 |
+
+The two groups were similar at baseline on all measured variables.
+
+### 3.3 Primary outcome
+
+Food waste in intervention sites fell from 9.8 to 7.1 kg per 100 covers (a change of -2.7), while control sites moved from 9.6 to 9.3 (a change of -0.3). The difference-in-differences estimate was -2.4 kg per 100 covers (95% CI -3.4 to -1.4; p < 0.001), which corresponds to a relative reduction of 24 percent against the intervention group's baseline. Of the three bins, the largest reduction was in preparation waste (-1.7 kg per 100 covers), followed by spoilage (-0.6) and plate waste (-0.1). The effect was visible from the second week of the intervention and did not grow after week 8.
+
+In the intervention group, 11 of the 12 sites reduced waste; the site that did not was the flooded site, whose waste rose by 0.4. Excluding this site gave an estimate of -2.7 (95% CI -3.6 to -1.8).
+
+### 3.4 Secondary outcomes
+
+| Outcome | Intervention: baseline to intervention | Control: baseline to intervention | Difference-in-differences (95% CI) |
+|---|---|---|---|
+| Median ticket time, min | 21.4 to 18.2 | 21.1 to 20.9 | -3.0 (-4.1 to -1.9) |
+| Food cost, % of sales | 31.2 to 29.4 | 30.9 to 30.7 | -1.6 (-2.5 to -0.7) |
+| Guest satisfaction, 1 to 5 | 4.21 to 4.18 | 4.19 to 4.20 | -0.04 (-0.12 to 0.04) |
+| Staff overtime, hours/week | 14.6 to 12.9 | 14.2 to 14.4 | -1.9 (-3.3 to -0.5) |
+| Covers per week | 1,840 to 1,812 | 1,795 to 1,801 | -34 (-96 to 28) |
+| Food sales per week, EUR | 41,300 to 41,050 | 40,100 to 40,250 | -400 (-1,650 to 850) |
+
+Ticket times fell in all 12 intervention sites. The reduction in food cost was equal to approximately 650 euros per site per week at the intervention group's average sales. Satisfaction scores did not differ between the groups; 2,914 survey responses were received in the intervention group and 2,873 in the control group, a response rate of 11 percent in both. Free-text comments mentioning "choice" or "variety" rose from 3.1 percent to 5.6 percent of comments in intervention sites and were unchanged in control sites.
+
+### 3.5 Sensitivity analyses
+
+Excluding the two control sites that reduced their own menus raised the primary estimate to -2.6 (95% CI -3.6 to -1.6). Using only the final eight weeks of the intervention period gave -2.5 (95% CI -3.6 to -1.4). Including brand as a fixed effect did not change the estimates materially; the effect was largest for Olive & Ember (-3.1) and smallest for The Copper Spoon (-1.4), although the study was not designed to detect differences between brands. The intra-cluster correlation for the primary outcome was 0.46.
+
+### 3.6 Implementation and fidelity
+
+Intervention sites removed between 17 and 23 menu items (mean 19.0, a reduction of 30 percent of the mean baseline menu of 63 items). All 12 sites kept at least four vegetarian main courses. The twice-daily batch prep was followed on 91 percent of audited services (the head chefs' own logs; the regional operations managers audited 6 services per site in unannounced visits and found 88 percent). Attendance at the weekly waste meeting was 10.4 of 12 weeks on average; two sites held fewer than eight meetings. Sites that held at least ten meetings (n = 8) had larger reductions in waste than those that held fewer (-2.9 versus -2.0 kg per 100 covers), but this comparison was not planned and the groups were not formed at random.
+
+The ten control sites that did not alter their menus also made no changes to their prep routines. At the start of week 10, one regional director reported that two control chefs had asked to copy the batch prep list from a neighbouring site; the request was refused.
+
+### 3.7 Staff and guest feedback
+
+At the end of the study a short questionnaire was sent to the 142 kitchen staff in the intervention sites; 97 replied (68 percent). Of these, 71 percent agreed or strongly agreed that the shorter menu made service calmer, 18 percent were neutral and 11 percent disagreed. Sixty-two percent said they would like to keep the shorter menu, and 24 percent said the menu was now too small. The head chefs reported that the main difficulty was the removal of dishes with loyal customers, and in four sites a regular dish was returned to the menu as a weekend special after week 6. These dishes were counted as part of the intervention menu.
+
+No food-safety incidents were recorded in either group during the study period. One allergen-related complaint was received in a control site and none in an intervention site.
+
+### 3.8 Data completeness
+
+Waste weights were missing for 2.1 percent of services in the intervention group and 3.4 percent in the control group, mostly because of tablet failures; missing services were not imputed and the weekly totals were scaled to the number of services recorded. Ticket times were complete. Payroll and inventory data were complete for all site-weeks except those of the flooded site. Survey responses were received for 11 percent of web bookings in both groups.

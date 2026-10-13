@@ -1,0 +1,125 @@
+I teach the Hollowmere Field School and I have to write the season summary for the university and our landowner. Below is the finds table from this year's test-pit programme, with a short description of how it was collected. Please write me a full written analysis: what the data shows by area and by depth, what looks like real archaeological pattern and what could be an artefact of how we collected it, a few clear findings I can state with confidence, and a list of next steps for next season's trenches, including how to fix our data collection.
+
+THE DATA
+
+Hollowmere Field School, summer season 2026 (15 June to 10 July, four weeks). Twenty-two students worked in four teams, each led by one instructor, on a ploughed field and the edge of a former orchard above the river at Hollowmere. The aim was to find out where a suspected farmstead of the later medieval period lay and which part of the field to open next year.
+
+We excavated 14 test pits, each 1 m by 1 m, in four areas laid out on a grid 30 m apart. Pits were dug by hand in arbitrary 10 cm spits (levels) from the surface down to sterile subsoil or clay, or until we ran out of time or the water table came up. All soil was dry-sieved. Each team worked one area, so the team and the area are the same thing in this data.
+
+Columns in the table below:
+
+- unit_id: pit number followed by the top and bottom depth of the spit in cm below the surface.
+- area: the area, A to D.
+- top_cm: depth of the top of the spit in cm (each spit is 10 cm thick).
+- team: T1 (Area A, instructor Okonkwo), T2 (Area B, Vasquez), T3 (Area C, Lindqvist), T4 (Area D, Brandt).
+- mesh_mm: the size of the sieve mesh used. Teams T1, T2 and T4 used 3 mm mesh. Team T3 used 6 mm mesh all season because their 3 mm screens broke on the first day and were not replaced.
+- soil: a simple description of the soil.
+- sherds: number of pottery sherds counted (all periods, including a few modern sherds).
+- flakes: number of struck stone flakes (flint and chert).
+- bone_g: weight of animal bone in grams, to the nearest tenth of a gram.
+- charcoal: Y if any charcoal was seen in the spit, N if not. Not quantified.
+- note: a field note where the student or instructor recorded something unusual. Blank means nothing recorded.
+
+PIT SUMMARY (from the site diary)
+
+| Area | Pits | Landscape position | Surface |
+|---|---|---|---|
+| A | A1 to A4 | Upper field, level | Ploughsoil, few stones |
+| B | B1 to B4 | Lower field, near old hedge line | Ploughsoil, dark, small pieces of tile on the surface |
+| C | C1 to C3 | Orchard edge, gentle slope | Grass over sandy soil, close to the river terrace |
+| D | D1 to D3 | Field boundary, stony | Thin topsoil, many flints |
+
+Spits were dug by students under supervision. Depths were measured with a tape from the datum at the north-west corner of each pit. No spit was combined with another. Sterile means no further finds in the spit and a change of soil to undisturbed clay or subsoil. The note about the water table in C1 refers to a 20-litre bucket being bailed every 15 minutes in the lowest spit; we think a few small finds could have been missed there.
+
+FINDS TABLE (CSV)
+
+unit_id,area,top_cm,team,mesh_mm,soil,sherds,flakes,bone_g,charcoal,note
+A1-00-10,A,0,T1,3,silty clay,2,2,5.3,N,
+A1-10-20,A,10,T1,3,silty clay,1,1,2.9,N,
+A1-20-30,A,20,T1,3,silty clay,4,5,4.3,Y,
+A1-30-40,A,30,T1,3,silty clay,15,7,9.1,N,
+A1-40-50,A,40,T1,3,clay,13,6,14.7,N,
+A1-50-60,A,50,T1,3,clay,1,2,3.1,Y,
+A2-00-10,A,0,T1,3,silty clay,0,1,5.2,N,
+A2-10-20,A,10,T1,3,silty clay,8,3,0,N,
+A2-20-30,A,20,T1,3,silty clay,4,4,5.6,N,
+A2-30-40,A,30,T1,3,silty clay,10,9,6.7,Y,
+A2-40-50,A,40,T1,3,clay,13,2,13.5,N,
+A2-50-60,A,50,T1,3,clay,3,2,2.4,Y,
+A3-00-10,A,0,T1,3,silty clay,1,3,9.5,Y,
+A3-10-20,A,10,T1,3,silty clay,1,1,0,N,
+A3-20-30,A,20,T1,3,silty clay,5,5,2.4,N,
+A3-30-40,A,30,T1,3,silty clay,11,4,11.1,Y,
+A3-40-50,A,40,T1,3,clay,11,8,12.0,Y,large sherd cluster
+A3-50-60,A,50,T1,3,clay,3,5,2.2,Y,
+A4-00-10,A,0,T1,3,silty clay,4,0,6.1,N,
+A4-10-20,A,10,T1,3,silty clay,4,2,4.8,N,
+A4-20-30,A,20,T1,3,silty clay,0,1,5.4,N,
+A4-30-40,A,30,T1,3,silty clay,9,4,9.1,N,
+A4-40-50,A,40,T1,3,clay,7,8,9.7,N,
+A4-50-60,A,50,T1,3,clay,3,2,7.7,Y,
+B1-00-10,B,0,T2,3,dark loam,10,6,9.0,Y,
+B1-10-20,B,10,T2,3,dark loam,11,2,6.5,Y,
+B1-20-30,B,20,T2,3,dark loam,33,14,22.2,N,
+B1-30-40,B,30,T2,3,dark loam,35,14,19.2,N,
+B1-40-50,B,40,T2,3,clay,13,3,13.4,N,
+B1-50-60,B,50,T2,3,clay,13,5,8.3,Y,
+B2-00-10,B,0,T2,3,dark loam,13,8,13.4,Y,
+B2-10-20,B,10,T2,3,dark loam,13,2,9.3,Y,
+B2-20-30,B,20,T2,3,dark loam,36,14,26.5,N,burnt patch
+B2-30-40,B,30,T2,3,dark loam,36,14,20.8,Y,hearth fill
+B2-40-50,B,40,T2,3,clay,16,6,12.5,Y,
+B2-50-60,B,50,T2,3,clay,16,4,13.7,N,
+B3-00-10,B,0,T2,3,dark loam,13,6,10.7,Y,
+B3-10-20,B,10,T2,3,dark loam,9,6,13.3,Y,
+B3-20-30,B,20,T2,3,dark loam,36,15,24.5,Y,
+B3-30-40,B,30,T2,3,dark loam,35,12,20.8,N,
+B3-40-50,B,40,T2,3,clay,14,8,15.5,N,
+B3-50-60,B,50,T2,3,clay,18,2,8.0,Y,
+B4-00-10,B,0,T2,3,dark loam,11,4,9.7,Y,
+B4-10-20,B,10,T2,3,dark loam,13,7,8.0,Y,
+B4-20-30,B,20,T2,3,dark loam,32,14,19.8,Y,
+B4-30-40,B,30,T2,3,dark loam,37,13,19.8,Y,worked bone point found
+B4-40-50,B,40,T2,3,clay,14,4,10.5,Y,
+B4-50-60,B,50,T2,3,clay,7,6,2.4,Y,
+C1-00-10,C,0,T3,6,sandy loam,6,2,1.5,N,
+C1-10-20,C,10,T3,6,sandy loam,13,1,9.0,Y,
+C1-20-30,C,20,T3,6,sandy loam,4,3,2.9,N,
+C1-30-40,C,30,T3,6,sandy loam,2,2,2.5,N,
+C1-40-50,C,40,T3,6,subsoil,15,5,15.9,N,
+C2-00-10,C,0,T3,6,sandy loam,3,0,10.3,Y,
+C2-10-20,C,10,T3,6,sandy loam,6,1,2.1,Y,
+C2-20-30,C,20,T3,6,sandy loam,6,2,6.0,Y,
+C2-30-40,C,30,T3,6,sandy loam,8,0,3.8,Y,
+C2-40-50,C,40,T3,6,subsoil,13,6,13.0,Y,
+C3-00-10,C,0,T3,6,sandy loam,7,2,0,Y,
+C3-10-20,C,10,T3,6,sandy loam,5,2,7.6,Y,
+C3-20-30,C,20,T3,6,sandy loam,5,0,6.4,Y,
+C3-30-40,C,30,T3,6,sandy loam,4,3,9.7,Y,
+C3-40-50,C,40,T3,6,subsoil,16,5,15.8,N,
+C3-50-60,C,50,T3,6,subsoil,14,7,15.6,N,
+D1-00-10,D,0,T4,3,gravelly sand,0,0,0.9,N,
+D1-10-20,D,10,T4,3,gravelly sand,5,1,1.9,Y,
+D1-20-30,D,20,T4,3,gravelly sand,4,1,6.1,Y,
+D1-30-40,D,30,T4,3,gravelly sand,5,1,0,Y,
+D1-40-50,D,40,T4,3,subsoil,0,1,0,Y,modern bottle glass in fill
+D2-00-10,D,0,T4,3,gravelly sand,1,0,0,Y,
+D2-10-20,D,10,T4,3,gravelly sand,5,2,4.1,Y,root disturbance
+D2-20-30,D,20,T4,3,gravelly sand,7,4,3.0,N,
+D2-30-40,D,30,T4,3,gravelly sand,2,1,6.4,N,
+D2-40-50,D,40,T4,3,subsoil,5,0,3.7,Y,
+D3-00-10,D,0,T4,3,gravelly sand,3,2,1.3,Y,
+D3-10-20,D,10,T4,3,gravelly sand,7,0,6.4,Y,
+D3-20-30,D,20,T4,3,gravelly sand,7,2,1.9,N,
+D3-30-40,D,30,T4,3,gravelly sand,3,0,2.8,Y,
+D3-40-50,D,40,T4,3,subsoil,0,0,4.4,N,
+
+FIELD NOTES FROM THE INSTRUCTORS
+
+Okonkwo (Area A): Pit A3 gave the best group of pottery, a cluster in the 40 to 50 cm spit that included one rim from a cooking pot. The other three pits in A were thin and the cluster seems local. Soil was clean silty clay below 40 cm.
+
+Vasquez (Area B): Pits B1 to B4 gave by far the richest material. A burnt patch at the edge of B2 in the 20 to 30 cm spit grew into an ash-rich fill in the next spit, which I read as the edge of a hearth. A worked bone point came from B4 in the 30 to 40 cm spit. The surface tile fragments in this area were not collected as finds.
+
+Lindqvist (Area C): With the 6 mm mesh we obviously lost small items, and the students were demoralised by the low flake counts. The soil is sandy and drains fast, but the water came up in C1 at the end. The deepest layers had some pottery in all three pits.
+
+Brandt (Area D): The area is mostly stony and shallow, with the topsoil sitting on gravel at about 30 cm in two of the pits. A fragment of modern bottle glass in D1 at 40 to 50 cm suggests disturbance from a later pit or a drain.

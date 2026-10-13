@@ -1,0 +1,32 @@
+Here are five tickets from our support inbox at the bookshop. Please write an individual, complete reply to each of them in a warm but professional tone, with clear next steps, and tell me if any of them needs a decision from me before it can be answered.
+
+**Ticket 3101 - Wrong edition**
+Customer: Harriet Moyo
+Message: I ordered "A History of Salt" (hardback, second edition, 24.99) for my father's birthday. What arrived is the paperback first edition. The birthday is on Saturday and I would like the right book by then. I have kept the packaging.
+Internal note: Order 88213, shipped Monday with standard post. Warehouse shows two hardbacks left in stock. Express shipping (next working day) costs us 6.80.
+
+**Ticket 3107 - Pre-order delay**
+Customer: Lukas Brandvold
+Message: I pre-ordered "The Lantern Keeper" in July and was told it would arrive on 15 October. It is now 20 October and there is no email. Has it been cancelled? I already paid 17.50.
+Internal note: Publisher moved the date to 3 November. A delay email was sent on 9 October to the old address Lukas used before changing his account. The order is still active.
+
+**Ticket 3112 - Gift card not working**
+Customer: Ines Carvalho
+Message: I received a gift card for 30 pounds from my sister. The code, ending 4821, says "invalid" at checkout. I am so embarrassed, she bought it a month ago. Can you check?
+Internal note: Card ending 4821 was issued 21 September and activated, balance 30.00. It expires after 12 months. The customer may be typing the code in lower case; codes are case-sensitive.
+
+**Ticket 3120 - Damaged book and refund**
+Customer: Oswin Pettigrew
+Message: The cover of my copy of "Tide Tables for Beginners" was crushed in the post and two pages are torn. I want a full refund and I don't want a replacement because I bought it somewhere else in the meantime. I have photographs.
+Internal note: Order 88405, 14.00 for the book and 3.20 postage, delivered Thursday. Our policy gives a full refund of damaged items including postage within 30 days. Photographs have been received and show damage consistent with the report.
+
+**Ticket 3126 - Bulk order question**
+Customer: Rosalind Achterberg
+Message: I run a reading club with 14 members and we would like to order 14 copies of "The Tidewater Letters" (paperback, 9.99 each). Do you give a discount for this? We would also like them all delivered together to the library, and the invoice made out to the club, not to me personally.
+Internal note: Stock shows 9 copies on the shelf and the rest due from the publisher in about a week. We offer 10 percent off orders of 10 or more copies of one title. Invoices to a club or group need the group's name and an address; Rosalind has not given either yet.
+
+**Reply guidelines**
+- Sign off as "The Fernhill Books team". Never use the customer's full address in a reply.
+- Refunds are processed within three working days and returned to the original payment method.
+- We can upgrade shipping at our own cost up to 7.00 without approval; above that I (Dana) must agree.
+- Do not promise delivery dates that depend on the courier, only dispatch dates.

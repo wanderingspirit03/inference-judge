@@ -1,0 +1,117 @@
+Below are the numbers I pulled together for the Northmere Chess Federation board meeting. Can you write me a proper analysis of what they show, with the main findings, anything that looks odd or that I should check before the board sees it, and a list of concrete next steps the federation could take? I need it written so a board member who has not seen the spreadsheets can follow it.
+
+Background. The federation has 24 member clubs. "Members" are people with a paid federation licence on 1 September of that year. "Juniors" are under 18 on that date. "Avg rating" is the mean of the club's members' current ratings on the federation scale (beginners start at 1000, strong club players are around 1800). "Events hosted" are tournaments the club ran in the 2025-26 season with federation approval. "Arbiter exams" are members who passed the federation's arbiter exam during 2025-26. The federation also ran 12 events directly, and these are in the monthly table but not in the club table.
+
+Table 1. Clubs, membership and activity
+
+| Club | Members 2025 | Members 2026 | Change | Juniors 2026 | Women 2026 | Avg rating 2026 | Events hosted | Arbiter exams |
+|---|---|---|---|---|---|---|---|---|
+| Alderbank | 59 | 56 | -3 | 16 | 5 | 1654 | 0 | 1 |
+| Brannock Rooks | 92 | 81 | -11 | 14 | 7 | 1594 | 0 | 0 |
+| Corvale | 29 | 49 | +20 | 6 | 9 | 1494 | 5 | 3 |
+| Dunmere Knights | 92 | 81 | -11 | 23 | 7 | 1493 | 0 | 2 |
+| Eastholm | 35 | 37 | +2 | 5 | 3 | 1537 | 4 | 3 |
+| Fenwick Gambit | 41 | 36 | -5 | 10 | 4 | 1429 | 4 | 3 |
+| Garrow Pawns | 26 | 15 | -11 | 2 | 3 | 1598 | 2 | 1 |
+| Hollis Bridge | 92 | 105 | +13 | 21 | 25 | 1737 | 1 | 0 |
+| Ivelstone | 91 | 94 | +3 | 24 | 13 | 1609 | 2 | 2 |
+| Juniper Hill | 27 | 22 | -5 | 5 | 5 | 1457 | 3 | 1 |
+| Kestrel Quay | 23 | 20 | -3 | 5 | 4 | 1540 | 2 | 3 |
+| Lowmoor | 62 | 77 | +15 | 26 | 7 | 1427 | 2 | 1 |
+| Marrow Cross | 26 | 16 | -10 | 5 | 3 | 1728 | 3 | 1 |
+| Nethering | 67 | 69 | +2 | 26 | 10 | 1692 | 0 | 1 |
+| Oakridge | 25 | 28 | +3 | 5 | 6 | 1583 | 3 | 1 |
+| Pellam | 28 | 25 | -3 | 5 | 3 | 1450 | 3 | 2 |
+| Quarry Gate | 53 | 61 | +8 | 18 | 9 | 1498 | 1 | 0 |
+| Redwick | 40 | 35 | -5 | 10 | 2 | 1681 | 1 | 1 |
+| Saltmarsh | 54 | 40 | -14 | 9 | 6 | 1669 | 2 | 0 |
+| Thornby | 83 | 71 | -12 | 26 | 16 | 1728 | 4 | 1 |
+| Underhill | 68 | 77 | +9 | 11 | 15 | 1411 | 1 | 0 |
+| Valewick | 44 | 56 | +12 | 8 | 11 | 1432 | 0 | 2 |
+| Westerly | 37 | 54 | +17 | 20 | 10 | 1416 | 1 | 2 |
+| Yarrowfield | 66 | 65 | -1 | 12 | 9 | 1566 | 3 | 0 |
+| **Total** | **1260** | **1270** | **+10** | **312** | **192** | **1564 (weighted)** | **47** | **31** |
+
+Table 2. Federation calendar 2025-26, all approved events (club-run and federation-run)
+
+| Month | Events | Entries | Entries per event | Junior entries | Women entries | Prize fund (pounds) |
+|---|---|---|---|---|---|---|
+| Sep | 6 | 203 | 33.8 | 56 | 36 | 2700 |
+| Oct | 7 | 263 | 37.6 | 62 | 31 | 3150 |
+| Nov | 7 | 255 | 36.4 | 45 | 36 | 2450 |
+| Dec | 3 | 100 | 33.3 | 27 | 16 | 900 |
+| Jan | 7 | 204 | 29.1 | 60 | 33 | 2450 |
+| Feb | 7 | 155 | 22.1 | 42 | 16 | 2100 |
+| Mar | 4 | 118 | 29.5 | 28 | 20 | 1600 |
+| Apr | 6 | 207 | 34.5 | 57 | 31 | 2400 |
+| May | 6 | 132 | 22.0 | 32 | 19 | 2400 |
+| Jun | 6 | 202 | 33.7 | 60 | 37 | 2400 |
+| **Total** | **59** | **1839** | **31.2** | **469** | **275** | **22550** |
+
+Table 3. Money, from the treasurer's draft accounts (pounds)
+
+| Item | 2024-25 | 2025-26 |
+|---|---|---|
+| Licence fees | 25200 | 25400 |
+| Event approval and rating fees | 6100 | 7050 |
+| Sponsorship | 9000 | 6500 |
+| Grants (youth programme) | 8000 | 11000 |
+| Total income | 48300 | 49950 |
+| Prize funds paid | 21800 | 22550 |
+| Arbiter training and exams | 1900 | 3100 |
+| Junior coaching sessions | 7400 | 10200 |
+| Insurance and venue deposits | 4600 | 4900 |
+| Administration | 9300 | 9800 |
+| Total spending | 45000 | 50550 |
+| Surplus or deficit | +3300 | -600 |
+
+Table 4. Members by age band on 1 September 2026
+
+| Age band | Members | Share |
+|---|---|---|
+| Under 12 | 98 | 7.7% |
+| 12 to 17 | 214 | 16.9% |
+| 18 to 34 | 211 | 16.6% |
+| 35 to 54 | 342 | 26.9% |
+| 55 to 69 | 316 | 24.9% |
+| 70 and over | 89 | 7.0% |
+| **Total** | **1270** | **100%** |
+
+Table 5. Junior coaching sessions 2025-26 (run by the federation at the Northmere Library hall)
+
+| Term | Sessions | Average attendance | Total attendances | Cost (pounds) |
+|---|---|---|---|---|
+| Autumn | 12 | 24 | 288 | 3300 |
+| Spring | 14 | 21 | 294 | 3500 |
+| Summer | 11 | 19 | 209 | 3400 |
+| **Total** | **37** | **21.4** | **791** | **10200** |
+
+A total of 131 different children came to at least one session. Attendance dropped each term, and the coach, Marisol Teague, thinks this is because sessions moved from Saturday morning to Wednesday after school in the Spring.
+
+Table 6. Why members did not renew. Of the 1260 members in 2025, 214 did not renew; 224 new members joined during the year, which gives 1260 - 214 + 224 = 1270. The federation sent a short survey to all 214 and 87 replied.
+
+| Main reason given | Replies | Share of replies |
+|---|---|---|
+| Time or family commitments | 24 | 27.6% |
+| Moved away | 21 | 24.1% |
+| Travel to the venue too far or too hard | 11 | 12.6% |
+| Licence and club fees too expensive | 9 | 10.3% |
+| Not enough challenge, opponents too weak | 8 | 9.2% |
+| Did not like the club atmosphere | 6 | 6.9% |
+| Other | 8 | 9.2% |
+| **Total replies** | **87** | **100%** |
+
+Of the 87 who replied, 5 named Thornby, Saltmarsh or Garrow Pawns as their club and wrote that they had stopped because the club's regular evening moved or was cancelled, and these are counted under "Travel" or "Time". The federation did not record which club each of the 214 non-renewals belonged to, so the survey cannot be broken down by club.
+
+Table 7. Members by rating band, 2026, and average rating change over the 2025-26 season
+
+| Rating band | Members | Average change in rating |
+|---|---|---|
+| Under 1200 | 110 | +38 |
+| 1200 to 1399 | 215 | +17 |
+| 1400 to 1599 | 330 | +4 |
+| 1600 to 1799 | 372 | -3 |
+| 1800 and over | 243 | -6 |
+| **Total** | **1270** | |
+
+Notes from the secretary. Licence fees are 22 pounds per adult and 14 pounds per junior, which gives about 25,400 pounds for 2026 and matches the accounts, although I have not checked it line by line. The Table 2 totals are what I got when I added the months up myself, so please check them. Hollis Bridge ran only one event but has the highest rating and the most women members. Three clubs (Brannock Rooks, Dunmere Knights, Nethering) hosted no events at all, while Corvale hosted five after joining us only three years ago. Two big clubs, Brannock Rooks and Dunmere Knights, each lost 11 members, and Thornby lost 12. The rating bands in Table 7 are rough because ratings of players with fewer than ten rated games are provisional. February and May look weak in Table 2, and I do not know whether that is exam season, bad weather, or because some entries were never recorded. The youth programme grant comes from the Northmere Community Trust and ends in March 2027, and the sponsor who paid 9,000 pounds in 2024-25 has told me he will probably give less again next year. The board wants to decide in November whether to cut the prize fund by a quarter, spend more on junior coaching, or both.

@@ -1,0 +1,57 @@
+Please summarise this audit report section by section for me and the pharmacy committee, then set out a prioritised set of recommendations with an owner and a time frame for each. I have only skimmed it, so I'd like you to say which findings are the most serious and why.
+
+# Internal Audit Report: Medicines Management, Inpatient Pharmacy
+
+Hospital: St. Aldric's Hospital (620 beds). Auditor: Cordelia Fairweather-Nkosi, Clinical Governance. Audit period: 1 April to 30 June. Report date: 14 July. Report status: final, for committee.
+
+## 1. Scope and method
+
+The audit covered the main inpatient pharmacy, 14 ward medicine cupboards, the controlled drugs (CD) registers on 9 wards, the fridge temperature records, and the discharge medicines process. The auditor reviewed 120 randomly selected patient drug charts, observed 6 medicines rounds, counted CD stock on 9 wards, and interviewed 11 staff. All wards were given 5 working days' notice of the visit.
+
+## 2. Summary of findings
+
+Of the 31 standards tested, 22 were fully met, 6 were partially met and 3 were not met. Overall compliance was 71 percent for full compliance, up from 64 percent last year. No harm to patients was identified.
+
+## 3. Controlled drugs
+
+Nine ward registers were checked and the physical stock was counted against the register. On 8 wards the stock matched the register. On Ward 7B, the count of morphine sulphate 10 mg ampoules differed by 3: the register showed 18, the cupboard held 15. The ward manager reported a discrepancy to pharmacy two days after the count, not the same day as the policy requires. The three missing ampoules were later found recorded on a patient's chart but not in the register. The CD keys were handed over correctly on all wards, but on two wards, 4A and 7B, the key was in the possession of a nurse who was not on the authorised list. Two entries in the registers on Ward 3C were not countersigned.
+
+## 4. Storage and fridges
+
+Of the 14 cupboards inspected, 12 were locked and tidy. On Ward 5A, the cupboard was left unlocked while the nurse was in a bay, for about 4 minutes during the observed round. Fridge temperature records were reviewed for the 91 days of the audit period across 22 fridges. The expected range is 2 to 8 degrees C. In 19 fridge-days (about 1 percent of the 2,002 fridge-days), the maximum temperature was above 8 degrees, and in 11 of those, the log has no note of action. On 3 April, the fridge on Ward 6B reached 11.2 degrees for an estimated 6 hours after a door was left open; insulin and two vaccines were in it. They were not discarded and no advice was sought from pharmacy.
+
+## 5. Prescribing and administration
+
+In the 120 drug charts, 103 (86 percent) had a recorded allergy status. Of the 17 that did not, 6 belonged to patients admitted via the emergency department overnight. In 9 charts, there was an omitted dose without a reason code. In 4 charts, an antibiotic was prescribed for longer than the 7 days in the policy with no review date. Across 6 observed rounds, 41 administrations were seen; in 3, the nurse did not check the patient's wristband before giving the drug.
+
+## 6. Discharge medicines
+
+Pharmacy reconciled medicines for 74 percent of discharges in the quarter, against a target of 90 percent. The weakest areas were Friday afternoons and the surgical wards, where 58 percent of discharges were reconciled. The median time for a discharge prescription to be dispensed was 118 minutes, against a target of 90. The auditor found that 22 of the 120 charts belonged to patients discharged in the audit period; 7 of them left without a complete medicines list for their GP.
+
+## 7. Staffing
+
+The pharmacy ran at 11 percent vacancy among pharmacy technicians in the quarter, with 4 posts unfilled out of 36. Three of the six ward-based pharmacists were on leave or sick in June. Medicines reconciliation on the surgical wards relies on a single technician.
+
+## 7a. Incidents and reporting culture
+
+In the quarter, 187 medicines incidents were reported on the hospital's incident system, against 214 in the same quarter last year. The auditor notes that a fall in reports is not necessarily a good sign. The most common types were omitted doses (58), wrong time (31) and documentation errors (27). Eleven incidents were graded as causing minor harm, none as moderate or severe. Reports from nurses accounted for 81 percent, from pharmacists 12 percent and from doctors 2 percent. Staff interviews suggested that doctors rarely report because they do not receive feedback on earlier reports. The medication safety officer, Beauregard Tanaka-Weiss, produces a monthly bulletin, but only 4 of the 11 interviewed staff had seen one.
+
+## 7b. Antimicrobial stewardship
+
+Of the 120 charts, 38 included at least one antibiotic. In 31 of the 38 (82 percent), the indication was documented. The policy requires a review at 72 hours; this was recorded in 24 of the 38 (63 percent). The four charts with courses longer than 7 days and no review date are included in this group. The antimicrobial pharmacist visits each ward twice a week but reviewed only the charts flagged by wards.
+
+## 7c. Training
+
+Mandatory medicines management training was up to date for 88 percent of nurses and 69 percent of junior doctors. On Ward 7B, 3 of 22 nurses had not completed the CD training in the last 12 months, and the nurse involved in the discrepancy was one of them. Pharmacy technicians had a completion rate of 97 percent.
+
+## 8. Actions already taken
+
+The Ward 7B discrepancy has been investigated and closed. The authorised key-holder lists have been updated on all wards. Fridge alarm thresholds on the 22 fridges have been set to alert after 15 minutes out of range.
+
+## 9. Recommendations of the auditor
+
+1. Re-audit CDs on wards 4A, 7B and 3C within three months.
+2. Introduce a daily fridge check sign-off, with a written action for any excursion.
+3. Extend the pharmacist-led reconciliation to Friday afternoons.
+4. Add a prompt in the electronic chart for allergy status and for antibiotic review at day 5.
+5. Repeat the wristband observation with 30 administrations.

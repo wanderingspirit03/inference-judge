@@ -1,0 +1,198 @@
+Can you do a proper code review of this module and then write a full set of unit tests for it? I inherited it from the person who ran our grow rooms before me and I want to know what is fragile before the autumn flush. Please explain each problem you find, show the fix, and make the tests cover the edge cases too.
+
+```python
+"""Grow room climate controller for the Hollin Beck mushroom farm.
+
+Reads sensor samples for a room, decides whether to run the humidifier,
+the exhaust fan and the heater, and keeps a short history so that a single
+bad reading does not flip a relay.
+"""
+
+import json
+import time
+from collections import deque
+from dataclasses import dataclass, field
+
+TARGETS = {
+    "oyster": {"temp": (14.0, 18.0), "humidity": (85.0, 95.0), "co2": 800},
+    "shiitake": {"temp": (12.0, 16.0), "humidity": (80.0, 90.0), "co2": 1000},
+    "lionsmane": {"temp": (16.0, 20.0), "humidity": (85.0, 95.0), "co2": 700},
+}
+
+HISTORY_LEN = 6
+MIN_SWITCH_SECONDS = 120
+
+
+@dataclass
+class Sample:
+    room: str
+    temp: float
+    humidity: float
+    co2: int
+    taken_at: float = field(default_factory=time.time)
+
+
+@dataclass
+class RelayState:
+    humidifier: bool = False
+    fan: bool = False
+    heater: bool = False
+    last_change: float = 0.0
+
+
+class RoomController:
+    def __init__(self, room, species, clock=time.time):
+        if species not in TARGETS:
+            raise ValueError("unknown species: " + species)
+        self.room = room
+        self.species = species
+        self.clock = clock
+        self.history = deque(maxlen=HISTORY_LEN)
+        self.relays = RelayState()
+
+    def add_sample(self, sample):
+        if sample.room != self.room:
+            raise ValueError("sample is for another room")
+        if sample.humidity > 100 or sample.humidity < 0:
+            return False
+        if sample.temp < -10 or sample.temp > 50:
+            return False
+        self.history.append(sample)
+        return True
+
+    def average(self, attr):
+        values = [getattr(s, attr) for s in self.history]
+        return sum(values) / len(values)
+
+    def decide(self):
+        target = TARGETS[self.species]
+        temp = self.average("temp")
+        humidity = self.average("humidity")
+        co2 = self.average("co2")
+        low_t, high_t = target["temp"]
+        low_h, high_h = target["humidity"]
+
+        want = {
+            "humidifier": self.relays.humidifier,
+            "fan": self.relays.fan,
+            "heater": self.relays.heater,
+        }
+
+        if humidity < low_h:
+            want["humidifier"] = True
+        elif humidity > high_h:
+            want["humidifier"] = False
+
+        if co2 > target["co2"] or temp > high_t:
+            want["fan"] = True
+        elif co2 < target["co2"] * 0.8 and temp < high_t:
+            want["fan"] = False
+
+        if temp < low_t:
+            want["heater"] = True
+        elif temp > low_t + 1:
+            want["heater"] = False
+
+        return want
+
+    def apply(self):
+        now = self.clock()
+        want = self.decide()
+        changed = []
+        if now - self.relays.last_change < MIN_SWITCH_SECONDS:
+            return changed
+        for name, value in want.items():
+            if getattr(self.relays, name) != value:
+                setattr(self.relays, name, value)
+                changed.append(name)
+        if changed:
+            self.relays.last_change = now
+        return changed
+
+    def status(self):
+        return {
+            "room": self.room,
+            "species": self.species,
+            "samples": len(self.history),
+            "relays": self.relays.__dict__,
+        }
+
+
+def load_rooms(path):
+    with open(path) as handle:
+        config = json.load(handle)
+    controllers = {}
+    for entry in config["rooms"]:
+        controllers[entry["name"]] = RoomController(entry["name"], entry["species"])
+    return controllers
+
+
+def run_once(controllers, samples):
+    report = {}
+    for sample in samples:
+        controller = controllers.get(sample.room)
+        if controller is None:
+            continue
+        controller.add_sample(sample)
+    for name, controller in controllers.items():
+        report[name] = controller.apply()
+    return report
+
+
+def worst_room(controllers):
+    worst = None
+    worst_gap = -1.0
+    for name, controller in controllers.items():
+        target = TARGETS[controller.species]["humidity"]
+        gap = abs(controller.average("humidity") - sum(target) / 2)
+        if gap > worst_gap:
+            worst, worst_gap = name, gap
+    return worst
+
+
+def save_state(controllers, path):
+    state = {}
+    for name, controller in controllers.items():
+        state[name] = {
+            "humidifier": controller.relays.humidifier,
+            "fan": controller.relays.fan,
+            "heater": controller.relays.heater,
+            "last_change": controller.relays.last_change,
+        }
+    with open(path, "w") as handle:
+        json.dump(state, handle)
+
+
+def restore_state(controllers, path):
+    try:
+        with open(path) as handle:
+            state = json.load(handle)
+    except FileNotFoundError:
+        return 0
+    restored = 0
+    for name, values in state.items():
+        controller = controllers.get(name)
+        if controller is None:
+            continue
+        controller.relays = RelayState(**values)
+        restored += 1
+    return restored
+
+
+def alarms(controllers, max_age=300):
+    now = time.time()
+    found = []
+    for name, controller in controllers.items():
+        if not controller.history:
+            found.append((name, "no samples"))
+            continue
+        newest = controller.history[-1]
+        if now - newest.taken_at > max_age:
+            found.append((name, "stale sensor"))
+        limit = TARGETS[controller.species]["co2"] * 2
+        if newest.co2 > limit:
+            found.append((name, "co2 very high"))
+    return found
+```
+
+Some background that might matter. We run about nine rooms, two of them lion's mane, and the heater is a bank of resistive coils that we do not want to cycle more than a few times an hour. The config file is a small JSON list of room names and species. Samples arrive every thirty seconds from the sensor gateway, and sometimes the gateway sends the same batch twice after a reconnect. Last October a room sat at 99 percent humidity for most of a night and we lost a full block of oysters to mould, and nobody could tell from the logs why the humidifier stayed on.

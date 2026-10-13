@@ -1,0 +1,26 @@
+Below is a month of show data from our planetarium in CSV form. Please write me a proper written analysis for the management team with the main findings, what looks surprising, possible explanations and next steps. I would like to know which shows to keep, change or drop, and what we should measure next.
+
+Description of the data: Cassiopeia Planetarium has one dome with 120 seats. The file covers September, 108 shows in total, summarised here by show title and time slot. Columns: show title, audience (Family, Adult, School), number of showings, average tickets sold per showing, average ticket price in euros (after discounts), average rating from the exit survey (1 to 5, response rate about 22%), and the share of seats sold for the 10:00 weekday slot, which is the slot we are most worried about.
+
+```csv
+show,audience,showings,avg_tickets,avg_price,avg_rating,weekday_10am_fill_pct
+Journey to the Red Planet,Family,24,88,9.40,4.6,31
+Little Bear and the Stars,Family,18,74,7.80,4.8,28
+Black Holes Unveiled,Adult,16,61,12.50,4.4,0
+The Sky Tonight (live talk),Adult,20,47,11.00,4.7,0
+Ancient Skies,Adult,8,38,12.50,3.9,0
+Planets for Schools,School,14,96,5.50,4.5,80
+Comet Chasers,Family,8,69,9.40,4.1,22
+```
+
+Notes from the box office:
+
+- Total showings were 108, and the dome was open on 27 days. Total revenue for the month was about 71,300 euros, including the gift shop but not the cafe.
+- Planets for Schools is only offered on weekday mornings and is booked in advance by teachers. It was fully booked on eleven of the fourteen days, and the other three were lost to a school trip cancellation, a storm warning and a technical fault.
+- The planetarium had a projector fault on 17 September that cancelled two showings of Journey to the Red Planet. The audience was offered a refund or a ticket for another day; 62 of 150 chose a refund.
+- Black Holes Unveiled was advertised on a local radio station from 8 to 22 September. The advert cost 1,600 euros. Average tickets sold per showing before the campaign were 52, and after the campaign 68, though the second half of the month also included two public holidays in the neighbouring region.
+- Ancient Skies was newly added in September and has the lowest rating. Several survey comments say the narration is too quiet and the music too loud; two say the show is "too long" (it runs 52 minutes against 40 for the other shows).
+- The Sky Tonight is presented live by our astronomer, Dr. Ilse Brandvold, and cannot run when she is on leave. Two of its planned showings were swapped for a recorded show during her week of leave and were not counted above.
+- We have not recorded how many visitors bought tickets online and how many bought at the door, nor the share of visitors that are first-time visitors, although a new booking system next month will capture both.
+
+Please keep the analysis honest about what such a small data set can and cannot show.

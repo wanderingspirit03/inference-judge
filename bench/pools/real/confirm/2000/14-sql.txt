@@ -1,0 +1,137 @@
+Our theatre's ticketing database was designed in a hurry and the box office says that reports have become slow since the autumn season started. Please review the design, point out missing or useless indexes, and rewrite the five queries at the bottom with explanations of what was wrong with each version.
+
+```sql
+-- Schema for the Millbrook Repertory Theatre ticketing system (PostgreSQL)
+
+CREATE TABLE customers (
+    customer_id   SERIAL PRIMARY KEY,
+    full_name     TEXT NOT NULL,
+    email         TEXT,
+    phone         TEXT,
+    postcode      TEXT,
+    member_since  DATE,
+    member_level  TEXT,           -- 'none', 'friend', 'patron'
+    notes         TEXT
+);
+
+CREATE TABLE productions (
+    production_id SERIAL PRIMARY KEY,
+    title         TEXT NOT NULL,
+    director      TEXT,
+    season        TEXT,           -- e.g. 'Autumn 2026'
+    base_price    NUMERIC(8,2)
+);
+
+CREATE TABLE performances (
+    performance_id SERIAL PRIMARY KEY,
+    production_id  INTEGER REFERENCES productions(production_id),
+    starts_at      TIMESTAMP NOT NULL,
+    venue          TEXT NOT NULL, -- 'main stage' or 'studio'
+    capacity       INTEGER NOT NULL
+);
+
+CREATE TABLE seats (
+    seat_id   SERIAL PRIMARY KEY,
+    venue     TEXT NOT NULL,
+    row_label TEXT NOT NULL,
+    seat_no   INTEGER NOT NULL,
+    zone      TEXT NOT NULL       -- 'stalls', 'circle', 'gallery'
+);
+
+CREATE TABLE orders (
+    order_id     SERIAL PRIMARY KEY,
+    customer_id  INTEGER REFERENCES customers(customer_id),
+    placed_at    TIMESTAMP NOT NULL DEFAULT now(),
+    channel      TEXT NOT NULL,   -- 'web', 'phone', 'counter'
+    status       TEXT NOT NULL,   -- 'paid', 'refunded', 'pending'
+    total        NUMERIC(8,2)
+);
+
+CREATE TABLE tickets (
+    ticket_id      SERIAL PRIMARY KEY,
+    order_id       INTEGER REFERENCES orders(order_id),
+    performance_id INTEGER REFERENCES performances(performance_id),
+    seat_id        INTEGER REFERENCES seats(seat_id),
+    price_paid     NUMERIC(8,2) NOT NULL,
+    price_band     TEXT,          -- 'full', 'concession', 'under26'
+    scanned_at     TIMESTAMP
+);
+
+CREATE INDEX idx_tickets_order ON tickets(order_id);
+CREATE INDEX idx_customers_name ON customers(lower(full_name));
+CREATE INDEX idx_orders_status ON orders(status);
+CREATE INDEX idx_perf_venue ON performances(venue);
+CREATE INDEX idx_seats_zone ON seats(zone);
+```
+
+Some facts about the data: there are about 140,000 customers, 260,000 orders and 780,000 tickets, growing by roughly 20,000 tickets per month and many more in the first week after a season is announced. The main stage has 640 seats and the studio 90. There are about 150 performances per season. Orders are mostly paid (95%); refunds are 3%. The box office has seen cases of two tickets for the same seat and performance, which should be impossible.
+
+**Query 1: sales per production for the current season**
+
+```sql
+SELECT p.title,
+       COUNT(t.ticket_id) AS tickets_sold,
+       SUM(t.price_paid)  AS revenue
+FROM productions p, performances pf, tickets t, orders o
+WHERE p.production_id = pf.production_id
+  AND pf.performance_id = t.performance_id
+  AND t.order_id = o.order_id
+  AND o.status <> 'refunded'
+  AND p.season = 'Autumn 2026'
+GROUP BY p.title
+ORDER BY revenue DESC;
+```
+
+**Query 2: customers who bought for the autumn season but never for last spring (for a mailing)**
+
+```sql
+SELECT c.customer_id, c.full_name, c.email
+FROM customers c
+WHERE c.customer_id IN (
+        SELECT o.customer_id FROM orders o, tickets t, performances pf, productions p
+        WHERE o.order_id = t.order_id AND t.performance_id = pf.performance_id
+          AND pf.production_id = p.production_id AND p.season = 'Autumn 2026')
+  AND c.customer_id NOT IN (
+        SELECT o.customer_id FROM orders o, tickets t, performances pf, productions p
+        WHERE o.order_id = t.order_id AND t.performance_id = pf.performance_id
+          AND pf.production_id = p.production_id AND p.season = 'Spring 2026')
+  AND c.email LIKE '%@%';
+```
+
+**Query 3: occupancy per performance in the last 30 days**
+
+```sql
+SELECT pf.performance_id, p.title, pf.starts_at,
+       (SELECT COUNT(*) FROM tickets t WHERE t.performance_id = pf.performance_id) * 100.0 / pf.capacity AS occupancy_pct
+FROM performances pf
+JOIN productions p ON p.production_id = pf.production_id
+WHERE date(pf.starts_at) >= current_date - 30
+  AND date(pf.starts_at) < current_date
+ORDER BY occupancy_pct DESC;
+```
+
+**Query 4: seats still free for one performance (used by the web booking page on every page load)**
+
+```sql
+SELECT s.seat_id, s.row_label, s.seat_no, s.zone
+FROM seats s
+WHERE s.venue = (SELECT venue FROM performances WHERE performance_id = 4821)
+  AND s.seat_id NOT IN (SELECT seat_id FROM tickets WHERE performance_id = 4821)
+ORDER BY s.zone, s.row_label, s.seat_no;
+```
+
+**Query 5: monthly revenue by channel for the finance report**
+
+```sql
+SELECT to_char(o.placed_at, 'YYYY-MM') AS month,
+       o.channel,
+       SUM(o.total) AS revenue,
+       COUNT(*) AS orders
+FROM orders o
+WHERE o.status = 'paid'
+  AND o.placed_at::date >= '2026-01-01'
+GROUP BY to_char(o.placed_at, 'YYYY-MM'), o.channel
+ORDER BY month, o.channel;
+```
+
+The finance report is run once a day by the finance manager, and Query 4 runs on every load of the seat map, around 40 times a minute during an on-sale. Query 3 is on the box office dashboard, which refreshes every minute.

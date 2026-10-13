@@ -1,0 +1,47 @@
+Please write a detailed reply to this email thread on my behalf. I'm the service director and I need it to answer every open question, say clearly what we will and will not do, and be firm but polite. After the reply, add a list of internal actions with owners.
+
+---
+
+From: Sabine Hollander <s.hollander@example.org>
+To: Service Desk, Valtek Lifts
+Subject: Lift 2 out of service again, third time in six weeks
+Date: Mon, 12 Oct, 07:48
+
+Dear Sir or Madam,
+
+The second lift in our building at 14 Mill Court stopped between the third and fourth floor this morning at about 07:15. Two residents were inside for twenty minutes before the fire brigade arrived. This is the third time since 1 September. We have a contract with you for monthly maintenance and I want to know what you are doing about it. Several residents are elderly and cannot manage the stairs. If this is not solved, the owners' association will consider cancelling the contract and claiming damages.
+
+Sabine Hollander, chair of the owners' association
+
+---
+
+From: Dmitri Volkov <d.volkov@example.org>
+To: Anke Roth; Service Desk
+Subject: RE: Lift 2 out of service again, third time in six weeks
+Date: Mon, 12 Oct, 09:05
+
+Anke, internal note before we answer. I checked the logs. Visit on 2 September: door operator replaced. Visit on 24 September: door sensor cleaned and a fault in the leveling switch noted but not repaired because the part was not in stock. The part arrived on 5 October, but nobody booked the job. Today's fault code is the same leveling switch. So this one is on us. The part is now in the Hamburg depot, and I can have a technician at 14 Mill Court tomorrow morning, if you agree to an overtime rate.
+
+Dmitri
+
+---
+
+From: Anke Roth <a.roth@example.org>
+To: Dmitri Volkov; Service Desk
+Subject: RE: Lift 2 out of service again, third time in six weeks
+Date: Mon, 12 Oct, 10:30
+
+Agreed on tomorrow, put it through as an urgent corrective visit and don't charge them. Two other things. First, the contract only guarantees a response time of 24 hours for stoppages, and we have two persons trapped, which under our emergency procedure must be a two-hour response. Did anyone answer their call this morning? Second, she mentions damages. I'd like our director to answer, since that has legal consequences, and I'd rather not accept blame in writing before our insurer has looked at it. Also, the building's lift 1 is 28 years old and the controller is obsolete. We have recommended modernisation twice, in January and in June, and they have not replied. Let's remind them politely.
+
+Anke
+
+---
+
+From: Dmitri Volkov <d.volkov@example.org>
+To: Anke Roth; Service Desk
+Subject: RE: Lift 2 out of service again, third time in six weeks
+Date: Mon, 12 Oct, 11:10
+
+The call came in at 07:22 and the duty technician reached the building at 09:40, which is 2 hours 18 minutes, so we missed our own two-hour target by 18 minutes. The fire brigade was there before him. I have also found that the 24 September report lists the leveling switch as "monitor", not "repair", which was the technician's decision.
+
+Dmitri

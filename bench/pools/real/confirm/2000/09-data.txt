@@ -1,0 +1,35 @@
+Te paso los datos de las tres primeras semanas de febrero de la estación de esquí de Peña Blanca, que ha recopilado nuestro equipo de operaciones. Necesito un análisis escrito con los hallazgos principales, las posibles explicaciones de lo que se ve en los números, las limitaciones de los datos y los siguientes pasos que recomiendas para la dirección.
+
+**Descripción de los datos.** Cada fila es un día de apertura entre el 2 y el 22 de febrero de 2026 (el 1 de febrero estuvo cerrada la estación por viento). Las columnas son: nieve base en cm a las 8:00, nieve nueva en cm en las últimas 24 horas, temperatura media en la cota media en grados centígrados, remontes abiertos de un total de 14, forfaits de día vendidos, ocupación de los hoteles asociados en porcentaje, accidentes atendidos por el servicio de pistas, y quejas recibidas por colas de más de 15 minutos. Los forfaits se venden en taquilla y en la web; los datos de la web se cuentan el día de uso, no el de compra. El día 14 es San Valentín y el fin de semana del 14 al 15 coincide con el puente de la comunidad vecina.
+
+| Día | Fecha | Nieve base | Nieve nueva | Temp. | Remontes | Forfaits | Ocupación | Accidentes | Quejas |
+|---|---|---|---|---|---|---|---|---|---|
+| Lun | 2 feb | 112 | 0 | -4 | 13 | 1.180 | 41% | 6 | 2 |
+| Mar | 3 feb | 110 | 0 | -3 | 13 | 1.040 | 38% | 5 | 1 |
+| Mié | 4 feb | 118 | 12 | -6 | 14 | 1.310 | 44% | 7 | 2 |
+| Jue | 5 feb | 121 | 4 | -7 | 14 | 1.480 | 52% | 8 | 3 |
+| Vie | 6 feb | 119 | 0 | -5 | 14 | 2.150 | 71% | 11 | 9 |
+| Sáb | 7 feb | 117 | 0 | -3 | 14 | 3.620 | 93% | 19 | 24 |
+| Dom | 8 feb | 114 | 0 | -2 | 14 | 3.040 | 78% | 15 | 13 |
+| Lun | 9 feb | 112 | 0 | 0 | 12 | 1.090 | 40% | 4 | 1 |
+| Mar | 10 feb | 108 | 0 | 1 | 12 | 960 | 35% | 4 | 0 |
+| Mié | 11 feb | 103 | 0 | 2 | 11 | 920 | 33% | 3 | 1 |
+| Jue | 12 feb | 131 | 34 | -5 | 9 | 1.050 | 49% | 5 | 2 |
+| Vie | 13 feb | 142 | 18 | -8 | 14 | 2.480 | 79% | 12 | 8 |
+| Sáb | 14 feb | 140 | 2 | -7 | 14 | 4.210 | 98% | 22 | 41 |
+| Dom | 15 feb | 138 | 0 | -6 | 14 | 3.870 | 91% | 20 | 27 |
+| Lun | 16 feb | 136 | 0 | -5 | 14 | 1.640 | 55% | 7 | 3 |
+| Mar | 17 feb | 135 | 0 | -4 | 14 | 1.250 | 46% | 5 | 2 |
+| Mié | 18 feb | 133 | 0 | -2 | 14 | 1.190 | 43% | 5 | 1 |
+| Jue | 19 feb | 129 | 0 | 1 | 13 | 1.120 | 42% | 6 | 2 |
+| Vie | 20 feb | 127 | 3 | -3 | 14 | 2.050 | 68% | 10 | 7 |
+| Sáb | 21 feb | 126 | 0 | -4 | 14 | 3.410 | 90% | 18 | 22 |
+| Dom | 22 feb | 125 | 0 | -3 | 14 | 2.930 | 76% | 14 | 12 |
+
+**Totales y comparación.** En los 21 días se vendieron 41.990 forfaits de día, con un promedio de 2.000 al día. Entre semana (lunes a jueves, 12 días) el promedio fue de 1.186; en viernes, sábado y domingo (9 días) fue de 3.084. El año pasado, en las mismas tres semanas, la estación vendió 36.700 forfaits con 11 días de más de 13 remontes abiertos. Esta temporada hubo 17 días con 13 o más remontes abiertos.
+
+**Otros datos del servicio de pistas.** De los 206 accidentes atendidos, 23 requirieron traslado al hospital. El 61% de los accidentes ocurrió entre las 12:00 y las 15:00. En los dos días con nieve nueva superior a 15 cm la proporción de accidentes por cada mil forfaits fue de 4,8 y 4,8, frente a una media de 4,9 para el resto del periodo. La estación tiene tres pistas verdes cerradas por obras de mejora de la nieve artificial desde el 9 de febrero.
+
+**Notas de operaciones.** El 9 y el 10 de febrero se cerraron dos remontes del sector alto por mantenimiento programado, el 11 se cerró un tercero por una avería y, el día 12, cinco remontes se cerraron por viento y nieve, a pesar de lo cual la nevada de ese día fue la mayor del periodo. El 14 de febrero la taquilla abrió con una sola ventanilla durante la primera hora porque una persona del turno no se presentó. La web de venta de forfaits estuvo caída de 9:10 a 9:50 el sábado 7 de febrero.
+
+**Precios (para referencia).** Forfait de día de adulto: 54 euros en taquilla, 48 euros en la web. Forfait de niño: 31 euros en taquilla, 28 euros en la web. Forfait de tarde: 36 euros. Se estima que el 38% de los forfaits corresponde a ventas web.

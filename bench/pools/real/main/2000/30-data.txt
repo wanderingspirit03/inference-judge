@@ -1,0 +1,30 @@
+I help run the Eastbrook Community Food Bank and I need to give our trustees a written analysis of the last six weeks of data before next Tuesday's meeting. Please go through the table, tell me what the main findings are for each site and overall, point out anything odd or worth checking in the numbers, and finish with concrete next steps and a few questions we should be asking.
+
+Background: we run four weekly distribution points. Each week the site leads send me the number of households and people served, how much food went out and how much came in (from the regional wholesaler, supermarket surplus and local donations), and the volunteer hours. "kg_given" is food handed out at the session, and "kg_received" is food delivered to that site during the week, so they will not match exactly because stock is carried over. Children means anyone under 16. Canalside Centre extended its opening hours from 3 to 5 hours on the week of 31 August after a request from the housing association next door. Hillcrest School only opens during the school holidays and for the first weeks of term, and it ran with a smaller team of volunteers throughout. Elm Street Hall had a one-day closure on 12 August because of a burst pipe, and its session was moved to the Thursday that week. School term started on 1 September, and our summer holiday children's lunch parcel scheme ended on 28 August.
+
+| week_start | site | households | individuals | adults | children | kg_given | kg_received | volunteer_hours |
+|---|---|---|---|---|---|---|---|---|
+| 2026-08-03 | Elm Street Hall | 119 | 371 | 240 | 131 | 1534 | 1537 | 37 |
+| 2026-08-03 | St Brigid's Church | 80 | 224 | 150 | 74 | 1110 | 974 | 24 |
+| 2026-08-03 | Canalside Centre | 140 | 490 | 326 | 164 | 1627 | 1862 | 47 |
+| 2026-08-03 | Hillcrest School | 61 | 160 | 114 | 46 | 704 | 709 | 17 |
+| 2026-08-10 | Elm Street Hall | 118 | 356 | 256 | 100 | 1521 | 1493 | 39 |
+| 2026-08-10 | St Brigid's Church | 88 | 249 | 170 | 79 | 1186 | 1170 | 26 |
+| 2026-08-10 | Canalside Centre | 167 | 595 | 389 | 206 | 2275 | 2148 | 49 |
+| 2026-08-10 | Hillcrest School | 60 | 149 | 99 | 50 | 762 | 841 | 18 |
+| 2026-08-17 | Elm Street Hall | 137 | 439 | 317 | 122 | 1661 | 1865 | 42 |
+| 2026-08-17 | St Brigid's Church | 97 | 268 | 192 | 76 | 1298 | 1406 | 28 |
+| 2026-08-17 | Canalside Centre | 149 | 498 | 321 | 177 | 2052 | 1816 | 44 |
+| 2026-08-17 | Hillcrest School | 60 | 149 | 98 | 51 | 721 | 733 | 18 |
+| 2026-08-24 | Elm Street Hall | 126 | 399 | 284 | 115 | 1692 | 1497 | 38 |
+| 2026-08-24 | St Brigid's Church | 89 | 243 | 157 | 86 | 1238 | 1165 | 29 |
+| 2026-08-24 | Canalside Centre | 158 | 531 | 347 | 184 | 2121 | 1866 | 54 |
+| 2026-08-24 | Hillcrest School | 63 | 159 | 105 | 54 | 786 | 737 | 18 |
+| 2026-08-31 | Elm Street Hall | 127 | 396 | 278 | 118 | 1689 | 1623 | 39 |
+| 2026-08-31 | St Brigid's Church | 104 | 290 | 196 | 94 | 1466 | 1326 | 30 |
+| 2026-08-31 | Canalside Centre | 182 | 638 | 447 | 191 | 2196 | 2353 | 61 |
+| 2026-08-31 | Hillcrest School | 65 | 176 | 115 | 61 | 865 | 844 | 18 |
+| 2026-09-07 | Elm Street Hall | 130 | 421 | 296 | 125 | 1769 | 1640 | 43 |
+| 2026-09-07 | St Brigid's Church | 101 | 276 | 195 | 81 | 1379 | 1200 | 29 |
+| 2026-09-07 | Canalside Centre | 177 | 623 | 418 | 205 | 2184 | 2457 | 52 |
+| 2026-09-07 | Hillcrest School | 65 | 165 | 113 | 52 | 759 | 685 | 19 |

@@ -1,0 +1,22 @@
+I have been asked to referee this write-up for a transport research workshop. Please draft a detailed peer review: summary of the claims, strengths, major concerns about the method and the statistics, minor points, and a recommendation with the changes you would require.
+
+**Does a fixed departure interval cut delays on short ferry routes? Evidence from the Skerrin Sound crossing**
+
+**Abstract.** We study whether replacing a variable departure schedule with a fixed 30 minute interval reduced late arrivals on a 12 km crossing operated by one company with two vessels. Using 14 months of operating data, we find that the share of arrivals more than five minutes late fell from 18.6 percent to 11.2 percent, and conclude that fixed intervals reduce delay.
+
+**Method.** Until 31 March the company ran a timetable of 22 daily sailings at uneven times, tuned to the school day and the lorry bookings. On 1 April it switched to a fixed departure every 30 minutes from 06:00 to 21:30, which gives 32 sailings. We compare the seven months before the change (1 September to 31 March, n = 4,380 sailings) with the seven months after (1 April to 31 October, n = 6,720 sailings). A sailing is late if it arrives more than five minutes after the published time. Data were taken from the vessels' logs. Sailings cancelled for weather were removed, which affected 61 sailings in the first period and 12 in the second. We tested the difference in the share of late arrivals with a two-proportion z-test and report a 95 percent confidence interval.
+
+**Results.** In the first period 814 of 4,380 sailings were late (18.6 percent). In the second period 753 of 6,720 were late (11.2 percent). The difference is 7.4 percentage points (95 percent CI 6.1 to 8.7, p < 0.001). Mean delay among late sailings fell from 13.4 to 9.8 minutes. Table 1 shows the pattern by hour of day: the largest improvements are in the morning peak (07:00 to 09:00), where late arrivals fell from 27 percent to 12 percent. In the evening the shares were 15 percent before and 13 percent after.
+
+**Table 1. Late arrivals (more than 5 minutes) by period of day**
+
+| Period | Before (%) | After (%) |
+|---|---|---|
+| 06:00-09:00 | 27 | 12 |
+| 09:00-15:00 | 14 | 10 |
+| 15:00-19:00 | 17 | 11 |
+| 19:00-22:00 | 15 | 13 |
+
+**Discussion.** The results support the view that predictable intervals let crews load, refuel and turn the vessels around in a steady rhythm, and reduce the need to hold sailings for late lorries. The company also reports that its mean number of passengers per sailing fell from 61 to 44 after the change, which we take as a sign of spreading demand. We did not model weather, but we note that the winters in the first period were rougher than the summer in the second. We recommend that other operators of short crossings consider a fixed interval.
+
+**Limitations.** This is a single route. The change was not randomised. The second period includes the summer, with longer daylight and lighter wind, while the first covers autumn and winter. A new harbour pilot joined the crew in May.

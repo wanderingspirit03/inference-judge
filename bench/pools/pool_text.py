@@ -8,7 +8,6 @@ Interface:
   Writer.document(min_chars)      a document (article, minutes, email thread,
                                   FAQ, story or report) of at least min_chars
   Writer.paragraph()              one paragraph of prose
-  Writer.code(min_chars)          source code (Python, JavaScript, SQL, C, shell)
   Writer.python_module(n_funcs)   (source, [function names]) for code completion
   Writer.record()                 (text, facts dict) for JSON extraction
   Writer.name()                   a person's name
@@ -607,93 +606,6 @@ class Writer:
             name, src = self._py_func()
             if name not in names:
                 return "\n\n".join(parts) + "\n\n" + "\n".join(src.split("\n")[:2]) + "\n"
-
-    def _py_class(self) -> str:
-        cls = self._ident("cls") + self.pick(["Store", "Planner", "Tracker", "Registry", "Queue", "Index"])
-        a = self._ident()
-        k = self.rng.randrange(3, 30)
-        return (f"class {cls}:\n    \"\"\"Keeps a bounded list of {a} records.\"\"\"\n\n"
-                f"    def __init__(self, capacity={k}):\n        self.capacity = capacity\n        self._rows = []\n\n"
-                f"    def add(self, row):\n        self._rows.append(row)\n        if len(self._rows) > self.capacity:\n"
-                f"            self._rows.pop(0)\n        return len(self._rows)\n\n"
-                f"    def find(self, **where):\n        return [r for r in self._rows\n"
-                f"                if all(r.get(k) == v for k, v in where.items())]\n\n"
-                f"    def __len__(self):\n        return len(self._rows)\n")
-
-    def _js(self) -> str:
-        a, b = self._ident(), self._ident()
-        n = self.rng.randrange(2, 20)
-        return self.pick([
-            f"export function debounce_{a}(fn, ms = {n * 10}) {{\n  let timer = null;\n  return (...args) => {{\n"
-            f"    clearTimeout(timer);\n    timer = setTimeout(() => fn(...args), ms);\n  }};\n}}\n",
-            f"export async function fetch_{a}(url, retries = {n % 5 + 1}) {{\n  for (let i = 0; i < retries; i++) {{\n"
-            f"    const res = await fetch(url);\n    if (res.ok) return res.json();\n"
-            f"    await new Promise((r) => setTimeout(r, 100 * 2 ** i));\n  }}\n  throw new Error(`failed: ${{url}}`);\n}}\n",
-            f"export const group_{a} = (rows, key) =>\n  rows.reduce((acc, row) => {{\n    (acc[row[key]] ||= []).push(row);\n"
-            f"    return acc;\n  }}, {{}});\n",
-            f"export function clamp_{a}(x, lo = 0, hi = {n * 5}) {{\n  return Math.min(hi, Math.max(lo, x));\n}}\n",
-            f"class {self._ident('cls')}Cache {{\n  constructor(limit = {n}) {{\n    this.limit = limit;\n    this.map = new Map();\n  }}\n"
-            f"  get(key) {{\n    if (!this.map.has(key)) return undefined;\n    const v = this.map.get(key);\n"
-            f"    this.map.delete(key);\n    this.map.set(key, v);\n    return v;\n  }}\n"
-            f"  set(key, v) {{\n    this.map.delete(key);\n    this.map.set(key, v);\n"
-            f"    if (this.map.size > this.limit) this.map.delete(this.map.keys().next().value);\n  }}\n}}\n",
-        ])
-
-    def _sql(self) -> str:
-        t, u = self._ident(), self._ident()
-        n = self.rng.randrange(2, 90)
-        return self.pick([
-            f"SELECT {t}_id, COUNT(*) AS n, AVG(cost) AS avg_cost\nFROM {t}_log\nWHERE created_at >= DATE '2024-0{n % 9 + 1}-01'\n"
-            f"GROUP BY {t}_id\nHAVING COUNT(*) > {n}\nORDER BY n DESC\nLIMIT {n};\n",
-            f"CREATE TABLE {t} (\n  id INTEGER PRIMARY KEY,\n  {u}_id INTEGER NOT NULL REFERENCES {u}(id),\n"
-            f"  label TEXT NOT NULL,\n  weight REAL DEFAULT {n}.0,\n  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);\n"
-            f"CREATE INDEX idx_{t}_{u} ON {t} ({u}_id);\n",
-            f"WITH ranked AS (\n  SELECT *, ROW_NUMBER() OVER (PARTITION BY {u}_id ORDER BY created_at DESC) AS rn\n  FROM {t}\n)\n"
-            f"SELECT id, {u}_id, label FROM ranked WHERE rn = 1;\n",
-            f"UPDATE {t}\nSET weight = weight * 1.{n % 9 + 1}\nWHERE {u}_id IN (SELECT id FROM {u} WHERE active = 1);\n",
-        ])
-
-    def _c(self) -> str:
-        a = self._ident()
-        n = self.rng.randrange(8, 200)
-        return self.pick([
-            f"#include <stddef.h>\n\nsize_t count_{a}(const int *xs, size_t n, int threshold) {{\n    size_t c = 0;\n"
-            f"    for (size_t i = 0; i < n; i++)\n        if (xs[i] > threshold)\n            c++;\n    return c;\n}}\n",
-            f"#include <string.h>\n\nvoid reverse_{a}(char *s) {{\n    size_t n = strlen(s);\n    for (size_t i = 0; i < n / 2; i++) {{\n"
-            f"        char t = s[i];\n        s[i] = s[n - 1 - i];\n        s[n - 1 - i] = t;\n    }}\n}}\n",
-            f"typedef struct {{\n    int items[{n}];\n    int head, tail;\n}} ring_{a};\n\n"
-            f"int ring_{a}_push(ring_{a} *r, int v) {{\n    int next = (r->tail + 1) % {n};\n    if (next == r->head)\n        return -1;\n"
-            f"    r->items[r->tail] = v;\n    r->tail = next;\n    return 0;\n}}\n",
-        ])
-
-    def _sh(self) -> str:
-        a = self._ident()
-        n = self.rng.randrange(2, 30)
-        return self.pick([
-            f"#!/usr/bin/env bash\nset -euo pipefail\nfor f in logs/{a}-*.txt; do\n  lines=$(wc -l < \"$f\")\n"
-            f"  if [ \"$lines\" -gt {n * 100} ]; then\n    gzip -9 \"$f\"\n  fi\ndone\n",
-            f"#!/usr/bin/env bash\nset -eu\ntar -czf backup-$(date +%F).tgz data/{a}\nfind backups -name '*.tgz' -mtime +{n} -delete\n",
-        ])
-
-    def code(self, min_chars: int) -> str:
-        self.switch_domain()
-        parts, size = [], 0
-        while size < min_chars:
-            r = self.rng.random()
-            if r < 0.45:
-                c, _ = self.python_module(self.rng.randrange(2, 5))
-                c = "# file: " + self._ident() + ".py\n" + c + "\n\n" + self._py_class()
-            elif r < 0.65:
-                c = "// file: " + self._ident() + ".js\n" + "\n".join(self._js() for _ in range(3))
-            elif r < 0.8:
-                c = "-- file: " + self._ident() + ".sql\n" + "\n".join(self._sql() for _ in range(3))
-            elif r < 0.93:
-                c = "/* file: " + self._ident() + ".c */\n" + "\n".join(self._c() for _ in range(2))
-            else:
-                c = "# file: " + self._ident() + ".sh\n" + self._sh()
-            parts.append(c)
-            size += len(c) + 2
-        return "\n\n".join(parts)
 
     # ---- records for JSON extraction ------------------------------------------------
     def record(self) -> tuple[str, dict]:

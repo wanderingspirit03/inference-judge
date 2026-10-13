@@ -1,0 +1,153 @@
+My landlord's building has just installed a Kestrel Locker unit in the lobby and I have been asked to accept these terms before I can get my first parcel. Please explain this to me clause by clause in plain language, say what each clause means for me in practice, and then finish with a list of the biggest risks and what I could do to protect myself.
+
+KESTREL LOCKERS LTD
+CUSTOMER TERMS OF USE FOR THE KESTREL LOCKER NETWORK
+Version 4.2, effective 1 March 2026
+
+These terms are an agreement between you and Kestrel Lockers Ltd, registered in Hollin Vale under company number HV-0048213, whose registered office is at 14 Carrow Wharf, Hollin Vale ("Kestrel", "we", "us"). They apply whenever you use a Kestrel locker, our app, or our website to collect, send or return a parcel. By creating an account or by using a locker you accept these terms.
+
+1. Definitions
+
+1.1 "Locker" means a secured compartment in a Kestrel unit. "Unit" means a freestanding or wall-mounted bank of lockers. "Parcel" means any item placed in a locker by a carrier, a retailer, you or another customer. "Carrier" means a delivery company that has an agreement with us. "Collection Window" means the period during which a parcel may be collected without charge, as set out in clause 4. "Access Code" means the one-time code, QR code or phone token we send you to open a locker.
+
+2. Your account
+
+2.1 You must be at least 16 years old to hold an account. If you are under 18 you confirm that a parent or guardian knows you are using the service.
+
+2.2 You must give us a working mobile number and email address and keep them up to date. We send Access Codes and all notices about your parcels to those details, and we are treated as having told you something once we have sent it there.
+
+2.3 You are responsible for everything done with your account. If someone else uses your Access Code, whether or not you agreed to it, we treat it as you.
+
+2.4 You may share an Access Code with a person you trust so that they can collect for you. You do this at your own risk, and clause 7 applies as if you had collected the parcel yourself.
+
+3. Delivery to a locker
+
+3.1 When a carrier places a parcel in a locker we send you an Access Code within thirty minutes. The time stamp on our system is conclusive evidence of when a parcel was delivered, unless you can show it is wrong.
+
+3.2 We do not open, inspect or weigh the contents of any parcel. We check only that it fits the locker and does not show visible leaks or smells.
+
+3.3 We may refuse or remove any parcel that is larger than the largest locker, weighs more than 20 kg, leaks, smells, is alive, or falls within the list of prohibited items in clause 9. If we remove a parcel we may return it to the sender or dispose of it, as set out in clause 10.
+
+4. Collection Window and storage fees
+
+4.1 The Collection Window is 72 hours starting from the time we send the Access Code. If your parcel is a chilled or frozen grocery parcel the Collection Window is 12 hours.
+
+4.2 If you have not collected by the end of the Collection Window we charge a storage fee of 1.50 pounds per day or part of a day, up to a maximum of 21 pounds per parcel. We take the fee from the payment card you have saved on your account. By creating an account you authorise us to do this.
+
+4.3 You may ask for one free extension of 48 hours per parcel through the app, provided you ask before the Collection Window ends. We may refuse an extension at any time if the unit is nearly full.
+
+4.4 If a parcel has not been collected after 14 days from the time of delivery we treat it as abandoned and clause 10 applies.
+
+5. Sending and returning parcels
+
+5.1 To send or return a parcel you must print or display a label that we or a carrier have approved, close the parcel securely, and place it in an open locker that the unit gives you. You then confirm by pressing the green button.
+
+5.2 Until a carrier collects the parcel from the locker it is still your responsibility. We take a photograph of the locker door when you close it, and that photograph is our record that you deposited something.
+
+5.3 A return is complete only when the carrier scans the parcel. A receipt from the unit proves only that you placed something in the locker, not that the retailer has accepted the return.
+
+5.4 Carriers collect from units on working days at times shown in the app. A parcel left on a Friday evening may not be collected until the following Monday.
+
+6. Prices
+
+6.1 Receiving a parcel is free to you. Sending a parcel costs the price shown in the app at the time you book. We may change prices on thirty days' notice by email. If you do not agree to a change you may close your account before it takes effect.
+
+6.2 Payment for sending is taken in advance. If a parcel is not collected by the carrier within seven days we will refund the price on request, less a handling fee of 1 pound.
+
+7. Loss, damage and our responsibility
+
+7.1 We are responsible for loss of or damage to a parcel only while it is in a locker and only if the loss or damage is caused by our negligence or by a fault in a unit.
+
+7.2 Our liability for any one parcel is limited to the lower of (a) the value of the contents that you can prove, and (b) 100 pounds. If you want cover for more you must buy the optional Kestrel Cover described in clause 12 and shown in the app before the parcel is delivered or deposited.
+
+7.3 We are not liable for loss of profit, loss of data, loss of opportunity, or any loss that we could not reasonably have foreseen when you accepted these terms.
+
+7.4 We are not liable for anything that happens after a parcel leaves a locker, including when a person other than you collects it with your Access Code, or for the acts of a carrier or retailer.
+
+7.5 Nothing in these terms limits our liability for death or personal injury caused by our negligence, for fraud, or for anything else that the law does not allow us to limit.
+
+7.6 You must tell us about a problem with a parcel within 48 hours of collecting it, or within 48 hours after the Collection Window would have ended if you did not collect. If you tell us later we may refuse your claim.
+
+8. Unit faults and access
+
+8.1 If a unit will not open you can use the help button or the app to ask us to open it remotely. We try to do this within twenty minutes during staffed hours, which are 7am to 10pm every day.
+
+8.2 If a unit is out of order for more than 48 hours we will move your parcel to the nearest working unit and tell you. We do not pay for the cost of your journey.
+
+8.3 Units are watched by cameras that record continuously. We keep footage for 30 days, or longer if it relates to a complaint or an investigation.
+
+8.4 You must use the units and the app properly. You must not climb on a unit, force or block a door, put anything in a locker that you do not intend to be collected or sent, use a locker to store your own belongings, or try to read or change the software.
+
+8.5 If you damage a unit, whether on purpose or by carelessness, we may charge you the cost of repair, up to 400 pounds, and we may report deliberate damage to the police.
+
+8.6 You must not let a locker door stand open. If you open a locker and then do not take the parcel or close the door within two minutes, the unit will lock again and we may charge a call-out fee of 3 pounds if you ask us to reopen it.
+
+9. Prohibited items
+
+9.1 You must not send or ask us to hold any of the following: weapons and ammunition; explosives and fireworks; flammable liquids and gas cylinders; lithium batteries that are not packed inside or with equipment; illegal drugs; live animals; cash above 50 pounds; passports and other identity documents; and anything the law forbids to post.
+
+9.2 If we reasonably think a parcel contains a prohibited item we may open it in the presence of a second member of staff, record what we find, and give it to the police.
+
+10. Abandoned and removed parcels
+
+10.1 If a parcel is abandoned we will try to contact you three times by email and text. If we do not hear from you within seven days after the third attempt we may return the parcel to the sender, give it to charity if it is in good condition, or dispose of it.
+
+10.2 You still owe the storage fee up to the day we remove the parcel, and we may also charge a handling fee of 5 pounds. We may take both from your saved card.
+
+11. Your data
+
+11.1 We collect your name, contact details, the time and place of each parcel event, photographs from the lockers, and the data sent by your phone when you open a locker with a token. Our privacy notice explains this in more detail.
+
+11.2 We share parcel events with the carrier and retailer involved, and with the owner of the building where the unit stands if they ask for a record of access to their property. We may also use anonymised data to plan where to put new units.
+
+11.3 We keep your account data for two years after you last used the service, and parcel records for six years because of tax and insurance rules.
+
+11.4 You may ask us at any time for a copy of the data we hold about you, or ask us to correct it. You may also ask us to delete it, but we cannot delete parcel records we must keep under clause 11.3 until the time there has passed.
+
+11.5 We send you marketing emails only if you tick the box for them when you sign up or later in the app. You can untick it at any time and we will stop within seven days. Messages about your parcels are not marketing and you cannot switch them off.
+
+12. Kestrel Cover
+
+12.1 Kestrel Cover is an optional extra that raises our limit under clause 7.2 for one parcel. It costs 2 pounds for cover up to 500 pounds and 4 pounds for cover up to 1,000 pounds. You choose it in the app for each parcel; it does not carry over to later parcels.
+
+12.2 Cover applies only to loss or damage that clause 7.1 already makes us responsible for. It does not cover items on the prohibited list, cash, jewellery, or items that you cannot show a receipt or other proof of value for.
+
+12.3 To claim you must give us the order number or receipt, photographs of the parcel and its contents, and a short written description of what happened. We will decide the claim within 15 working days of receiving everything we asked for, and we pay by refund to your saved card.
+
+13. Shared and accessible units
+
+13.1 Many units stand in buildings that are shared, such as blocks of flats and offices. The building owner or manager may have their own rules about who can enter. We are not responsible if you cannot reach a unit because of those rules.
+
+13.2 If you cannot use a locker because of a disability, for example because the top row is out of reach, you can ask us in the app to place your parcels only in lower compartments. We will do this where the unit has a free one. If none is free we will tell you before the parcel is placed, and you may ask the carrier to deliver elsewhere.
+
+13.3 Every unit has a help button, an audio prompt and a high contrast screen. You can also open a locker with the app alone and without touching the screen.
+
+13.4 If you live in a building where the manager has agreed to take in parcels for residents, the manager may collect your parcel with a master code. We tell you by email each time this happens.
+
+14. Events outside our control
+
+14.1 Neither you nor we are in breach of these terms if we cannot do something because of events we cannot reasonably control, for example a power cut, a flood, a strike by carriers, or damage to a unit by a third party. If this lasts more than 14 days either side may end the agreement.
+
+14.2 In such an event we will not charge storage fees for days when you could not reach the unit and we have been told about it.
+
+15. Ending the agreement
+
+15.1 You may close your account at any time in the app. Any parcels in lockers must be collected first and any fees paid.
+
+15.2 We may suspend or close your account at once if you break these terms, if you use a locker to hide stolen goods, if you abuse our staff, or if a payment fails twice. We may also close an account that has been unused for 12 months, after giving you 30 days' notice.
+
+16. Changes to these terms
+
+16.1 We may change these terms from time to time. We will email you at least thirty days before a change takes effect, except where we must change them sooner to follow the law. If you keep using the service after the date in the email you accept the new terms.
+
+17. Complaints and disputes
+
+17.1 Please write first to care@kestrel.example.org. We will reply within 10 working days. If you are not happy with our final answer you may refer the complaint to the Hollin Vale Parcel Ombudsman, whose service is free to consumers.
+
+17.2 These terms are governed by the law of Hollin Vale. If we cannot settle a dispute, either of us may bring it in the courts of Hollin Vale, but you may also bring a claim in the court of the place where you live if you are a consumer.
+
+17.3 If any part of these terms is found to be invalid the rest stays in force.
+
+18. Contact
+
+Kestrel Lockers Ltd, 14 Carrow Wharf, Hollin Vale. Customer care line open 7am to 10pm every day. Email: care@kestrel.example.org.

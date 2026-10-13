@@ -1,0 +1,104 @@
+These are the notes from our planning meeting at the dairy on Tuesday. Nobody agreed who would write the plan up, so it is me. Can you turn them into a full project plan for the new maturing cellar and the cheese-on-demand launch, with workstreams, owners, dates, dependencies and a risk list? Where the notes are vague, flag it and suggest something sensible.
+
+---
+
+WETHERBY CROFT DAIRY
+Meeting notes: Maturing Cellar and Direct Sales Planning
+Date: Tuesday 8 October, 10:00 to 12:45
+Location: Farm office, upstairs room
+Present: Tamsin Ogunleye (managing director, chair), Bartholomew Rees (head cheesemaker), Ilse Brandvold (finance and administration), Kofi Ansah-Whitlock (milk supply and farm liaison), Perpetua Lindgren (sales and marketing), Desmond Achterberg (maintenance and building works)
+Apologies: Yusuf Haldane (quality and food safety), who sent written comments that were read out
+Notes taken by: Ilse Brandvold
+
+1. Purpose of the meeting
+
+Tamsin opened by saying that the dairy has outgrown its single maturing room. We now make about 41 tonnes of cheese a year, mostly the hard cloth-bound cheddar-style wheel and the smaller washed-rind round, and about a third of every batch has to be sold young because there is nowhere to keep it. Older cheese sells for between 40 and 60 percent more per kilo. Two other things came together this summer. The old cattle shed next to the dairy became free when the heifers moved to the north field, and the regional food board offered a grant for small producers who add storage and direct sales. The grant application closes on 29 November. The aim is to decide today what we will do, who does it and by when, so that the application can be written in time.
+
+2. The maturing cellar
+
+Desmond presented the survey of the old shed. It is a stone building 14 metres by 6 metres, with a sound roof and a concrete floor that slopes toward a drain on the east side. Walls are 55 centimetres thick, which gives good natural thermal mass. There is a three-phase power supply at the yard gate, 22 metres away, but the cable to the shed would need replacing. Water is present, but there is no hot water.
+
+Bartholomew said that the shed could be divided into two rooms: a hard-cheese room at 11 to 13 degrees and 85 percent humidity, and a washed-rind room at 12 to 14 degrees and 92 percent humidity. He wants a small separate anteroom for brushing, turning and packing so that staff do not carry the smell and the moulds into the make room. He estimated the shed could hold 2,800 wheels of the large cheese on three-tier wooden racking or about 60 tonnes in total, which would let the dairy double production over four or five years.
+
+Desmond gave a rough budget from two builders who visited:
+
+- Floor resurfacing and drainage: 11,500 pounds
+- Insulated internal partition walls and doors: 9,800 pounds
+- Refrigeration and humidity control for two rooms: 31,000 pounds
+- Electrical cable and distribution: 6,400 pounds
+- Racking in spruce and stainless fittings: 14,000 pounds
+- Anteroom fit-out with washable wall cladding and handwash basins: 8,300 pounds
+- Contingency of 10 percent: 8,100 pounds
+
+Total about 89,100 pounds. Ilse noted that these are verbal figures and nobody has given a written quote. Tamsin asked Desmond to get two written quotes for the refrigeration, since that is the largest item and the one most likely to be wrong. Desmond said refrigeration firms in the area are booked until January for installation but will send quotes within three weeks.
+
+Discussion about whether to use a ground-source system for cooling. Bartholomew liked the idea because of stable temperatures, but Desmond said the cost would be at least double and the grant guidelines do not clearly cover it. Decision: go with conventional refrigeration, but design the plant room so that a heat pump could be added later.
+
+3. Food safety and approval
+
+Yusuf's written comments were read by Ilse. The local authority must approve any new maturing room before cheese is stored there for sale, and the process normally takes six to ten weeks after the inspector receives the final plans. He warned that the floor drainage must meet the standard for a food room, with a trapped gully and a sealed floor with coved edges, and that wooden racking is acceptable only if the supplier can confirm the wood is untreated and the dairy holds a written cleaning procedure for it. He asked for a pest control contract to be extended to the new building and for a new hazard analysis document, which he will write if he has the layout drawing by the end of November. He also said he is not comfortable with the washed-rind room sharing an air system with the hard cheese room, because of the risk of cross-contamination of surface cultures. Bartholomew agreed that each room needs its own evaporator and fan, and Desmond will add this to the quote request.
+
+4. Direct sales and the cheese-on-demand idea
+
+Perpetua presented the second part of the plan. Currently about 70 percent of the dairy's cheese goes through three wholesalers and 30 percent through the farm shop and two markets. Wholesale pays an average of 11.80 pounds per kilo, shop and markets 19.50. She proposed a subscription and mail-order service called Cheese Club, in which customers choose a monthly box of 1.2 kilos with a choice of cheese ages and receive a card from the cheesemaker. She believes 400 subscribers within 18 months is realistic, based on 1,100 names on the shop email list and a pilot of 35 boxes at the summer fair, of which 31 were bought again.
+
+The proposed price is 34 pounds a box including delivery. Ilse worked out that, with packaging at about 3.60 pounds, courier at 6.20, and the cheese at an internal cost of 9.40 per box, the margin would be about 14.80 per box before staff time and website fees. At 400 subscribers that is about 71,000 pounds a year in gross margin. She asked whether the delivery cost is realistic for summer when cool packs are needed. Perpetua said she would test two couriers with chilled packaging over the next four weeks.
+
+Kofi raised a point about milk. Doubling production would need roughly 480,000 litres more a year than the dairy takes now. The home herd and the two neighbouring farms that supply can give about 150,000 litres more. Kofi has spoken to a third farm, the Larkspur family, who may be able to supply 200,000 litres but only if the dairy agrees a price above the standard rate and accepts their milk twice a week rather than daily. The remaining volume would have to come later. Tamsin said that doubling in one step is not the plan, and that the first goal is to age more of what the dairy already makes.
+
+5. Website and order system
+
+Perpetua said the current shop website cannot take recurring payments. Two options were discussed: a hosted shop platform at about 70 pounds a month plus 2 percent fees, or having a freelance developer build a custom system. Everyone preferred the hosted platform. Perpetua will set up a test shop and report back. Ilse asked for the system to produce a daily pick list and courier labels automatically. Perpetua believes the platform can do this through an add-on at 19 pounds a month.
+
+6. Staffing
+
+Bartholomew said that with the second room, the dairy will need a full-time cellar person to turn, brush and wash cheeses. A candidate from the dairy college has been mentioned by his old teacher, but there is no job description yet. Tamsin asked Ilse to draft a job description with a salary range of 26,000 to 29,000 pounds. Perpetua said she needs a part-time packing and customer service person from March, for about 20 hours a week.
+
+7. Funding
+
+Ilse summarised funding. The grant could cover 40 percent of eligible costs up to 45,000 pounds, which is for the building and equipment but not for the website or staff. The dairy would need to fund the balance of the cellar of about 44,000 pounds. The business has 38,000 pounds in reserve and an overdraft facility of 25,000 pounds that is not currently used. The bank's small business manager has offered to talk about a five-year equipment loan at around 7.2 percent. Tamsin said she is not keen to use the overdraft for building work and would prefer a loan, with the reserve kept for working capital. Kofi asked about the price for extra milk and whether the grant allows that. Ilse said it does not, so the cost of milk will have to be funded from cash flow.
+
+8. Timeline discussed
+
+Tamsin wants the cellar in use before the spring flush of milk in April, because that is when there is most cheese to store. Working back from that:
+
+- Grant application submitted by Friday 29 November
+- Final plans to inspector by end of November
+- Written quotes by Friday 1 November (refrigeration), 15 November (building)
+- Start of building work as soon as the grant decision is known, expected in late January
+- Refrigeration installation as soon as available, possibly February
+- Inspector approval by end of March
+- Cheese Club soft launch in May, public launch in September
+
+Desmond doubted that the building could be finished by April if the grant decision slips. Nobody had a plan for this case. Tamsin said she would rather start the floor and drainage at the dairy's own risk in December than lose the season, provided the grant rules allow work that began before the decision. Ilse will find out.
+
+9. Cheese quality, ageing plan and the product range
+
+Bartholomew set out what he would do with the extra cellar space. The large cloth-bound wheel is currently sold at 5 to 6 months. He wants to hold half of each batch to 12 months and a smaller share to 18 months, which is the age at which it wins medals and fetches the highest price. The washed-rind round would move from 6 weeks to 10 weeks for part of each batch, and he wants to try a new smaller blue-veined cheese of about 1.5 kilos, which needs its own corner of the washed-rind room, since the blue mould spreads easily. He suggested a small trial of 40 wheels this winter in the existing make room fridge to see whether the dairy can control the mould. Yusuf's note said that any blue cheese must be kept physically separate and have its own tools, brushes and racking. Bartholomew accepted this and said the blue trial may have to wait until the anteroom exists.
+
+The effect on cash flow was discussed. Holding cheese for 12 months instead of 5 means that money is tied up for longer. Ilse estimated that moving half of all production to 12 months would need an extra 31,000 pounds of working capital at its peak in the second year, since the cheese made in month one is not sold until month thirteen. Tamsin said this is the reason she wants to keep the reserve for working capital rather than build with it.
+
+Perpetua asked that each wheel is labelled with the date of make so that Cheese Club customers can choose by age. She would like to start a small "vintage" range with numbered wheels. Bartholomew said he can do this with a stamped tag on the cloth.
+
+10. Packaging, couriers and customer service
+
+Perpetua reported on the first two courier quotes. Courier A charges 6.20 pounds for a next-day box under 2 kilos to most of the country and 9.10 to the Scottish islands and Northern Ireland. Courier B is 5.40 pounds but offers only two-day delivery on Mondays and Tuesdays to avoid weekend storage. She prefers next-day for cheese quality. Boxes would be shipped Monday to Wednesday only so that no parcel is in the network over a weekend. Packaging would be a recyclable cardboard box with a wool-fibre liner, and she has asked a supplier for samples. The wool liner costs more than foam, about 1.10 pounds extra, but customers in the summer pilot commented on it positively.
+
+Ilse asked how many people would be needed to pack. Perpetua said that at 400 boxes a month, packing would take about 25 hours a week, more at Christmas, when the dairy could expect up to three times the volume. It was agreed that seasonal temporary help would be needed in December and that this must be in the cost plan. Tamsin asked about complaints and returns. Perpetua proposed a simple promise: if a box arrives late or warm, the dairy replaces it without discussion. She estimated a loss of about 2 percent of boxes.
+
+11. Insurance, labelling and legal points
+
+Ilse reminded the meeting that the dairy's insurance covers storage at the current site only. The new building must be added, along with cover for stock held at higher value because aged cheese is worth far more than young cheese. She will request a quote. Labelling for mail order also needs a closer look. Each box must list allergens, the use-by or best-before date and the dairy's approval number, and distance-selling rules mean the website must show a cancellation policy. Perpetua will check these with the trading standards officer, whom she knows from the market. Desmond noted that fire regulations for the new building should be checked, since two rooms with refrigeration plant and timber racking might need a fire alarm and extinguishers. Tamsin asked him to include these in the building quotes.
+
+12. Other points
+
+Yusuf also asked for a decision on the cheese-testing laboratory contract, which renews in January. The dairy pays 4,200 pounds a year, and a cheaper lab 40 kilometres away has quoted 3,500. Postponed. Kofi mentioned that the milk tanker route might change in the new year, and he will confirm the dates. The next meeting is on Tuesday 22 October at 10:00.
+
+Actions recorded at the meeting (no dates given unless stated)
+
+- Desmond: written quotes for refrigeration and building (dates above)
+- Ilse: grant application, job description for cellar person, check start-before-decision rule
+- Perpetua: courier tests, hosted shop test
+- Kofi: talk to Larkspur farm about price and delivery pattern
+- Bartholomew: layout drawing of the two rooms and anteroom
+- Yusuf: hazard analysis once the drawing is ready

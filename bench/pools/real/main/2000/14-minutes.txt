@@ -1,0 +1,64 @@
+Here are the notes from our volunteer call last night. Please turn them into a full project plan for the rest of the quarter, with named owners, dates, dependencies and a risk list. Where the notes leave something unclear, tell me what you assumed so I can check it with people.
+
+# Greenmeadow Open Map Project: volunteer coordination call
+
+Date: Tuesday 7 October, 19:00 to 20:35 (video call)
+Present: Odalys Brandt (chair), Kwabena Mensah-Hart, Sunniva Elgstrand, Rafferty Dunmore, Bashir Qureshi, Linnea Vogt, Teodor Pavlic. Apologies: Maribel Contreras.
+Notes taken by Linnea Vogt.
+
+## 1. Last meeting's actions
+
+- Rafferty set up the shared issue tracker as promised. 63 tasks created, 22 closed.
+- Sunniva's request to the town council for access to the 1998 survey plans: no reply yet. Odalys will phone on Thursday.
+- Teodor's script to find duplicate footpaths: finished, 41 candidate duplicates found, not yet reviewed.
+
+## 2. The mapping weekends
+
+The goal is to survey the remaining 30 percent of the district's footpaths and benches before the leaves come down at the end of November. Kwabena counted 118 km of footpath mapped so far out of an estimated 168 km. Three weekends have been proposed: 18-19 October, 1-2 November and 15-16 November. Bashir can lead the weekend of 18 October but is away on 1 November. Linnea can lead on 1 November if the weather is dry; the village hall is booked for that day. Nobody has yet confirmed the 15th.
+
+The group agreed to split the survey into four areas: Riverside (about 22 km left), Old Quarry (14 km), Hill Farm (10 km) and the Common (4 km). Kwabena suggested starting with the Quarry because the rights-of-way there are the least certain. Sunniva said the farm owner at Hill Farm has agreed to access only on Saturdays. The Common is already almost complete and can be finished by two people in an afternoon.
+
+Each surveyor needs a phone running the field app and a battery pack. We have 6 spare battery packs and 9 volunteers who have said they might come. Rafferty will check whether the town library can lend phones.
+
+## 3. Data quality
+
+Teodor reported that about 6 percent of the existing footpath segments have no surface tag and 11 percent have no width. Linnea suggested adding a checklist card for surveyors with the five tags that matter most: surface, width, lit, incline, and whether a wheelchair can pass. The accessibility tags matter because the town's disability group has asked for a route map by January. Odalys said the group wants to see a draft map before Christmas, with step-free routes shown in a different colour.
+
+There was a short discussion about whether to import the council's open data on benches, which has about 140 entries. Kwabena has checked and the licence is compatible, but he found that around a quarter of the positions are visibly wrong. Agreed to import only after a field check, and to treat the council data as a hint rather than a source. Bashir will write the import rules.
+
+## 4. Training and new volunteers
+
+Four new people joined last month. Sunniva wants a short training evening before the first weekend, covering the field app, the tag checklist and safety on the old quarry paths. Teodor offered to run it on Thursday 16 October. Maximum 12 people, in the library meeting room if Odalys can book it. Rafferty raised the question of insurance for under-18s who come with parents. Odalys thinks the umbrella insurance of the national mapping network covers this but has not seen the wording and will ask.
+
+## 5. Funding
+
+We have 1,240 in the account. Costs for the quarter: printing 120 route cards (about 90), hall hire for the training and the Saturday base (about 150), refreshments (about 200), and a laminated map for the library (about 60). The town council's small grants fund closes on 24 October; Odalys will submit an application for 800 to cover phones and battery packs. Linnea will write the one-page description by 17 October.
+
+## 6. Publishing
+
+The draft route map needs a hosting page. Rafferty proposed using the project's existing website and adding a "walks" section. Bashir prefers a separate page to avoid cluttering the site. Not decided. Teodor reminded the group that the map tiles must be rendered again after data changes, which takes about 40 minutes on the shared server, and that the server can only do one render at a time.
+
+## 7. Any other business
+
+Maribel (absent) emailed to say she can proofread the route cards. Kwabena asked everyone to avoid editing the Riverside area in the main map until the weekend survey is finished, to prevent conflicts. Next call: Tuesday 4 November, 19:00.
+
+## 8. Actions as recorded
+
+| Action | Person | Said date |
+|---|---|---|
+| Phone town council about the 1998 plans | Odalys | Thursday |
+| Review the 41 candidate duplicate footpaths | Teodor, with Kwabena | "before the first weekend" |
+| Write the import rules for the council bench data | Bashir | not given |
+| Ask the national network about insurance for under-18s | Odalys | not given |
+| Book the library meeting room for training | Odalys | not given |
+| Run the training evening | Teodor | 16 October |
+| Ask the library about lending phones | Rafferty | not given |
+| One-page description for the grant application | Linnea | 17 October |
+| Submit the grant application | Odalys | 24 October |
+| Draft checklist card for surveyors | Linnea | not given |
+| Proofread the route cards | Maribel (to confirm) | not given |
+| Decide where the walks page will live | whole group | not given |
+
+## 9. Concerns raised during the call
+
+Sunniva said she was worried that three weekends in a row would tire the volunteers and that attendance on the third would be low. Bashir answered that the leaves would make the footpaths harder to see after the end of November, so the window is short. Rafferty noted that the shared server was updated in September and that the map render has failed twice since then, once because of disk space. He will ask the host to increase the disk, but has no date. Odalys said that if the weather is bad on 18 October the survey should not be moved to the next day because the Hill Farm owner only allows Saturdays.

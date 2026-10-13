@@ -642,7 +642,7 @@ class TpsSpec:
     levels: list[float]
     isl: int | list[int]
     osl: int
-    prompts: list[dict]               # the pool: {"id", "prompt"}
+    prompts: list[dict]               # the pool: {"id", "prompt"[, "isl"]}
     ramp_s: float = 2.0
     window_s: float = 10.0
     seed: int = 7
@@ -652,6 +652,9 @@ class TpsSpec:
     slo: dict = field(default_factory=lambda: dict(metrics.TPS_DEFAULT_SLO))
     arrival: str = "poisson"          # open loop: poisson | uniform
     length_tol: float = 0.0
+    # whole requests (pool rows that name their size): how far under its
+    # size a request may be, as a fraction of the size
+    isl_tol: float = 0.3
     exclude_ids: frozenset = frozenset()
     warm_cycles: int = 0
 
@@ -709,26 +712,44 @@ class _PromptSampler:
     A prompt the server has seen before can be memoised, so a repeat is not a
     fresh measurement: when the pool runs dry the sampler starts again and
     flags every repeat, and the record is invalid (prompt_reused).
+
+    A pool is one of two kinds. Rows {"id", "prompt"} are text to cut to
+    whatever size is asked for, and any row serves any size. Rows that also
+    carry "isl" are whole requests: each is sent as written and only under
+    its own size, so every size has its own order and runs dry on its own.
     """
 
     def __init__(self, pool: list[dict], seed: int,
                  exclude: frozenset) -> None:
+        sized = {"isl" in p for p in pool}
+        if len(sized) > 1:
+            raise SystemExit("tps: the prompt pool mixes whole requests (rows "
+                             "with \"isl\") and rows to cut (rows without)")
+        self.whole = sized == {True}
         self.items = [p for p in pool if str(p["id"]) not in exclude]
         if not self.items:
             raise SystemExit("tps: the prompt pool is empty after exclusions")
         self.rng = random.Random(seed)
-        self.order: list[dict] = []
-        self.passes = 0
+        self.order: dict[int | None, list[dict]] = {}
+        self.passes: dict[int | None, int] = {}
         self.n_reused = 0
 
-    def next(self) -> tuple[dict, bool]:
-        if not self.order:
-            self.order = list(self.items)
-            self.rng.shuffle(self.order)
-            self.passes += 1
-        reused = self.passes > 1
+    def sizes(self) -> set[int]:
+        """The sizes a whole-request pool can serve."""
+        return {int(p["isl"]) for p in self.items} if self.whole else set()
+
+    def next(self, isl: int | None = None) -> tuple[dict, bool]:
+        key = int(isl) if self.whole and isl is not None else None
+        if not self.order.get(key):
+            self.order[key] = [p for p in self.items
+                               if key is None or int(p["isl"]) == key]
+            if not self.order[key]:
+                raise SystemExit(f"tps: the prompt pool has no request of size {isl}")
+            self.rng.shuffle(self.order[key])
+            self.passes[key] = self.passes.get(key, 0) + 1
+        reused = self.passes[key] > 1
         self.n_reused += reused
-        return self.order.pop(), reused
+        return self.order[key].pop(), reused
 
 
 class _LoopLag:
@@ -769,6 +790,31 @@ class _TpsRun:
                                       spec.exclude_ids)
         self.mixed = isinstance(spec.isl, (list, tuple))
         self.sizes = [int(x) for x in spec.isl] if self.mixed else [int(spec.isl)]
+        if self.sampler.whole:
+            self._check_whole_requests()
+
+    def _check_whole_requests(self) -> None:
+        """Every measured size has requests, and each of them fits its size
+        with the reference line in front: never over it (an engine may pad a
+        prompt up to the next shape), and under it by at most isl_tol."""
+        for size in self.sizes:
+            if size not in self.sampler.sizes():
+                raise SystemExit(f"tps: the prompt pool has no request of size {size}")
+        shortest, longest = nonce_bounds(self.tok) if self.spec.nonce else (0, 0)
+        for p in self.spec.prompts:
+            size = int(p["isl"])
+            if size not in self.sizes:
+                continue
+            n = self.tok.count(str(p["prompt"]))
+            least = size * (1 - self.spec.isl_tol)
+            if n + longest > size:
+                raise SystemExit(
+                    f"tps: request {p['id']} is too long for size {size}: {n} tokens "
+                    f"plus a reference line of up to {longest}")
+            if n + shortest < least:
+                raise SystemExit(
+                    f"tps: request {p['id']} is too short for size {size}: {n} tokens "
+                    f"plus a reference line of {shortest}, under {least:g}")
 
     def size_at(self, k: int) -> int:
         """The input size of a stream's k-th request."""
@@ -778,8 +824,11 @@ class _TpsRun:
         return None if t is None else round(t - self.t0, 6)
 
     def prompt(self, isl: int) -> tuple[str, str, bool]:
-        item, reused = self.sampler.next()
+        item, reused = self.sampler.next(isl)
         text = str(item["prompt"])
+        if self.sampler.whole:            # sent as written
+            head = nonce_prefix() if self.spec.nonce else ""
+            return str(item["id"]), head + text, reused
         if not self.spec.nonce:
             return str(item["id"]), self.tok.fit(text, isl), reused
         head = nonce_prefix()
@@ -813,7 +862,9 @@ class _TpsRun:
         out_text = reasoning + ("\n" if reasoning and text else "") + text
         tokens = self.tok.count(text) + self.tok.count(reasoning)
         usage = state.usage or {}
-        d4, cr = metrics.text_sanity(out_text)
+        # special tokens a server was asked to show are counted above; they
+        # are not text, so the junk check reads the answer without them
+        d4, cr = metrics.text_sanity(self.tok.plain(out_text))
         row = {
             "req_id": uuid.uuid4().hex[:16], "prompt_id": prompt_id,
             "load": load, "level": level,
@@ -838,6 +889,8 @@ class _TpsRun:
         reason = metrics.tps_invalid_reason(row, self.spec.osl,
                                             self.spec.length_tol)
         row["ok"], row["invalid_reason"] = reason is None, reason
+        if reason is not None:
+            row["text"] = out_text      # what it answered, for whoever asks why
         return row
 
     # ---- loads -----------------------------------------------------------
@@ -1057,7 +1110,7 @@ def tps_spec_from_args(args: argparse.Namespace) -> TpsSpec:
         ramp_s=args.ramp_s, window_s=args.window_s, seed=args.seed,
         nonce=args.nonce != "none", ignore_eos=args.ignore_eos,
         chips=args.chips, slo=slo, arrival=args.arrival,
-        length_tol=args.length_tol,
+        length_tol=args.length_tol, isl_tol=args.isl_tol,
         exclude_ids=_excluded_ids(args.pool_exclude),
         warm_cycles=args.warm_cycles)
 
@@ -1092,10 +1145,13 @@ async def run_tps_cli(args: argparse.Namespace, out_dir: Path) -> int:
         "arrival": spec.arrival if spec.load == "open" else None,
         "nonce": "turn" if spec.nonce else "none",
         "ignore_eos": spec.ignore_eos, "length_tol": spec.length_tol,
+        "prompts": ("whole" if all("isl" in p for p in spec.prompts)
+                    else "cut"), "isl_tol": spec.isl_tol,
         "temperature": args.temperature,
         "reasoning_effort": args.reasoning_effort,
         "chat_template_kwargs": (json.loads(args.chat_template_kwargs)
                                  if args.chat_template_kwargs else None),
+        "extra_body": json.loads(args.extra_body) if args.extra_body else None,
         "tokenizer": {"name": tok.name, "sha256": tok.fingerprint()},
         "prompt_pool": {"path": args.prompt_pool,
                         "sha256": _sha256_file(args.prompt_pool),
@@ -1138,10 +1194,20 @@ async def run_tps_cli(args: argparse.Namespace, out_dir: Path) -> int:
 # --------------------------------------------------------------------------
 # CLI
 # --------------------------------------------------------------------------
-def nonce_prefix() -> str:
+def nonce_prefix(ref: uuid.UUID | None = None) -> str:
     """A fresh reference at the very start of a request, so nothing in it can
     be a prompt-cache hit."""
-    return f"Request reference: {uuid.uuid4()}.\n\n"
+    return f"Request reference: {ref or uuid.uuid4()}.\n\n"
+
+
+def nonce_bounds(tok, n: int = 4096) -> tuple[int, int]:
+    """The fewest and the most tokens the reference line takes, over a fixed
+    set of n references: the same answer on every load. A tokenizer may split
+    one reference into more pieces than another."""
+    rng = random.Random(0)
+    counts = [tok.count(nonce_prefix(uuid.UUID(int=rng.getrandbits(128), version=4)))
+              for _ in range(n)]
+    return min(counts), max(counts)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -1247,6 +1313,9 @@ def build_parser() -> argparse.ArgumentParser:
                           "sanity band min_distinct4, max_compression")
     tps.add_argument("--length-tol", type=float, default=0.0,
                      help="allowed |tokens_client - osl| / osl (0 for ws)")
+    tps.add_argument("--isl-tol", type=float, default=0.3,
+                     help="a pool of whole requests (rows with \"isl\"): how "
+                          "far under its size a request may be, as a fraction")
     return ap
 
 

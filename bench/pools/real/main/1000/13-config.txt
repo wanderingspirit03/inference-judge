@@ -1,0 +1,76 @@
+Please audit these three files from our tenant-portal project. List every problem you find, with how serious it is, explain the fix for each, and then give me a corrected version of every file. We deploy to a small server that the housing association rents, and we want it safe and boring.
+
+`Dockerfile`
+
+```dockerfile
+FROM node:latest
+WORKDIR /app
+COPY . .
+RUN npm install
+ENV NODE_ENV=development
+ENV DATABASE_URL=postgres://portal:Tenant2024!@db.internal:5432/portal
+EXPOSE 3000
+USER root
+CMD ["npm", "start"]
+```
+
+`.github/workflows/deploy.yml`
+
+```yaml
+name: deploy
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: npm install
+      - run: npm test || true
+      - run: docker build -t portal:latest .
+      - run: |
+          echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login registry.example.org -u deploybot --password-stdin
+          docker tag portal:latest registry.example.org/housing/portal:latest
+          docker push registry.example.org/housing/portal:latest
+      - run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh -o StrictHostKeyChecking=no deploy@portal.example.org "docker pull registry.example.org/housing/portal:latest && docker restart portal"
+```
+
+`docker-compose.yml` (on the server, next to the nightly backup script)
+
+```yaml
+version: "3"
+services:
+  portal:
+    image: registry.example.org/housing/portal:latest
+    container_name: portal
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - SESSION_SECRET=changeme
+    depends_on:
+      - db
+  db:
+    image: postgres
+    container_name: portal-db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=portal
+      - POSTGRES_PASSWORD=Tenant2024!
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+```
+
+Notes from the team: the portal lets tenants report repairs and see their rent statements, so it holds names, addresses and payment history for about 2,300 households. The database is backed up nightly by the hosting provider but we have never tried a restore. The app listens on port 3000 behind a reverse proxy that handles the certificate. Tests take about four minutes and one of them is flaky, which is why somebody added the `|| true`. We would like deployment to happen only from `main`, and we would like to be able to roll back to the previous version in a hurry.

@@ -1,0 +1,32 @@
+Below are the notes I took in our kickoff meeting. Please turn them into a full project plan with workstreams, owners, dates, dependencies and a risk register. If the notes contradict themselves or leave something out, tell me what you assumed.
+
+**Staybright kickoff: "Instant Confirm" project**
+Date: Tuesday 6 October, 14:00 to 15:30
+Present: Lena Hartmann (CEO), Omar Haddad (CTO), Priya Nair (head of partnerships), Jonas Weiss (backend lead), Carla Mendes (support manager), Ivo Petrov (mobile developer). Notes by Priya.
+
+**Background**
+
+Today, when a guest books a room through Staybright, the booking is only "requested" until the hotel confirms it by email or by phone. The median confirmation time is 3 hours 40 minutes, and 17% of requests are never confirmed, which is our biggest complaint category. Lena wants "Instant Confirm" live for at least 40 partner hotels before the winter ski season starts on 5 December. Currently 212 hotels are on the platform, but only 31 have a live connection to a property management system.
+
+**Discussion**
+
+Omar said the technical idea is to read availability and rates directly from each hotel's property management system every five minutes, and to write the booking back as soon as the guest pays. Three of the systems used by our hotels have a usable interface, and two of them are used by about 70% of the connected hotels. Jonas thinks the first connector can be ready in four weeks if nobody else uses his time, but he is also the only person who knows the payment module, and the payment provider's new rules come into force on 1 November. Omar said he would borrow a contractor for six weeks, budget up to 18,000 euros, but has not found anyone yet.
+
+Priya said the biggest risk is not technical. Many hotel owners do not want to give us write access. She suggested a pilot with 8 friendly hotels in the mountains, using a simple contract addendum that her team can write by the end of next week. Lena said legal review takes ten working days, and she would ask the lawyer to start before the addendum is final.
+
+Carla said support is already behind and asked who will answer hoteliers when a connector fails. She wants a short runbook and a shared inbox, and she needs two weeks' notice before launch to train her team of five. Ivo said the app needs a new booking status ("Confirmed instantly") and a badge in the search results, which he estimated at about eight working days, but only after Jonas has agreed on the interface for the booking data. Ivo is also on holiday from 16 to 20 November.
+
+Lena asked what happens if a hotel is double booked. No one had a clear answer. Omar suggested that a hotel's own systems always win, and that we give the guest a free rebooking. Carla said we need a written policy with compensation limits. This was left open.
+
+**Decisions**
+
+- Pilot with 8 hotels, then widen to 40 by 5 December.
+- Start with the connector for the most used system.
+- Weekly progress meeting on Tuesdays at 10:00, led by Omar.
+- Budget cap for the whole project: 60,000 euros, of which 18,000 is for the contractor.
+
+**Open points**
+
+- Who owns the double-booking policy?
+- Is the 40-hotel goal fixed, or is 25 acceptable?
+- Which hotels are in the pilot? Priya to propose a list.

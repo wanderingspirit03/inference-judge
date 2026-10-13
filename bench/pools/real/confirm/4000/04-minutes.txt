@@ -1,0 +1,79 @@
+I took these minutes at today's steering meeting and nobody could agree afterwards on who was doing what. Please turn them into a full project plan for the digitisation and reading room move, with a work breakdown, an owner and a date for every task, a budget table, and a clear list of risks with what we do about each. Where the minutes leave something open, tell me what you assumed.
+
+HARROWGATE COUNTY RECORDS ARCHIVE
+STEERING GROUP - MINUTES
+Date: Wednesday 14 October 2026, 10:00 to 12:20, Reading Room Annexe
+Present: Philippa Dunmore (County Archivist, chair), Tomasz Reyes (Head of Conservation), Aisha Venkataraman (Digital Programme Manager), Colm Ferreira (Facilities), Yvette Strand (Finance Business Partner), Godfrey Alabi (Public Services Lead), Rhiannon Oakes (volunteer coordinator), Bram Kessel (IT, joined at item 3)
+Apologies: Dr Sunniva Hale (Friends of the Archive)
+Minutes: Rhiannon Oakes
+
+1. Minutes of the last meeting and matters arising
+
+1.1 Minutes of 9 September agreed as a true record.
+1.2 Matters arising: the fire survey of the old boiler room has been done. Colm reported that the room can hold the 220 metres of shelving the group wants, but the sprinkler pipework must be moved first. Quote received for 11,400 pounds. Action on Colm to confirm the quote is firm (see item 5).
+1.3 The grant letter from the Heritage Trust arrived on 28 September. The Trust will pay 186,000 pounds in total, in three instalments: 40 percent on signing, 40 percent at the half way report, 20 percent on the final report. Yvette said the final report must be in by 30 June 2027 or the last instalment is lost.
+
+2. The project in outline
+
+2.1 Philippa reminded the group of the scope agreed in the grant bid: (a) digitise the parish registers 1538 to 1900 (about 412 volumes, estimated 61,800 images) and the quarter sessions rolls 1620 to 1830 (about 96 boxes, estimated 38,500 images); (b) put the images online with a searchable index; (c) move the public reading room from the damp east wing into the old boiler room area and open it in the new space.
+2.2 The group agreed the project start date is Monday 2 November 2026 and the end date is 30 June 2027, set by the grant.
+2.3 Tomasz asked whether the 1538 registers are fit to be scanned. Condition survey so far covers only 140 of 412 volumes. Tomasz expects that between 10 and 15 percent will need repair before scanning. He said a volume needing repair takes about 6 hours of conservator time.
+
+3. Digitisation
+
+3.1 Aisha presented the scanning plan. Two overhead book scanners will be hired from a supplier for six months, at 1,650 pounds per month each. A third scanner is in the budget as a spare but Aisha is not sure it is needed. Agreed to decide at the half way point.
+3.2 Throughput: Aisha's pilot last month showed that one trained operator on one scanner makes about 480 images in a seven hour day for registers and about 360 for the rolls, because the rolls need to be unrolled and flattened. Working days available between 4 January and 28 May: 100 (excluding bank holidays and the Easter closure).
+3.3 Aisha's calculation: registers 61,800 / 480 = 128.75 operator days; rolls 38,500 / 360 = 106.9 operator days. Total about 236 operator days. With two scanners running on 100 days that is 200 operator days, so the group is about 36 days short. Options discussed: (a) a third scanner for the last 60 days; (b) Saturday working by volunteers; (c) drop the lowest priority 18th century rolls. No decision. Philippa asked Aisha to bring costed options to the next meeting.
+3.4 Bram joined. He confirmed the storage server can take 100 TB, which is enough for the master images (about 55 TB at the chosen format) with room for copies. A second copy will go to the offsite store in the neighbouring county. He needs the file naming rules from Aisha by 20 November to set up the folders.
+3.5 The online index: Godfrey said that the public wants a name search above all. The supplier of the catalogue software has quoted 22,500 pounds for a transcription module. Rhiannon said volunteers could do transcription of the 1813 to 1837 registers, which are the best loved by family historians, but nobody has agreed how many volunteers can be found. She estimates 25 in the first year based on the current list of 41 people who have asked to help.
+3.6 Bram raised a concern about the supplier's hosting terms, which require the Trust grant to pay three years in advance (31,800 pounds). Yvette said the Trust may not allow that because costs after 30 June 2027 are not eligible. To be checked with the Trust officer.
+
+4. Conservation
+
+4.1 Tomasz said that repair of the 1538 to 1640 registers will be done by himself and one part time conservator, Lucia Ferreira-Nwosu, who is available three days a week from 1 December. At 412 volumes with 12.5 percent needing repair (say 52 volumes) at 6 hours each, the repair time is 312 hours, or about 45 working days of one person at seven hours a day. At three days a week Lucia alone would take 15 weeks, so Tomasz will do part of it himself.
+4.2 The conservator's time is already in the budget at 31,200 pounds for the project. Tomasz thinks this is enough only if the percentage needing repair is 15 or below.
+4.3 Rolls: 12 of the 96 boxes are known to be mouldy. Tomasz said that they must be dry cleaned off site by a specialist before anyone handles them. A specialist visit costs 2,100 pounds per day and he expects two days. The mouldy boxes cannot be scanned until this is done. He suggested to do this in November so that the rolls can be scanned from February.
+4.4 The group noted that the new shelving room must be climate controlled before any records move. Colm said the climate control unit has a lead time of 10 weeks.
+
+5. Reading room move
+
+5.1 Colm presented the facilities plan. Work order: (1) move the sprinkler pipework (11,400 pounds, 3 weeks); (2) install the climate control unit (48,000 pounds, 10 week lead time and 1 week fitting); (3) install the 220 metres of shelving (36,500 pounds, 2 weeks); (4) paint and floor (9,200 pounds, 2 weeks); (5) move the records in a controlled way over 2 weeks; (6) install reading room furniture and the new public access computers (14,000 pounds, 1 week).
+5.2 Colm said that if he places the climate unit order on 20 October, delivery would be by 29 December and the full facilities work could be done by 26 February 2027 if the sprinkler job starts on 9 November and nothing slips. The records could move from 1 March for two weeks. The reading room could open on Monday 22 March 2027, and the damp east wing could close after that.
+5.3 Godfrey said that readers use the room most in March and April (Easter and school holidays) and does not want a closure at that time. He wants a plan for a two week closure in January or in May instead. Philippa pointed out that the sprinkler work and records move cannot be shifted without moving the whole date. No decision. Philippa will talk to the Friends before the next meeting.
+5.4 Yvette asked about contingency. Philippa said 10 percent on facilities. Yvette said the Trust requires the contingency to be shown as a separate line and cannot be spent without its written consent.
+
+6. Budget
+
+6.1 Yvette tabled the draft budget. Totals (pounds): scanners hire 19,800; operator posts (2 digitisation assistants, 6 months at 2,350 per month each) 28,200; conservation 31,200; mould specialist 4,200; storage server and backup 24,000; catalogue software and transcription module 22,500; hosting 31,800; facilities total 105,100 (the four items in 5.1 that Colm costed); furniture and computers 14,000; project manager (Aisha, 0.4 of her time for 8 months) 17,600; contingency 10,510. The grand total is 308,910 pounds.
+6.2 Yvette noted that the total is 122,910 pounds higher than the grant of 186,000 pounds. Philippa said she has had a verbal assurance of up to 50,000 pounds from the county but nothing in writing, and Dr Hale has told her the Friends can pledge 20,000 pounds. That still leaves 52,910 pounds with no source. The group agreed it cannot sign the Trust agreement while this gap is open. Action on Philippa to get written confirmation from the county and to bring proposals for the remaining gap to the next meeting; Yvette to see which lines can be cut or phased.
+6.3 Godfrey asked whether the 14,000 pounds for furniture and computers was inside the facilities figure of 105,100. Colm said no, it is separate.
+
+7. Reporting to the Heritage Trust and communications
+
+7.1 Yvette said the Trust asks for a half way report and the group agreed it should be submitted by 26 March 2027, once the reading room has opened, so that it can show real progress and trigger the second instalment of 74,400 pounds. The final report is due 30 June 2027.
+7.2 The first instalment of 74,400 pounds will arrive only after the agreement is signed (see 6.2). Colm and Aisha pointed out that the climate unit order of 48,000 pounds on 20 October would have to be paid from county funds, because the grant money will not have arrived. Yvette will ask whether the county can underwrite this. If not, the order cannot be placed on 20 October and item 8.1 of the risks below applies.
+7.3 Godfrey will draft a short notice for readers about the move and the closure. It cannot be published until the closure dates are decided (see 5.3). He suggested a monthly newsletter from December.
+7.4 Philippa will ask the local paper whether it would run a piece when the first parish registers go online. Target for the first online release: 31 March 2027, with the 1813 to 1837 registers first.
+
+8. Risks discussed
+
+8.1 Climate unit delay: if the order is placed after 20 October the reading room date moves by the same number of weeks.
+8.2 Staff: Aisha is the only person who knows the scanning workflow. Philippa wants a deputy named by 30 November.
+8.3 Volunteer numbers: transcription depends on them and none are signed up yet.
+8.4 Hosting terms: see 3.6.
+8.5 Mould found in more than 12 boxes, which would delay the rolls.
+8.6 The records have to be insured while they are moved, and Yvette has not yet asked the insurer.
+
+9. Any other business
+
+9.1 Rhiannon reported that 41 people responded to the call for volunteers. A training evening is being planned for the first week of December.
+9.2 Dr Hale sent a note before the meeting asking that the Friends are told about the closure dates at least eight weeks ahead.
+9.3 The next meeting is Wednesday 11 November at 10:00 in the Annexe.
+
+Summary of actions agreed in the meeting
+- Colm: confirm the sprinkler quote is firm and order the climate unit by 20 October.
+- Aisha: file naming rules to Bram by 20 November; costed options for the throughput shortfall for the next meeting.
+- Tomasz: finish the condition survey of the remaining 272 volumes by the end of November.
+- Yvette: check with the Trust whether hosting can be prepaid; ask the insurer about the move; ask whether the county can underwrite the climate unit order; see which budget lines can be cut or phased.
+- Philippa: written confirmation of county funds and proposals for the remaining 52,910 pound gap; talk to the Friends about the closure; name a deputy for Aisha by 30 November.
+- Rhiannon: first volunteer training evening in the first week of December.

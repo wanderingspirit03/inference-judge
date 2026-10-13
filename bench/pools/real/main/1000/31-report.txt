@@ -1,0 +1,36 @@
+Here is our incident report from the January network outage. Could you summarise it section by section for the executive committee, then list your recommendations, and flag anything in the report you think is weak, missing or inconsistent? Keep the summary clear enough for people who are not engineers.
+
+INCIDENT REPORT IR-2025-003: Loss of heat supply to the Northgate network, 14 to 15 January
+Prepared by: Operations Engineering, Calderbrook District Heat Ltd. Reviewed by: Head of Operations. Status: final.
+
+1. Executive summary
+Between 03:40 on 14 January and 11:15 on 15 January, about 2,300 homes and 14 commercial buildings on the Northgate network received reduced or no heat. Outside temperatures fell to minus 9 C. The cause was a failure of the primary circulation pump P2 at the Northgate energy centre, followed by a failure of the automatic switch to standby pump P3. Total customer-hours without adequate heat were roughly 41,000.
+
+2. Timeline
+- 03:40: Alarm for low differential pressure. The on-call operator acknowledged it at 03:52.
+- 04:05: Operator found P2 had tripped on motor overheating and tried to start P3 manually; P3 would not start because its breaker was open following maintenance on 9 January.
+- 04:30: Duty engineer called in. Breaker closed at 05:10 after it was confirmed safe.
+- 05:25: P3 running, but at reduced speed because of a faulty frequency drive setting. Supply temperature recovered only to 61 C against a target of 85 C.
+- 08:00: Customer calls reached 340 per hour. The call centre had no scripted message.
+- 09:30: Contractor attended to correct the drive settings. Full flow was restored for most streets by 14:30.
+- 15 January, 06:00: A second, smaller dip in pressure followed when valves in the Eastfield branch were opened too quickly during refilling. Eastfield streets (about 600 homes) were not fully warm until 11:15.
+
+3. Root causes
+(a) The standby pump breaker was left open after maintenance and no checklist step required it to be closed and signed off. (b) The automatic changeover had been disabled for testing in November and was not re-enabled. (c) The frequency drive settings on P3 had never been tested under winter load. (d) Alarms went to a single on-call phone with no escalation.
+
+4. Impact
+The company received 1,420 complaints and 96 requests for compensation. Under our customer charter, households that lose heat for more than 24 hours receive 60; a further 38 vulnerable households (elderly, ill or with infants) were offered portable electric heaters. Direct costs are estimated at 118,000, made up of compensation 61,000, extra staff and contractors 32,000, heaters 9,000 and repair 16,000. Reputational effects have not been quantified.
+
+5. Actions already taken
+The breaker was locked closed and a new sign-off step added to the maintenance checklist. The changeover logic was restored and tested on 17 January. The frequency drive on P3 was reprogrammed. A second on-call phone was added.
+
+6. Open items
+- The cause of P2's overheating is not yet known; the motor has been sent to the manufacturer.
+- A review of the call centre scripts is pending.
+- The regulator was told of the incident on 16 January, 36 hours after the 24-hour deadline.
+- Winter readiness testing for all three energy centres has not been scheduled.
+
+7. Lessons learned
+Maintenance and operations did not share a view of equipment status. Customers were not informed in time. Staff worked well under pressure but a number of procedures were found to be out of date.
+
+Appendix: Pump data. P2: installed 2011, last overhaul 2019. P3: installed 2016, never overhauled. P1: removed 2022, not replaced.

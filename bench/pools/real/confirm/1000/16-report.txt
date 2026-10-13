@@ -1,0 +1,18 @@
+Here is the quarterly report of the national chess federation's development office. Please give me a section-by-section summary, then a list of your recommendations for the board, ranked by importance and with the reasoning behind each one.
+
+**Chess Federation of Norland: Development Office, Q3 2026 report**
+Prepared by: Elias Brandt, head of development, for the board meeting of 15 October
+
+**1. Membership.** The federation ended the quarter with 11,420 individual members, up from 10,980 at the end of Q2 (4.0 percent). Junior members under 18 rose from 3,310 to 3,790, mostly thanks to the school programme described in section 4. Adult membership fell slightly, from 7,670 to 7,630. Renewals for the adult group stood at 81 percent, below our target of 85 percent. Exit surveys show that 40 percent of lapsed adults say there were too few local tournaments.
+
+**2. Finance.** Revenue was 412,000, against a budget of 395,000. Membership fees made up 238,000, tournament entry fees 96,000, sponsorship 58,000 and grants 20,000. Spending was 389,000, against a budget of 380,000. The overspend of 9,000 came almost entirely from the junior team's travel to the European youth championship, where flights were booked late. The federation holds a reserve of 268,000, equal to about two months of costs. The main sponsor, a regional bank, has given notice that it will review its contract in January; its 40,000 a year is two thirds of our sponsorship income.
+
+**3. Tournaments.** There were 63 rated tournaments in the quarter, compared with 58 last year. Total player entries were 3,940. The national open attracted 412 players, our highest number, but ran two hours late on the final day because of a shortage of arbiters. Only 31 of our 74 registered arbiters took part in any event this quarter. Three tournaments were cancelled for lack of entries, all in the northern region.
+
+**4. School programme.** The programme reached 96 schools, up from 61, with 2,100 pupils taking weekly lessons. We have 24 coaches, of whom 9 are volunteers. Coach turnover is a concern: five coaches left during the quarter, citing low pay of 22 an hour. A pilot of online lessons in four remote schools had a drop-out rate of 35 percent, against 12 percent for in-person lessons.
+
+**5. Rating system.** The new rating software went live on 1 August. Eleven players raised errors in their rating changes; nine were confirmed as software mistakes and corrected. The manual check of results is taking one staff member about 12 hours a week.
+
+**6. Risks.** Sponsor dependence, coach turnover, arbiter shortage, and one data protection complaint about junior photographs, which is still open.
+
+**7. Next quarter.** Priorities proposed by the office: a regional tournament fund for the north of 15,000, a recruitment drive for arbiters, and a review of coach pay.

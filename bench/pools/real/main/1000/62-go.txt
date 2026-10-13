@@ -1,0 +1,94 @@
+Here is a Go package from our tea importing business that works out the blend recipes for our packaged teas. Please explain what each function does, review it for bugs and design issues, and write table-driven tests. I'm especially worried about the rounding and about the ordering of results.
+
+```go
+package blend
+
+import (
+	"errors"
+	"fmt"
+	"sort"
+	"strings"
+)
+
+type Lot struct {
+	Name        string
+	Origin      string
+	GramsInHand float64
+	CostPerKg   float64
+}
+
+type Part struct {
+	LotName string
+	Percent float64
+}
+
+type Recipe struct {
+	Name  string
+	Parts []Part
+}
+
+var ErrShortStock = errors.New("not enough stock for batch")
+
+func Validate(r Recipe) error {
+	total := 0.0
+	for _, p := range r.Parts {
+		if p.Percent <= 0 {
+			return fmt.Errorf("recipe %s: non-positive share for %s", r.Name, p.LotName)
+		}
+		total += p.Percent
+	}
+	if total != 100 {
+		return fmt.Errorf("recipe %s: shares add up to %v, want 100", r.Name, total)
+	}
+	return nil
+}
+
+func CostPerKg(r Recipe, stock map[string]*Lot) (float64, error) {
+	cost := 0.0
+	for _, p := range r.Parts {
+		lot, ok := stock[p.LotName]
+		if !ok {
+			return 0, fmt.Errorf("unknown lot %q", p.LotName)
+		}
+		cost += lot.CostPerKg * p.Percent / 100
+	}
+	return cost, nil
+}
+
+func Needs(r Recipe, batchKg float64) map[string]float64 {
+	out := make(map[string]float64)
+	for _, p := range r.Parts {
+		out[p.LotName] += batchKg * 1000 * p.Percent / 100
+	}
+	return out
+}
+
+func Produce(r Recipe, batchKg float64, stock map[string]*Lot) error {
+	if err := Validate(r); err != nil {
+		return err
+	}
+	needs := Needs(r, batchKg)
+	for name, grams := range needs {
+		lot, ok := stock[name]
+		if !ok {
+			return fmt.Errorf("unknown lot %q", name)
+		}
+		if lot.GramsInHand < grams {
+			return ErrShortStock
+		}
+		lot.GramsInHand -= grams
+	}
+	return nil
+}
+
+func Label(r Recipe) string {
+	var names []string
+	for _, p := range r.Parts {
+		names = append(names, p.LotName)
+	}
+	sort.Strings(names)
+	return r.Name + ": " + strings.Join(names, ", ")
+}
+```
+
+Some context. Recipes are loaded from a spreadsheet, so percentages like 33.3, 33.3 and 33.4 do appear, as do thirds that someone typed as 33.333. A batch is usually 5 to 40 kg. We have about 60 lots in stock and 25 recipes. The warehouse team once reported that a failed batch had still used up part of the stock of one lot, even though the system said the batch was refused. The label is printed on the box and is read by customers, so the order in which the ingredients appear matters to us for legal reasons: they have to be listed from the largest share to the smallest.

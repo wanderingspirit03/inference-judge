@@ -1,0 +1,370 @@
+We are a network of eleven kindergartens run by a parents' cooperative, and this TypeScript module is the heart of our admin app: it handles places, waiting lists, staffing ratios and the monthly parent fees. A volunteer wrote it quickly and it has grown. Please explain what each part does, propose a refactoring (with the reasons and what the new structure would look like), and then write a good set of tests with Vitest for the parts that matter most. Call out anything you think is a bug.
+
+```ts
+// kindergarten.ts - places, waiting list, ratios and fees for the Little Oak network
+
+export type AgeBand = "under2" | "2to3" | "3plus";
+
+export interface Child {
+  id: string;
+  name: string;
+  birthDate: string; // ISO yyyy-mm-dd
+  centreId: string;
+  siblingIds: string[];
+  hoursPerWeek: number;
+  allergies?: string[];
+  vegetarian?: boolean;
+  startDate: string;
+  endDate?: string;
+}
+
+export interface Centre {
+  id: string;
+  name: string;
+  groups: Group[];
+}
+
+export interface Group {
+  id: string;
+  name: string;
+  band: AgeBand;
+  capacity: number;
+  childIds: string[];
+  staffIds: string[];
+}
+
+export interface Staff {
+  id: string;
+  name: string;
+  qualified: boolean;
+  weeklyHours: number;
+}
+
+export interface WaitingEntry {
+  childId: string;
+  centreId: string;
+  requestedStart: string;
+  appliedOn: string;
+  hasSiblingInCentre: boolean;
+  memberFamily: boolean;
+  priority?: number;
+}
+
+export interface FeeTable {
+  baseHourly: number;
+  mealPerDay: number;
+  materialsPerMonth: number;
+  incomeBands: { upTo: number; factor: number }[];
+  siblingDiscount: number[]; // index 0 = second child, 1 = third child, ...
+}
+
+export const DEFAULT_FEES: FeeTable = {
+  baseHourly: 1.85,
+  mealPerDay: 3.9,
+  materialsPerMonth: 12,
+  incomeBands: [
+    { upTo: 24000, factor: 0.5 },
+    { upTo: 42000, factor: 0.8 },
+    { upTo: 70000, factor: 1 },
+    { upTo: Infinity, factor: 1.15 },
+  ],
+  siblingDiscount: [0.1, 0.25, 0.5],
+};
+
+const RATIO: Record<AgeBand, number> = {
+  under2: 4,
+  "2to3": 7,
+  "3plus": 12,
+};
+
+export function ageInMonths(birthDate: string, on: string): number {
+  const b = new Date(birthDate);
+  const d = new Date(on);
+  let months = (d.getFullYear() - b.getFullYear()) * 12 + (d.getMonth() - b.getMonth());
+  if (d.getDate() < b.getDate()) months -= 1;
+  return months;
+}
+
+export function bandFor(birthDate: string, on: string): AgeBand {
+  const m = ageInMonths(birthDate, on);
+  if (m < 24) return "under2";
+  if (m < 36) return "2to3";
+  return "3plus";
+}
+
+// ---------------------------------------------------------------- ratios
+
+export interface RatioCheck {
+  groupId: string;
+  children: number;
+  staff: number;
+  qualifiedStaff: number;
+  allowed: number;
+  ok: boolean;
+  reason?: string;
+}
+
+export function checkRatio(group: Group, staff: Staff[]): RatioCheck {
+  const onGroup = staff.filter((s) => group.staffIds.includes(s.id));
+  const qualified = onGroup.filter((s) => s.qualified).length;
+  const allowed = onGroup.length * RATIO[group.band];
+  const children = group.childIds.length;
+
+  let ok = true;
+  let reason: string | undefined;
+  if (children > group.capacity) {
+    ok = false;
+    reason = "over capacity";
+  } else if (children > allowed) {
+    ok = false;
+    reason = "not enough staff";
+  } else if (children > 0 && qualified === 0) {
+    ok = false;
+    reason = "no qualified staff";
+  }
+  return {
+    groupId: group.id,
+    children,
+    staff: onGroup.length,
+    qualifiedStaff: qualified,
+    allowed,
+    ok,
+    reason,
+  };
+}
+
+export function checkCentre(centre: Centre, staff: Staff[]): RatioCheck[] {
+  return centre.groups.map((g) => checkRatio(g, staff));
+}
+
+// ---------------------------------------------------------------- waiting list
+
+export function scoreEntry(e: WaitingEntry, today: string): number {
+  let score = 0;
+  if (e.hasSiblingInCentre) score += 50;
+  if (e.memberFamily) score += 20;
+  const waitedDays = Math.floor(
+    (new Date(today).getTime() - new Date(e.appliedOn).getTime()) / 86400000
+  );
+  score += Math.min(waitedDays / 30, 24);
+  if (e.priority) score += e.priority;
+  return score;
+}
+
+export function rankWaitingList(entries: WaitingEntry[], today: string): WaitingEntry[] {
+  return entries.sort((a, b) => scoreEntry(b, today) - scoreEntry(a, today));
+}
+
+export function offerPlaces(
+  centre: Centre,
+  entries: WaitingEntry[],
+  children: Map<string, Child>,
+  today: string
+): { childId: string; groupId: string }[] {
+  const offers: { childId: string; groupId: string }[] = [];
+  const ranked = rankWaitingList(entries.filter((e) => e.centreId === centre.id), today);
+  for (const entry of ranked) {
+    const child = children.get(entry.childId);
+    if (!child) continue;
+    const band = bandFor(child.birthDate, entry.requestedStart);
+    const group = centre.groups.find(
+      (g) => g.band === band && g.childIds.length + offers.filter((o) => o.groupId === g.id).length < g.capacity
+    );
+    if (group) offers.push({ childId: child.id, groupId: group.id });
+  }
+  return offers;
+}
+
+// ---------------------------------------------------------------- fees
+
+export interface FeeInput {
+  child: Child;
+  householdIncome: number;
+  daysAttended: number;
+  month: string; // yyyy-mm
+  siblingOrder: number; // 0 = eldest in the network
+}
+
+export interface FeeLine {
+  label: string;
+  amount: number;
+}
+
+export function incomeFactor(income: number, table: FeeTable = DEFAULT_FEES): number {
+  for (const band of table.incomeBands) {
+    if (income <= band.upTo) return band.factor;
+  }
+  return 1;
+}
+
+export function weeksInMonth(month: string): number {
+  const [y, m] = month.split("-").map(Number);
+  const days = new Date(y, m, 0).getDate();
+  return days / 7;
+}
+
+export function monthlyFee(input: FeeInput, table: FeeTable = DEFAULT_FEES): FeeLine[] {
+  const lines: FeeLine[] = [];
+  const { child } = input;
+
+  const hours = child.hoursPerWeek * weeksInMonth(input.month);
+  let care = hours * table.baseHourly * incomeFactor(input.householdIncome, table);
+
+  if (input.siblingOrder > 0) {
+    const idx = Math.min(input.siblingOrder - 1, table.siblingDiscount.length - 1);
+    care = care * (1 - table.siblingDiscount[idx]);
+  }
+  lines.push({ label: "Childcare", amount: Math.round(care * 100) / 100 });
+
+  if (!child.vegetarian || child.vegetarian) {
+    lines.push({
+      label: "Meals",
+      amount: Math.round(input.daysAttended * table.mealPerDay * 100) / 100,
+    });
+  }
+
+  lines.push({ label: "Materials", amount: table.materialsPerMonth });
+  return lines;
+}
+
+export function totalOf(lines: FeeLine[]): number {
+  return lines.reduce((sum, l) => sum + l.amount, 0);
+}
+
+export function siblingOrderFor(child: Child, all: Map<string, Child>): number {
+  const family = [child, ...child.siblingIds.map((id) => all.get(id)).filter(Boolean)] as Child[];
+  family.sort((a, b) => a.birthDate.localeCompare(b.birthDate));
+  return family.findIndex((c) => c.id === child.id);
+}
+
+// ---------------------------------------------------------------- attendance and staff hours
+
+export interface AttendanceRecord {
+  childId: string;
+  date: string;
+  present: boolean;
+  arrivedAt?: string; // HH:MM
+  leftAt?: string; // HH:MM
+}
+
+export function parseAttendanceCsv(text: string): AttendanceRecord[] {
+  const rows = text.trim().split("\n").slice(1);
+  return rows.map((row) => {
+    const [childId, date, present, arrivedAt, leftAt] = row.split(",");
+    return {
+      childId,
+      date,
+      present: present === "1",
+      arrivedAt: arrivedAt || undefined,
+      leftAt: leftAt || undefined,
+    };
+  });
+}
+
+export function daysAttendedByChild(records: AttendanceRecord[], month: string): Record<string, number> {
+  const result: Record<string, number> = {};
+  for (const r of records) {
+    if (!r.date.startsWith(month)) continue;
+    if (r.present) result[r.childId] = (result[r.childId] || 0) + 1;
+  }
+  return result;
+}
+
+export function hoursBetween(from: string, to: string): number {
+  const [fh, fm] = from.split(":").map(Number);
+  const [th, tm] = to.split(":").map(Number);
+  return (th * 60 + tm - (fh * 60 + fm)) / 60;
+}
+
+export function overtimeChildren(records: AttendanceRecord[], contractedPerDay: Record<string, number>): string[] {
+  const flagged = new Set<string>();
+  for (const r of records) {
+    if (!r.present || !r.arrivedAt || !r.leftAt) continue;
+    const actual = hoursBetween(r.arrivedAt, r.leftAt);
+    if (actual > contractedPerDay[r.childId] + 0.25) flagged.add(r.childId);
+  }
+  return Array.from(flagged);
+}
+
+export function staffCoverage(staff: Staff[], centre: Centre): Record<string, number> {
+  const coverage: Record<string, number> = {};
+  for (const g of centre.groups) {
+    const hours = staff
+      .filter((s) => g.staffIds.includes(s.id))
+      .reduce((sum, s) => sum + s.weeklyHours, 0);
+    coverage[g.id] = hours / 40;
+  }
+  return coverage;
+}
+
+export function nextBandChange(child: Child, today: string): string | null {
+  const born = new Date(child.birthDate);
+  const months = ageInMonths(child.birthDate, today);
+  const target = months < 24 ? 24 : months < 36 ? 36 : null;
+  if (target === null) return null;
+  const d = new Date(born.getFullYear(), born.getMonth() + target, born.getDate());
+  return d.toISOString().slice(0, 10);
+}
+
+// ---------------------------------------------------------------- invoices
+
+export interface Invoice {
+  childId: string;
+  month: string;
+  lines: FeeLine[];
+  total: number;
+  dueDate: string;
+}
+
+export function buildInvoices(
+  children: Child[],
+  incomes: Record<string, number>,
+  attendance: Record<string, number>,
+  month: string
+): Invoice[] {
+  const byId = new Map(children.map((c) => [c.id, c]));
+  const invoices: Invoice[] = [];
+  for (const child of children) {
+    if (child.endDate && child.endDate < month + "-01") continue;
+    if (child.startDate > month + "-31") continue;
+    const lines = monthlyFee(
+      {
+        child,
+        householdIncome: incomes[child.id],
+        daysAttended: attendance[child.id] ?? 0,
+        month,
+        siblingOrder: siblingOrderFor(child, byId),
+      },
+      DEFAULT_FEES
+    );
+    invoices.push({
+      childId: child.id,
+      month,
+      lines,
+      total: totalOf(lines),
+      dueDate: month + "-05",
+    });
+  }
+  return invoices;
+}
+
+export function summarise(invoices: Invoice[]): { count: number; total: number; average: number } {
+  const total = invoices.reduce((s, i) => s + i.total, 0);
+  return { count: invoices.length, total, average: total / invoices.length };
+}
+
+export function allergyReport(centre: Centre, children: Map<string, Child>): string[] {
+  const lines: string[] = [];
+  for (const g of centre.groups) {
+    for (const id of g.childIds) {
+      const c = children.get(id);
+      if (c && c.allergies && c.allergies.length > 0) {
+        lines.push(`${g.name}: ${c.name} (${c.allergies.join(", ")})`);
+      }
+    }
+  }
+  return lines;
+}
+```
+
+Some background: each centre has between two and four groups, and each group has two to five staff. Fees are invoiced on the first working day of the month for the month before. Households with several children in the network get a discount on the younger children. Parents often complain that fees for children who started or left mid-month do not look right, and that the vegetarian meal price should be lower, but the price table has no field for it. The waiting list for our two biggest centres has over 200 children each.

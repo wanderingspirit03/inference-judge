@@ -17,7 +17,7 @@ Everything on this page was checked against `SCHEMA` in `bench/target.py` and th
 | file | what it is | how far it has been run |
 |---|---|---|
 | `targets/cpu-mock.yaml` | the mock server, for a laptop or CI | runs on any laptop |
-| `targets/v6e4-gemma4-26b-tps.yaml` | one user's speed on a Google Cloud TPU v6e-4, with vLLM | the model server was brought up by hand on a v6e-4; bootstrap and a judged run have not been run on a TPU, so the file ships as `runnable: false` and its sealed launch is marked NOT PROVEN |
+| `targets/v6e4-gemma4-26b-tps.yaml` | one user's speed on a Google Cloud TPU v6e-4, with vLLM | on one v6e-4, bootstrap, a baseline, a 10-launch calibration and a rehearsal have run, so the file ships as `runnable: true`; the chip gate passed only with `--network host --privileged`, so its isolation is weaker than a full seal; no research loop has run on a TPU |
 | `targets/gpu-gemma4-26b-tps.yaml` | one user's speed on one NVIDIA GPU, with vLLM | built and tested on a laptop with fakes only; no GPU has run it |
 | `targets/sketch-tpu-8chip.yaml` | an example of a target that is not ready to run; every value marked `verify` is a placeholder | not meant to run |
 
@@ -59,7 +59,7 @@ bench/.venv/bin/python bench/target.py validate targets/<id>.yaml
 A good file prints `targets/<id>.yaml: ok (<id>, tps, runnable)`, or `NOT runnable` when it says `runnable: false`. A bad file prints the field and the reason, and exits with 1:
 
 ```text
-target.py: metric.windows_s: unknown key (known: kind, isl, osl, concurrency, slo, ramp_s, window_s, screen_window_s, design, blocks, prompt_pool, confirm_pool, pool_size, length_tol, guard_tol, screen_tol, stall_ms)
+target.py: metric.windows_s: unknown key (known: kind, isl, osl, concurrency, slo, ramp_s, window_s, screen_window_s, design, blocks, prompt_pool, confirm_pool, pool_size, length_tol, isl_tol, extra_body, guard_tol, screen_tol, stall_ms)
 ```
 
 Create `bench/.venv` with `make -C bench venv` if you do not have it yet. `bench/target.py` needs PyYAML, and the venv has it.
@@ -207,9 +207,11 @@ metric:
 | `screen_window_s` | no | If set, a candidate is first launched alone for one window of this length and screened against the incumbent's record. A clear loser costs one launch and never starts the incumbent. |
 | `design` | no | `abba` (incumbent, candidate, candidate, incumbent: four launches) or `ici` (incumbent, candidate, incumbent: three launches). Default `abba`. Use `ici` when each launch is dear, for example when it compiles. |
 | `blocks` | no | Measured sweeps per launch, after one unscored warm sweep. Default 2. |
-| `prompt_pool`, `confirm_pool` | no | Files of prompts, in the judge's own area. `confirm_pool` is used by the held-out `--confirm` run and must not overlap `prompt_pool`. Without `prompt_pool`, the judge draws a fresh pool for each run. |
+| `prompt_pool`, `confirm_pool` | no | Files of prompts, in the judge's own area. `confirm_pool` is used by the held-out `--confirm` run and must not overlap `prompt_pool`. Without `prompt_pool`, the judge draws a fresh pool for each run. A row is either `{"id", "prompt"}`, which the harness cuts or pads to each size, or `{"id", "isl", "prompt"}`, a whole request that it sends as written and only under its own size. A pool holds one kind of row or the other, and the harness refuses a mix. |
 | `pool_size` | no | The size of that fresh pool. Default 2048. |
 | `length_tol` | no | How far a request's token count may differ from `osl`, as a fraction of `osl`. Default 0, which suits the mock's tokenizer. A real tokenizer usually needs a small value such as 0.01. |
+| `isl_tol` | no | For a pool of whole requests only. How far under its size a request may be, with the reference line in front, as a fraction of the size. It must be at least 0 and below 1. When unset, the harness uses 0.3. A request over its size, or under it by more than this, stops the run at load. |
+| `extra_body` | no | A mapping of extra fields merged into the body of every speed-test request. The fields the judge measures by, such as `max_tokens` and `stream`, are set after it and cannot be overridden. For example, `{skip_special_tokens: false}` suits a server that hides special tokens from the text it returns, which would make the answer count come up short. |
 | `guard_tol` | no | How far a candidate may fall below the incumbent (and the stock baseline) at any level before it fails the guard, as a fraction. Default 0.03. |
 | `screen_tol` | no | The tolerance the screening launch is held to against the incumbent's stored value. Default 0.02. |
 | `stall_ms` | no | The longest silence allowed between two tokens of one answer. A block with a stall is dropped. A launch whose blocks all stall is `INVALID`. Default 1000. |

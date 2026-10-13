@@ -1,0 +1,36 @@
+Please turn my lecture notes below into a study guide for the new trainees: a clear summary of each topic, at least four worked examples with the arithmetic shown, and a ten-question quiz with full answers. The trainees are school leavers with no baking experience, so explain anything that is not obvious.
+
+LECTURE 3: DOUGH FORMULAS, BAKER'S PERCENTAGES AND SCALING (Hartwell & Daughters Bakeries, trainee programme)
+
+1. Why we use baker's percentages
+Every ingredient is written as a percentage of the flour weight. Flour is always 100 percent. This lets us compare recipes at a glance and scale any batch without recalculating by hand. Example formula for the standard white loaf: flour 100, water 65, salt 2, yeast 1, which totals 168 percent.
+
+2. Calculating weights from a total
+To find how much of each ingredient is needed for a total dough weight:
+- total percentage = sum of all percentages
+- flour weight = total dough weight x 100 / total percentage
+- every other weight = flour weight x its percentage / 100
+For the white loaf formula, 16.8 kg of dough needs 10 kg flour, 6.5 kg water, 200 g salt and 100 g yeast.
+
+3. Hydration
+Hydration is the water percentage. 65 percent is a firm sandwich-loaf dough. Our sourdough runs at 78 percent and is stickier, so it needs a longer rest and gentle handling. Higher hydration gives a more open crumb but a flatter loaf if shaped poorly.
+
+4. Pre-ferments
+We use a poolish (equal weights of flour and water, plus a pinch of yeast) for baguettes. The flour and water in the poolish count toward the final formula. If the final dough uses 10 kg of total flour and 30 percent of it is pre-fermented as poolish, the poolish contains 3 kg flour and 3 kg water. The remaining flour is 7 kg. Water to be added at mixing is the total water minus 3 kg.
+
+5. Dough temperature
+Target dough temperature after mixing is 24 C. We calculate the water temperature using the formula: water temperature = (desired dough temperature x 3) minus (flour temperature + room temperature + friction factor). The friction factor for our spiral mixers is 12 C. Example: flour 20 C, room 26 C, desired dough 24 C. Water = 72 minus (20 + 26 + 12) = 14 C. In summer we use ice for part of the water. Weigh the ice as water.
+
+6. Scaling and yield
+After mixing, dough loses about 1.5 percent of its weight during fermentation and 12 percent as moisture during baking. To get 600 g loaves, scale the raw dough at 600 divided by 0.88, which is about 682 g. Forgetting baking loss is the most common reason new trainees produce underweight bread, which breaks the labelling rules.
+
+7. Costing
+Flour costs 0.72 per kg, yeast 4.80 per kg, salt 0.40 per kg. Water is ignored. The ingredient cost of one 16.8 kg batch of white dough is flour 7.20, yeast 0.48, salt 0.08, total 7.76. Divided by 24 loaves, that is about 0.32 per loaf.
+
+8. Common mistakes
+- Using volume (cups) rather than weight.
+- Forgetting to subtract pre-ferment flour and water from the final mix.
+- Adding salt directly onto yeast. Salt slows the yeast, so keep them apart in the bowl until mixing begins.
+- Not checking dough temperature with a probe.
+
+Homework for next week: Scale the sourdough formula (flour 100, water 78, salt 2, starter 20 percent of flour, with the starter at 100 percent hydration) to make 40 kg of dough. Remember to include the starter's flour and water in the totals. Bring your working to the practical session on Thursday.

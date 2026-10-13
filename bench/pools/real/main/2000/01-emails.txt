@@ -1,0 +1,110 @@
+Below is an email thread from our shop that has gone round in circles for a week. I'm Priya and I have to close it out. Please write the reply I should send to everyone that settles every open point, and then give me a list of actions with an owner and a date for each.
+
+---
+
+From: Dorothea Lindqvist <dorothea@fernlanebooks.example.org>
+To: Priya Raman, Tobias Okafor, Maren Castellano
+Date: Mon 6 Oct, 09:12
+Subject: Autumn promotion: what are we actually doing?
+
+Hi all,
+
+We need a decision on the autumn promotion this week, because the print catalogue goes to the printer on Friday 17 Oct. Three things are open.
+
+1. Free shipping threshold. It is 35 pounds today. Tobias wants 30, Maren wants to leave it alone.
+2. The "Second-hand Saturdays" idea. Do we list used books on the main site or on a separate page?
+3. The returns backlog. Maren says there are 41 parcels sitting in the back room.
+
+Please reply by Wednesday so I can brief the printer.
+
+Dorothea
+
+---
+
+From: Tobias Okafor <tobias@fernlanebooks.example.org>
+Date: Mon 6 Oct, 11:40
+Subject: Re: Autumn promotion: what are we actually doing?
+
+On shipping: last October our average basket was 27.80. Only 22 percent of orders cleared 35 pounds. If we drop the threshold to 30, my rough model says about 31 percent of orders clear it and the basket should creep up as people add a paperback to qualify. Postage costs us 3.10 on average, so we lose that on every order that newly qualifies. I think it pays for itself, but only if the average basket rises by at least 2.50. I would test it for the six weeks of the promotion and then revert if it does not.
+
+On used books: I'd like them on the main site with a "Pre-loved" filter. A separate page splits our search traffic and our reviews.
+
+Tobias
+
+---
+
+From: Maren Castellano <maren@fernlanebooks.example.org>
+Date: Mon 6 Oct, 14:05
+Subject: Re: Autumn promotion: what are we actually doing?
+
+I don't want to change the threshold in the middle of the busiest quarter. Customer service already gets a dozen emails a week asking where free shipping went when we changed it in March. If we change it again we will get the same wave.
+
+Used books: each one is a single copy with its own condition. Our stock system cannot handle one-off items with different conditions under a single product page. Someone will have to create 300 or so separate listings by hand. I have counted 312 books in the back room that are good enough to sell.
+
+Returns: yes, 41 parcels. 29 are from the September school-set order and the rest are mixed. Nobody has opened them since 22 September because I was off for two weeks. The refunds are not processed, and some customers are now chasing us. The payment provider only lets us refund within 90 days, so the oldest ones expire on 21 December.
+
+Maren
+
+---
+
+From: Priya Raman
+Date: Tue 7 Oct, 08:30
+Subject: Re: Autumn promotion: what are we actually doing?
+
+Two questions before I decide. Maren, could the 312 used books be loaded by a spreadsheet import rather than by hand? And Tobias, what does the six-week test cost us in the worst case if the basket does not rise?
+
+Priya
+
+---
+
+From: Tobias Okafor
+Date: Tue 7 Oct, 10:55
+Subject: Re: Autumn promotion: what are we actually doing?
+
+Worst case: we expect about 1,900 orders over six weeks. The extra qualifying orders are about 9 percent of that, so around 170 orders, times 3.10, comes to roughly 530 pounds. That is the maximum we would lose if no one adds to their basket. I can set up a banner that says "Free shipping over 30 until 30 November" so people know it ends.
+
+---
+
+From: Maren Castellano
+Date: Tue 7 Oct, 15:20
+Subject: Re: Autumn promotion: what are we actually doing?
+
+A spreadsheet import does exist, but it makes one product with variants, not one product per copy. Each book would need a unique ISBN suffix, like -U001, and then the site shows 300 near-identical results for a popular title. I would rather start with a hand-picked 60 and see how they sell. I can do 60 in two days if Dorothea approves the photographs, because the condition notes take the time.
+
+On returns, I can clear them by Friday 10 Oct if someone helps me on Thursday. I need one person for the day to open parcels while I process refunds.
+
+---
+
+From: Tobias Okafor
+Date: Tue 7 Oct, 17:10
+Subject: Re: Autumn promotion: what are we actually doing?
+
+Two more points so nobody is surprised later.
+
+First, the school-set order. The 29 returned parcels are the Ashgrove Primary reading packs. The school's bursar emailed me directly on Monday. She says the packs arrived with the wrong edition of the spelling workbook and she wants a replacement, not a refund. So those 29 do not go through the payment provider at all. They need a replacement order picked and sent, and the workbook edition must be checked against the school's purchase order, which says second edition. I suspect our supplier shipped the third edition to us in August.
+
+Second, the customer emails about the March change. I looked at the log. We had 47 emails in the fortnight after the change, not a dozen a week, so Maren is right that it was a bad fortnight. But about two thirds of them were from one cause: the checkout page still showed the old threshold for three days. If we change the text on the basket page and the banner on the same day, I think we avoid most of it. I can do both on Monday 13 Oct.
+
+---
+
+From: Maren Castellano
+Date: Wed 8 Oct, 08:15
+Subject: Re: Autumn promotion: what are we actually doing?
+
+Thanks Tobias, that is useful, I did not know the school packs were a replacement case. That moves 29 parcels out of the refund queue, so I only have 12 refunds to process. The oldest of those is from 15 September, so there is no risk with the 90 day limit.
+
+I can live with the threshold test if it is for six weeks only, the banner says when it ends, and the basket page is updated the same day as the banner. If I see more than 30 complaints in the first two weeks I want it stopped, no argument.
+
+I will add one condition on the used books. The 60 listings must go live on a Saturday, not before, otherwise the name makes no sense. The first Saturday that works is 25 Oct, since I need the week of the 13th for the replacement packs.
+
+---
+
+From: Dorothea Lindqvist
+Date: Wed 8 Oct, 09:02
+Subject: Re: Autumn promotion: what are we actually doing?
+
+I'm fine with the 530 pound risk. But the catalogue must say the right thing. Priya, whatever you decide, I need the exact wording of the shipping line and the dates by Thursday noon, otherwise the printer will use last year's text. I'm also happy to take a day on Thursday to help Maren with the parcels.
+
+One thing nobody has mentioned: the catalogue also has a page for gift wrapping, which we charge 3.50 for. If the threshold goes to 30, do we keep charging for wrapping on free-shipping orders? Last year we did. I would prefer to keep it, but I need a yes or no.
+
+Dorothea

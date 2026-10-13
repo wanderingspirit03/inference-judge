@@ -1,0 +1,1 @@
+Write a long design essay arguing whether a small video game studio of twelve people should build its own engine or use an existing one, weighing cost, team skills, schedule, and long-term flexibility.

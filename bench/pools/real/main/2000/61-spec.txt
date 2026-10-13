@@ -1,0 +1,65 @@
+Wir möchten diese Spezifikation vor dem Abnahmetest an die Fachabteilung geben. Bitte erstellen Sie dazu einen vollständigen Testplan mit nummerierten Testfällen (Vorbedingung, Schritte, erwartetes Ergebnis), gegliedert nach den Abschnitten der Spezifikation. Weisen Sie bitte außerdem auf Stellen hin, an denen die Spezifikation unklar ist oder sich selbst widerspricht, damit wir sie vorher korrigieren können.
+
+Produktspezifikation: Baumpflege-Manager (BPM) für das Grünflächenamt der Stadt Lindenau
+Version 1.2, Entwurf zur Abnahme
+Verantwortlich: Henrike Salzmann-Brandt, Abteilungsleiterin Stadtgrün
+
+1. Zweck
+
+Das Grünflächenamt der Stadt Lindenau pflegt rund 31.000 Straßen- und Parkbäume. Bisher wird das Baumkataster in einer Tabellenkalkulation geführt, Kontrollen werden auf Papier festgehalten, und Pflegeaufträge an die Kolonnen werden per E-Mail verteilt. Der Baumpflege-Manager (BPM) ersetzt diese Werkzeuge. Er verwaltet die Bäume, plant die gesetzlich geforderten Regelkontrollen, erzeugt Pflegeaufträge, dokumentiert Fällungen und Ersatzpflanzungen und liefert dem Amt die Zahlen für den jährlichen Bericht.
+
+2. Rollen
+
+2.1 Baumkontrolleur: erfasst Kontrollergebnisse und legt Pflegeaufträge an. Er darf keine Bäume löschen.
+2.2 Kolonnenführer: sieht die ihm zugewiesenen Aufträge, meldet Arbeitsbeginn und Fertigstellung und lädt Fotos hoch.
+2.3 Sachbearbeiter: legt Bäume an, ändert Stammdaten, genehmigt Fällungen unter 40 cm Stammdurchmesser und erstellt Berichte.
+2.4 Amtsleitung: genehmigt alle Fällungen ab 40 cm Stammdurchmesser und alle Fällungen von Bäumen, die als Naturdenkmal markiert sind. Sie hat Lesezugriff auf alle Daten.
+2.5 Jeder Benutzer hat genau eine Rolle. Rollen werden nur von der Systemadministration geändert.
+
+3. Baumdaten
+
+3.1 Pflichtfelder eines Baumes sind: Baumnummer (automatisch vergeben, Format B-000000), Art (aus der Artenliste), Standort (Koordinaten im Landeskoordinatensystem und Straße oder Parkname), Pflanzjahr (oder „unbekannt“), Stammdurchmesser in Zentimetern, Kronenhöhe in Metern und Zustandsklasse.
+3.2 Die Zustandsklasse ist eine Zahl von 0 bis 4: 0 gesund, 1 leichte Mängel, 2 deutliche Mängel, 3 stark geschädigt, 4 abgestorben.
+3.3 Der Stammdurchmesser muss zwischen 1 und 400 liegen. Die Kronenhöhe muss zwischen 1 und 45 liegen.
+3.4 Ein Baum kann als Naturdenkmal gekennzeichnet werden. Dann ist zusätzlich die Nummer der Schutzverordnung anzugeben.
+3.5 Bäume werden nie physisch gelöscht. Eine Fällung setzt den Status auf „gefällt“ und speichert das Datum.
+
+4. Regelkontrollen
+
+4.1 Jeder Baum wird in einem festen Intervall kontrolliert, das von der Zustandsklasse abhängt: Klasse 0 und 1 alle 24 Monate, Klasse 2 alle 12 Monate, Klasse 3 alle 6 Monate. Bäume der Klasse 4 werden innerhalb von 14 Tagen gefällt und nicht mehr kontrolliert.
+4.2 An Spielplätzen, Schulen und Kindertagesstätten gilt für alle Bäume höchstens ein Intervall von 12 Monaten, unabhängig von der Klasse.
+4.3 Das System erzeugt am ersten Werktag jedes Monats eine Kontrollliste für die Bäume, deren Kontrolle im laufenden oder im folgenden Monat fällig ist, sortiert nach Fälligkeitsdatum und danach nach Stadtbezirk.
+4.4 Eine Kontrolle gilt als überfällig, wenn das Fälligkeitsdatum überschritten ist. Überfällige Kontrollen werden in der Übersicht rot dargestellt und nach 30 Tagen an die Abteilungsleiterin gemeldet.
+4.5 Bei einer Kontrolle erfasst der Kontrolleur: Datum, neue Zustandsklasse, Befund (Freitext, höchstens 500 Zeichen) und, falls nötig, Maßnahmen. Das Datum darf nicht in der Zukunft liegen.
+4.6 Ändert sich die Zustandsklasse, wird das nächste Kontrolldatum sofort nach 4.1 neu berechnet.
+
+5. Pflegeaufträge
+
+5.1 Ein Pflegeauftrag hat: Baumnummer, Maßnahme (Kronenpflege, Totholzentfernung, Fällung, Wurzelbehandlung, Nachpflanzung), Dringlichkeit (hoch, normal, niedrig), Frist und zugewiesene Kolonne.
+5.2 Aufträge mit Dringlichkeit „hoch“ erhalten automatisch eine Frist von 3 Werktagen, „normal“ von 8 Wochen und „niedrig“ von 6 Monaten. Der Sachbearbeiter kann die Frist verlängern, aber nicht verkürzen.
+5.3 Eine Fällung wird erst zur Ausführung freigegeben, wenn sie nach 2.3 oder 2.4 genehmigt wurde. Ausgenommen sind Fällungen bei Gefahr im Verzug (Zustandsklasse 4 mit Dringlichkeit „hoch“), die sofort freigegeben werden, aber nachträglich innerhalb von 5 Werktagen bestätigt werden müssen.
+5.4 Ein Auftrag durchläuft die Status offen, zugewiesen, in Arbeit, erledigt und abgenommen. Der Kolonnenführer kann nur von zugewiesen auf in Arbeit und von in Arbeit auf erledigt schalten. Die Abnahme erfolgt durch den Kontrolleur, der den Baum erneut bewertet.
+5.5 Für die Fertigstellung sind mindestens ein Foto und der Zeitaufwand in Minuten erforderlich.
+5.6 Wird ein Auftrag nicht innerhalb seiner Frist erledigt, erscheint er auf der Liste der verspäteten Aufträge und wird einmal pro Woche per E-Mail an die Abteilungsleiterin gesendet.
+
+6. Fällungen und Ersatzpflanzungen
+
+6.1 Für jeden gefällten Baum mit einem Stammdurchmesser von mindestens 20 cm muss eine Ersatzpflanzung angelegt werden. Der Ersatz erfolgt im Verhältnis 1:1 bei Durchmessern bis 60 cm und im Verhältnis 1:2 bei Durchmessern über 60 cm.
+6.2 Die Ersatzpflanzung muss innerhalb der nächsten Pflanzperiode (1. November bis 31. März) erfolgen. Das System legt dafür automatisch einen Auftrag mit niedriger Dringlichkeit an.
+6.3 Kann der Ersatz nicht am selben Standort erfolgen, ist ein anderer Standort im selben Stadtbezirk zu wählen und zu begründen.
+
+7. Berichte
+
+7.1 Der Jahresbericht enthält: Anzahl der Bäume nach Art, nach Zustandsklasse und nach Stadtbezirk, die Zahl der Kontrollen, die Zahl der überfälligen Kontrollen am Stichtag 31. Dezember, die Zahl der Fällungen und Ersatzpflanzungen sowie die durchschnittliche Bearbeitungsdauer der Aufträge.
+7.2 Berichte können als PDF und als CSV-Datei (Trennzeichen Semikolon, Zeichensatz UTF-8) exportiert werden.
+
+8. Nichtfunktionale Anforderungen
+
+8.1 Eine Karte mit bis zu 5.000 Bäumen im sichtbaren Ausschnitt muss in weniger als 4 Sekunden geladen werden.
+8.2 Die Kolonnenführer arbeiten mit Tablets und müssen Aufträge auch ohne Netzverbindung ansehen und abschließen können. Die Daten werden abgeglichen, sobald wieder eine Verbindung besteht.
+8.3 Alle Änderungen an Bäumen und Aufträgen werden mit Benutzer und Zeitpunkt protokolliert und mindestens 10 Jahre aufbewahrt.
+8.4 Die Anmeldung erfolgt über das zentrale Benutzerverzeichnis der Stadt. Nach 20 Minuten Inaktivität wird die Sitzung beendet.
+
+9. Offene Punkte
+
+Es ist noch nicht entschieden, ob Bäume auf privaten Grundstücken, für die die Stadt eine Verkehrssicherungspflicht übernommen hat, aufgenommen werden. Ebenso ist offen, ob Bürger Schäden über ein Online-Formular melden dürfen.

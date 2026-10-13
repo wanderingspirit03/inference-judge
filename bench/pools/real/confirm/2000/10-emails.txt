@@ -1,0 +1,76 @@
+I am the plant manager and I have to answer this thread today. Please write a detailed reply from me that settles every open point (say clearly what we decide and who does what), and then give me a short list of actions with owners and dates.
+
+**From:** Gwendolyn Achterberg (Operations Director, Kilner Waste Group)
+**To:** Rashid Mbeki; Corinne Dufresne; Pavel Novak
+**Date:** Mon 5 Oct 2026, 08:14
+**Subject:** Riverside Recycling: glass line downtime and the council contract
+
+Rashid, Corinne, Pavel,
+
+The council has told us in writing that it will check our glass-contamination figures at the quarterly review on 29 October. If our contamination rate for September is above 3.5%, we pay a penalty of 14 pounds per tonne on the whole month's output. I need three things from you by Friday: a reason for the glass line stopping on three days last month, the real September contamination number, and a decision on the optical sorter. Please do not argue by email. Give me facts and a recommendation.
+
+Gwendolyn
+
+---
+
+**From:** Pavel Novak (Maintenance Lead)
+**To:** Gwendolyn Achterberg; Rashid Mbeki; Corinne Dufresne
+**Date:** Mon 5 Oct 2026, 09:40
+**Subject:** Re: Riverside Recycling: glass line downtime and the council contract
+
+Gwendolyn,
+
+The line stopped on 8, 17 and 24 September. On the 8th it was the crusher belt, which snapped; we had a spare and it took 5 hours. On the 17th the cause was a jam in the screen after a load of ceramic and stone from the east depot, 9 hours including cleaning. On the 24th it was the main drive gearbox temperature alarm, 16 hours; the gearbox oil was low and the cooler was blocked with glass dust. Total lost: 30 hours out of about 520 scheduled, so 5.8%. I think the 17th and 24th are avoidable. For the cooler I need a weekly cleaning job, which takes 40 minutes and needs the line stopped. For the screen, the answer is better incoming checks, which is Corinne's area.
+
+The optical sorter: the quote from Brightline is 186,000 pounds installed, with 11 weeks lead time. The older used machine from Tolliver is 64,000 pounds but has no warranty and I have not seen it run. I recommend neither until we know the contamination number.
+
+Pavel
+
+---
+
+**From:** Corinne Dufresne (Quality and Compliance)
+**To:** Gwendolyn Achterberg; Rashid Mbeki; Pavel Novak
+**Date:** Mon 5 Oct 2026, 11:25
+**Subject:** Re: Riverside Recycling: glass line downtime and the council contract
+
+All,
+
+September contamination: we took 41 samples (the contract needs a minimum of 30, one per tonne batch is our own rule but we are not there yet). The average is 3.9%. 12 of the 41 samples were above 5%, and 9 of those 12 came from loads collected in the east district, which the council changed to a single-bin collection on 1 September. Ceramic, heat-resistant glass and stone are the main contaminants. The 3.9% is above the 3.5% limit. September output was 1,420 tonnes, so the penalty would be 1,420 x 14 = 19,880 pounds.
+
+Two things I can do before the 29th. First, I can ask the council to take the east district loads out of the sample for September because their collection change was not our decision; this is a negotiation, not a right, and I would like Gwendolyn to ask. Second, I can start a picking station at the tipping floor to remove ceramics by hand, for two shifts a day. That needs two extra staff from agency, about 1,150 pounds per week each.
+
+Corinne
+
+---
+
+**From:** Rashid Mbeki (Site Supervisor)
+**To:** Gwendolyn Achterberg; Corinne Dufresne; Pavel Novak
+**Date:** Mon 5 Oct 2026, 13:02
+**Subject:** Re: Riverside Recycling: glass line downtime and the council contract
+
+I disagree with part of what Pavel and Corinne have written. A picking station at the tipping floor will not work in winter without a canopy; the floor is outdoors on the east side and the glass is wet. And two shifts of agency staff will not stop a ceramic jam because they would be picking at 25 tonnes an hour. I think the right fix is a rule that any east-district load that shows more than a visible handful of ceramic is rejected at the weighbridge and charged back to the council at the tipping fee. I can put a sign up and train the weighbridge operators tomorrow. I also want one thing clear: the line downtime on the 24th was not just the cooler. The night shift supervisor ignored the first temperature alert at 02:10 and the line was only stopped at 03:30. That is a procedure problem and I am dealing with it.
+
+Also, I need a day for the weekly cooler clean. Friday afternoon after the last load is fine for me, around 15:30.
+
+Rashid
+
+---
+
+**From:** Pavel Novak (Maintenance Lead)
+**To:** Gwendolyn Achterberg; Rashid Mbeki; Corinne Dufresne
+**Date:** Mon 5 Oct 2026, 13:48
+**Subject:** Re: Riverside Recycling: glass line downtime and the council contract
+
+One more point on the sorter, since Gwendolyn asked for facts. The Brightline machine removes ceramic and stone above 8 mm at about 95% efficiency according to their trial report from a plant in the north, but it only works if the glass is dry and the feed is spread in a single layer, so it also needs a new vibrating feeder at 12,500 pounds that is not in the 186,000 quote. The Tolliver machine is 12 years old and its supplier would not give me a trial. If we buy the Brightline machine and it delivers what they say, the contamination should fall to about 1.5%, but it will not be installed before the middle of January, so it cannot help with the 29 October review or with the October figures. One hour of line downtime costs us roughly 1,100 pounds in lost output, so the 30 hours in September cost about 33,000 pounds, which is more than the penalty.
+
+Pavel
+
+---
+
+**From:** Gwendolyn Achterberg
+**To:** Rashid Mbeki; Corinne Dufresne; Pavel Novak
+**Cc:** Plant Manager
+**Date:** Mon 5 Oct 2026, 14:20
+**Subject:** Re: Riverside Recycling: glass line downtime and the council contract
+
+I am copying the plant manager, who will give the final answer. Open points as I see them: (1) the optical sorter, buy or not; (2) the picking station against the weighbridge rule; (3) who asks the council about the east district samples; (4) the cooler cleaning; (5) the night shift alert procedure. Please make sure the reply covers each of the five. The plant manager has authority up to 40,000 pounds without me; above that I sign.

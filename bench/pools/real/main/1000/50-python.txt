@@ -1,0 +1,75 @@
+This module from our paper mill calculates the cost and expected weight of paper reel orders. Please give it a thorough code review, covering bugs, rounding and numeric problems, structure and naming, and then write a full set of pytest unit tests for it.
+
+```python
+import math
+from dataclasses import dataclass
+
+# grams per square metre -> price per tonne (euros)
+PRICE_PER_TONNE = {
+    60: 745.0,
+    80: 790.0,
+    100: 815.0,
+    120: 860.0,
+}
+
+CORE_WEIGHT_KG = 12.5
+MAX_REEL_DIAMETER_M = 1.25
+CORE_DIAMETER_M = 0.15
+
+
+@dataclass
+class Order:
+    customer: str
+    gsm: int
+    width_m: float
+    length_m: float
+    quantity: int
+    rush: bool = False
+
+
+def sheet_weight_kg(gsm, width_m, length_m):
+    area = width_m * length_m
+    return area * gsm / 1000
+
+
+def reel_weight_kg(order):
+    paper = sheet_weight_kg(order.gsm, order.width_m, order.length_m)
+    return paper + CORE_WEIGHT_KG
+
+
+def reel_diameter_m(order):
+    # thickness in mm is roughly gsm / 1000 * 1.2
+    thickness_m = order.gsm / 1000 * 1.2 / 1000
+    r_core = CORE_DIAMETER_M / 2
+    r_out = math.sqrt(r_core ** 2 + order.length_m * thickness_m / math.pi)
+    return r_out * 2
+
+
+def price_per_tonne(gsm):
+    if gsm in PRICE_PER_TONNE:
+        return PRICE_PER_TONNE[gsm]
+    keys = sorted(PRICE_PER_TONNE)
+    for lo, hi in zip(keys, keys[1:]):
+        if lo < gsm < hi:
+            share = (gsm - lo) / (hi - lo)
+            return PRICE_PER_TONNE[lo] + share * (PRICE_PER_TONNE[hi] - PRICE_PER_TONNE[lo])
+    raise ValueError("unsupported gsm")
+
+
+def order_cost(order):
+    if order.quantity <= 0:
+        raise ValueError("quantity must be positive")
+    if reel_diameter_m(order) > MAX_REEL_DIAMETER_M:
+        raise ValueError("reel too large")
+    paper_tonnes = sheet_weight_kg(order.gsm, order.width_m, order.length_m) * order.quantity / 1000
+    cost = paper_tonnes * price_per_tonne(order.gsm)
+    if order.quantity >= 20:
+        cost = cost * 0.95
+    elif order.quantity >= 10:
+        cost = cost * 0.97
+    if order.rush:
+        cost += cost * 0.15
+    return round(cost, 2)
+```
+
+Some notes on how it is used. The sales office types orders into a small web form, which builds an Order and shows the cost to the customer before they confirm. Widths are usually between 0.5 and 1.6 metres and lengths between 500 and 6,000 metres. Last month a customer was quoted a price a few euros lower than the invoice, and we also had one reel that came off the machine heavier than the paperwork said. The sales office would like to know whether those two incidents could come from this code.

@@ -1,0 +1,139 @@
+This is the beginning of a story I'm writing for a small anthology about working nights. I'm stuck at the end of chapter two. Please continue it in the same voice and keep going for a long stretch, at least the whole of chapter three and the start of chapter four, and keep the details I have already set up (the names, the building, the temperature problem, the missing pallet). I don't want a neat resolution yet.
+
+---
+
+THE COLD CHAIN
+
+Chapter One
+
+At ten past eleven the loading dock at Pellam & Voss Pharmaceutical Wholesale was lit like an operating theatre and about as warm. Ingrid Haldane stood at the edge of it with her hands in the sleeves of her fleece and watched the last lorry of the evening reverse towards the bay, the beeping of it going up and down the long grey wall of the warehouse like a bird that had learned one note.
+
+She had been the night supervisor for nine years. Before that she had been a picker, and before that a girl who had left school at sixteen and stood in the doorway of this same building asking whether they needed anyone, and a man whose name she had forgotten had said, Can you count? and she had said yes, and that had been the interview. The building had changed since then. The old brick end was now offices and a canteen that smelled of soup. The new end, which had gone up in the year her mother died, was the cold store: forty thousand square feet of racking kept at between two and eight degrees, and inside it, a room within the room, the freezer vault where the vaccines slept.
+
+Behind her, in the glass cabin that everyone called the aquarium, Dessa was eating a sandwich over her keyboard with the care of someone defusing something.
+
+"Fourteen pallets on this one," Dessa said, without looking up. "Eight are Mercer's insulin, four are the eye drops for the hospital group, and two are the usual mess."
+
+"Which mess?"
+
+"It says miscellaneous. It says do not stack."
+
+Ingrid went down the three steps to the dock level. The lorry's doors opened with the drawn-out sigh that big doors make, and the driver, a thin man with a beard the colour of wet sand, climbed down the side with a clipboard like it was a hymn book. His name badge said Corwin. He did not look at her. He looked at the thermometer by the door, the one that Pellam & Voss had bolted to the dock wall in her second year as supervisor, and he said, "Is that right? It says eleven."
+
+"It says eleven because it's eleven degrees on the dock," Ingrid said. "That's why we are very quick. How long has your load been on the road?"
+
+"Left the depot at four. Eight hours with the stops. The reefer unit was reading five all the way."
+
+"Reading," said Ingrid. This was the thing she had learned in nine years. The unit on the lorry read five. It did not say what the pallets read.
+
+They unloaded the way they always did, in a rhythm that nobody had designed: Teodoro on the electric pallet truck, Wren and Ash with the scanners, Oyelaran from the night team ticking each line against the manifest and calling it out in a voice that had never once been raised. Ingrid held the temperature probe. She slid it between the cartons of the first pallet and watched the number settle. 4.2. The second: 4.6. The third: 4.4. At the sixth, the number would not settle. It climbed to 7.8, hovered, and went to 8.3.
+
+"Stop," she said.
+
+Teodoro held the truck in the air, forks raised, the pallet hanging like an exhibit. Nobody spoke. Ingrid removed the probe and put it in again, in a different carton, then a third, and found 8.1, 8.4, 8.2.
+
+"That is the insulin," Dessa said from the dock edge. She had come out after all, the sandwich in a paper napkin. "That is Mercer's. That is the hospital order for Thursday."
+
+"I know what it is."
+
+Insulin that had been above eight degrees for some unknown time was not a catastrophe, she knew; there was a table for it, there were stability data, there were the men at Mercer's who would be asked and would say what they were asked to say. But it was a decision, and decisions were made in the morning by the Responsible Person, whose name was Halvard Pryce, who did not come in before seven-thirty. It was twelve minutes to midnight and there was a pallet in the air and a driver with a clipboard looking at her as though she were going to tell him that he was a murderer or a hero.
+
+"Put it in the quarantine bay," she said. "Cage it and tag it red. Don't open it. Scan the rest as normal, and probe every single pallet, not one in three."
+
+"That's another hour," Wren said.
+
+"Then it's another hour."
+
+Corwin lowered his clipboard. "Is this going to say it was my fault?"
+
+"It's going to say what the probe said," Ingrid told him. "That's all anyone can do."
+
+By one o'clock the lorry was empty. By a quarter past one she had probed all fourteen pallets and found that eight were fine, four were fine, and of the two marked miscellaneous, one was fine and one was not on the manifest at all. She stood in front of it with the scanner and the scanner gave her a long, low, offended tone.
+
+"Dessa," she said into the radio. "Fourteen pallets on the manifest."
+
+"Fourteen on the manifest."
+
+"I have fifteen on the floor."
+
+There was a pause, in which she could hear Dessa swallowing something. "Then it's not ours," Dessa said.
+
+Ingrid looked at the extra pallet. It was wrapped in grey film that gave back her own reflection, bent. There was a white label with a number but no name. No barcode. The cartons beneath the film had no printing on them at all, only a stripe of blue tape across each lid, and when she put the probe against the film, the number settled almost at once, as though it had been waiting for her: 2.0.
+
+Two degrees. The coldest thing on the dock.
+
+Chapter Two
+
+She did not tell Halvard Pryce about the extra pallet, though she told herself that she would, and that the delay was only because the right moment had not yet come. The right moment was the problem. At seven-thirty Pryce arrived in a good coat, with a coffee in a paper cup and the walk of a man for whom problems were things that happened to other people's departments, and she found him in the doorway of his office and reported the insulin. He listened with his head slightly inclined, the way a doctor does, and then said, "Brought in at eight degrees. For how long?"
+
+"I don't know. The lorry's log says five. The probe says eight on six of the fourteen."
+
+"Not on all of them?"
+
+"No. On six. The ones at the back, nearest the doors."
+
+He was quiet. "The doors," he said, "are the problem."
+
+"They're always the problem."
+
+"Then it's a transport deviation, and not ours." He wrote on a pad, the way he wrote on everything, in small square capitals. "Quarantine stays. I'll ring Mercer's and request the stability data and we will see what they say. Send the driver's log to me. And Ingrid, well done on the probe. A lot of people would have let it through."
+
+She thought about the fifteenth pallet, behind the red cage, behind a second, smaller cage she had made out of two pallet collars and a sheet of plywood and put in the corner where the camera did not quite reach. She thought about the blue tape. She said, "Thank you," and went home.
+
+Home was a flat above a launderette on Sorrel Street, two rooms and a kitchen, a bed she had not made since Sunday and a radiator that clanked as though someone were trying to get out of it. She slept until two in the afternoon with a towel over her eyes, and when she woke her mother's old clock on the shelf said a quarter past three, and her phone said that Dessa had called four times.
+
+She rang back. Dessa picked up on the first ring and did not say hello.
+
+"It's gone."
+
+"What's gone?"
+
+"Your pallet. The one that wasn't on the manifest. I came in early to do the quarantine log and went to look at it, because you made me curious, and the little cage is empty. The plywood's still there. The collars are there. The pallet is gone."
+
+Ingrid sat on the edge of the bed, still in last night's clothes. "Who was on the day shift?"
+
+"Everyone. Anyone. It's forty thousand square feet, Ingrid. A pallet truck could take it out the side door and no one would see." Dessa lowered her voice. "I looked at the camera. The camera on the dock. You know that one has a blind corner."
+
+"I know about the corner."
+
+"Between six and ten past seven this morning, the dock camera shows nobody. Then it shows somebody at ten past, walking into frame with a hand truck. I can't see the face. The coat is the good coat."
+
+"The good coat."
+
+"I'm not saying anything," said Dessa. "I'm saying I'm describing a coat."
+
+Ingrid looked at the radiator. It clanked twice, as if offering an opinion. She thought of Halvard Pryce in his doorway with his small square capitals, saying well done on the probe, saying a lot of people would have let it through. She thought about being a girl in a doorway, and a man she could not name asking whether she could count.
+
+"Don't tell anyone you rang me," she said. "I'm coming in. I'll be there at nine, an hour early, before the others arrive. I want to see the log of every door sensor from six to eight."
+
+"The door logs are in the system. The system is Pryce's."
+
+"The system is a database, Dessa. Databases are only secret for as long as nobody asks the right clerk."
+
+She did not leave at once. She sat for a while with her hands between her knees, and then she did what she had not done since the funeral, which was to open the bottom drawer of the shelf under the clock. Her mother's things were in it: a tin of buttons, a pair of reading glasses with one arm mended with tape, and an envelope of photographs. The top one was of the cold store on the day it opened, forty men and women in white coats on the new concrete, a ribbon, a man with scissors. Her mother had been the second from the left, squinting. She had worked in the old brick end for twenty-two years and had been given a coat and a place in the picture because someone in management had wanted it to look like a family.
+
+"They keep a record of everything," her mother used to say, "and they only read the records they like."
+
+Ingrid put the photograph back and shut the drawer. She dressed in the dark, which was how she had dressed for nine years, and went down the stairs.
+
+In the launderette below, the owner, Mr. Abara, who was folding sheets at the counter with a boy's patience and an old man's hands, called to her without turning round. "Miss Haldane. There was a man here asking about you this morning. A man in a good coat."
+
+She stopped at the door. "What did he want?"
+
+"To know if you lived upstairs. I said I could not give out information about my tenants. He said he understood, he was a colleague, he only wanted to leave something for you." Mr. Abara turned at last. In his hands he held a sealed white envelope, the kind that come in boxes of five hundred. "I said I would pass it on. I did not like the way he said it. He smiled with only the front of his face."
+
+She took the envelope. It weighed nothing. On the front, in small square capitals, someone had written her name, and she knew the handwriting at once, and put it in the inside pocket of her fleece unopened, against her ribs, where it stayed all the way to the bus stop like a second pulse.
+
+It had begun to rain in the way that it rains in November, without any drama, as if the sky had run out of ideas. The bus came and smelled of wet wool and oranges. She sat at the back and counted the stops, because she could count, because that was what they had asked her, and because it was easier than thinking about what she would do if the log said what she was afraid it would say.
+
+At the warehouse the car park was nearly empty. The rain had made the building look as if it had been lowered into water. She badged through the side door, up the stairs, past the canteen with its smell of soup, and found the data room unlocked and the light on and a stranger sitting at the terminal in her chair. The stranger was a young woman in a navy jacket with a lanyard Ingrid did not recognise, and a laptop connected to the server by a thin blue cable.
+
+"Oh," said the young woman. "Hi. You must be Ingrid. I'm Nyoka, from the audit team at head office. Mr. Pryce said you would be in at ten. He said you might have some questions about the temperature excursion." She smiled in a friendly, practised way. "I've pulled all the sensor data for the last forty-eight hours. I thought I'd save you the trouble."
+
+Ingrid stood very still in the doorway. On the screen behind Nyoka, in a grid of small grey rectangles, she could see the door sensors for the cold store, row on row, every one of them showing a flat green line. Every one of them, for the whole of the last forty-eight hours, perfectly normal.
+
+"That's helpful," she said. "Thank you."
+
+"Not at all." Nyoka turned back to her screen. "Strange, isn't it? A reading of eight degrees on the lorry pallets, and then not a flicker in any of your own sensors. It's almost as though the building doesn't know."
+
+"Almost," said Ingrid.

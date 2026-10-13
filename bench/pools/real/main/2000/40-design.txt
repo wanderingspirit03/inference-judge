@@ -1,0 +1,81 @@
+I'm the volunteer who looks after IT for Tidewater Rowing Club, and I've written up a design for a new boat booking and safety system. Please critique it honestly (what's missing, what's over-engineered, what could go wrong on the water), suggest alternatives to the main choices, and then give me an implementation plan with phases and rough effort that a few volunteers could realistically deliver.
+
+DESIGN DOCUMENT: Boat Booking and Outing Log, version 0.4
+Author: Aoife Brennan
+Date: 2 October
+
+1. Why we need it
+
+The club has 61 boats (eights, fours, quads, doubles, singles and two coaching launches), about 230 members and a boathouse on a tidal river. Boat use is arranged today on a paper whiteboard in the boathouse and a WhatsApp group. This causes double bookings of the eights on Saturday mornings, no record of who took which boat out and when it returned, and there is no way to find out which boats have damage reports. After the incident in March, when a single sculler was out for four hours after dark without anyone noticing, the committee asked for a system that records every outing and warns when a boat is overdue.
+
+2. Goals
+
+- Members can book a boat and a time slot from their phone, up to 14 days ahead.
+- Squad captains can reserve boats for a whole squad's training sessions.
+- Every outing is logged on departure and on return, using a tablet at the boathouse door.
+- If a boat has not returned by 30 minutes after the end of its booking, or at sunset plus 15 minutes, whichever is earlier, the duty officer's phone gets an alert.
+- Damage reports can be filed for a boat, and a boat with serious damage cannot be booked.
+- Safety rules are enforced: novices cannot book a single scull without a coach on a launch, and nobody may book a boat during a red flag condition.
+
+Non-goals: payment, race entries, and the club's membership database (we will read from it, but not change it).
+
+3. Users
+
+Members (about 230), squad captains (9), coaches (6), duty officers (a rota of 14 volunteers), the boat captain who handles repairs (1), and the committee, who need reports.
+
+4. Proposed architecture
+
+A small web application written in Python using the Django framework, with a PostgreSQL database, running on a rented virtual server (about 12 per month). Members sign in with the email address in the membership list, receiving a one-time link; no passwords. The mobile experience is a responsive web page, not a native app. Notifications are sent by email and by SMS through a third-party gateway (about 4 pence per message, estimate 150 messages a month). The boathouse tablet runs the same web application in a kiosk mode.
+
+Key tables: Member, Boat, Booking, Outing, DamageReport, Condition (stores the current flag colour and tide state entered by the duty officer), and Alert.
+
+5. Main flows
+
+5.1 Booking. The member picks a date and a slot, sees the available boats which match their grade, and confirms. The system checks the rules (grade, flag, double booking, damage status) before storing the booking. A booking can be cancelled up to one hour before the start.
+
+5.2 Departure. At the boathouse, the member taps their name on the tablet, selects the booking, and confirms the crew list. The outing starts and the boat is marked "on water".
+
+5.3 Return. The member taps "returned" on the tablet and answers a one-question damage check. If they report damage, they enter a short description and a photo may be added from their phone.
+
+5.4 Overdue alerts. A scheduled job runs every five minutes, looks for outings that are on water and past their limit, and sends an SMS to the duty officer on the rota. If the duty officer does not acknowledge within ten minutes, the message goes to the second person on the rota, and then to the club safety officer.
+
+6. Offline behaviour
+
+The boathouse has poor mobile coverage and a flaky Wi-Fi router. The tablet app will keep a local copy of the day's bookings and queue departures and returns until the connection returns. We accept that the overdue alert will not fire while the tablet is disconnected.
+
+7. Data and privacy
+
+We store names, email addresses, mobile numbers (for duty officers only), and outing times. Outing logs are kept for 3 years for insurance reasons. Members can ask to see their data. We do not store location.
+
+8. Security
+
+One-time sign-in links last 15 minutes. Admin rights are given to the committee secretary and the boat captain. The database is backed up daily to a cloud bucket. The tablet is locked into the application and has no access to other apps.
+
+9. Rollout
+
+Pilot with the Tuesday evening squad for four weeks, then the whole club in the spring. The whiteboard stays in place for the first month in parallel. A training evening will be held for the duty officers.
+
+9a. Reports for the committee
+
+Each month the system produces a table of outings per boat, hours per member, and the number of damage reports, so that the committee can decide which boats need replacing and whether the club is using its eights enough to justify the cost of storing them. The reports are generated from the database as CSV files; there is no dashboard in the first release. The boat captain also wants a list of boats ordered by hours since the last service, because oars and riggers are checked every 200 hours of use.
+
+9b. Running costs
+
+Server 12 per month, SMS gateway about 6 per month, domain name 15 per year, backup storage about 2 per month. The club's treasurer has agreed to a budget of 300 for the first year, which the estimate meets with a margin of about 60. The tablet (a second-hand model with a rugged case) costs 140 and has already been bought.
+
+9c. Alternatives considered
+
+We looked at two commercial booking services used by other clubs. Both charge per member per year (3 to 5), which would be 700 to 1,150 a year for us, and neither supports the sunset rule or the red flag rule. We also thought about a shared spreadsheet with a script. It would be cheaper but could not send reliable overdue alerts and would be hard to hand over to a new volunteer.
+
+10. Risks and open questions
+
+- Volunteers may not tap the tablet when they leave in a rush. What then? Some suggested a QR code on each boat, scanned by the phone.
+- Who updates the flag colour, and what happens if nobody does? At present it relies on a duty officer who might not be at the club.
+- Sunset times change daily. We plan to calculate them from the date and the latitude of the boathouse.
+- The system depends on a single volunteer (me). We need a backup person.
+- Should coaches be able to override rule blocks? Aoife thinks yes, with a reason, and the safety officer is not sure.
+- Is SMS the right channel for an urgent alert, given the poor coverage on the river bank?
+
+11. Estimated effort
+
+Roughly 120 hours of development, 30 hours of testing and 20 hours of training and documentation, over about five months of evenings and weekends.

@@ -1,0 +1,72 @@
+I'm the newest developer on the team and I've been asked to sign off on this design before we start building. Please give me a proper critique of it, covering what is sound and what is risky or missing, then suggest realistic alternatives for the parts you think are weakest, and finish with an implementation plan broken into phases with rough effort and what should be built first.
+
+Design document: SiteBook, daily records and snag tracking for the Ashgrove Construction site offices
+Author: Ludmila Okonkwo-Reyes, Engineering Lead
+Status: Draft 2, for review
+Date: 8 October 2026
+
+1. Background
+
+Ashgrove Construction runs between 9 and 14 building sites at a time, from small housing schemes to a 120-unit apartment block. Each site has a site office with a site manager, a clerk of works and one or two assistants. Today the daily record is a paper diary, the snag list (defects found during inspection that must be fixed before handover) is a spreadsheet emailed around weekly, and photographs live on personal phones. Three problems keep recurring. Disputes with subcontractors over who was on site and when cannot be settled without the paper diary, which is often left in the site cabin. Snags get lost or fixed twice because the spreadsheet is out of date within a day of being sent. And the head office cannot see the position on a site without phoning the manager.
+
+2. Goals
+
+- Site staff record the daily diary (weather, labour on site by trade, deliveries, visitors, instructions given, delays) on a tablet or phone in under 10 minutes.
+- Snags are created on site with a photo, a location on the building plan, a trade responsible and a due date, and can be tracked to closure.
+- Head office sees a live summary of every site.
+- The system works in a site cabin with poor or no mobile signal and synchronises when the connection returns.
+- Records cannot be altered after the end of the following working day without leaving an audit trail, because they may be used as evidence in a dispute.
+
+3. Non-goals
+
+SiteBook will not replace the programme, cost control or health and safety document systems. It will not handle subcontractor payments. It will not offer a customer-facing portal in this version.
+
+4. Users and scale
+
+About 70 site staff, 25 head office staff and 15 subcontractor foremen who are given limited access to see and close snags assigned to their company. Expected volumes: 14 diaries a day, around 400 snags created a week during busy handover periods, about 60 photographs a day, with a photograph averaging 3.5 MB after compression.
+
+5. Proposed architecture
+
+5.1 Client. A progressive web app built with React, installable on tablets and phones, using a local database in the browser (IndexedDB) for offline storage. All writes go first to the local database and are queued for upload.
+
+5.2 Server. A single Node.js service with a REST interface, backed by one PostgreSQL database, running on two virtual machines behind a load balancer in a single cloud region. Photographs are stored in object storage, with thumbnails created by a background worker.
+
+5.3 Synchronisation. Each client keeps a queue of changes. When online, the client sends the queue to the server in order, and the server applies each change if the record has not been changed by someone else since the version the client last saw. If it has, the server keeps the version with the later timestamp and discards the other. The client then downloads all changes since its last sync.
+
+5.4 Audit. Every change is written to an append-only audit table with user, time, device identifier and the old and new values. Diaries are locked at 23:59 on the next working day. Editing a locked diary needs a site manager's reason and creates a visible amendment note.
+
+5.5 Plans. Building plans are uploaded as PDFs and converted to images at several zoom levels. Snag locations are stored as a plan identifier plus x and y coordinates in the range 0 to 1.
+
+5.6 Authentication. Staff sign in with their company email account through single sign-on. Subcontractor foremen sign in with a one-time code sent to their phone, valid for 12 hours.
+
+6. Data model (outline)
+
+Site, Plan, Diary (one per site per day), DiaryEntry (type: labour, delivery, visitor, instruction, delay, weather), Snag (plan, x, y, description, trade, company, due date, status: open, fixed, verified, rejected), Photo (attached to a diary entry or snag), AuditEvent, User, Company.
+
+7. Reporting
+
+The head office dashboard shows for each site the number of open snags by age, overdue snags, labour on site today, deliveries expected and a flag if no diary has been submitted by 17:00. The queries run directly on the live database. A weekly PDF report is generated on Friday at 16:00 and emailed to project directors.
+
+7a. Non-functional requirements
+
+The app must open and show the current diary within 3 seconds on a tablet that is two years old. A diary must save locally within 1 second, even with no connection. Synchronisation of a typical day's changes, including 10 photographs, must finish within 2 minutes on a 4G connection. The service must be available 99.5 percent of the time between 06:00 and 20:00 on working days. Backups are taken nightly and kept for 35 days, and the database can be restored within 4 hours. All times are stored in UTC and shown in the site's local time.
+
+7b. Cost estimate
+
+Development: three developers for six months at an average loaded cost of 14,500 pounds each a month is 261,000 pounds. A designer for six weeks adds 22,000 pounds, testing and the pilot sites add 17,000 pounds, and 10,000 pounds is held for tablets and accessories for the first four sites. The running cost of 3,200 pounds a month covers the virtual machines (900), the database (700), object storage and bandwidth (600), the single sign-on licence (450) and monitoring, backups and support tools (550).
+
+8. Security and privacy
+
+Data is encrypted in transit and at rest. Access is by site: staff can see only sites they are assigned to, apart from head office staff who see all. Visitor names and company names are personal data and are kept for 7 years, after which they are anonymised. Photographs may show members of the public and should not be shared outside the company.
+
+9. Risks identified by the author
+
+Conflict handling in synchronisation is simple and may lose data. IndexedDB storage can be cleared by the browser if the device runs low on space. Large plan images may be slow on older tablets. The team has no experience with offline-first applications.
+
+10. Delivery proposal
+
+Build the entire system in about 6 months with a team of three developers, release to all sites at the same time in April 2027, and retire the paper diaries one month later. Training is planned as a single half-day session per site. The cost estimate is 310,000 pounds for development and 3,200 pounds a month to run.
+
+11. Open questions
+
+Whether to use an existing off-the-shelf site diary product instead of building. Whether subcontractors should be allowed to add their own comments on snags. How long to keep photographs. Who owns the data if a joint venture partner is involved in a site.

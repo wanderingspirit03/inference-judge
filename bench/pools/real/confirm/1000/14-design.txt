@@ -1,0 +1,23 @@
+Ich habe unten das Entwurfsdokument für die neue Volltextsuche in unserem Landesarchiv eingefügt. Bitte schreibe eine ausführliche Kritik, nenne mindestens zwei sinnvolle Alternativen mit Vor- und Nachteilen und erstelle einen Umsetzungsplan mit Meilensteinen und Risiken.
+
+**Entwurf: Suchdienst für das digitale Archiv, Version 0.3**
+Autor: Katrin Brandl, Team Fachverfahren
+Stand: 6. Oktober 2026
+
+**1. Ausgangslage.** Das Archiv verwaltet rund 2,4 Millionen digitalisierte Seiten aus Akten der Stadt- und Kreisverwaltung, davon etwa 1,9 Millionen mit Texterkennung. Die heutige Suche greift direkt auf die relationale Datenbank zu und findet nur Titel und Aktenzeichen. Besucher im Lesesaal und Bürger über das Internetportal beschweren sich, dass Inhalte nicht gefunden werden. Das Portal verzeichnet im Schnitt 3.000 Suchanfragen pro Tag, in der Spitze 150 pro Minute.
+
+**2. Ziele.** Volltextsuche über alle Seiten mit Antwortzeiten unter zwei Sekunden für 95 Prozent der Anfragen; Suche nach Namen auch bei abweichender Schreibweise; Einschränkung nach Zeitraum, Behörde und Aktenart; Treffer nur für Dokumente, die nach den Schutzfristen öffentlich sind.
+
+**3. Vorgeschlagene Architektur.** Ein einzelner Suchserver mit einem Volltextindex wird neben der bestehenden Datenbank betrieben. Ein nächtlicher Importjob liest alle geänderten Seiten aus der Datenbank, zerlegt den Text in Wörter und schreibt ihn in den Index. Das Portal ruft den Suchserver direkt über eine interne Schnittstelle auf. Die Zugriffsrechte werden im Portal geprüft, nachdem der Suchserver die Treffer geliefert hat; nicht öffentliche Treffer werden aus der Liste entfernt.
+
+**4. Datenmodell des Index.** Pro Seite ein Dokument mit den Feldern Akten-ID, Seitennummer, Volltext, Behörde, Aktenart, Jahr und Schutzfristende. Der Volltext wird unverändert gespeichert. Für Namen wird zusätzlich ein phonetisches Feld gepflegt, das auf deutscher Aussprache beruht.
+
+**5. Betrieb.** Der Server läuft auf einer virtuellen Maschine mit 32 GB Arbeitsspeicher und 500 GB Speicherplatz. Der Index wird einmal pro Woche gesichert. Bei einem Ausfall wird der Index aus der Datenbank neu aufgebaut, was nach ersten Tests etwa 40 Stunden dauert. Es gibt keine Überwachung außer der bestehenden Überprüfung, ob der Dienst antwortet.
+
+**6. Nicht-Ziele.** Keine Suche in Bildinhalten, keine Übersetzung, keine automatische Verschlagwortung.
+
+**7. Zeitplan.** Entwicklung acht Wochen, Test mit Mitarbeitern zwei Wochen, danach Freischaltung für das Portal. Das Team besteht aus zwei Entwicklern, von denen einer ab November in Elternzeit ist.
+
+**8. Datenschutz und Sicherheit.** Der Suchserver ist aus dem Netz des Portals erreichbar und verlangt keine Anmeldung. Anfragen werden mit der Suchanfrage des Nutzers protokolliert, damit Fehler nachvollzogen werden können; die Protokolle werden 90 Tage aufbewahrt. Eine Prüfung durch die Datenschutzbeauftragte ist vor der Freischaltung vorgesehen, aber noch nicht terminiert.
+
+**9. Offene Fragen.** Wie werden Berichtigungen und Sperrungen von Akten im Index nachgezogen? Darf der Volltext nicht öffentlicher Seiten überhaupt in einem Index liegen, der vom Internetportal erreichbar ist? Wer entscheidet, wann die Qualität der Texterkennung für eine Veröffentlichung ausreicht?

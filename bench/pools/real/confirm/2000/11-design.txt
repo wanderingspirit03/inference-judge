@@ -1,0 +1,70 @@
+Our school's head of IT asked me to get a second opinion on this design document before we start building. Please critique it honestly (gaps, risks, wrong assumptions), suggest alternative approaches where you think the proposed one is weak, and then give me an implementation plan with phases and rough effort.
+
+# Design: Placement test and class-assignment system for Linden Language School
+
+Author: Mirela Santangelo, IT. Status: draft for review. Last edited 2 October 2026.
+
+## 1. Background
+
+Linden Language School teaches English, Spanish and German to about 1,800 adult students per term in four locations (Central, Harbourside, Northgate and an online campus). New students currently take a paper placement test at the front desk, which a teacher marks by hand within two working days. A coordinator then phones the student with a proposed class. About 22% of students end up in the wrong level and change class in the first two weeks. Coordinators spend roughly 60 hours per term on placement.
+
+## 2. Goals
+
+- Students take an online placement test at home, in 25 minutes.
+- Results are available immediately for the written part and within one working day for the speaking part.
+- Students are proposed one or more matching classes, can choose and pay online.
+- The wrong-level rate falls below 10%.
+- Coordinators only handle exceptions.
+
+Non-goals: replacing the school's accounting system, building a general learning platform, or supporting more than three languages in the first release.
+
+## 3. Proposed architecture
+
+A single web application (Node.js with a PostgreSQL database) hosted on the school's existing virtual server, 4 cores and 8 GB of memory, shared with the school's public website. The application has four modules.
+
+**3.1 Test engine.** Items are stored in the database with a level tag from A1 to C2. The test is adaptive: it starts at B1 and moves up after two right answers and down after two wrong answers, with a fixed length of 30 items. The final level is the highest level at which the student answered at least 70% of items correctly. Item selection is random within the level. The item bank has 400 items per language, written by teachers over the summer.
+
+**3.2 Speaking part.** After the written test the student records a 60-second answer to a prompt in the browser. The audio file is stored on the server disk and a teacher listens to it and assigns a level from a form. A teacher is expected to review about 40 recordings a day in the peak weeks before the term starts, at 3 minutes each.
+
+**3.3 Class matching.** Each class has a level, a language, a campus, a day and time, and a number of places. The matcher proposes classes at the student's level (or one level lower if the speaking level is lower than the written one by one step) that have free places, sorted by the student's preferred days. Students pick a class and pay with a card through the school's payment provider; the application records the payment reference.
+
+**3.4 Coordinator dashboard.** Lists students waiting for the speaking review, students whose written and speaking levels differ by two or more steps, and classes that are over or under their target size (8 to 14 students).
+
+## 4. Data and privacy
+
+Student data (name, email, date of birth, country, test results, audio files) is stored in the same database and disk as the application. Audio files are kept for one year. Passwords are hashed. Students log in with email and a one-time code. The school is in a country with a data-protection law that requires a record of processing, a retention period and the ability to delete a student's data on request.
+
+## 5. Load and availability
+
+We expect peak load in the two weeks before each term (3 per year): about 1,200 tests over 14 days, with a daily peak of about 150 students taking tests, mostly between 18:00 and 22:00. Enrolment opens at 09:00 on a fixed date for each term, and last term 220 students tried to enrol in the first ten minutes. The application should be available 99% of the time in the peak weeks. Backups are taken nightly.
+
+## 6. Security
+
+The application runs behind the school's existing web server with HTTPS. Teachers log in with a username and password. Items and answers are stored in the same database tables as student responses, and the browser receives the entire item with the correct answer marked so that scoring can happen in the browser and be saved at the end.
+
+## 7. Integration
+
+A weekly export of enrolments in CSV is sent by email to the finance office, who enter them into the accounting system by hand. Class timetables are maintained in a spreadsheet by the coordinators, and are imported into the application each term from a file.
+
+## 8. Rollout
+
+A pilot with English at the Central campus in January, then all languages and campuses from the April term. The paper test is kept for two terms as a fallback.
+
+## 8A. Notifications and support
+
+The application sends four emails: the one-time login code, a confirmation when the written test is finished with the provisional level, a notice when the speaking review is done with the proposed classes, and a payment receipt. Emails are sent through the school's mail server directly from the application, in the student's own language where we have a translation, otherwise in English. If a student writes to the front desk with a problem during the test (for example the microphone does not work), the front desk can reset the test from the coordinator dashboard, which sets the attempt back to "not started" and keeps the old answers in the database. Front desk staff have a one-page guide for the five most likely problems. There is no live chat. The school's phone line is staffed from 09:00 to 17:30 on weekdays, and evenings and weekends are not covered, even though most tests will be taken then.
+
+## 9. Team, effort and budget
+
+The work will be done by Mirela and one other developer, Jacek, each at 60% of their time, with a contract designer for 15 days. We estimate 10 weeks to the January pilot. The estimate was made by listing screens: 9 student screens, 6 teacher screens and 5 coordinator screens at about 3 days each, plus 3 weeks for the test engine and 2 weeks for the payment integration. The budget approved in principle is 32,000 euros, of which 14,000 is for the designer, penetration testing and the payment provider's set-up fee, and the rest is internal time. There is no budget for a test environment separate from the production server.
+
+## 10. Reporting
+
+The coordinators want a weekly report with the number of tests started and finished, the distribution of levels, the average time to a speaking review, and the share of students who enrol in a class within seven days of their result. The report is a SQL query run by Mirela on the first working day of each week and pasted into an email. The wrong-level rate will be measured by counting students who change class in the first two weeks, as it is today.
+
+## 11. Open questions
+
+- Should the test be free?
+- How do we handle students with accessibility needs, for example dyslexia or low vision?
+- Who owns the item bank if a teacher leaves?
+- What should happen if a student retakes the test to get into a lower level?

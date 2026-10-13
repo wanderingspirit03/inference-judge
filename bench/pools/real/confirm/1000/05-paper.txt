@@ -1,0 +1,33 @@
+I'm a reviewer for a small claims-management journal and was sent this section of a manuscript. Please write a detailed peer review: summarise what the authors did, assess whether the method supports the conclusions, list major and minor concerns, and say what you would require before publication.
+
+**Does an automated triage score shorten settlement times? Evidence from a regional insurance claims office**
+
+**3. Methods**
+
+We studied one regional claims office that handles household property claims. Between 1 March and 31 August 2025 the office received 4,812 new claims. On 1 June the office introduced a triage score, calculated from claim value, claimant history and the number of attached photographs, which sorts incoming claims into three queues: fast track (score under 30), standard (30 to 70) and complex (over 70). Before 1 June, claims were handled in order of arrival by whichever adjuster was free.
+
+Our primary outcome was days from first notice to settlement. We compared the 2,206 claims received in March to May (the before period) with the 2,606 claims received in June to August (the after period). Claims still open on 30 September 2025 were excluded from the analysis; this affected 143 claims in the before period and 311 in the after period. We report medians because settlement times were skewed. Differences were tested with a Mann-Whitney test, and we adjusted for claim value using a linear regression on log days.
+
+Adjusters were not told which period was being studied. However, the office manager, who is the second author, chose the cut-off scores for the queues after viewing the before-period data.
+
+**4. Results**
+
+Table 1 shows the main result. Median settlement time fell from 19 days in the before period to 14 days in the after period (p < 0.001). The adjusted estimate was a reduction of 22 percent (95% interval 17 to 27 percent).
+
+| Queue (after period) | Claims | Median days |
+|---|---|---|
+| Fast track | 1,104 | 6 |
+| Standard | 1,013 | 17 |
+| Complex | 489 | 41 |
+
+Claims in the fast track settled in a median of 6 days. The complex queue, however, had a median of 41 days, compared with a median of 33 days for the highest-value third of claims in the before period. The authors note this but do not test it.
+
+Customer complaints rose from 61 in the before period to 88 in the after period. Complaints per 100 claims were therefore 2.8 before and 3.4 after. We did not test this difference because complaints were a secondary measure. Staff sick leave in the office was similar in both periods.
+
+In the summer months of the after period the region experienced an unusually dry spell, and the number of water damage claims, which are typically quick to settle, fell from 38 percent of all claims to 24 percent. Two adjusters left the office in July and were replaced in August.
+
+**5. Discussion**
+
+The triage score reduced the typical settlement time by about a quarter and we therefore recommend that other offices adopt it. The longer times in the complex queue show that adjusters spend their effort where it is needed. The rise in complaints is most likely explained by greater awareness of the complaints process after a newsletter sent in July.
+
+We acknowledge that this is a single-office study. Future work should examine whether the score can be applied to commercial claims.

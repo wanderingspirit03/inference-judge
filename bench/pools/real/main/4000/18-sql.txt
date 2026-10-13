@@ -1,0 +1,225 @@
+Our ferry company's booking database has got slow now that we have three seasons of data, and the operations dashboard queries take up to 40 seconds. Could you review the schema and tell me what is wrong with the design, which indexes we need and why, and then rewrite each of the seven queries so they are correct and fast, explaining every change? It is PostgreSQL 15 and the largest tables are bookings (about 2.1 million rows), booking_passengers (about 4.8 million) and sailing_events (about 9 million).
+
+```sql
+-- Schema for Skerryhold Ferries booking system
+
+CREATE TABLE ports (
+    port_id        SERIAL PRIMARY KEY,
+    name           VARCHAR(80) NOT NULL,
+    country_code   CHAR(2) NOT NULL,
+    timezone       VARCHAR(40) NOT NULL
+);
+
+CREATE TABLE vessels (
+    vessel_id      SERIAL PRIMARY KEY,
+    name           VARCHAR(80) NOT NULL,
+    passenger_cap  INTEGER NOT NULL,
+    vehicle_cap    INTEGER NOT NULL,
+    cabins         INTEGER NOT NULL DEFAULT 0,
+    in_service     BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+CREATE TABLE routes (
+    route_id       SERIAL PRIMARY KEY,
+    origin_port    INTEGER NOT NULL REFERENCES ports(port_id),
+    dest_port      INTEGER NOT NULL REFERENCES ports(port_id),
+    distance_nm    NUMERIC(6,1),
+    typical_mins   INTEGER
+);
+
+CREATE TABLE sailings (
+    sailing_id     SERIAL PRIMARY KEY,
+    route_id       INTEGER NOT NULL REFERENCES routes(route_id),
+    vessel_id      INTEGER NOT NULL REFERENCES vessels(vessel_id),
+    departs_at     VARCHAR(25) NOT NULL,   -- stored as text, ISO format, e.g. 2025-07-14T09:30:00
+    arrives_at     VARCHAR(25),
+    status         VARCHAR(20) NOT NULL DEFAULT 'scheduled'
+);
+
+CREATE TABLE customers (
+    customer_id    SERIAL PRIMARY KEY,
+    email          VARCHAR(120),
+    full_name      VARCHAR(120) NOT NULL,
+    phone          VARCHAR(30),
+    loyalty_tier   VARCHAR(10),
+    created_at     TIMESTAMP NOT NULL DEFAULT now()
+);
+
+CREATE TABLE bookings (
+    booking_id     SERIAL PRIMARY KEY,
+    customer_id    INTEGER,
+    sailing_id     INTEGER NOT NULL,
+    booked_at      TIMESTAMP NOT NULL DEFAULT now(),
+    status         VARCHAR(20) NOT NULL,   -- confirmed, cancelled, refunded, standby
+    total_pence    INTEGER NOT NULL,
+    vehicle_plate  VARCHAR(12),
+    vehicle_class  VARCHAR(10),
+    cabin_id       INTEGER,
+    promo_code     VARCHAR(20),
+    notes          TEXT
+);
+
+CREATE TABLE booking_passengers (
+    id             SERIAL PRIMARY KEY,
+    booking_id     INTEGER NOT NULL,
+    passenger_name VARCHAR(120) NOT NULL,
+    age_band       VARCHAR(10) NOT NULL,   -- adult, child, infant
+    fare_pence     INTEGER NOT NULL
+);
+
+CREATE TABLE payments (
+    payment_id     SERIAL PRIMARY KEY,
+    booking_id     INTEGER NOT NULL,
+    amount_pence   INTEGER NOT NULL,
+    method         VARCHAR(20) NOT NULL,
+    paid_at        TIMESTAMP,
+    provider_ref   VARCHAR(60)
+);
+
+CREATE TABLE cabins (
+    cabin_id       SERIAL PRIMARY KEY,
+    vessel_id      INTEGER NOT NULL REFERENCES vessels(vessel_id),
+    deck           INTEGER NOT NULL,
+    cabin_number   VARCHAR(8) NOT NULL,
+    berths         INTEGER NOT NULL,
+    cabin_class    VARCHAR(12) NOT NULL    -- inside, outside, suite
+);
+
+CREATE TABLE sailing_events (
+    event_id       BIGSERIAL PRIMARY KEY,
+    sailing_id     INTEGER NOT NULL,
+    event_type     VARCHAR(30) NOT NULL,   -- boarding_open, boarding_closed, departed, arrived, delayed, cancelled
+    occurred_at    TIMESTAMP NOT NULL,
+    detail         JSONB
+);
+
+CREATE INDEX idx_bookings_customer ON bookings(customer_id);
+CREATE INDEX idx_payments_booking ON payments(booking_id);
+```
+
+Notes on the data: `sailings.departs_at` is text for historic reasons (the original import came from a CSV); all values are in UTC and in the same ISO format. `bookings.status` can be confirmed, cancelled, refunded or standby. `sailing_events.detail` for a delayed event looks like `{"minutes_late": 25, "reason": "weather"}`. Ages: the `age_band` column holds adult, child or infant. A booking has one row in `booking_passengers` per traveller, and a driver counts as a passenger. About 4 per cent of bookings have no customer (customer_id is NULL) because they were made at the port desk.
+
+The seven queries below are used by the operations dashboard and by the monthly report. Queries 1, 3 and 4 run on every dashboard refresh, which happens every 60 seconds.
+
+```sql
+-- Query 1: Today's sailings with passenger counts and load factor
+SELECT s.sailing_id,
+       r.origin_port,
+       r.dest_port,
+       s.departs_at,
+       v.name AS vessel,
+       (SELECT COUNT(*)
+          FROM booking_passengers bp
+          JOIN bookings b ON b.booking_id = bp.booking_id
+         WHERE b.sailing_id = s.sailing_id
+           AND b.status = 'confirmed') AS passengers,
+       (SELECT COUNT(*)
+          FROM booking_passengers bp
+          JOIN bookings b ON b.booking_id = bp.booking_id
+         WHERE b.sailing_id = s.sailing_id
+           AND b.status = 'confirmed') * 100.0 / v.passenger_cap AS load_pct
+FROM sailings s
+JOIN routes r ON r.route_id = s.route_id
+JOIN vessels v ON v.vessel_id = s.vessel_id
+WHERE substring(s.departs_at, 1, 10) = to_char(now() AT TIME ZONE 'UTC', 'YYYY-MM-DD')
+ORDER BY s.departs_at;
+
+-- Query 2: Customers who have never made a confirmed booking
+SELECT c.customer_id, c.full_name, c.email
+FROM customers c
+WHERE c.customer_id NOT IN (
+    SELECT b.customer_id
+    FROM bookings b
+    WHERE b.status = 'confirmed'
+);
+
+-- Query 3: Delayed sailings in the last 24 hours with minutes late
+SELECT s.sailing_id, s.departs_at, e.occurred_at,
+       e.detail->>'minutes_late' AS minutes_late,
+       e.detail->>'reason' AS reason
+FROM sailing_events e
+JOIN sailings s ON s.sailing_id = e.sailing_id
+WHERE e.event_type = 'delayed'
+  AND date_trunc('day', e.occurred_at) >= date_trunc('day', now() - interval '1 day')
+ORDER BY (e.detail->>'minutes_late')::int DESC;
+
+-- Query 4: Revenue by route for the current month, with refunds netted off
+SELECT r.route_id,
+       p1.name || ' to ' || p2.name AS route_name,
+       SUM(b.total_pence) / 100.0 AS gross,
+       SUM(CASE WHEN b.status = 'refunded' THEN b.total_pence ELSE 0 END) / 100.0 AS refunded,
+       (SUM(b.total_pence) - SUM(CASE WHEN b.status = 'refunded' THEN b.total_pence ELSE 0 END)) / 100.0 AS net
+FROM bookings b
+JOIN sailings s ON s.sailing_id = b.sailing_id
+JOIN routes r ON r.route_id = s.route_id
+JOIN ports p1 ON p1.port_id = r.origin_port
+JOIN ports p2 ON p2.port_id = r.dest_port
+WHERE to_char(b.booked_at, 'YYYY-MM') = to_char(now(), 'YYYY-MM')
+  AND b.status IN ('confirmed', 'refunded')
+GROUP BY r.route_id, p1.name, p2.name
+ORDER BY net DESC;
+
+-- Query 5: Top 20 customers by spend in the last 12 months, with their most recent booking date
+SELECT *
+FROM (
+    SELECT c.customer_id,
+           c.full_name,
+           c.loyalty_tier,
+           SUM(b.total_pence) AS spend_pence,
+           COUNT(DISTINCT b.booking_id) AS bookings,
+           MAX(b.booked_at) AS last_booked
+    FROM customers c, bookings b
+    WHERE c.customer_id = b.customer_id
+      AND b.status = 'confirmed'
+      AND b.booked_at > now() - interval '12 months'
+    GROUP BY c.customer_id, c.full_name, c.loyalty_tier
+) t
+ORDER BY spend_pence DESC
+LIMIT 20;
+
+-- Query 6: Cabin occupancy for sailings departing in the next 7 days
+SELECT s.sailing_id,
+       s.departs_at,
+       v.name AS vessel,
+       v.cabins AS total_cabins,
+       (SELECT COUNT(DISTINCT b.cabin_id)
+          FROM bookings b
+         WHERE b.sailing_id = s.sailing_id
+           AND b.cabin_id IS NOT NULL
+           AND b.status <> 'cancelled') AS cabins_taken,
+       (SELECT string_agg(c.cabin_number, ', ')
+          FROM cabins c
+         WHERE c.vessel_id = s.vessel_id
+           AND c.cabin_id NOT IN (SELECT b2.cabin_id
+                                    FROM bookings b2
+                                   WHERE b2.sailing_id = s.sailing_id
+                                     AND b2.cabin_id IS NOT NULL
+                                     AND b2.status <> 'cancelled')) AS free_cabin_numbers
+FROM sailings s
+JOIN vessels v ON v.vessel_id = s.vessel_id
+WHERE s.departs_at::timestamp BETWEEN now() AND now() + interval '7 days'
+  AND v.cabins > 0
+ORDER BY s.departs_at;
+
+-- Query 7: Passenger manifest for one sailing (parameter: sailing 48213)
+SELECT bp.passenger_name,
+       bp.age_band,
+       b.booking_id,
+       b.vehicle_plate,
+       b.vehicle_class,
+       c.full_name AS booked_by,
+       c.phone,
+       (SELECT SUM(p.amount_pence) FROM payments p WHERE p.booking_id = b.booking_id) AS paid_pence,
+       b.total_pence
+FROM bookings b
+JOIN booking_passengers bp ON bp.booking_id = b.booking_id
+LEFT JOIN customers c ON c.customer_id = b.customer_id
+WHERE b.sailing_id = 48213
+  AND b.status IN ('confirmed', 'standby')
+  AND UPPER(b.vehicle_plate) LIKE '%'
+ORDER BY b.vehicle_plate, bp.age_band, bp.passenger_name;
+```
+
+Some more context that may matter. The passenger-count logic in Query 1 should include standby bookings only if they have been promoted to confirmed, and I believe that is how it works today. The dashboard needs to include sailings that depart today in UTC, even though the ports are in different time zones. The monthly report (Query 4) is run on the first working day of the month for the previous month, and finance have asked that it be changed to take a month as a parameter. Finally, Query 2 is run by marketing once a quarter to find people to send a promotion to; they say it sometimes returns nothing at all, which is odd because there are certainly people who registered and never booked.
+
+Query 6 feeds the cabin sales page and is called once for every visitor who opens the cabin picker, which at the summer peak is several hundred times an hour. Query 7 is printed by the port staff about an hour before departure; it is slow on the busiest sailings, which carry up to 1,100 passengers, and the staff have also complained that foot passengers (who have no vehicle plate) sometimes seem to be missing from it. Vehicle plates are entered by hand at the desk and so are inconsistent about case and spaces. Please also tell me if there is anything in the schema that could cause wrong answers rather than just slow ones, and whether it would be sensible to partition `sailing_events` or archive the oldest seasons.

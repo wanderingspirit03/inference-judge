@@ -1,0 +1,43 @@
+Here is the specification for the harvest tracking feature in the app we are building for a vineyard. Please write a complete test plan for it: test cases grouped by requirement, with preconditions, steps, expected results and priority, plus edge cases and a short list of what should be automated.
+
+# Product Specification: Harvest Tracker (v1.0)
+
+Product: Vinora Field, the mobile app for Eichenhof Estate
+Owner: Katrin Lang, Cellar Manager
+
+## 1. Purpose
+
+Pickers and block supervisors use the app during harvest (usually the last week of September to the end of October) to record every bin of grapes picked, so that the cellar can plan pressing and track the origin of each batch.
+
+## 2. Users and roles
+
+- **Picker:** can see only the blocks assigned to them today.
+- **Supervisor:** can see all blocks in their zone, edit bin records of that day, and close a block.
+- **Cellar manager:** can see all zones, export reports, and change grape varieties and target sugar levels.
+
+## 3. Functional requirements
+
+**FR-1 Log in.** Users sign in with their employee number and a four-digit PIN. After five wrong attempts the account is locked for 15 minutes. The app must keep the user signed in for the whole shift (up to 12 hours) without asking for the PIN again.
+
+**FR-2 Record a bin.** A picker scans the QR code on a bin or types its 6-digit number, selects the block from a list, and enters the weight in kilograms (range 5.0 to 600.0, one decimal). The app stores the time, the picker, the block and the GPS position. A bin number may be recorded only once per day.
+
+**FR-3 Offline mode.** The vineyard has poor coverage. The app must save all records on the phone and synchronise them within 60 seconds of regaining a connection. Records made offline keep their original time. The user can see a counter of unsynchronised records.
+
+**FR-4 Sugar reading.** A supervisor can enter a reading in degrees Oechsle (range 40 to 140) for a block. If the reading is above the block's target, the app shows a green banner; if it is more than 10 degrees below, it shows an amber banner.
+
+**FR-5 Close a block.** When a supervisor closes a block, the app shows the total weight and number of bins. After closing, pickers can no longer add bins to this block. Reopening requires the cellar manager.
+
+**FR-6 Daily report.** The cellar manager can export a CSV with one row per bin (date, time, block, variety, picker, weight, sugar) for any date range of up to 31 days. Exports over 5,000 rows are sent by email within five minutes.
+
+**FR-7 Correct a record.** A supervisor can change the weight or block of a bin record made on the same day. Every change is stored with the old value, the new value, the time and the name of the supervisor. Pickers cannot edit records after saving, but can ask a supervisor through a "Report a mistake" button, which marks the record with a flag.
+
+## 4. Non-functional requirements
+
+- Screens must be readable in direct sunlight and usable with gloves (touch targets at least 48 pixels).
+- The app supports Android 11 and later and the two latest iOS versions.
+- A bin record must be saved in less than one second.
+- The app is available in German and English.
+
+## 5. Out of scope
+
+Payment of pickers, equipment tracking and weather forecasts.

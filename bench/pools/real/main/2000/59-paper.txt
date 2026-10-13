@@ -1,0 +1,59 @@
+Our crew planning group asked me to referee this internal write-up before it goes to the safety and operations committee. Could you write a detailed peer review of it, covering the methods, the statistics, whether the conclusions follow from the results, and any operational or safety issues the authors have missed? Please finish with a clear recommendation (accept, revise, or reject) and a numbered list of changes you would require.
+
+Title: A rolling-horizon rostering heuristic for reducing reserve call-outs and duty-limit exceedances at Skerry Air
+
+Authors: Tamsin Orchard-Bell (Crew Planning), Yusuf Halvorsen (Operations Research Intern), Gwendolen Faraday (Head of Crew Resources)
+
+Abstract. Skerry Air operates six turboprop aircraft on 14 island and mainland routes with 38 pilots and 52 cabin crew. Rosters are built four weeks ahead by hand by two planners. Last-minute changes cause frequent reserve call-outs and, occasionally, duty periods that exceed our internal limit. We developed a rolling-horizon heuristic that builds the roster week by week and repairs it daily. In an eight-week trial the heuristic reduced reserve call-outs by 41 percent and removed all duty-limit exceedances. We recommend adopting it in the winter schedule.
+
+1. Introduction
+
+Crew costs are the second largest cost of the airline after fuel. Skerry Air's network is small but irregular: three routes fly only on some weekdays, two seasonal routes are suspended between November and March, and the base at Port Merrow has a night-stop requirement for the early morning departures. Pilots are subject to national flight time limits and to a stricter internal limit of 11 hours duty in any 24 hour period. Cabin crew follow national rules and an agreement with their union that guarantees at least 2 consecutive days off in every 7.
+
+When a crew member is sick or a flight is delayed, a reserve crew member is called out. Reserve call-outs are costly, 190 pounds on average in standby pay and overtime, and disruptive. Over the last 12 months there were 312 call-outs at Port Merrow, an average of 6.0 a week, and 9 duty periods that exceeded the internal limit.
+
+2. Methods
+
+2.1 Heuristic. The heuristic works on a rolling horizon of 4 weeks. At the start of each week it fixes the next 7 days, builds the following 3 weeks by a greedy construction that assigns pairings (sequences of flights ending at the base) to crew in order of the hardest to cover first, and then improves the result with a local search that swaps pairings between crew members. The objective penalises, in order, a violation of a legal rule (infinite weight), a violation of the internal limit (weight 1,000), a pairing that gives a crew member fewer than 11 hours of rest (weight 200), and an unequal spread of weekend work (weight 5 per extra weekend over the average). A daily repair step re-runs the local search on the next 72 hours when a disruption is entered, with the aim of changing as few existing assignments as possible.
+
+2.2 Reserve policy. Each day, 4 pilots and 5 cabin crew are placed on standby. The heuristic spreads the standby days so that nobody has more than 2 in any 7 days. The manual rosters used the same numbers but the planners assigned them by experience.
+
+2.3 Trial design. The trial ran for 8 weeks, from 31 August to 25 October 2026. The heuristic's rosters were used for pilots and cabin crew based at Port Merrow, which covers 9 of the 14 routes. For comparison, we used the corresponding 8 weeks in the previous year, which were rostered by hand. The planners did not change the manual method for the trial. The heuristic's recommended roster was reviewed by a planner who could override it, and overrides were logged.
+
+2.4 Measures. The primary measure was the number of reserve call-outs per week. Secondary measures were duty-limit exceedances, the number of days off per 7 days, the number of crew who worked more than 10 days in a row, and the planners' time spent per week. The main comparison used a two-sample t-test on the weekly number of call-outs. No adjustment was made for multiple comparisons.
+
+3. Results
+
+3.1 Call-outs. In the trial weeks there were 29 call-outs in 8 weeks, a mean of 3.6 per week, against 49 in the 8 comparison weeks of the previous year, a mean of 6.1 per week. This is a reduction of 41 percent (t = 4.3, p < 0.001).
+
+Table 1. Weekly reserve call-outs
+
+| Week | Previous year | Trial |
+|---|---|---|
+| 1 | 7 | 4 |
+| 2 | 5 | 3 |
+| 3 | 6 | 5 |
+| 4 | 8 | 3 |
+| 5 | 4 | 2 |
+| 6 | 7 | 4 |
+| 7 | 6 | 5 |
+| 8 | 6 | 3 |
+| Total | 49 | 29 |
+
+3.2 Duty-limit exceedances. There were no exceedances of the internal limit during the trial, against 3 in the comparison period. The authors note that the period included a spell of unusually good weather with only 4 cancellations for weather, against 17 in the previous year.
+
+3.3 Days off. The average number of days off per 7 days was 2.3 in the trial and 2.2 before. On 5 occasions in the 8 weeks a cabin crew member was given only 1 day off in 7, which breaches the union agreement. The authors explain that these occurred when an override was made by the planner after a crew member went sick.
+
+3.4 Long runs. Four crew members worked more than 10 days in a row during the trial. In the previous year the number was 6 over the same period.
+
+3.5 Planner time. Planners spent an average of 3.5 hours a week on rostering during the trial, compared with 14 hours a week for the manual method. The authors note that the planners spent additional time checking the heuristic's output, which is not included, and that the second planner was on leave for three weeks of the trial.
+
+3.6 Overrides. Planners overrode the roster 23 times, of which 14 were to accommodate shift swaps requested by crew. The authors do not report the effect of the overrides on the call-out numbers.
+
+4. Discussion
+
+We conclude that the heuristic is a better method than manual rostering and recommend that it be used for all crew from the winter schedule. The reduction in call-outs would save about 475 pounds a week at the Port Merrow base, or about 24,700 pounds a year, and the reduction in planner hours would free time for other work. The lower number of duty-limit exceedances improves safety. We believe the heuristic would generalise to other bases.
+
+5. Limitations
+
+The trial lasted 8 weeks at one base. The comparison period was a different year, and the schedule was slightly different, as one route had been added. The heuristic's parameters were tuned using the previous year's data, which was also used in the comparison.

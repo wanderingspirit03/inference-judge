@@ -65,11 +65,18 @@ ARGS=(
   --port "$PORT"
   # 2 chips fail at load: the loader puts the BF16 weights on the chips first.
   --tensor-parallel-size 4
-  # Inputs go up to 8192 tokens with 512 out (the target's size list). The
-  # hand-measured run used 4096 for both; the first ruler baseline replaces
-  # its numbers.
-  --max-model-len 9216
-  --max-num-batched-tokens 8192
+  # Found by trial on a v6e-4 on 2026-10-13. 9216 was the plan and the first
+  # request killed the engine at 9216 with any chunk size: the batched RPA
+  # kernel's schedule builder asked for 2.75 MB of scalar memory where the chip
+  # has 1 MB (RESOURCE_EXHAUSTED, rpa_metadata_schedule). 6144 serves 4000
+  # tokens in and 512 out; nothing between 6144 and 9216 was tried.
+  --max-model-len 6144
+  --max-num-batched-tokens 4096
+  # Text only. Gemma 4 takes images and audio, and the TPU runner refuses
+  # prompt logprobs for a multimodal model (the refusal kills the engine);
+  # the ruler's quality check needs them. With every limit at 0 the runner
+  # treats the model as text-only.
+  --limit-mm-per-prompt '{"image": 0, "audio": 0}'
   # NOT tuned for one stream on purpose: this file is the plain starting point.
   --max-num-seqs 8
   --gpu-memory-utilization 0.6

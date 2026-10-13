@@ -1,0 +1,1 @@
+Write a script for a forty-minute planetarium show for children aged eight to ten about the life of a star, with narration, suggested visuals, pauses for questions, and a short activity afterwards.

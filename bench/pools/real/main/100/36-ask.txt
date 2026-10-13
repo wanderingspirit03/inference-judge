@@ -1,0 +1,1 @@
+Write a set of ten worked examples that a hearing-aid clinic could give new audiologists, each describing a patient case, the test results, the fitting choices that were made, and the follow-up plan.

@@ -1,0 +1,25 @@
+Necesito una revisión por pares detallada de la siguiente sección de métodos y resultados, como si fueras un evaluador de una revista de horticultura. Comenta el diseño del experimento, el análisis estadístico, si las conclusiones se sostienen con los datos y qué debería añadir o corregir el autor. Termina con una recomendación y una lista ordenada de cambios obligatorios.
+
+**Efecto de la concentración de dióxido de carbono en la producción de setas ostra (Pleurotus ostreatus) en cámaras de cultivo comerciales**
+
+*Métodos y resultados (borrador para la finca Fuente del Alcor)*
+
+**2. Métodos**
+
+2.1 Instalaciones. El estudio se hizo entre enero y abril de 2026 en cuatro cámaras idénticas de 60 m2 de la finca Fuente del Alcor. Cada cámara contiene 480 bloques de sustrato de paja de trigo de 5 kg, inoculados con la misma cepa y del mismo lote de micelio. La temperatura se mantuvo en 17 grados y la humedad relativa en 90 por ciento en todas las cámaras.
+
+2.2 Tratamientos. Se asignó una concentración objetivo de dióxido de carbono a cada cámara durante la fase de fructificación: 600 ppm (cámara 1), 800 ppm (cámara 2), 1.000 ppm (cámara 3) y 1.400 ppm (cámara 4). La concentración se controló con un ventilador de extracción regulado por un sensor. La asignación se hizo según la disponibilidad de la instalación y no por sorteo, porque la cámara 1 es la más cercana a la entrada de aire.
+
+2.3 Variables. Se registraron el peso fresco de la cosecha de cada bloque durante dos oleadas (en kilogramos), el diámetro medio del sombrero de diez setas por bloque y la proporción de bloques con contaminación visible por moho verde. Las mediciones las hizo la misma persona, que conocía el tratamiento de cada cámara.
+
+2.4 Análisis. Se compararon las medias de rendimiento mediante un análisis de varianza de un factor y, después, pruebas t por pares sin corrección. Se consideró significativo un valor de p menor de 0,05. Los bloques contaminados se excluyeron del análisis de rendimiento.
+
+**3. Resultados**
+
+3.1 Rendimiento. El rendimiento medio por bloque en las dos oleadas fue de 1,12 kg (desviación típica 0,21) a 600 ppm, 1,05 kg (0,19) a 800 ppm, 0,93 kg (0,24) a 1.000 ppm y 0,78 kg (0,27) a 1.400 ppm. El análisis de varianza mostró un efecto significativo (F = 18,4; p < 0,001). Todas las diferencias por pares fueron significativas salvo la de 600 contra 800 ppm (p = 0,07).
+
+3.2 Tamaño del sombrero. El diámetro medio fue de 7,9 cm a 600 ppm, 8,4 cm a 800 ppm, 9,6 cm a 1.000 ppm y 11,3 cm a 1.400 ppm. Los sombreros eran más grandes y los tallos más largos a mayor concentración.
+
+3.3 Contaminación. Se perdieron 14 bloques por moho verde en la cámara 1, 19 en la cámara 2, 22 en la cámara 3 y 41 en la cámara 4, de 480 en cada una.
+
+3.4 Conclusión. Concluimos que la concentración de dióxido de carbono reduce el rendimiento de forma lineal y que la finca debería mantener sus cámaras en 600 ppm o menos. Dado que 600 ppm produjo el mayor rendimiento, recomendamos además reducir la concentración por debajo de 400 ppm para aumentar todavía más la producción.

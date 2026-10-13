@@ -1,0 +1,77 @@
+Bitte erstelle auf Grundlage der folgenden Spezifikation einen vollständigen Testplan mit konkreten Testfällen (Voraussetzung, Schritte, erwartetes Ergebnis) und weise auf Lücken oder Widersprüche in der Spezifikation hin. Unser Team hat dafür nur zwei Wochen Zeit, deshalb sollen die Testfälle nach Priorität geordnet sein.
+
+# Spezifikation: Geräteausleihe für Schüler (Projekt „Leihbox")
+
+Version 0.9, Schulamt Weidenau, IT-Stelle. Verantwortlich: Karin Obermüller. Technische Umsetzung: Jonas Feldkamp.
+
+## 1. Zweck
+
+Die Schulen des Schulamtsbezirks Weidenau verleihen Tablets und Laptops an Schülerinnen und Schüler. Bisher führt jede Schule eine eigene Tabelle. Mit „Leihbox" gibt es eine zentrale Webanwendung, in der Geräte erfasst, ausgeliehen, zurückgenommen und gesperrt werden. Es gibt 14 Schulen und rund 2.300 Geräte.
+
+## 2. Rollen
+
+- **Administration (Schulamt):** legt Schulen und Geräte an, sieht alle Daten, kann Geräte aus dem Bestand nehmen.
+- **Schulbetreuung:** je Schule 1 bis 3 Personen. Sie leihen Geräte aus und nehmen sie zurück, sehen nur die Daten der eigenen Schule.
+- **Lehrkraft:** darf Geräte für die eigene Klasse vormerken, aber nicht ausgeben.
+- **Erziehungsberechtigte:** können über einen Link den Leihvertrag digital bestätigen. Sie haben kein Konto.
+
+## 3. Geräte
+
+Jedes Gerät hat eine Inventarnummer im Format WEI-JJJJ-NNNNN (zum Beispiel WEI-2024-00417), eine Seriennummer, einen Typ (Tablet oder Laptop), einen Zustand (neu, gut, gebraucht, defekt) und einen Status. Mögliche Status: verfügbar, vorgemerkt, ausgeliehen, in Reparatur, gesperrt, ausgesondert. Die Inventarnummer ist eindeutig und kann nicht geändert werden. Die Seriennummer muss ebenfalls eindeutig sein.
+
+## 4. Ausleihe
+
+4.1 Die Schulbetreuung wählt ein verfügbares Gerät und eine Schülerin oder einen Schüler. Die Schülerliste wird jeden Morgen um 05:00 Uhr aus dem Schulverwaltungssystem importiert.
+
+4.2 Pro Schüler darf es höchstens ein ausgeliehenes Gerät geben. Ausnahme: Geschwister dürfen je ein Gerät erhalten.
+
+4.3 Vor der Ausgabe muss der Leihvertrag bestätigt sein. Die Erziehungsberechtigten erhalten dazu einen Link per E-Mail, der 7 Tage gültig ist. Ohne Bestätigung kann das Gerät nicht ausgegeben werden. Bei Schülern unter 14 Jahren genügt die Bestätigung einer Person, bei Schülern ab 14 Jahren müssen Schüler und eine erziehungsberechtigte Person bestätigen.
+
+4.4 Die Leihdauer beträgt standardmäßig ein Schuljahr. Die Schulbetreuung kann ein abweichendes Enddatum wählen, höchstens jedoch 400 Tage ab Ausgabe.
+
+4.5 Bei der Ausgabe wird der Zustand des Geräts erfasst. Wenn der Zustand schlechter ist als bei der letzten Rücknahme, muss ein Kommentar eingegeben werden.
+
+## 5. Rücknahme
+
+5.1 Bei der Rücknahme prüft die Schulbetreuung den Zustand. Ist das Gerät defekt, wechselt der Status automatisch auf „in Reparatur" und es wird ein Reparaturauftrag mit Beschreibung angelegt. Andernfalls wird das Gerät wieder „verfügbar".
+
+5.2 Fehlt das Ladegerät, wird dies als Zubehörmangel vermerkt. Die Rücknahme ist trotzdem möglich. Eine Mahnung an die Erziehungsberechtigten wird nicht automatisch versendet.
+
+5.3 Wird ein Schüler im Schulverwaltungssystem als abgemeldet geführt, erscheint er am nächsten Tag in der Liste „Rückgabe überfällig" der Schule, falls er noch ein Gerät hat.
+
+## 6. Sperrung
+
+Die Administration kann ein Gerät sperren, etwa bei Verlust oder Diebstahl. Beim Sperren muss ein Grund gewählt werden (Verlust, Diebstahl, Sicherheitsvorfall, Sonstiges). Ein gesperrtes Gerät wird an die Geräteverwaltung gemeldet, die es aus der Ferne sperrt. Die Meldung wird bis zu dreimal im Abstand von 10 Minuten wiederholt. Gelingt sie nicht, erscheint ein Hinweis in der Administration. Eine Sperrung kann nur durch die Administration aufgehoben werden.
+
+## 7. Berichte
+
+Die Administration kann einen Bericht „Bestand je Schule" als CSV-Datei herunterladen, mit Anzahl je Status. Die Schulbetreuung sieht eine Liste der Geräte, deren Leihdauer in den nächsten 30 Tagen endet.
+
+## 7a. Benachrichtigungen
+
+Die Anwendung versendet drei Arten von E-Mails: den Vertragslink an die Erziehungsberechtigten (siehe 4.3), eine Erinnerung 14 Tage vor Ende der Leihdauer an die Erziehungsberechtigten und eine Wochenübersicht an die Schulbetreuung mit den überfälligen Rückgaben. Die Erinnerung wird nur versendet, wenn das Enddatum nicht von der Schulbetreuung verlängert wurde. Wird eine E-Mail-Adresse vom Mailserver als unzustellbar zurückgewiesen, erscheint beim Schüler ein Hinweis „Adresse prüfen" und die Schulbetreuung kann die Adresse korrigieren und den Link erneut senden. Ein erneut gesendeter Link macht den vorherigen ungültig.
+
+## 7b. Schülerimport
+
+Der Import um 05:00 Uhr liest eine Datei mit Schüler-Kennung, Name, Geburtsdatum, Klasse, Schule und Status (aktiv oder abgemeldet). Fehlt eine Spalte oder ist das Geburtsdatum ungültig, wird der betroffene Datensatz übersprungen und in einem Importprotokoll vermerkt; die übrigen Datensätze werden trotzdem verarbeitet. Enthält die Datei weniger als 80 Prozent der Datensätze des Vortags, wird der gesamte Import abgebrochen und die Administration per E-Mail informiert, damit nicht versehentlich viele Schüler als abgemeldet gelten. Wechselt ein Schüler die Schule, bleibt ein ausgeliehenes Gerät zunächst bei ihm, erscheint aber in der Liste „Rückgabe überfällig" der alten Schule, bis es zurückgenommen oder übertragen wird.
+
+## 7c. Akzeptanzkriterien (Auszug)
+
+- Eine Ausleihe ohne bestätigten Vertrag ist nicht möglich und zeigt eine verständliche Fehlermeldung.
+- Ein Schüler kann nicht gleichzeitig zwei Geräte ausgeliehen haben, außer es handelt sich um Geschwister.
+- Das Importprotokoll des Vortags ist für die Administration mindestens 30 Tage abrufbar.
+- Nach dem Sperren eines Geräts steht der Status innerhalb von 60 Sekunden auf „gesperrt", auch wenn die Meldung an die Geräteverwaltung noch nicht erfolgreich war.
+
+## 8. Nichtfunktionale Anforderungen
+
+- Die Seitenaufbauzeit soll bei bis zu 150 gleichzeitigen Nutzern unter 2 Sekunden liegen.
+- Alle Änderungen an Geräten und Ausleihen werden mit Benutzer und Zeitpunkt protokolliert. Das Protokoll wird 5 Jahre aufbewahrt.
+- Personenbezogene Daten von Schülern werden 12 Monate nach Ende der Ausleihe gelöscht, das Protokoll bleibt ohne Namen erhalten.
+- Die Anwendung ist mit den gängigen Browsern der letzten zwei Versionen nutzbar und auf Tablets bedienbar.
+- Die Anmeldung erfolgt über das zentrale Konto des Schulamts mit Zwei-Faktor-Anmeldung.
+
+## 9. Offene Punkte
+
+- Wie werden Geräte behandelt, die zwischen zwei Schulen wechseln?
+- Soll eine Lehrkraft eine Vormerkung zurücknehmen können, nachdem die Schulbetreuung sie bestätigt hat?
+- Die Frist des Vertragslinks (7 Tage) wurde mit dem Datenschutzbeauftragten noch nicht abgestimmt.

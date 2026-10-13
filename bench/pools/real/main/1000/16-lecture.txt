@@ -1,0 +1,27 @@
+These are my lecture notes from the rail operations module that I'm teaching to new control-room staff at a regional rail operator. Please turn them into a study guide with worked examples for each section, and then add a quiz of ten questions with full answers.
+
+**Module 4: Timetable resilience and recovery from delay**
+
+**4.1 Why timetables carry slack**
+A timetable is a promise made under uncertainty. Three kinds of slack protect it. Running-time margin is extra time added to the minimum journey time between two stations, usually 3 to 7 percent. Dwell margin is extra time at a stop beyond what boarding needs. Buffer time is the gap between two trains that share a track section or a platform. Margin absorbs small random delays, and buffer stops one delay from spreading to the next train.
+
+Example used in class: the minimum run from Aldport to Hexley is 38 minutes. With a 5 percent margin the timetable allows 40 minutes (38 x 1.05 = 39.9, rounded up).
+
+**4.2 Primary and secondary delay**
+A primary delay is caused by an event on a train itself, such as a door fault, a late crew or a trespasser. A secondary delay is caused by another train's delay: waiting for a platform, waiting for a connection, or being held behind a slow service. In our network about 60 percent of delay minutes are secondary, which is why buffer time matters more than most people expect.
+
+**4.3 Headway and capacity**
+Headway is the time between two trains passing the same point. On a line with three-minute signal blocks and a safety distance of two blocks, the minimum headway is about 6 minutes, giving a theoretical maximum of 10 trains per hour. In practice, planners keep to around 70 to 80 percent of that, so 7 or 8 trains per hour, to leave room for recovery. Worked example: 8 trains per hour means a train every 7.5 minutes on average, so a 4 minute delay to one train leaves 3.5 minutes of buffer before the next train is affected.
+
+**4.4 Recovery tools available in the control room**
+- Hold: keep a train at a station so a connection can be made. It helps passengers on that train and harms those behind.
+- Short-turn: end a late train before its final stop and send the empty unit back early. It restores the following service but strands passengers at the end of the line.
+- Skip-stop: leave out one or two stops. It saves about a minute per stop and is used rarely because of complaints.
+- Swap: exchange the order of two trains when the slower one is ahead of a faster one.
+- Cancel: the last resort. We must record a reason code within 15 minutes.
+
+**4.5 Performance measures**
+Punctuality on our network is the share of trains arriving within 3 minutes of the timetable at the final stop. Our target is 90 percent. A related measure counts cancellations: no more than 1.5 percent of planned trains. A line can pass one and fail the other, for instance by cancelling difficult trains to protect punctuality, so the regulator publishes both.
+
+**4.6 Case from last winter**
+On 14 January a points failure at Corrow closed one of two tracks for 70 minutes. Trains ran every 15 minutes before it. The controller chose to hold the 07:45 for a connection, which delayed 3 later services by 5 to 9 minutes in total.

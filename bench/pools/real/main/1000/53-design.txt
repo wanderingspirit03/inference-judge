@@ -1,0 +1,52 @@
+Here is a design document for a system at our food bank. Please critique it honestly, suggest at least two alternative approaches with their trade-offs, and give me an implementation plan with phases and milestones. I am the only developer, plus a few volunteers who help part-time, so be realistic.
+
+# Design: Pickup Slot Booking for Partner Charities
+
+Author: Gwen Takahashi
+Status: Draft v2
+Last updated: 12 October
+
+## 1. Problem
+
+Riverside Food Bank collects surplus food from supermarkets and distributes it to about 85 partner charities (soup kitchens, shelters, community fridges). Charities collect on Tuesdays and Fridays from 9:00 to 14:00. At present, they phone or text the warehouse manager to say when they are coming. In busy weeks there are 40 or more pickups in one morning, but the loading dock fits only two vans at once. Queues of up to 50 minutes form, volunteers get frustrated, and chilled goods wait outside. Twice in September, a charity arrived and found that its allocation had been given to someone else because two people had promised the same slot.
+
+## 2. Goals
+
+- Let each charity book a 20-minute pickup slot online or by text message.
+- Keep at most two vans at the dock at any time.
+- Show the warehouse team a clear list of who comes when and what they are collecting.
+- Work on cheap phones with poor connections.
+
+## 3. Non-goals
+
+- Routing or delivery to charities.
+- Stock management. The warehouse already uses a separate spreadsheet.
+
+## 4. Proposed solution
+
+A small web application with a PostgreSQL database, hosted on a single virtual server that costs 14 euros per month. Each charity gets a login link sent by email. A booking page shows the open slots for the next two Tuesdays and Fridays. A charity picks a slot and enters how many pallets it expects to collect (maximum six). The system refuses a booking if two slots already overlap in that time window.
+
+Text messages are handled by an SMS provider: a charity can send "BOOK TUE 10:20" to a short number and gets a confirmation. A reminder goes out the evening before.
+
+## 5. Data model
+
+- charity (id, name, contact_phone, contact_email, status)
+- slot (id, date, start_time, capacity)
+- booking (id, charity_id, slot_id, pallets, created_at, cancelled_at)
+
+Capacity is set to 2 for every slot. Booking creation does a count query and inserts if the count is below capacity.
+
+## 6. Risks and open questions
+
+- Charities with no phone data, or no internet, may be excluded. About 10 of the 85 only use a landline.
+- Priority for charities serving children has not been decided.
+- We have not decided what happens when a van is late. The current idea is that the slot is lost after 15 minutes.
+- No plan for backups yet.
+
+## 7. Security and privacy
+
+Charities log in with an emailed link that expires after 24 hours. The system stores contact names, phone numbers and emails of volunteers at the charities, but nothing about the people they feed. Warehouse staff use one shared account on the dock tablet to see the daily list. Logs are kept for 30 days.
+
+## 8. Timeline
+
+Four weeks of development, two weeks of testing with five charities, then launch for all.

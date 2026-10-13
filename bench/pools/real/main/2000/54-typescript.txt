@@ -1,0 +1,175 @@
+Our warehouse team inherited this TypeScript module for allocating stock to pharmacy orders and none of us wrote it. Could you explain what each part does, propose a refactoring that would make it easier to maintain, and write a set of tests for it (Jest style is fine)? Please point out any behaviour that looks wrong for a pharmaceutical wholesaler.
+
+```ts
+// allocation.ts - Calder & Moss Pharmaceutical Wholesale
+// Allocates stock lots to customer order lines, first-expired-first-out.
+
+export interface Lot {
+  lotId: string;
+  sku: string;
+  quantity: number;
+  expiry: string; // ISO date, e.g. "2027-03-31"
+  quarantined: boolean;
+  coldChain: boolean;
+}
+
+export interface OrderLine {
+  lineId: string;
+  sku: string;
+  quantity: number;
+  needsColdChain: boolean;
+}
+
+export interface Order {
+  orderId: string;
+  pharmacyId: string;
+  lines: OrderLine[];
+  placedAt: string;
+}
+
+export interface Pick {
+  lineId: string;
+  lotId: string;
+  quantity: number;
+}
+
+export interface AllocationResult {
+  picks: Pick[];
+  shortages: { lineId: string; missing: number }[];
+}
+
+const MIN_DAYS_TO_EXPIRY = 90;
+
+function daysUntil(dateStr: string, today: Date): number {
+  const d = new Date(dateStr);
+  return Math.floor((d.getTime() - today.getTime()) / 86400000);
+}
+
+export function usableLots(lots: Lot[], sku: string, coldChain: boolean, today: Date): Lot[] {
+  return lots
+    .filter((l) => l.sku === sku)
+    .filter((l) => !l.quarantined)
+    .filter((l) => l.quantity > 0)
+    .filter((l) => daysUntil(l.expiry, today) >= MIN_DAYS_TO_EXPIRY)
+    .filter((l) => (coldChain ? l.coldChain : true))
+    .sort((a, b) => (a.expiry < b.expiry ? -1 : 1));
+}
+
+export function allocateOrder(order: Order, lots: Lot[], today: Date): AllocationResult {
+  const picks: Pick[] = [];
+  const shortages: { lineId: string; missing: number }[] = [];
+
+  for (const line of order.lines) {
+    let remaining = line.quantity;
+    const candidates = usableLots(lots, line.sku, line.needsColdChain, today);
+
+    for (const lot of candidates) {
+      if (remaining === 0) break;
+      const take = Math.min(lot.quantity, remaining);
+      picks.push({ lineId: line.lineId, lotId: lot.lotId, quantity: take });
+      lot.quantity -= take;
+      remaining -= take;
+    }
+
+    if (remaining > 0) {
+      shortages.push({ lineId: line.lineId, missing: remaining });
+    }
+  }
+
+  return { picks, shortages };
+}
+
+export function allocateBatch(orders: Order[], lots: Lot[], today: Date): Map<string, AllocationResult> {
+  const results = new Map<string, AllocationResult>();
+  const sorted = [...orders].sort((a, b) => (a.placedAt < b.placedAt ? -1 : 1));
+  for (const order of sorted) {
+    results.set(order.orderId, allocateOrder(order, lots, today));
+  }
+  return results;
+}
+
+export function fillRate(result: AllocationResult, order: Order): number {
+  const ordered = order.lines.reduce((sum, l) => sum + l.quantity, 0);
+  const missing = result.shortages.reduce((sum, s) => sum + s.missing, 0);
+  return (ordered - missing) / ordered;
+}
+
+export function summarisePicks(picks: Pick[]): Record<string, number> {
+  const byLot: Record<string, number> = {};
+  for (const p of picks) {
+    byLot[p.lotId] = (byLot[p.lotId] || 0) + p.quantity;
+  }
+  return byLot;
+}
+
+export function expiringSoon(lots: Lot[], today: Date, withinDays: number): Lot[] {
+  return lots.filter((l) => {
+    const days = daysUntil(l.expiry, today);
+    return days >= 0 && days <= withinDays && l.quantity > 0;
+  });
+}
+
+export interface Recall {
+  recallId: string;
+  sku: string;
+  lotIds: string[];
+  issuedAt: string;
+}
+
+export function applyRecall(lots: Lot[], recall: Recall): number {
+  let quarantinedUnits = 0;
+  for (const lot of lots) {
+    if (lot.sku === recall.sku && recall.lotIds.includes(lot.lotId)) {
+      lot.quarantined = true;
+      quarantinedUnits += lot.quantity;
+    }
+  }
+  return quarantinedUnits;
+}
+
+export interface ReorderSuggestion {
+  sku: string;
+  onHand: number;
+  weeklyDemand: number;
+  weeksOfCover: number;
+}
+
+export function reorderSuggestions(
+  lots: Lot[],
+  weeklyDemand: Record<string, number>,
+  minWeeks: number
+): ReorderSuggestion[] {
+  const onHand: Record<string, number> = {};
+  for (const lot of lots) {
+    onHand[lot.sku] = (onHand[lot.sku] || 0) + lot.quantity;
+  }
+  const suggestions: ReorderSuggestion[] = [];
+  for (const sku of Object.keys(weeklyDemand)) {
+    const demand = weeklyDemand[sku];
+    const have = onHand[sku] || 0;
+    const cover = have / demand;
+    if (cover < minWeeks) {
+      suggestions.push({ sku, onHand: have, weeklyDemand: demand, weeksOfCover: cover });
+    }
+  }
+  return suggestions.sort((a, b) => a.weeksOfCover - b.weeksOfCover);
+}
+
+export function formatShortageEmail(order: Order, result: AllocationResult): string {
+  if (result.shortages.length === 0) {
+    return "";
+  }
+  const lines = result.shortages.map((s) => {
+    const line = order.lines.find((l) => l.lineId === s.lineId);
+    return `- ${line!.sku}: short by ${s.missing}`;
+  });
+  return [
+    `Dear pharmacy ${order.pharmacyId},`,
+    ``,
+    `Order ${order.orderId} could not be filled in full:`,
+    ...lines,
+    ``,
+    `The remaining items will follow as soon as stock arrives.`,
+  ].join("\n");
+}
+```

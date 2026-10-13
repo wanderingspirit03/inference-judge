@@ -1,0 +1,210 @@
+I'm new to Go and inherited this package from a colleague who left our courier startup. Could you explain what it does piece by piece, review it for bugs and bad style, and write table-driven tests for the important functions? Please tell me which bugs would hurt customers first.
+
+```go
+// Package dispatch assigns parcels to couriers for Quickfoot Couriers and
+// estimates delivery prices and times.
+package dispatch
+
+import (
+	"errors"
+	"math"
+	"sort"
+	"sync"
+	"time"
+)
+
+type Point struct {
+	Lat, Lon float64
+}
+
+type Parcel struct {
+	ID       string
+	Weight   float64 // kilograms
+	Pickup   Point
+	Dropoff  Point
+	Deadline time.Time
+	Fragile  bool
+}
+
+type Courier struct {
+	ID       string
+	Location Point
+	Vehicle  string // "bike", "van"
+	Load     float64
+	MaxLoad  float64
+	OnShift  bool
+}
+
+var ErrNoCourier = errors.New("no courier available")
+
+// distanceKm returns the straight-line distance in kilometres using the
+// haversine formula.
+func distanceKm(a, b Point) float64 {
+	const earthRadius = 6371.0
+	dLat := (b.Lat - a.Lat) * math.Pi / 180
+	dLon := (b.Lon - a.Lon) * math.Pi / 180
+	la := a.Lat * math.Pi / 180
+	lb := b.Lat * math.Pi / 180
+	h := math.Sin(dLat/2)*math.Sin(dLat/2) +
+		math.Cos(la)*math.Cos(lb)*math.Sin(dLon/2)*math.Sin(dLon/2)
+	return 2 * earthRadius * math.Asin(math.Sqrt(h))
+}
+
+// Price returns the delivery price in euro cents.
+func Price(p Parcel) int {
+	km := distanceKm(p.Pickup, p.Dropoff)
+	price := 350 + int(km*90)
+	if p.Weight > 5 {
+		price += int((p.Weight - 5) * 40)
+	}
+	if p.Fragile {
+		price += 200
+	}
+	if price > 4000 {
+		price = 4000
+	}
+	return price
+}
+
+// ETA estimates how long a courier needs to collect and deliver a parcel.
+func ETA(c Courier, p Parcel) time.Duration {
+	speed := 15.0 // km/h for bikes
+	if c.Vehicle == "van" {
+		speed = 25.0
+	}
+	km := distanceKm(c.Location, p.Pickup) + distanceKm(p.Pickup, p.Dropoff)
+	hours := km / speed
+	return time.Duration(hours*float64(time.Hour)) + 5*time.Minute
+}
+
+// Pool holds the couriers that are currently known to the dispatcher.
+type Pool struct {
+	mu       sync.Mutex
+	couriers map[string]*Courier
+}
+
+func NewPool() *Pool {
+	return &Pool{couriers: make(map[string]*Courier)}
+}
+
+func (p *Pool) Add(c Courier) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.couriers[c.ID] = &c
+}
+
+func (p *Pool) UpdateLocation(id string, loc Point) bool {
+	c, ok := p.couriers[id]
+	if !ok {
+		return false
+	}
+	c.Location = loc
+	return true
+}
+
+func (p *Pool) SetShift(id string, on bool) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if c, ok := p.couriers[id]; ok {
+		c.OnShift = on
+	}
+}
+
+// Candidates returns couriers that could carry the parcel, nearest first.
+func (p *Pool) Candidates(parcel Parcel) []*Courier {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	var out []*Courier
+	for _, c := range p.couriers {
+		if !c.OnShift {
+			continue
+		}
+		if c.Load+parcel.Weight > c.MaxLoad {
+			continue
+		}
+		if parcel.Weight > 20 && c.Vehicle == "bike" {
+			continue
+		}
+		out = append(out, c)
+	}
+
+	sort.Slice(out, func(i, j int) bool {
+		return distanceKm(out[i].Location, parcel.Pickup) <
+			distanceKm(out[j].Location, parcel.Pickup)
+	})
+	return out
+}
+
+// Assign picks the nearest suitable courier whose ETA meets the deadline and
+// adds the parcel weight to their load.
+func (p *Pool) Assign(parcel Parcel, now time.Time) (*Courier, error) {
+	cands := p.Candidates(parcel)
+	for _, c := range cands {
+		if now.Add(ETA(*c, parcel)).Before(parcel.Deadline) {
+			c.Load += parcel.Weight
+			return c, nil
+		}
+	}
+	return nil, ErrNoCourier
+}
+
+// Release removes the weight of a delivered parcel from a courier's load.
+func (p *Pool) Release(id string, weight float64) {
+	c := p.couriers[id]
+	c.Load -= weight
+	if c.Load < 0 {
+		c.Load = 0
+	}
+}
+
+// Batch groups parcels with the same pickup point so one courier can collect
+// them together. Parcels are grouped when their pickups are within 150 metres.
+func Batch(parcels []Parcel) [][]Parcel {
+	var groups [][]Parcel
+	used := make([]bool, len(parcels))
+	for i := range parcels {
+		if used[i] {
+			continue
+		}
+		group := []Parcel{parcels[i]}
+		used[i] = true
+		for j := i + 1; j < len(parcels); j++ {
+			if used[j] {
+				continue
+			}
+			if distanceKm(parcels[i].Pickup, parcels[j].Pickup) < 0.15 {
+				group = append(group, parcels[j])
+				used[j] = true
+			}
+		}
+		groups = append(groups, group)
+	}
+	return groups
+}
+
+// Summary describes the state of the pool for the operations dashboard.
+type Summary struct {
+	OnShift   int
+	Idle      int
+	TotalLoad float64
+	Capacity  float64
+}
+
+// Summarise counts couriers on shift and how much of their capacity is used.
+func (p *Pool) Summarise() Summary {
+	var s Summary
+	for _, c := range p.couriers {
+		if !c.OnShift {
+			continue
+		}
+		s.OnShift++
+		if c.Load == 0 {
+			s.Idle++
+		}
+		s.TotalLoad += c.Load
+		s.Capacity += c.MaxLoad
+	}
+	return s
+}
+```

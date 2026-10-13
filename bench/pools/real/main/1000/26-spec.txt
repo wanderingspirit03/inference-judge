@@ -1,0 +1,50 @@
+Below is the spec for the online booking feature we are about to build. Can you write a complete test plan for it, with numbered test cases (preconditions, steps, expected results), grouped by area, and include the edge cases and negative tests you think the spec misses? Also point out any place where the spec is ambiguous.
+
+SPEC: Lane and Session Booking, Aldermoor Leisure Pools. Version 0.4
+
+1. Purpose
+Members and guests of Aldermoor Leisure Pools book swimming sessions online instead of queueing at the desk. Capacity limits keep lanes safe and let families plan.
+
+2. Facilities
+- Main pool: 6 lanes, 25 m. Each lane holds up to 8 swimmers per session.
+- Learner pool: open water, holds up to 24 people per session, no lanes.
+- Sessions run on the hour, 06:00 to 21:00, each 55 minutes long, with five minutes for turnover.
+
+3. Users
+- Member: has an account and a monthly pass. Can book up to 4 sessions in advance at any time and 1 per day on the same lane type.
+- Guest: no account, pays per session by card. Can book up to 2 sessions, only within 3 days of today.
+- Staff: can book on behalf of anyone and can cancel any booking.
+
+4. Booking rules
+4.1 Members can book from 14 days ahead. Guests from 3 days ahead.
+4.2 A booking is for one person. A family needs one booking per person; the system offers "add another swimmer" which repeats the booking for up to 5 people in one purchase if capacity remains for all of them.
+4.3 Under-8s must be accompanied. A booking for a child under 8 requires an adult booking in the same session; the system warns but does not block.
+4.4 Lane types: Fast, Medium, Slow, Lessons. Lessons lanes are only bookable by members enrolled in a course.
+4.5 Capacity is checked at the moment of payment confirmation. If capacity has run out, the user sees a message and nothing is charged.
+
+5. Payment
+5.1 Members: session is deducted from the monthly pass, which gives 12 sessions per calendar month. Unused sessions do not carry over.
+5.2 Guests: price is 6.50 for adults, 4.00 for children (ages 3 to 15) and free for under-3s. Payment by card only.
+5.3 If payment fails, held places are released after 10 minutes.
+
+6. Cancellation and changes
+6.1 Members may cancel up to 2 hours before the session; the session is returned to their pass.
+6.2 Guests may cancel up to 24 hours before for a full refund. Later cancellations are not refunded.
+6.3 If the pool closes (maintenance or an incident), all bookings are cancelled automatically and the user receives a refund or a returned session within 5 working days, plus an email and a text message.
+6.4 A swimmer may be moved to another session at the same price if the new session has space. Moves to a different day are limited to 7 days ahead.
+
+7. Check-in
+7.1 Users show a QR code at the desk. Staff scan it with the handheld app.
+7.2 Check-in opens 15 minutes before the session and closes 10 minutes after it starts. No-shows are logged. A member with 3 no-shows in a month cannot book same-day sessions for the next 30 days.
+
+8. Notifications
+Email confirmation immediately after booking. A reminder 24 hours before. A text message 2 hours before for members who opted in.
+
+9. Accessibility
+The booking pages must work with screen readers and support text up to 200 percent zoom. A "needs hoist access" checkbox reserves the hoist for the booked session. There is one hoist and it can serve one swimmer per session.
+
+10. Performance
+The availability page loads in under 2 seconds with 200 simultaneous users. The system must not allow two people to take the last place at the same time.
+
+11. Out of scope
+Party bookings, swimming club block bookings, and changing pass prices.

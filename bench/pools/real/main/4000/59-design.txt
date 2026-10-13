@@ -1,0 +1,130 @@
+Our team wrote the design document below for a fault-reporting and dispatch system for the street lights we maintain under contract. I will present it to the technical board on Friday. Please critique it honestly, tell me what is weak or missing, suggest realistic alternatives for the major decisions, and then give me an implementation plan with phases, the order of work and the main risks.
+
+# Design: Lamp Fault Reporting and Crew Dispatch (LFRD)
+
+Author: Gerhard Lindqvist-Amadi, Systems Lead, Brightway Lighting Services
+Reviewers: Naledi Whitcombe (Operations), Osric Fennimore (Field Crews), Yasmin Teague (Finance)
+Status: Draft 3, for board review
+Date: 7 October 2026
+
+## 1. Background
+
+Brightway maintains about 38,400 street lights for three municipal councils: Ashford Vale (14,200 lamps), Corrin Bay (17,100) and the Tarn Valley district (7,100). The contracts require us to repair a reported lamp outage within 5 working days for ordinary lamps and within 24 hours for lamps at pedestrian crossings and junctions. Penalties apply at 40 per lamp per day of delay for the critical class.
+
+Today, faults arrive in four ways: a council call centre emails a spreadsheet every morning, residents phone our office, crews note faults they see during night patrols, and a few councils forward messages from a resident app. All of these end up typed by hand into a shared spreadsheet by two dispatchers. The spreadsheet has no history of who changed what. In the last quarter, we found 212 duplicate reports of the same lamp, 61 faults that were never assigned to a crew, and 9 critical faults that passed the 24 hour limit, costing us roughly 4,300 in penalties.
+
+## 2. Goals
+
+1. Every fault report, from any source, becomes one record with a unique number, a lamp, a location and a clock that starts when the report arrives.
+2. Duplicate reports of the same lamp within 10 days attach to the open fault instead of creating a new one.
+3. Dispatchers see a map and a ranked list, with critical faults and those closest to breaching their deadline shown first.
+4. Crews receive their daily job list on a phone, record what they found and what they did, and can work with no mobile signal.
+5. Councils get a monthly report generated automatically, showing response times against the contract.
+
+## 3. Non-goals
+
+- Replacing the asset register of lamps, which stays in the existing database owned by Finance.
+- Remote monitoring of the lamps themselves. That is a separate project in 2027.
+- Routing optimisation across crews. For version 1, dispatchers will assign jobs by hand with the map.
+
+## 4. Proposed architecture
+
+The system has five parts.
+
+**Intake service.** A small web service that accepts reports: an email parser for the councils' daily spreadsheets, a web form for our office, an API endpoint for the resident app, and an entry screen in the crew app. Each report is matched to a lamp using the lamp number printed on the column, or, if the number is not known, using the nearest lamp to the coordinates given within 25 metres.
+
+**Fault database.** A single PostgreSQL database, hosted by our existing cloud provider, with tables for faults, lamps (a read-only copy synchronised nightly from the Finance asset register), crews, assignments and events. Every change to a fault writes an event row, so the full history is kept.
+
+**Dispatch console.** A browser application for the two dispatchers, showing a map with coloured markers (red for critical, orange for ordinary faults within 24 hours of their deadline, grey for the rest) and a list on the right. The dispatcher drags a fault onto a crew to assign it.
+
+**Crew app.** A mobile application for the 22 field staff, written once and run on both Android and iOS. It stores the day's jobs locally, lets the crew photograph the lamp, choose a cause from a short list (lamp failure, driver failure, cable damage, vandalism, knocked down by vehicle, other), record parts used and close the job. When there is no signal, it keeps the changes on the phone and sends them when the signal returns.
+
+**Reporting job.** A scheduled task that runs on the first day of each month and produces a PDF and a spreadsheet for each council: faults received, faults fixed on time, average repair time by class, repeat faults on the same lamp, and penalties incurred.
+
+## 5. Key decisions
+
+### 5.1 One database, no message queue
+
+We considered an event-driven design with a message queue between the intake service and the database. We decided against it because the load is small. Our peak is about 150 reports on the Monday morning after a storm, which one database handles easily. A queue would add another part to run and watch for a team of three developers.
+
+### 5.2 Synchronisation of crew phones
+
+The crew app keeps a local copy of the day's jobs. When it reconnects, it sends its changes and receives updates. If a dispatcher and a crew member change the same fault while the phone is offline, the later change by time stamp wins. We believe conflicts will be rare because only the crew changes a job once it is assigned to them.
+
+### 5.3 Duplicate detection
+
+A new report is treated as a duplicate if the same lamp has an open fault, or a fault closed in the last 10 days. In the second case the fault is reopened and marked as a repeat. We chose 10 days because the field crews say a lamp that fails again within 10 days has usually had the wrong part fitted.
+
+### 5.4 Deadline clock
+
+The clock starts when the first report arrives at any of our channels, not when a dispatcher reads it. The council spreadsheet is emailed at 07:00, but some of the reports in it are from the previous afternoon. We will use the time the council recorded the report, as given in the spreadsheet, when it is available, and the time of receipt otherwise.
+
+### 5.5 Authentication
+
+Dispatchers and crews sign in with accounts managed in our existing company directory. The resident app endpoint uses a shared key per council. Photos are stored in an object store and linked from the fault, and they are kept for 24 months.
+
+### 5.6 Hosting and backup
+
+The database runs on a managed instance with daily backups kept for 14 days. The recovery target is four hours. We have not yet decided whether to use a second region.
+
+## 6. Data model (summary)
+
+- lamps: lamp_id, council, column_number, latitude, longitude, class (ordinary or critical), lamp_type, installed_on
+- faults: fault_id, lamp_id, reported_at, source, class, status, deadline_at, closed_at, cause, repeat_of
+- assignments: assignment_id, fault_id, crew_id, assigned_at, planned_for, completed_at
+- events: event_id, fault_id, at, actor, kind, details
+- crews: crew_id, name, vehicle, lead_name
+- parts_used: fault_id, part_code, quantity
+
+## 7. Security and privacy
+
+Reports from residents may include names and phone numbers. We store these only on the fault record, show them to dispatchers, and do not send them to the crew app unless the dispatcher marks the fault as needing a call-back. Personal details are deleted 90 days after the fault closes. The crew app does not store passwords on the phone, and a lost phone can be blocked from the directory.
+
+## 8. Testing approach
+
+We will test the intake matching using the last six months of real reports, about 11,000 records, and check that duplicates are found as the dispatchers would find them. The crew app will be tried by four volunteer crews for two weeks before a general release. We will not run a load test, since the traffic is low.
+
+## 9. Escalation and alerts
+
+Each fault has a deadline, and the system warns people as it approaches. For critical faults, the dispatcher sees an amber marker 8 hours before the deadline and a red marker at 4 hours. At 2 hours, a text message goes to the Operations manager (Naledi Whitcombe) and, outside office hours, to the on-call crew lead. For ordinary faults, the warning is shown at 24 hours before the deadline in the list only, without messages. A fault that is assigned but not marked as started within 3 hours of its planned time is shown with a clock symbol so that the dispatcher can call the crew.
+
+Storm days are handled by a manual switch. When the dispatcher turns on storm mode, the console groups faults by street and by district instead of by individual lamp, and the 10 day duplicate rule is shortened to 48 hours, because after a storm many neighbouring lamps legitimately fail on the same day. Storm mode does not change the contract deadlines. The councils have agreed that deadlines for ordinary faults are extended to 10 working days during a declared storm, but this is a manual decision by the council, and the system only records the date on which the council declared it.
+
+## 10. Monitoring and operations
+
+The intake service writes a heartbeat to the database every minute. If no heartbeat is seen for 5 minutes, the on-call developer receives a text message. Separate checks watch for three kinds of silent failure: no reports arrived from the council spreadsheet by 09:00 on a working day, the nightly lamp synchronisation finished with fewer than 99 percent of the previous lamp count, and the crew app has not sent data from a crew that has jobs assigned for more than 4 hours. We will log every parsed report with the raw source text so that mismatches can be investigated later.
+
+The database size is expected to reach about 6 gigabytes in three years, mostly in the events table. Photos are not stored in the database. The object store for photos is expected to hold about 400 gigabytes by then, assuming two photos per fault at 1.5 megabytes each and 28,000 faults a year. Old photos are moved to cheaper storage after 6 months.
+
+Releases are done on Tuesday mornings, after the dispatchers' peak, and only after the automated tests pass. The crew app is released in two steps: first to the crew leads, and after three days to everybody. The app checks the server on start and refuses to sync if it is too old, showing a message asking the crew to update. The server accepts the previous two versions of the app for two weeks.
+
+## 11. Alternatives considered
+
+We looked at buying an off-the-shelf work-order product used by several utilities. Its licence would cost about 28,000 a year for 25 users, and it does not handle our council spreadsheet format or the 10 day repeat rule without paid customisation, which the supplier quoted at 45,000. We decided to build, but the board may want to compare again if the schedule slips.
+
+We also considered extending the existing spreadsheet with scripts. This would be cheap, but it cannot work offline on phones, and a shared spreadsheet cannot give the history of changes that the councils have asked us for in the next contract round.
+
+Finally, we considered letting the councils log directly into our dispatch console to see their own faults. We left this out of version 1 to limit the number of users and the need for access controls, but the data model supports it, because every fault records its council.
+
+## 12. Reporting details
+
+The monthly report counts a fault as on time if its status changed to fixed before the deadline, regardless of when the dispatcher closed it. Faults that need a part we do not stock, for example a special lantern head, are marked as waiting for parts, and the clock stops only if the contract allows it, which today applies only in the Tarn Valley contract. The report lists such faults separately. Average repair time is the mean of working hours between the start of the clock and the fix, excluding weekends and public holidays, and excluding periods marked as waiting for council access, such as roadworks that block the column. The report also shows the ten lamps with the most repeat faults in the last 12 months, so that the councils can decide whether to replace them.
+
+## 13. Training and change management
+
+The two dispatchers have used the spreadsheet for nine years, and the project depends on them trusting the new console. Osric Fennimore proposed that both dispatchers join a design review every second week from week 3, and that they run the old spreadsheet and the new console side by side for the final two weeks before the switch. Each morning they will compare the two lists and note any fault that appears in only one. The crews will receive a one-page guide and a 45 minute session at the depot, held twice so that the night patrol can attend, and each crew lead gets a short video on closing a job without signal. Yasmin Teague asked that the first month of monthly reports be checked by hand against the old figures before they are sent to the councils.
+
+## 14. Rollout
+
+Phase 1 (weeks 1 to 8): database, intake service, the dispatch console. Dispatchers move off the spreadsheet in week 8. Phase 2 (weeks 9 to 16): crew app and offline mode. Phase 3 (weeks 17 to 20): monthly reports and the resident app link. Go-live for all three councils in week 21, which is the third week of March, before the spring storms.
+
+## 15. Cost
+
+Development effort is estimated at 3 developers for 20 weeks, about 120,000 including a tester for four weeks. Running costs are about 900 a month for hosting and the map provider. Finance expects a saving of roughly 31,000 a year from fewer penalties and one dispatcher hour less per day, which gives a payback of about 4 years if the penalty savings are as expected.
+
+## 16. Open questions
+
+- Who maintains the nightly lamp synchronisation if Finance changes the asset register layout?
+- What happens to faults reported for lamps that are not in our asset register, such as lamps owned by private estates?
+- Can the councils change the spreadsheet format without telling us? Today they have done this twice in two years.
+- Should the crew be able to close a critical fault without a photo?

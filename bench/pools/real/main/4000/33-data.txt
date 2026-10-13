@@ -1,0 +1,93 @@
+Below is the site data export for Harbour Row Block C that I pulled together from our site diary and snagging log for the first 18 weeks. I have to present it to the project board on Thursday and I am not sure what story it tells. Could you write me a proper analysis with the main findings, what you think is causing the slippage, anything odd in the numbers, and a list of next steps for the site team? Please explain your reasoning, not just the conclusions.
+
+## Background
+
+Harbour Row Block C is a six-storey residential block with 54 apartments and one level of basement parking, built for Calder & Rowe Developments. Our site office is the main contractor. Start on site was Monday 2 March 2026 and the contract completion date is 30 October 2026, which is 35 weeks. The tables below cover weeks 1 to 18, from 2 March to 5 July 2026.
+
+Planned cumulative percentage comes from the baseline programme approved in February. Actual cumulative percentage is the quantity surveyor's monthly valuation interpolated by week, so treat it as rounded. Average workers per day is taken from the signing-in sheets, and it includes subcontractor staff but not deliveries drivers or visitors. Weather hours lost is the total of lost working hours recorded in the site diary, counting only hours when the foreman stopped a named activity. Concrete is the volume placed that week in cubic metres (basement slab, columns, and the floor slabs up to level 3, plus the level 4 slab in week 14). Late deliveries are deliveries that arrived more than two hours after the booked slot or on a different day. Reportable incidents are those that had to be reported to the safety authority; near misses are the ones logged on the site card system. Overtime hours are those paid at premium rate across all directly employed labour.
+
+## Table 1: Weekly site data
+
+| Week | Starting | Planned cum. % | Actual cum. % | Avg workers/day | Weather hrs lost | Concrete m3 | Late deliveries | Reportable incidents | Near misses | Overtime hrs |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | 2026-03-02 | 2 | 2 | 18 | 0 | 0 | 1 | 0 | 1 | 0 |
+| 2 | 2026-03-09 | 5 | 4 | 24 | 6 | 64 | 2 | 0 | 2 | 12 |
+| 3 | 2026-03-16 | 9 | 8 | 31 | 14 | 118 | 0 | 1 | 3 | 30 |
+| 4 | 2026-03-23 | 13 | 11 | 38 | 3 | 142 | 3 | 0 | 2 | 24 |
+| 5 | 2026-03-30 | 18 | 15 | 44 | 0 | 96 | 1 | 0 | 1 | 18 |
+| 6 | 2026-04-06 | 23 | 19 | 47 | 22 | 0 | 4 | 0 | 4 | 52 |
+| 7 | 2026-04-13 | 29 | 25 | 52 | 9 | 88 | 2 | 1 | 2 | 40 |
+| 8 | 2026-04-20 | 35 | 30 | 55 | 0 | 132 | 1 | 0 | 3 | 36 |
+| 9 | 2026-04-27 | 41 | 36 | 58 | 4 | 76 | 3 | 0 | 2 | 28 |
+| 10 | 2026-05-04 | 47 | 41 | 61 | 12 | 0 | 5 | 0 | 2 | 44 |
+| 11 | 2026-05-11 | 53 | 46 | 60 | 0 | 54 | 2 | 0 | 5 | 60 |
+| 12 | 2026-05-18 | 59 | 51 | 57 | 0 | 0 | 1 | 1 | 3 | 48 |
+| 13 | 2026-05-25 | 64 | 56 | 59 | 18 | 0 | 2 | 0 | 2 | 70 |
+| 14 | 2026-06-01 | 70 | 61 | 62 | 5 | 110 | 3 | 0 | 1 | 64 |
+| 15 | 2026-06-08 | 75 | 66 | 64 | 0 | 0 | 4 | 0 | 2 | 86 |
+| 16 | 2026-06-15 | 81 | 71 | 63 | 7 | 0 | 2 | 0 | 3 | 92 |
+| 17 | 2026-06-22 | 87 | 76 | 58 | 3 | 0 | 1 | 1 | 2 | 74 |
+| 18 | 2026-06-29 | 92 | 80 | 52 | 0 | 0 | 2 | 0 | 1 | 58 |
+
+Totals over the 18 weeks: weather hours lost 103, concrete 880 m3, late deliveries 39, reportable incidents 4, near misses 41, overtime 836 hours.
+
+## Table 2: Snagging and defect log (open or closed in the period)
+
+Severity: A means work stopped or has to be redone before the next trade, B means must be fixed before handover, C means cosmetic. Days open is counted to 5 July for items still open.
+
+| ID | Raised | Location | Trade | Category | Severity | Status | Days open |
+|---|---|---|---|---|---|---|---|
+| D-001 | 2026-03-19 | Basement slab, grid C4 | Groundworks | Level out of tolerance | A | Closed | 6 |
+| D-002 | 2026-03-26 | Basement wall W2 | Concrete | Honeycombing | B | Closed | 21 |
+| D-003 | 2026-04-02 | Core 1, level 1 | Concrete | Starter bars misplaced | A | Closed | 4 |
+| D-004 | 2026-04-09 | Level 1 slab edge | Formwork | Edge out of line | B | Closed | 12 |
+| D-005 | 2026-04-14 | Basement ramp | Waterproofing | Membrane lap too short | A | Closed | 9 |
+| D-006 | 2026-04-22 | Level 2, flat 2.03 | Concrete | Slab cracking | B | Open | 74 |
+| D-007 | 2026-04-29 | Level 2 columns | Concrete | Cover to rebar low | A | Closed | 7 |
+| D-008 | 2026-05-05 | Level 3 slab | Mechanical | Sleeves missing | A | Closed | 5 |
+| D-009 | 2026-05-08 | Core 2 lift pit | Waterproofing | Damp penetration | A | Closed | 18 |
+| D-010 | 2026-05-12 | Level 1, flat 1.04 | Masonry | Wall not plumb | B | Closed | 15 |
+| D-011 | 2026-05-14 | Level 1, flat 1.01 | Electrical | Back boxes at wrong height | C | Closed | 10 |
+| D-012 | 2026-05-19 | Level 2, flat 2.05 | Masonry | Cracks at opening | B | Open | 47 |
+| D-013 | 2026-05-21 | Level 3 slab | Concrete | Surface laitance | C | Closed | 14 |
+| D-014 | 2026-05-26 | Roof edge, east | Scaffold | Missing edge protection | A | Closed | 1 |
+| D-015 | 2026-05-28 | Level 2 corridor | Fire stopping | Gaps around services | B | Open | 38 |
+| D-016 | 2026-06-02 | Level 3, flat 3.02 | Masonry | Wrong block specification | A | Closed | 11 |
+| D-017 | 2026-06-03 | Level 1 plant room | Mechanical | Pipe falls reversed | A | Closed | 8 |
+| D-018 | 2026-06-04 | Level 3, flat 3.06 | Electrical | Containment not fixed | B | Open | 31 |
+| D-019 | 2026-06-09 | Level 4 slab | Concrete | Thickness under spec | A | Open | 26 |
+| D-020 | 2026-06-10 | Facade grid 4/E | Facade | Bracket off position | B | Closed | 9 |
+| D-021 | 2026-06-11 | Level 2, flat 2.01 | Plastering | Uneven finish | C | Open | 24 |
+| D-022 | 2026-06-15 | Core 1 stairs | Steelwork | Handrail height low | B | Open | 20 |
+| D-023 | 2026-06-16 | Level 3, flat 3.04 | Mechanical | Duct clash with beam | A | Open | 19 |
+| D-024 | 2026-06-18 | Level 4 columns | Formwork | Vertical out by 12 mm | A | Closed | 3 |
+| D-025 | 2026-06-22 | Level 1 corridor | Fire stopping | Wrong sealant used | B | Open | 13 |
+| D-026 | 2026-06-24 | Facade grid 6/B | Facade | Membrane not lapped | A | Open | 11 |
+| D-027 | 2026-06-25 | Level 4, flat 4.02 | Masonry | Lintel not bedded | B | Open | 10 |
+| D-028 | 2026-06-29 | Level 3 corridor | Electrical | Cable tray clash | C | Open | 6 |
+| D-029 | 2026-07-01 | Basement parking | Drainage | Gully blocked with grout | B | Open | 4 |
+| D-030 | 2026-07-02 | Level 4, flat 4.05 | Plastering | Hollow patches | C | Open | 3 |
+
+Counts for the log: 30 items, 16 closed and 14 open. Severity A 13, severity B 12, severity C 5.
+
+## Table 3: Subcontractor summary to week 18
+
+| Subcontractor | Package | Contract value (k) | Valued to date (k) | Avg workers/day | Late deliveries | Defects raised |
+|---|---|---|---|---|---|---|
+| Norvik Groundworks | Excavation, basement, drainage | 640 | 640 | 6 | 4 | 4 |
+| Tallis Concrete | Frame, slabs, columns | 2,150 | 1,420 | 14 | 12 | 8 |
+| Brightwell Masonry | Blockwork and brickwork | 980 | 540 | 11 | 6 | 4 |
+| Kestrel Mechanical | Heating, plumbing, ventilation | 1,320 | 410 | 7 | 7 | 3 |
+| Ashdown Electrical | Power, lighting, fire alarm | 870 | 260 | 5 | 3 | 3 |
+| Fenwick Facade | Cladding and windows | 1,640 | 380 | 5 | 5 | 2 |
+| Sable Fire Protection | Fire stopping and compartmentation | 210 | 70 | 2 | 0 | 2 |
+
+Defects raised in Table 3 add up to 26, while the log in Table 2 has 30 items. The other four were raised against trades that are not in the table: scaffold (D-014), steelwork (D-022) and plastering (D-021 and D-030). Waterproofing and drainage items are counted under Norvik, and formwork items under Tallis.
+
+## Notes from the site manager
+
+- The programme assumed a 5-day working week with no weekend work. Since week 10, Saturday working has been used on and off, which explains most of the overtime figures.
+- Week 6 had the storm that stopped the crane for three days. The concrete pour planned for that week moved to week 7.
+- The tower crane was off site for inspection for two days in week 12, and I have not entered those hours in the weather column because it was not weather.
+- The level 4 slab thickness (D-019) is being checked by the structural engineer. If it needs to be corrected by adding a screed topping, the programme impact is estimated at about 5 working days, but this is not confirmed.
+- The client has asked for a revised completion forecast at the board meeting. Our own estimate in week 18 is that completion will move to late December unless we recover time, but I do not trust it.

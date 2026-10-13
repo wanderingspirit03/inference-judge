@@ -1,0 +1,82 @@
+This is the database for our taxi dispatch centre (PostgreSQL 15). The dashboard has become slow since we passed about 4 million trips. Please review the design, suggest indexes, and rewrite the three queries with an explanation of why each rewrite is better. Also point out any design problems that will hurt us later.
+
+```sql
+CREATE TABLE drivers (
+    id            serial PRIMARY KEY,
+    full_name     text NOT NULL,
+    phone         text,
+    licence_no    text,
+    active        boolean DEFAULT true,
+    hired_on      date
+);
+
+CREATE TABLE vehicles (
+    id            serial PRIMARY KEY,
+    plate         text NOT NULL,
+    seats         int,
+    fuel_type     text,
+    in_service    boolean DEFAULT true
+);
+
+CREATE TABLE trips (
+    id            bigserial PRIMARY KEY,
+    driver_id     int REFERENCES drivers(id),
+    vehicle_id    int REFERENCES vehicles(id),
+    pickup_time   timestamp,
+    dropoff_time  timestamp,
+    pickup_zone   text,
+    dropoff_zone  text,
+    fare_cents    int,
+    status        text,
+    payment_type  text,
+    customer_phone text
+);
+
+CREATE TABLE complaints (
+    id            serial PRIMARY KEY,
+    trip_id       bigint,
+    created_at    timestamp DEFAULT now(),
+    category      text,
+    resolved      boolean DEFAULT false
+);
+```
+
+Query 1: revenue per driver for last month, shown on the manager's page.
+
+```sql
+SELECT d.full_name, SUM(t.fare_cents) / 100.0 AS revenue
+FROM drivers d, trips t
+WHERE d.id = t.driver_id
+  AND to_char(t.pickup_time, 'YYYY-MM') = to_char(now() - interval '1 month', 'YYYY-MM')
+  AND t.status = 'completed'
+GROUP BY d.full_name
+ORDER BY revenue DESC;
+```
+
+Query 2: the dispatcher's list of drivers who have not had a trip in the last two hours, so they can be called.
+
+```sql
+SELECT d.id, d.full_name, d.phone
+FROM drivers d
+WHERE d.active = true
+  AND d.id NOT IN (
+      SELECT driver_id FROM trips WHERE pickup_time > now() - interval '2 hours'
+  );
+```
+
+Query 3: busiest pickup zones by hour of the day, plus the number of complaints on those trips.
+
+```sql
+SELECT t.pickup_zone,
+       extract(hour from t.pickup_time) AS hr,
+       count(*) AS trips,
+       (SELECT count(*) FROM complaints c WHERE c.trip_id IN
+           (SELECT id FROM trips t2 WHERE t2.pickup_zone = t.pickup_zone
+              AND extract(hour from t2.pickup_time) = extract(hour from t.pickup_time))) AS complaints
+FROM trips t
+GROUP BY t.pickup_zone, extract(hour from t.pickup_time)
+ORDER BY trips DESC
+LIMIT 20;
+```
+
+More facts: we add about 9,000 trips per day, and the only indexes are the primary keys. Trips are never updated after they are finished, apart from adding a complaint. Dispatchers usually look at the last 24 hours; managers look at whole months. Some drivers share names, and a few trips have a null driver_id because they were dispatched by phone and entered afterwards. The data protection officer has asked us to delete customer phone numbers after 90 days.

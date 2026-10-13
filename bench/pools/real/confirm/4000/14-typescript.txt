@@ -1,0 +1,289 @@
+We run a small language school (Calderwood Language Centre) and this module handles enrolment, waiting lists and fees. I did not write most of it and I do not fully understand how the pieces fit together. Could you explain what each part does, propose a refactoring that would make it easier to maintain, and write tests for it (Vitest is fine)? Please point out anywhere you think it behaves wrongly.
+
+```ts
+// enrolment.ts
+
+export type Level = "A1" | "A2" | "B1" | "B2" | "C1";
+
+export const LEVELS: Level[] = ["A1", "A2", "B1", "B2", "C1"];
+
+export interface Student {
+  id: string;
+  name: string;
+  email: string;
+  birthYear: number;
+  level: Level;
+  referredBy?: string; // id of the student who referred them
+}
+
+export interface Course {
+  id: string;
+  language: string;
+  level: Level;
+  weekday: number; // 0 = Sunday ... 6 = Saturday
+  startHour: number; // 24h clock
+  durationMin: number;
+  capacity: number;
+  pricePerTerm: number; // in whole euros
+  enrolled: string[]; // student ids
+  waitlist: string[]; // student ids, first in line first
+}
+
+export interface Invoice {
+  studentId: string;
+  courseId: string;
+  gross: number;
+  discounts: { reason: string; amount: number }[];
+  net: number;
+}
+
+export type EnrolResult =
+  | { status: "enrolled"; invoice: Invoice }
+  | { status: "waitlisted"; position: number }
+  | { status: "rejected"; reason: string };
+
+const TERM_WEEKS = 12;
+const MAX_COURSES_PER_STUDENT = 3;
+
+// Placement test: 40 questions, one point each.
+export function levelFromScore(score: number): Level {
+  if (score < 0 || score > 40 || !Number.isInteger(score)) {
+    throw new RangeError(`invalid placement score: ${score}`);
+  }
+  if (score <= 8) return "A1";
+  if (score <= 18) return "A2";
+  if (score <= 28) return "B1";
+  if (score <= 35) return "B2";
+  return "C1";
+}
+
+export function levelIndex(level: Level): number {
+  return LEVELS.indexOf(level);
+}
+
+export function ageOn(student: Student, year: number): number {
+  return year - student.birthYear;
+}
+
+export function overlaps(a: Course, b: Course): boolean {
+  if (a.weekday !== b.weekday) return false;
+  const aStart = a.startHour * 60;
+  const bStart = b.startHour * 60;
+  const aEnd = aStart + a.durationMin;
+  const bEnd = bStart + b.durationMin;
+  return aStart < bEnd && bStart < aEnd;
+}
+
+export class Registry {
+  private students = new Map<string, Student>();
+  private courses = new Map<string, Course>();
+  private invoices: Invoice[] = [];
+
+  addStudent(s: Student): void {
+    if (this.students.has(s.id)) {
+      throw new Error(`duplicate student ${s.id}`);
+    }
+    this.students.set(s.id, s);
+  }
+
+  addCourse(c: Course): void {
+    if (this.courses.has(c.id)) {
+      throw new Error(`duplicate course ${c.id}`);
+    }
+    this.courses.set(c.id, c);
+  }
+
+  coursesOf(studentId: string): Course[] {
+    const result: Course[] = [];
+    for (const c of this.courses.values()) {
+      if (c.enrolled.includes(studentId)) result.push(c);
+    }
+    return result;
+  }
+
+  priceFor(student: Student, course: Course, year: number): Invoice {
+    const gross = course.pricePerTerm;
+    const discounts: { reason: string; amount: number }[] = [];
+    const age = ageOn(student, year);
+
+    if (age < 18) {
+      discounts.push({ reason: "youth", amount: Math.round(gross * 0.15) });
+    } else if (age >= 65) {
+      discounts.push({ reason: "senior", amount: Math.round(gross * 0.2) });
+    }
+
+    const existing = this.coursesOf(student.id).length;
+    if (existing >= 1) {
+      discounts.push({
+        reason: "second course",
+        amount: Math.round(gross * 0.1),
+      });
+    }
+
+    if (student.referredBy && this.students.has(student.referredBy)) {
+      discounts.push({ reason: "referral", amount: 25 });
+    }
+
+    const total = discounts.reduce((sum, d) => sum + d.amount, 0);
+    const net = Math.max(gross - total, 0);
+    return { studentId: student.id, courseId: course.id, gross, discounts, net };
+  }
+
+  enrol(studentId: string, courseId: string, year: number): EnrolResult {
+    const student = this.students.get(studentId);
+    const course = this.courses.get(courseId);
+    if (!student) return { status: "rejected", reason: "unknown student" };
+    if (!course) return { status: "rejected", reason: "unknown course" };
+
+    if (course.enrolled.includes(studentId)) {
+      return { status: "rejected", reason: "already enrolled" };
+    }
+    if (course.waitlist.includes(studentId)) {
+      return { status: "rejected", reason: "already on the waiting list" };
+    }
+
+    const gap = Math.abs(levelIndex(student.level) - levelIndex(course.level));
+    if (gap > 1) {
+      return { status: "rejected", reason: "level does not match placement" };
+    }
+
+    const current = this.coursesOf(studentId);
+    if (current.length >= MAX_COURSES_PER_STUDENT) {
+      return { status: "rejected", reason: "too many courses" };
+    }
+    for (const other of current) {
+      if (overlaps(other, course)) {
+        return { status: "rejected", reason: `clashes with ${other.id}` };
+      }
+    }
+
+    if (course.enrolled.length >= course.capacity) {
+      course.waitlist.push(studentId);
+      return { status: "waitlisted", position: course.waitlist.length };
+    }
+
+    const invoice = this.priceFor(student, course, year);
+    course.enrolled.push(studentId);
+    this.invoices.push(invoice);
+    return { status: "enrolled", invoice };
+  }
+
+  withdraw(studentId: string, courseId: string, year: number): EnrolResult | null {
+    const course = this.courses.get(courseId);
+    if (!course) throw new Error(`unknown course ${courseId}`);
+
+    const waitIdx = course.waitlist.indexOf(studentId);
+    if (waitIdx >= 0) {
+      course.waitlist.splice(waitIdx, 1);
+      return null;
+    }
+
+    const idx = course.enrolled.indexOf(studentId);
+    if (idx < 0) throw new Error(`${studentId} is not enrolled in ${courseId}`);
+    course.enrolled.splice(idx, 1);
+
+    this.invoices = this.invoices.filter(
+      (inv) => !(inv.studentId === studentId && inv.courseId === courseId)
+    );
+
+    // promote the next person on the waiting list who can still be enrolled
+    while (course.waitlist.length > 0) {
+      const nextId = course.waitlist.shift() as string;
+      const result = this.enrol(nextId, courseId, year);
+      if (result.status === "enrolled") return result;
+    }
+    return null;
+  }
+
+  // Move a student from one course to another in the same language.
+  // If the new course is full, the student stays where they are.
+  transfer(
+    studentId: string,
+    fromId: string,
+    toId: string,
+    year: number
+  ): EnrolResult {
+    const from = this.courses.get(fromId);
+    const to = this.courses.get(toId);
+    if (!from || !to) return { status: "rejected", reason: "unknown course" };
+    if (from.language !== to.language) {
+      return { status: "rejected", reason: "different language" };
+    }
+    if (!from.enrolled.includes(studentId)) {
+      return { status: "rejected", reason: "not enrolled in the first course" };
+    }
+    if (to.enrolled.length >= to.capacity) {
+      return { status: "rejected", reason: "new course is full" };
+    }
+    this.withdraw(studentId, fromId, year);
+    return this.enrol(studentId, toId, year);
+  }
+
+  // One line per course for the Monday staff meeting.
+  summary(): { courseId: string; enrolled: number; waiting: number; fill: string }[] {
+    const rows: { courseId: string; enrolled: number; waiting: number; fill: string }[] = [];
+    for (const c of this.courses.values()) {
+      rows.push({
+        courseId: c.id,
+        enrolled: c.enrolled.length,
+        waiting: c.waitlist.length,
+        fill: `${Math.round((c.enrolled.length / c.capacity) * 100)}%`,
+      });
+    }
+    return rows.sort((a, b) => a.courseId.localeCompare(b.courseId));
+  }
+
+  invoicesFor(studentId: string): Invoice[] {
+    return this.invoices.filter((inv) => inv.studentId === studentId);
+  }
+
+  revenue(): number {
+    return this.invoices.reduce((sum, inv) => sum + inv.net, 0);
+  }
+
+  revenuePerWeek(): number {
+    return this.revenue() / TERM_WEEKS;
+  }
+
+  fillRate(courseId: string): number {
+    const course = this.courses.get(courseId);
+    if (!course) throw new Error(`unknown course ${courseId}`);
+    return course.enrolled.length / course.capacity;
+  }
+
+  // Courses with at least one free seat that the student could join,
+  // best level match first, then earliest in the week.
+  suggest(studentId: string): Course[] {
+    const student = this.students.get(studentId);
+    if (!student) return [];
+    const mine = this.coursesOf(studentId);
+    const options: Course[] = [];
+    for (const c of this.courses.values()) {
+      if (c.enrolled.length >= c.capacity) continue;
+      if (c.enrolled.includes(studentId)) continue;
+      if (Math.abs(levelIndex(c.level) - levelIndex(student.level)) > 1) continue;
+      if (mine.some((m) => overlaps(m, c))) continue;
+      options.push(c);
+    }
+    return options.sort((a, b) => {
+      const ga = Math.abs(levelIndex(a.level) - levelIndex(student.level));
+      const gb = Math.abs(levelIndex(b.level) - levelIndex(student.level));
+      if (ga !== gb) return ga - gb;
+      if (a.weekday !== b.weekday) return a.weekday - b.weekday;
+      return a.startHour - b.startHour;
+    });
+  }
+}
+
+export function formatInvoice(inv: Invoice): string {
+  const lines = [`Course ${inv.courseId} for student ${inv.studentId}`];
+  lines.push(`  Fee: ${inv.gross.toFixed(2)} EUR`);
+  for (const d of inv.discounts) {
+    lines.push(`  Discount (${d.reason}): -${d.amount.toFixed(2)} EUR`);
+  }
+  lines.push(`  To pay: ${inv.net.toFixed(2)} EUR`);
+  return lines.join("\n");
+}
+```
+
+A few things about how the school uses it. Terms are twelve weeks. The front desk (Hendrika and Joaquim) call `enrol` while talking to people on the phone, so it needs to be quick and the messages in `reason` are read out loud to the caller. The owner, Philippa Calderwood, has asked three times why the figures in the monthly revenue report do not match what the bank shows, and I suspect the discounts but I cannot prove it. Finally, we are about to add evening courses that finish after midnight in the summer schedule, and a "family" discount for siblings, so the design should be able to take those without another rewrite.

@@ -1,0 +1,23 @@
+I have been asked to referee this manuscript for a logistics journal. Please write a detailed peer review for me: a summary of the paper, its strengths, major concerns about the methods and the statistics, minor points, and a recommendation (accept, minor revision, major revision or reject) with reasons.
+
+**Title:** Dynamic batching of same-day deliveries reduces courier idle time: evidence from a field experiment in a mid-sized city
+
+**Abstract (shortened).** We study whether a dynamic batching rule, which holds incoming orders for up to six minutes in order to assign two or three orders to the same courier, reduces idle time and delivery cost for a courier start-up. We ran a field experiment over 28 days. We find that batching reduces courier idle time by 23% and cost per delivery by 11%, with a small increase in mean delivery time.
+
+**3. Methods**
+
+3.1 Setting. The experiment took place in one city of about 400,000 inhabitants, served by the company's 64 couriers on bicycles and electric scooters. The company handles on average 1,150 orders per weekday, mostly restaurant meals and small parcels from shops.
+
+3.2 Design. Each day was randomly assigned to treatment (batching on) or control (orders dispatched at once) by a coin flip made at 6:00. Across 28 days, 15 days were treatment and 13 were control. The unit of analysis is the courier-day. Couriers were not told which rule was in force, though they could see the app's suggestions.
+
+3.3 Measures. Idle time is the share of logged-in time during which a courier has no assigned order and is not travelling to a pickup. Cost per delivery is the sum of courier pay and fuel or charging costs divided by completed orders. Delivery time is the time from order placement to drop-off.
+
+3.4 Analysis. We compared means with a two-sample t-test on courier-day observations (n = 1,792 courier-days; 960 treatment, 832 control), and report 95% confidence intervals. Covariates were not included.
+
+**4. Results**
+
+Mean idle time was 31.2% in the control days and 24.0% on the treatment days (difference 7.2 percentage points, a relative reduction of 23%; t = 9.4, p < 0.001). Mean cost per delivery fell from 4.62 to 4.11 euros (p < 0.001). Mean delivery time rose from 27.4 to 29.9 minutes (p = 0.003). The effect on idle time was larger on weekdays than at weekends (difference of 9.1 against 3.8 points); we did not test whether this gap was significant. Customer ratings were similar across arms (4.61 against 4.58), and 6 of 64 couriers left the company during the period, all of whom are excluded from the analysis from the day of their last shift.
+
+**5. Discussion**
+
+The results show that dynamic batching is a robust way to cut cost in same-day delivery in any city. We recommend that all couriers adopt a six-minute holding window. The slightly longer delivery time is a small price for a large gain in efficiency. A limitation is that the experiment lasted only four weeks, in autumn, when there was no extreme weather.

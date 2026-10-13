@@ -1,0 +1,101 @@
+Please do a thorough code review of this module and then write a full set of unit tests with pytest. I want to know about bugs, edge cases, unclear naming, and anything that will break on real data. Explain each problem before you show the fix.
+
+```python
+"""Quote and invoice helpers for the translation agency."""
+
+import csv
+import re
+from datetime import date, timedelta
+
+RATES = {
+    ("en", "de"): 0.11,
+    ("en", "fr"): 0.12,
+    ("de", "en"): 0.10,
+    ("fr", "en"): 0.10,
+    ("en", "es"): 0.09,
+}
+
+REPEAT_DISCOUNT = 0.7  # repeated sentences cost 30 percent less
+MIN_CHARGE = 35.0
+RUSH_FACTOR = 1.5
+VAT = 0.2
+
+
+def count_words(text):
+    words = re.findall(r"\w+", text)
+    return len(words)
+
+
+def split_sentences(text):
+    parts = re.split(r"[.!?]", text)
+    return [p.strip() for p in parts if p.strip()]
+
+
+def repeated_words(text):
+    seen = set()
+    total = 0
+    for sentence in split_sentences(text):
+        if sentence in seen:
+            total += count_words(sentence)
+        seen.add(sentence)
+    return total
+
+
+def quote(text, source, target, rush=False):
+    rate = RATES[(source, target)]
+    words = count_words(text)
+    repeats = repeated_words(text)
+    price = (words - repeats) * rate + repeats * rate * REPEAT_DISCOUNT
+    if rush:
+        price = price * RUSH_FACTOR
+    if price < MIN_CHARGE:
+        price = MIN_CHARGE
+    return round(price, 2)
+
+
+def delivery_date(words, start=None, rush=False):
+    start = start or date.today()
+    per_day = 2500 if not rush else 5000
+    days = words // per_day + 1
+    d = start
+    while days > 0:
+        d = d + timedelta(days=1)
+        if d.weekday() < 5:
+            days -= 1
+    return d
+
+
+def invoice_total(lines, client_country):
+    net = 0
+    for line in lines:
+        net += line["amount"]
+    vat = 0
+    if client_country == "GB":
+        vat = net * VAT
+    return {"net": net, "vat": vat, "gross": net + vat}
+
+
+def format_line(job, amount):
+    kind = "RUSH" if job["rush"] else "STD"
+    return job["id"] + " " + job["title"] + " [" + kind + "] " + str(amount) + " EUR"
+
+
+def load_jobs(path):
+    jobs = []
+    with open(path) as f:
+        for row in csv.DictReader(f):
+            row["words"] = int(row["words"])
+            row["rush"] = row["rush"] == "yes"
+            jobs.append(row)
+    return jobs
+
+
+def monthly_summary(jobs, year, month):
+    totals = {}
+    for job in jobs:
+        d = date.fromisoformat(job["delivered"])
+        if d.year == year and d.month == month:
+            key = job["translator"]
+            totals[key] = totals.get(key, 0) + job["words"]
+    return totals
+```

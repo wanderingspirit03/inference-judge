@@ -11,8 +11,9 @@ Interface:
                                    raises TargetError naming the bad field
   target_hash(target) -> str       sha256 of the canonical JSON of the dict
   ruler_hash(bench_root, target_file=None) -> str
-                                   DESIGN 2.6: sha256 over the ruler files
-                                   and the target file, sorted by file name,
+                                   DESIGN 2.6: sha256 over the ruler files,
+                                   the target file and the data files it
+                                   names (RULER_DATA), sorted by file name,
                                    each fed as  name NUL bytes NUL
   seal_notes(target) -> [str]      what the target's docker flags give up from
                                    the sealed launch ("privileged",
@@ -194,6 +195,12 @@ SCHEMA: dict[str, dict[str, tuple]] = {
         "confirm_pool": (_str, OPT, ""),
         "pool_size": (_int_pos, OPT, 2048),
         "length_tol": (_num_nonneg, OPT, 0.0),
+        # a pool of whole requests: how far under its size (metric.isl) a
+        # request may be, as a fraction; unset, the harness's own default
+        "isl_tol": (lambda v: _num_nonneg(v) and v < 1, OPT, None),
+        # merged into every speed-test request; the fields the ruler measures
+        # by (max_tokens, ignore_eos, stream, ...) are set after it
+        "extra_body": (_str_keyed, OPT, None),
         "guard_tol": (_num_nonneg, OPT, 0.03),
         "screen_tol": (_num_nonneg, OPT, 0.02),
         "stall_ms": (_num_pos, OPT, 1000),
@@ -348,11 +355,34 @@ def target_hash(t: dict) -> str:
                           .encode()).hexdigest()
 
 
+# The data files a target names. They are part of what is measured, so the
+# ruler hash covers their bytes with the target file's.
+RULER_DATA = (("metric", "prompt_pool"), ("metric", "confirm_pool"),
+              ("reference", "prompts"), ("reference", "tasks"))
+
+
+def _ruler_data_files(root: Path, target_file: Path) -> list[Path]:
+    """The RULER_DATA files of this target that exist. A relative path is
+    under the bench root. A path that is not there (a target names its pools
+    where the box keeps them) is left out, like a ruler file that is not."""
+    try:
+        t = yaml.safe_load(target_file.read_text())
+    except (OSError, UnicodeDecodeError, yaml.YAMLError):
+        return []
+    out = []
+    for section, field in RULER_DATA:
+        name = (t.get(section) or {}).get(field) if isinstance(t, dict) else None
+        if isinstance(name, str) and name and (root / name).is_file():
+            out.append(root / name)
+    return out
+
+
 def ruler_hash(bench_root: str | Path, target_file: str | Path | None = None) -> str:
     root = Path(bench_root)
     files = [root / n for n in RULER_FILES if (root / n).exists()]
     if target_file is not None and Path(target_file).exists():
         files.append(Path(target_file))
+        files += _ruler_data_files(root, Path(target_file))
     h = hashlib.sha256()
     for f in sorted(files, key=lambda p: p.name):
         h.update(f.name.encode() + b"\0" + f.read_bytes() + b"\0")
@@ -455,6 +485,9 @@ def shell_vars(t: dict, bench_root: str | Path) -> str:
         "T_RAMP_S": m["ramp_s"], "T_WINDOW_S": m["window_s"],
         "T_SCREEN_WINDOW_S": m.get("screen_window_s") or "",
         "T_LENGTH_TOL": m.get("length_tol", ""),
+        "T_ISL_TOL": "" if m.get("isl_tol") is None else m["isl_tol"],
+        "T_EXTRA_BODY": (json.dumps(m["extra_body"], separators=(",", ":"))
+                         if m.get("extra_body") else ""),
         "T_DESIGN": m.get("design", ""),
         "T_BLOCKS": m.get("blocks", ""),
         "T_POOL_SIZE": m.get("pool_size", ""),

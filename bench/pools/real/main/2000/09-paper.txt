@@ -1,0 +1,62 @@
+Voici un extrait de notre rapport d'essai (méthodes et résultats) avant sa diffusion aux adhérents de la coopérative. Pouvez-vous en faire une relecture critique détaillée, comme le ferait un évaluateur extérieur : points forts, faiblesses de la méthode, problèmes d'interprétation des chiffres, et modifications précises à demander aux auteurs ?
+
+# Effet d'un couvert végétal d'interculture sur le rendement du blé tendre et la teneur en azote du sol : essai multi-sites de la Coopérative des Terres Hautes, campagnes 2023-2024 et 2024-2025
+
+Auteurs : Clémence Ravelomanana, Hugo Delavigne, Odile Marchetti-Sorel. Coopérative agricole des Terres Hautes, service agronomie.
+
+## 2. Matériel et méthodes
+
+### 2.1 Sites et dispositif
+
+L'essai a été conduit sur douze parcelles appartenant à neuf exploitations adhérentes, réparties sur trois secteurs : plateau (4 parcelles, sols argilo-calcaires superficiels), vallée (5 parcelles, limons profonds) et coteau (3 parcelles, sols sableux). Chaque parcelle a été divisée en deux bandes de largeur égale, orientées dans le sens du travail du sol : une bande témoin laissée en sol nu après la récolte du précédent (orge d'hiver), et une bande avec couvert. Le choix de la bande couverte a été fait par l'agriculteur, généralement la bande la plus proche du chemin d'accès. Il n'y a pas eu de répétition à l'intérieur des parcelles.
+
+### 2.2 Couvert
+
+Le couvert était un mélange de vesce commune (40 pour cent du poids de semences), de phacélie (10 pour cent) et d'avoine rude (50 pour cent), semé à 45 kg par hectare entre le 20 août et le 10 septembre selon les parcelles, puis détruit par broyage et enfouissement léger entre le 15 et le 30 novembre. La date de semis n'a pas été enregistrée de façon uniforme : pour cinq parcelles, elle est estimée d'après les factures de semences.
+
+### 2.3 Mesures
+
+La biomasse du couvert a été mesurée à la destruction sur quatre carrés de 0,25 m² par parcelle. L'azote minéral du sol (nitrate et ammonium) a été dosé en laboratoire sur des prélèvements de 0 à 30 cm au début de mars, avant le premier apport d'engrais, sur six points par bande. Le rendement a été mesuré à la moissonneuse-batteuse équipée d'un capteur de rendement, bande par bande, et ramené à 15 pour cent d'humidité. Les doses d'azote apportées au blé ont été décidées par chaque agriculteur ; elles sont indiquées dans le tableau 2.
+
+### 2.4 Analyse statistique
+
+Les différences de rendement entre bande couverte et bande témoin ont été calculées pour chaque parcelle, puis comparées à zéro par un test t de Student pour échantillons appariés. Les deux campagnes ont été regroupées, soit 24 couples bande-parcelle-année, et traitées comme indépendantes. Le seuil de signification retenu est de 5 pour cent. Aucune correction n'a été appliquée pour les comparaisons multiples entre secteurs. Les valeurs manquantes (deux parcelles en 2024, pour cause de verse) ont été exclues, ce qui ramène l'effectif à 22 couples.
+
+## 3. Résultats
+
+### 3.1 Biomasse du couvert
+
+La biomasse moyenne à la destruction était de 2,1 t de matière sèche par hectare (écart type 0,9), avec un minimum de 0,6 t sur le coteau en 2024 (semis tardif, le 10 septembre, suivi d'un automne sec) et un maximum de 3,8 t dans la vallée en 2023.
+
+### 3.2 Azote minéral du sol en mars
+
+L'azote minéral moyen dans les bandes témoins était de 38 kg N par hectare, contre 31 kg N par hectare dans les bandes couvertes, soit une différence de 7 kg N par hectare (p = 0,03). L'écart est plus marqué sur les parcelles dont la biomasse du couvert dépassait 2,5 t (-14 kg N par hectare, 8 couples) que sur les autres (-3 kg N par hectare, 14 couples).
+
+### 3.3 Rendement
+
+Tableau 1. Rendement du blé tendre (q/ha à 15 pour cent d'humidité), moyenne par secteur.
+
+| Secteur | Couples | Témoin | Couvert | Différence |
+|---|---|---|---|---|
+| Plateau | 7 | 64,2 | 62,9 | -1,3 |
+| Vallée | 9 | 83,5 | 85,6 | +2,1 |
+| Coteau | 6 | 52,8 | 49,7 | -3,1 |
+| Ensemble | 22 | 69,0 | 68,6 | -0,4 |
+
+La différence moyenne de rendement sur l'ensemble des parcelles n'est pas significative (t = -0,61 ; p = 0,55). Les auteurs notent toutefois que, dans la vallée, le gain de 2,1 q/ha est cohérent avec l'hypothèse d'une meilleure structure du sol, et que le coteau montre une perte de 3,1 q/ha « probablement due à la sécheresse du printemps 2025 ». Aucune mesure d'humidité du sol n'a été faite pour étayer cette explication.
+
+Tableau 2. Dose moyenne d'azote apportée (kg N/ha).
+
+| Secteur | Témoin | Couvert |
+|---|---|---|
+| Plateau | 168 | 160 |
+| Vallée | 175 | 171 |
+| Coteau | 152 | 158 |
+
+### 3.4 Marge brute
+
+En prenant un prix du blé de 215 euros la tonne, un coût du couvert (semences et passage) de 78 euros par hectare et les économies d'engrais du tableau 2, la marge brute du couvert est inférieure de 85 euros par hectare à celle du témoin sur l'ensemble de l'essai. Même dans la vallée, elle reste inférieure de 28 euros par hectare, le gain de rendement ne couvrant pas le coût du couvert. Ces calculs ne tiennent pas compte de l'effet éventuel sur la lutte contre l'érosion ni sur les adventices.
+
+## 4. Premières conclusions des auteurs
+
+Le couvert d'interculture réduit l'azote minéral disponible en sortie d'hiver sans diminuer significativement le rendement, ce qui confirme son intérêt agronomique. Les auteurs recommandent aux adhérents du secteur de la vallée de généraliser le couvert dès la campagne prochaine, et aux autres secteurs de poursuivre l'essai.

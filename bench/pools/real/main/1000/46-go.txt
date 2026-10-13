@@ -1,0 +1,111 @@
+This is the booking package from our coworking space system. Can you explain how it works, review it for bugs and design problems, and write table-driven tests for it? Please be specific about edge cases.
+
+```go
+package booking
+
+import (
+	"errors"
+	"sort"
+	"sync"
+	"time"
+)
+
+var (
+	ErrOverlap     = errors.New("booking overlaps an existing booking")
+	ErrPastTime    = errors.New("booking starts in the past")
+	ErrBadDuration = errors.New("booking must last between 30 minutes and 8 hours")
+	ErrNoDesk      = errors.New("unknown desk")
+)
+
+type Desk struct {
+	ID       string
+	Capacity int
+}
+
+type Booking struct {
+	ID     int
+	DeskID string
+	Member string
+	Start  time.Time
+	End    time.Time
+}
+
+type Calendar struct {
+	mu       sync.Mutex
+	desks    map[string]Desk
+	bookings map[string][]Booking
+	nextID   int
+	now      func() time.Time
+}
+
+func NewCalendar(desks []Desk) *Calendar {
+	c := &Calendar{
+		desks:    make(map[string]Desk),
+		bookings: make(map[string][]Booking),
+		now:      time.Now,
+	}
+	for _, d := range desks {
+		c.desks[d.ID] = d
+	}
+	return c
+}
+
+func (c *Calendar) Book(deskID, member string, start, end time.Time) (Booking, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	if _, ok := c.desks[deskID]; !ok {
+		return Booking{}, ErrNoDesk
+	}
+	if start.Before(c.now()) {
+		return Booking{}, ErrPastTime
+	}
+	d := end.Sub(start)
+	if d < 30*time.Minute || d > 8*time.Hour {
+		return Booking{}, ErrBadDuration
+	}
+	for _, b := range c.bookings[deskID] {
+		if start.Before(b.End) && end.After(b.Start) {
+			return Booking{}, ErrOverlap
+		}
+	}
+
+	c.nextID++
+	b := Booking{ID: c.nextID, DeskID: deskID, Member: member, Start: start, End: end}
+	c.bookings[deskID] = append(c.bookings[deskID], b)
+	return b, nil
+}
+
+func (c *Calendar) Cancel(id int) bool {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	for deskID, list := range c.bookings {
+		for i, b := range list {
+			if b.ID == id {
+				c.bookings[deskID] = append(list[:i], list[i+1:]...)
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func (c *Calendar) ForMember(member string) []Booking {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	var out []Booking
+	for _, list := range c.bookings {
+		for _, b := range list {
+			if b.Member == member {
+				out = append(out, b)
+			}
+		}
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].Start.Before(out[j].Start) })
+	return out
+}
+```
+
+A few things we know. Members book through a web page and also through a door tablet, so several goroutines call Book at once. Members can look up their own bookings from the tablet. We have around forty desks and a few thousand bookings a month, so speed is not the main worry, but correctness is. A member once told us a booking made on the last Sunday of March ended up an hour shorter than they expected, and we never found out why.

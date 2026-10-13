@@ -3,7 +3,8 @@ no Docker, no agent. It prints a speed table and can write the same as JSON.
 
 Interface under test (command line only):
     measure.py URL --model NAME [--tokenizer auto|ws|server|FILE|hf:REPO]
-               [--input N,N] [--output N] [--users N,N] [--seconds S] [--json FILE]
+               [--input N,N] [--output N] [--users N,N] [--seconds S]
+               [--extra-body JSON] [--json FILE]
 """
 from __future__ import annotations
 
@@ -15,6 +16,7 @@ from pathlib import Path
 import pytest
 
 from conftest import BENCH, MockServer, free_port
+from test_tps_harness import capture_server
 
 import measure
 
@@ -144,6 +146,36 @@ def test_a_server_whose_every_answer_is_invalid_exits_1(tmp_path):
     assert p.returncode == 1
     assert data["rows"][0]["requests_ok"] == 0 and data["rows"][0]["requests_invalid"] > 0
     assert "length" in p.stdout
+
+
+def test_extra_body_fields_reach_every_request_the_probe_included(tmp_path):
+    """A target's metric.extra_body changes what the server sends back, so a
+    quick measurement of the same server has to be able to send it too."""
+    with capture_server(16, 16, delay_s=0.05) as (url, bodies):
+        p, data = run(url, "--tokenizer", "ws", "--input", "32",
+                      "--extra-body", '{"skip_special_tokens": false, "max_tokens": 1}',
+                      out=tmp_path / "m.json")
+    assert p.returncode == 0, p.stderr
+    assert len(bodies) > 2
+    assert all(b["skip_special_tokens"] is False for b in bodies)
+    assert all(b["max_tokens"] == 16 for b in bodies)     # the measured fields stay ours
+    assert data["extra_body"] == {"skip_special_tokens": False, "max_tokens": 1}
+    assert "skip_special_tokens" in p.stdout              # the table says what was sent
+
+
+def test_an_extra_body_that_is_not_a_json_object_is_a_usage_error(honest, tmp_path):
+    for bad in ("{skip_special_tokens: false}", "[1]"):
+        p, data = run(honest.url, "--tokenizer", "ws", "--input", "32", "--extra-body", bad,
+                      out=tmp_path / "m.json")
+        assert p.returncode == 2
+        assert "--extra-body" in p.stderr and "Traceback" not in p.stderr
+        assert data == {}
+
+
+def test_without_extra_body_the_result_says_none_was_sent(honest, tmp_path):
+    p, data = run(honest.url, "--tokenizer", "ws", "--input", "32", out=tmp_path / "m.json")
+    assert p.returncode == 0, p.stderr
+    assert data["extra_body"] is None and "extra request fields" not in p.stdout
 
 
 # ------------------------------------------------------------ the tokenizer --

@@ -1,0 +1,1 @@
+Write me a Python program that simulates a toy factory line with three machines and a queue between each pair, then add a complete set of unit tests and a short explanation of how it all fits together.

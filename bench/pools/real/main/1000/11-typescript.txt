@@ -1,0 +1,75 @@
+Please explain what each part of this TypeScript module does, propose a refactoring (I think it's doing too much in one file), and write tests for the refactored version. It's part of our volunteer mapping tool that checks edits to footpaths before they're accepted.
+
+```ts
+export interface PathEdit {
+  id: string;
+  author: string;
+  points: Array<[number, number]>; // [lat, lon]
+  surface?: "paved" | "gravel" | "dirt" | "grass";
+  name?: string;
+  createdAt: string; // ISO date
+}
+
+export interface Problem {
+  editId: string;
+  severity: "error" | "warning";
+  message: string;
+}
+
+const MAX_SEGMENT_METRES = 500;
+
+function toRadians(deg: number): number {
+  return (deg * Math.PI) / 180;
+}
+
+export function distanceMetres(a: [number, number], b: [number, number]): number {
+  const r = 6371000;
+  const dLat = toRadians(b[0] - a[0]);
+  const dLon = toRadians(b[1] - a[1]);
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRadians(a[0])) * Math.cos(toRadians(b[0])) * Math.sin(dLon / 2) ** 2;
+  return 2 * r * Math.asin(Math.sqrt(h));
+}
+
+export function checkEdit(edit: PathEdit, now: Date = new Date()): Problem[] {
+  const problems: Problem[] = [];
+
+  if (edit.points.length < 2) {
+    problems.push({ editId: edit.id, severity: "error", message: "A path needs at least two points." });
+    return problems;
+  }
+
+  for (const [lat, lon] of edit.points) {
+    if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+      problems.push({ editId: edit.id, severity: "error", message: `Point ${lat},${lon} is outside the map.` });
+    }
+  }
+
+  for (let i = 1; i < edit.points.length; i++) {
+    const d = distanceMetres(edit.points[i - 1], edit.points[i]);
+    if (d === 0) {
+      problems.push({ editId: edit.id, severity: "warning", message: `Points ${i} and ${i + 1} are identical.` });
+    } else if (d > MAX_SEGMENT_METRES) {
+      problems.push({
+        editId: edit.id,
+        severity: "warning",
+        message: `Segment ${i} is ${Math.round(d)} m long; add intermediate points.`,
+      });
+    }
+  }
+
+  if (!edit.surface) {
+    problems.push({ editId: edit.id, severity: "warning", message: "Surface is missing." });
+  }
+
+  const created = new Date(edit.createdAt);
+  if (Number.isNaN(created.getTime())) {
+    problems.push({ editId: edit.id, severity: "error", message: "Creation date is not valid." });
+  } else if (created.getTime() > now.getTime()) {
+    problems.push({ editId: edit.id, severity: "error", message: "Creation date is in the future." });
+  }
+
+  return problems;
+}
+```

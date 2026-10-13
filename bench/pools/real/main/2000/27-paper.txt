@@ -1,0 +1,37 @@
+Below are the methods and results sections of a manuscript from our process research group, submitted to a paper-industry journal. I've been asked to referee it. Please write a detailed peer review: a summary of the claims, major concerns about the design and statistics, minor points, and a clear recommendation with the changes you would need to see.
+
+Effect of Cationic Starch Dosage and Refiner Intensity on Dry Strength and Drainage in Recycled Testliner: A Pilot-Scale Factorial Study at the Aldermoor Mill
+
+2. Methods
+
+2.1 Furnish and pilot equipment. The furnish was a mixed recovered paper grade (approximately 70 percent old corrugated containers, 30 percent mixed office waste), pulped for 25 minutes at 4.5 percent consistency in a batch pulper and then screened through a 0.20 mm slotted screen. All trials were run on the Aldermoor pilot paper machine (width 0.5 m, speed 40 m/min) over three consecutive weeks. Stock was pumped from a single 12 m3 chest that was topped up with fresh pulp each Monday. Whitewater was recirculated within each week, but the system was drained and cleaned at the end of each week.
+
+2.2 Experimental design. We varied two factors. Cationic starch dosage had three levels (0, 6 and 12 kg per tonne of dry fibre, added at the machine chest). Refiner intensity, set by specific edge load, had two levels (low, 2.0 Ws/m, and high, 3.5 Ws/m), at a fixed specific energy of 90 kWh/t. This gave six treatment combinations. Each combination was run once per week, in the order that suited the operators, giving three runs per treatment. Basis weight was held at 125 g/m2 by adjusting the stock flow, and wet-end pH at 7.1 by adding alum when needed. Retention aid was kept at 400 g/t for all runs.
+
+2.3 Measurements. After each run reached steady state (judged by headbox consistency within 2 percent for ten minutes), we collected five 1 m sheets from the reel, conditioned them at 23 degrees C and 50 percent relative humidity for 24 hours, and tested them. Burst index (ISO 2758), ring crush index (ISO 12192) and tensile index (ISO 1924-2) were measured on ten specimens per sheet, and the values were averaged per run. Drainage was characterised by Schopper-Riegler number on a stock sample taken at the headbox, and by the vacuum level required at the second suction box to hold 18 percent solids after the press. Specific energy of the vacuum system was read from the mill meter.
+
+2.4 Statistics. Run-level means were analysed with a two-way analysis of variance with interaction, at the 5 percent level. Where the interaction was significant, we compared the means pairwise with Student's t-tests without adjustment. The effect of starch was also fitted by linear regression of strength on dosage, using all 18 runs. Normality was checked by eye on residual plots. No runs were excluded.
+
+2.5 Economic estimate. The saving per tonne was calculated from the mill's 2025 average prices: cationic starch at 640 euros per tonne, electricity at 0.14 euros per kWh, and recovered paper furnish at 118 euros per tonne of dry fibre. Fibre saved by lowering basis weight was credited at the furnish price. The extra vacuum energy was taken directly from the mill meter readings during each run. Drying steam was not included because the pilot machine has an electric dryer section that is not representative of the full-scale machine.
+
+3. Results
+
+3.1 Strength. Starch dosage raised all three strength indices. Mean burst index rose from 1.52 kPa m2/g at 0 kg/t to 1.74 at 6 kg/t and 1.83 at 12 kg/t. Ring crush index rose from 6.1 to 6.9 and 7.2 N m/g. Tensile index rose from 31.4 to 35.0 and 36.9 N m/g. The effect of dosage was significant for all three (p < 0.01). The effect of refiner intensity was significant only for tensile index, where the high-intensity setting gave 2.1 N m/g more on average (p = 0.03). The interaction was significant for burst index (p = 0.04): at high intensity, the gain from 6 to 12 kg/t starch was 0.02, whereas at low intensity it was 0.16.
+
+Table 1. Mean burst index (kPa m2/g) by treatment, three runs each.
+
+| Starch kg/t | Low intensity | High intensity |
+|---|---|---|
+| 0 | 1.49 | 1.55 |
+| 6 | 1.71 | 1.77 |
+| 12 | 1.87 | 1.79 |
+
+3.2 Drainage. Schopper-Riegler number increased with refining intensity from 34 to 38 on average and was not affected by starch (p = 0.41). The vacuum level needed at the second suction box increased with starch dosage, from 31 kPa at 0 kg/t to 34 kPa at 6 and 37 kPa at 12 kg/t. This corresponds to a rise of about 6 percent in vacuum energy per 6 kg/t. We interpret this as starch binding water in the web, though we did not measure water retention value.
+
+3.3 Regression. The linear regression of burst index on starch dosage gave a slope of 0.026 per kg/t (R2 = 0.88, n = 18). We used this slope to estimate that each 1 kg/t of starch would allow a reduction of 1.6 g/m2 in basis weight at constant burst index, and, at the current starch price, a net saving of 2.3 euros per tonne of paper after counting the extra vacuum energy.
+
+3.4 Variation between weeks. Week 3 gave higher strength than week 1 at all treatments, by 0.06 kPa m2/g on average for burst index. We attribute this to a higher proportion of old corrugated containers in the chest after the Monday top-up in week 3, which was not measured. The differences between weeks were not tested.
+
+3.5 Conclusions drawn by the authors. A dosage of 6 kg/t of cationic starch with high refiner intensity gives the best compromise between strength and drainage and is recommended for full-scale trials on the Aldermoor testliner machine. Higher dosage is not justified because of the vacuum penalty and the plateau in burst index at high refining. The results are expected to carry over to other recycled grades.
+
+3.6 Strip test on the full-scale machine. After the pilot trials, the mill ran the recommended setting (6 kg/t, high intensity) on its testliner machine for 36 hours. Mean burst index of the reel samples was 1.69 kPa m2/g against 1.58 during the preceding 36 hours at the usual setting of 3 kg/t and medium intensity. The machine speed was reduced from 820 to 790 m/min during the trial because of web breaks at the first press, which the operators did not attribute to the starch. The authors did not repeat the strip test.

@@ -1,0 +1,97 @@
+I run the sales floor at Brackenridge Motors and I've been copied on this whole mess. Can you write me a detailed reply to send to everyone on the thread that settles every open point, and then a list of actions with a name against each one and a date? Please keep the tone calm and fair to the customer without us admitting more than we have to.
+
+---
+
+From: Pradeep Vanterpool <pradeep.vanterpool@example.org>
+To: Eilidh Strand <eilidh.strand@example.org>
+Cc: Tobias Wragg <tobias.wragg@example.org>
+Date: Mon 5 Oct 2026, 09:14
+Subject: Complaint: silver hatchback, bought 19 Sept
+
+Dear Ms Strand,
+
+I bought the silver hatchback (stock number BM-3318, 2017, 62,400 miles, price 7,950 pounds) from your showroom on 19 September. After nine days the engine warning light came on, and on Saturday the car lost power on the ring road and I had to be recovered. The garage I called says the turbocharger has failed and the repair would cost about 1,850 pounds. Your salesman told me the car had a full service history and was "mechanically sound". I would like a full refund or for you to pay for the repair. I attach the recovery receipt for 135 pounds.
+
+Yours sincerely,
+Pradeep Vanterpool
+
+---
+
+From: Eilidh Strand <eilidh.strand@example.org>
+To: Tobias Wragg <tobias.wragg@example.org>; Norma Quilliam <norma.quilliam@example.org>
+Date: Mon 5 Oct 2026, 10:02
+Subject: FW: Complaint: silver hatchback, bought 19 Sept
+
+Tobias, Norma, see below. Tobias, did you tell him it was mechanically sound? Norma, what did we do to this car before sale, and did it have a full service history? I need facts before I reply to him.
+
+Eilidh
+
+---
+
+From: Norma Quilliam <norma.quilliam@example.org>
+To: Eilidh Strand <eilidh.strand@example.org>; Tobias Wragg <tobias.wragg@example.org>
+Date: Mon 5 Oct 2026, 11:40
+Subject: RE: FW: Complaint: silver hatchback, bought 19 Sept
+
+BM-3318 came in as a part exchange on 8 September. Our pre-sale inspection on 10 September was the standard 82 point check. It passed, with a note that the front tyres were close to the limit (we replaced both) and that the turbo "may be noisy at idle, monitor". I should be honest that the note was on the job card but I don't think anyone told the salesman. We did not do an oil change. The previous owner's book had stamps up to 2023 but nothing for 2024 or 2025, so "full service history" is not accurate in my view. We would have changed the oil and filter normally, but the car was needed on the forecourt by the 12th and the bay was full.
+
+Norma
+
+---
+
+From: Tobias Wragg <tobias.wragg@example.org>
+To: Eilidh Strand <eilidh.strand@example.org>; Norma Quilliam <norma.quilliam@example.org>
+Date: Mon 5 Oct 2026, 13:25
+Subject: RE: FW: Complaint: silver hatchback, bought 19 Sept
+
+I did say "service history" because the book had stamps and I thought that was good enough. I did not say the words mechanically sound, but I might have said "no problems that we know of". I did not see the job card note about the turbo. The customer test drove it for twenty minutes and was happy. He paid a 500 deposit on the 17th and the balance on the 19th by bank transfer. He did not take the extended warranty, which we offered at 349 pounds.
+
+Tobias
+
+---
+
+From: Augustin Rawle <augustin.rawle@example.org>
+To: Eilidh Strand <eilidh.strand@example.org>
+Cc: Norma Quilliam <norma.quilliam@example.org>
+Date: Tue 6 Oct 2026, 08:47
+Subject: Vanterpool - what the paperwork says
+
+Eilidh, I looked at the sales file. The order form has "sold as seen, 30 day dealer warranty on engine and gearbox" ticked. The warranty card is signed and dated 19 September and covers parts and labour up to 1,500 pounds per claim. The car was sold with 62,400 miles, and the mileage at the time of the recovery on Saturday was 62,911. The customer has therefore driven 511 miles. Under our own warranty the turbo would count as engine. The repair estimate is higher than the claim limit, 1,850 against 1,500.
+
+Also, the order form says nothing about service history. The advert on our website, which I have printed, says "full service history". Since the advert is a representation we made, I think we can't rely on "sold as seen" as a defence. I'd be cautious about arguing with him. Under consumer law he has a right to reject within the first 30 days, and a refund can be claimed if the fault was present at sale, which is presumed within the first six months. The turbo "may be noisy at idle" note makes it hard to argue it wasn't.
+
+Augustin (accounts)
+
+---
+
+From: Eilidh Strand <eilidh.strand@example.org>
+To: Tobias Wragg <tobias.wragg@example.org>; Norma Quilliam <norma.quilliam@example.org>; Augustin Rawle <augustin.rawle@example.org>
+Date: Tue 6 Oct 2026, 09:30
+Subject: RE: Vanterpool - what the paperwork says
+
+Thanks all. Where are we on the options? My view: he's been left stranded and we have been sloppy on three points, the advert, the unknown service gap and the job card note. I don't want a refund if I can avoid it, because the car is now worth less and the engine may need other work. Options as I see them are (a) refund 7,950 and take the car back, (b) repair the turbo at our own garage at cost and give him a courtesy car, (c) pay for his garage's repair. Tobias, I want your answer on option b by end of day. Norma, how much would our cost be, and how long would it take? Augustin, can you confirm how much we should refund for the recovery and whether anything is owed on the finance.
+
+Eilidh
+
+---
+
+From: Norma Quilliam <norma.quilliam@example.org>
+To: Eilidh Strand <eilidh.strand@example.org>
+Cc: Tobias Wragg; Augustin Rawle
+Date: Tue 6 Oct 2026, 15:55
+Subject: RE: Vanterpool - what the paperwork says
+
+Our cost for a new turbo and fitting is 940 pounds in parts and 5 hours of labour. The part is in stock at the supplier in Wexcombe and would arrive Thursday. Realistically the job takes two working days, so he could have the car back by Monday 12th, or Friday 9th if the part arrives early and we start straight away. We would also do the oil and filter change and check the other engine work for free. We have one courtesy car free, a small hatchback, from tomorrow. A warning: if the failure was due to oil starvation, a turbo may fail again, and I would want to look at the oil feed pipe.
+
+Norma
+
+---
+
+From: Augustin Rawle <augustin.rawle@example.org>
+To: Eilidh Strand <eilidh.strand@example.org>
+Date: Wed 7 Oct 2026, 08:20
+Subject: RE: Vanterpool - what the paperwork says
+
+Eilidh, the recovery receipt is 135 pounds and we should repay that whatever we decide. There is no finance on the car, he paid in full. Nobody has checked yet why the advert said full service history, and Tobias still hasn't replied about option b. I think we should write to the customer today because it is now two days since his email.
+
+Augustin

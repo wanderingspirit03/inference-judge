@@ -1,0 +1,19 @@
+Our crew scheduling inbox has four tickets waiting. Please write a full reply to each one, as if from our team, with the specific steps we will take and what we need from the person. Be accurate about our rules (listed at the end) and be kind where someone is clearly stressed. Keep each reply self-contained.
+
+TICKET CS-5521. Opened by First Officer Lena Fischbach. Category: rest rules.
+"I was rostered on a 06:10 departure on Thursday after landing at 23:05 on Wednesday. I did the sums and I only get about 7 hours 40 minutes between arrival at the hotel and pick-up. That can't be legal. I did it anyway because the duty manager said there was nobody else. I want it on record that I was fatigued, and I want to know whether I have to fly the Friday rotation as well."
+
+TICKET CS-5524. Opened by Cabin Crew Member Joaquim Teles. Category: swap request.
+"Hi, I need to swap my Saturday 14 June Reykholt rotation with someone. My brother's wedding is that day and I put in for leave in January, but the leave was never approved or declined. Colleague Nia Oduya says she will take it. Can you approve the swap? I know the deadline for swaps is 7 days before, and it is now 5 days before. Please, it is a wedding."
+
+TICKET CS-5530. Opened by Captain Rurik Halvorsen. Category: system error.
+"The rostering app has put me on two flights at the same time on 3 July: the 09:20 to Marlowe and the 09:45 to Dunmere. One of them must be an error. Also, the app shows my currency check as expired though I completed it on 28 May. If I am not shown as current, I can't be rostered at all, which could explain the strange duplication. Please sort this out before the July roster is published on Friday."
+
+TICKET CS-5533. Opened by Station Manager Odile Marchetti, Dunmere. Category: staffing.
+"Next weekend we have a late inbound from Marlowe (landing 22:50) and an 05:40 departure. Both need a full cabin crew of 3. The roster only shows 2 available crew with enough rest, and the third would be a trainee. Can a trainee count towards the minimum? If not, can you find a third or tell me which flight I should cancel? I need an answer by Wednesday noon so I can warn the passengers."
+
+OUR RULES (internal, summarised)
+- Minimum rest before a duty period is 10 hours measured from hotel arrival to pick-up. Reduction to 9 hours is allowed only for operational reasons, must be approved in advance by the Head of Flight Operations and is compensated with an extra rest day within 7 days. Any crew member may declare themselves unfit due to fatigue; a fatigue report must be filed within 24 hours, and no penalty applies.
+- Swaps are approved by the scheduling team if both crew are qualified and the request is at least 7 days before. Exceptions are possible for family emergencies and weddings with a document, approved by the scheduling lead, Priyanka Wells. Leave requests must be answered within 14 days.
+- Roster errors: crew members must be contacted within 4 working hours. Qualification records are held by the training department, not scheduling; scheduling can mark a currency as pending for up to 5 days.
+- A trainee on a flight is a supernumerary and does not count towards minimum cabin crew. The minimum for a flight of this type is 3. Cancellation decisions belong to the Operations Control Centre, not to scheduling.

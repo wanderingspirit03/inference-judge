@@ -1,23 +1,22 @@
 # v6e4-gemma4-26b-tps - goal: speed for one user on TPU (single-stream
 # tokens/s), not total throughput.
-# Brought up by hand on an on-demand v6e-4 with these flags, at
-# --max-model-len 4096: about 8 ms per token for one user, the same from 128
-# to 2048 input tokens; cold start 25 min (compile 17.5), 7 min from a saved
-# restart disk; 2 chips fail at load. The compile cache saved on the disk is
-# from that length too. This file now asks for inputs up to 8000 tokens
-# (--max-model-len 9216, --max-num-batched-tokens 8192), which nobody has
-# measured: the first run on a real machine recompiles and measures the
-# baseline.
-# runnable: false until the launch below has been seen to reach the chips on a
-# real v6e-4 (see docker_flags). The ruler fingerprints this file: finish every
-# edit (docker_flags, env, runnable) BEFORE the baseline is measured; an edit
-# after it means measuring the baseline and the calibration again.
+# Brought up by hand on an on-demand v6e-4 at --max-model-len 4096: about
+# 8 ms per token for one user, the same from 128 to 2048 input tokens; cold
+# start 25 min (compile 17.5), 7 min from a saved restart disk; 2 chips fail
+# at load.
+# Session 1 (2026-10-13, us-east5-b) ran this target through the ruler at a
+# 6144 context, on cut prompts and without the 100 size: baseline, a
+# 10-launch calibration and a rehearsal. The pool and the sizes have changed
+# since, so those numbers are not this file's baseline.
+# The ruler fingerprints this file: finish every edit BEFORE the baseline is
+# measured; an edit after it means measuring the baseline and the calibration
+# again.
 id: v6e4-gemma4-26b-tps
-runnable: false
+runnable: true
 accelerator: {kind: tpu, type: v6e-4, chips: 4, hosts: 1, topology: 2x2, hbm_gb_per_chip: 32}
 provision:                          # bootstrap's section, not read by the ruler
   provider: gcp
-  zone: europe-west4-a              # verify which zone holds the quota
+  zone: us-east5-b                  # session 1 ran here; europe-west4-a had no capacity that day
   runtime_version: v2-alpha-tpuv6e  # from the recipe; verify
   mode: on-demand                   # spot | flex-start | on-demand
   data_disk_gb: 300
@@ -48,17 +47,14 @@ engine:
   # researcher's checkouts are ~/tpu_inference-src and ~/vllm-src; a launch
   # sees private copies at /src/tpu_inference and /src/vllm.
   sources: [tpu_inference, vllm]
-  # The strong seal: the four chips and the vfio container device, the TPU
-  # control service through its unix socket (mounted read-only; see env), and
-  # no network. NOT PROVEN: nobody has started the chips without --privileged.
-  # Bootstrap's chip gate tries exactly these flags; if they cannot reach the
-  # chips, tools/tpu_seal_probe.sh finds the strongest set that can, and its
-  # line goes here (and its -e pairs into env). Results name what was passed
-  # in: with these flags isolation.seal reads "weaker: device ..., host socket
-  # ..." and exfil_probe "not_proven: ...", and a privileged launch says so.
-  docker_flags: [--device, /dev/vfio/vfio, --device, /dev/vfio/0, --device, /dev/vfio/1,
-                 --device, /dev/vfio/2, --device, /dev/vfio/3,
-                 -v, "/var/run/tpu-plugin:/var/run/tpu-plugin:ro"]
+  # Not the strong seal (the chips as devices, the TPU control socket
+  # read-only, no network): no set of flags like that has reached the chips.
+  # Session 1, 2026-10-13, us-east5-b: every set without the host network failed
+  # (libtpu asks the metadata server for the worker address, and the node has no
+  # /var/run/tpu-plugin/vbar.sock). This is the set that reaches the chips, and
+  # results say so: isolation.seal reads "weaker: privileged, network=host".
+  # tools/tpu_seal_probe.sh looks for a stronger set that still reaches them.
+  docker_flags: [--network, host, --privileged]
   shm_size: 16g
   # Each launch gets a private writable copy of the ruler's seed at `mount`.
   # A candidate keeps its copy from its first launch to its last and it is
@@ -77,20 +73,18 @@ engine:
     MODEL_IMPL_TYPE: flax_nnx
     USE_BATCHED_RPA_KERNEL: "1"
     MOE_REQUANTIZE_WEIGHT_DTYPE: float8_e4m3fn
-    # the control service over the mounted socket instead of host TCP
-    VBAR_CONTROL_SERVICE_URL: "unix:/var/run/tpu-plugin/vbar.sock"
     # 1: the server compiles a shape the first time it is used instead of
     # every token bucket before it is ready. Ready in ~4 min instead of ~7
     # from a warm cache, and a candidate whose engine edit misses the cache
     # compiles the handful of shapes the ruler sends, not all of them
-    # (17.5 min at 4096; more at 8192). The price is a compile on first use:
+    # (17.5 min at 4096). The price is a compile on first use:
     # the ruler's warm sweep sends every input size once per stream before
     # anything is scored, and waits up to budgets.compile_s for it.
     SKIP_JAX_PRECOMPILE: "1"
   # The serve command is not here: it is research/experiments/baseline-tpu/
-  # launch.sh (--tensor-parallel-size 4, --max-model-len 9216,
-  # --max-num-batched-tokens 8192, --max-num-seqs 8, --kv-cache-dtype fp8 and
-  # the 8-bit rules), and every candidate brings its own.
+  # launch.sh (--tensor-parallel-size 4, --max-model-len 6144,
+  # --max-num-batched-tokens 4096, text only, and the 8-bit rules), and every
+  # candidate brings its own.
   port: 8000
 metric:
   kind: tps
@@ -100,11 +94,23 @@ metric:
   # sending the request to the last token. Sizes count the user text; the chat
   # template adds a few tokens. The engine pads a prompt to a power-of-two
   # bucket (9 buckets, 16..4096, at max-num-batched-tokens 4096), so each
-  # size sits just under an edge and 8000 is the largest that still fits the
-  # 8192 bucket with the template. Verify against the server's
-  # "Prepared request paddings" line. Only 128..2048 has been measured.
-  isl: [100, 1000, 2000, 4000, 8000]
+  # size sits just under an edge. 4000 is the largest: the engine serves a
+  # 6144 context on v6e and no more yet (see baseline-tpu/launch.sh).
+  # A size is a class of request, not an exact length: the pool below holds
+  # whole requests, each sent as written under its own size, at most that many
+  # tokens and at least (1 - isl_tol) of it. The server pads a prompt up to
+  # the next power of two, so every request of a size is the same work for it
+  # (100: 128, 1000: 1024, 2000: 2048, 4000: 4096): 0.3 keeps the smallest
+  # size above 64, and the pool's larger requests are all over 0.7 of theirs.
+  isl: [100, 1000, 2000, 4000]
+  isl_tol: 0.3
   osl: 512
+  # The server hides special tokens from the text it returns, and the ruler
+  # counts an answer from that text. Session 1: with them hidden, 8 of 45
+  # answers to a short prompt re-counted to fewer than the 507 tokens
+  # length_tol allows, which voids the launch; with them shown, 0 of 49. The
+  # ruler's junk check reads the answer without them.
+  extra_body: {skip_special_tokens: false}
   # One level only: with [1] the headline is the single-stream speed over
   # the 4 chips. Adding a higher level would make it a throughput number.
   concurrency: [1]
@@ -112,14 +118,14 @@ metric:
   # change after the baseline). p99_tpot_ms is over each request's MEAN time
   # per token, a 20 tok/s floor, so tokens arriving in bursts never trip it.
   # p95_ttft_ms is the only rule on the first token; by hand it was 56 ms at
-  # 2048 tokens in, and nobody has measured 8000.
+  # 2048 tokens in.
   slo: {p99_tpot_ms: 50, p95_ttft_ms: 2000}
   # The longest silence allowed between two tokens of one answer; at ~8 ms a
   # token it allows bursts of up to ~125 tokens. A block with a stall is
   # dropped, and a launch with every block stalled is INVALID.
   stall_ms: 1000
-  # A request is ~4.2 s (512 tokens at about 8 ms plus the prefill), a pass over
-  # the five sizes ~21 s. Per-token time was within 1% request to request, so
+  # A request is ~4.3 s (512 tokens at about 8 ms plus the prefill), a pass over
+  # the four sizes ~17 s. Per-token time was within 1% request to request, so
   # a window needs a few passes, not minutes: 60 s is ~3 requests per size,
   # two blocks and two launches give the per-size guard ~12 a side.
   ramp_s: 5
@@ -129,8 +135,14 @@ metric:
   screen_window_s: 45
   design: abba
   blocks: 2
-  prompt_pool: /opt/bench/pools/gemma4-main.jsonl
-  confirm_pool: /opt/bench/pools/gemma4-confirm.jsonl    # disjoint from prompt_pool
+  # Whole requests written for this project (pools/real/, one file each):
+  # what a person would send, with the document or code they would paste, and
+  # an ask that needs a long answer. Nothing is cut or padded. 64 per size in
+  # the main pool, 24 in the confirm pool: a candidate run sends no request
+  # twice and uses about 32 per size at the first session's speed, more on a
+  # faster server (pools/real_pool.py has the sum).
+  prompt_pool: /opt/bench/pools/gemma4-real-main.jsonl
+  confirm_pool: /opt/bench/pools/gemma4-real-confirm.jsonl    # disjoint from prompt_pool
   length_tol: 0.01
 # How long a launch may take to answer /v1/models. Ready was ~4 min by hand
 # (weights 156 s; shapes compile on first use, in the warm sweep, which has
@@ -143,7 +155,10 @@ probes:
 budgets: {build_s: 1200, compile_s: 1800, health_s: 1800, run_s: 5400}
 reference:
   dir: reference/v6e4-gemma4-26b-tps
-  prompts: /opt/bench/pools/gemma4-quality-prompts.jsonl
+  # Session 1 (2026-10-13): 240 of the pool's 256 prompts. The other 16 are
+  # longer than the 6144 context and the server refuses them (HTTP 400). All
+  # 240 line up under teacher forcing on the real engine.
+  prompts: /opt/bench/pools/gemma4-quality-prompts-6144.jsonl
   tasks: /opt/bench/pools/gemma4-quality-tasks.jsonl
   # The reference answers come from three cold launches of the baseline, 128
   # tokens each (these are also the defaults for a real engine).

@@ -1,0 +1,76 @@
+Here is a Python module we use at our recycling plant to track bales leaving the sorting hall. Please do a thorough code review, covering bugs, edge cases, style and design, and then write a full set of unit tests with pytest.
+
+```python
+import datetime
+from dataclasses import dataclass, field
+
+MATERIALS = ["paper", "glass", "metal", "plastic"]
+PRICE_PER_TONNE = {"paper": 85.0, "glass": 30.0, "metal": 310.0, "plastic": 140.0}
+MAX_CONTAMINATION = 0.08
+
+
+@dataclass
+class Bale:
+    bale_id: str
+    material: str
+    weight_kg: float
+    contamination: float
+    sorted_on: datetime.date
+    shipped: bool = False
+    notes: list = field(default_factory=list)
+
+
+class BaleLedger:
+    def __init__(self):
+        self.bales = {}
+
+    def add(self, bale):
+        if bale.material not in MATERIALS:
+            raise ValueError("unknown material: " + bale.material)
+        if bale.weight_kg < 0:
+            raise ValueError("negative weight")
+        if bale.bale_id in self.bales:
+            raise KeyError("duplicate bale " + bale.bale_id)
+        self.bales[bale.bale_id] = bale
+
+    def is_sellable(self, bale_id):
+        b = self.bales[bale_id]
+        return b.contamination <= MAX_CONTAMINATION and not b.shipped
+
+    def value(self, bale_id):
+        b = self.bales[bale_id]
+        tonnes = b.weight_kg / 1000
+        price = PRICE_PER_TONNE[b.material]
+        if b.contamination > 0.04:
+            price = price * 0.9
+        return round(tonnes * price, 2)
+
+    def ship(self, bale_ids, date=None):
+        date = date or datetime.date.today()
+        total = 0
+        for bid in bale_ids:
+            if not self.is_sellable(bid):
+                raise ValueError("bale not sellable: " + bid)
+            self.bales[bid].shipped = True
+            self.bales[bid].notes.append("shipped " + str(date))
+            total += self.value(bid)
+        return total
+
+    def stock_by_material(self):
+        result = {}
+        for b in self.bales.values():
+            if not b.shipped:
+                result[b.material] = result.get(b.material, 0) + b.weight_kg
+        return result
+
+    def oldest_unshipped(self, n=5):
+        items = [b for b in self.bales.values() if not b.shipped]
+        items.sort(key=lambda b: b.sorted_on)
+        return items[:n]
+
+    def average_contamination(self, material):
+        items = [b for b in self.bales.values() if b.material == material]
+        return sum(b.contamination for b in items) / len(items)
+```
+
+Some background: the ledger holds around 1,500 bales at any time, the shipping clerks call ship() with a list of up to 40 bales for each lorry, and they have complained that a lorry load sometimes fails halfway and then the system says some bales are shipped when no lorry left. The finance team also asked why the value of a bale changes depending on the contamination rate in a way they cannot reproduce by hand.

@@ -1,0 +1,141 @@
+I run the member support desk at Tallowfield Growers' Cooperative and I have seven open tickets from this week that I need to answer before Friday. Please write a complete, individual reply to each one, in a warm and practical tone, signed from the member support team. Where a ticket needs something from us that I haven't given you (a refund, a date, a policy exception), say clearly what we will do according to the policy notes at the bottom, and flag anything where you think I need to check with a manager before sending.
+
+=== TICKET #4471 ===
+Channel: Member portal form
+Opened: Monday 08:14
+Member: Bronwen Aldercott, Aldercott Dairy (member since 2011)
+Category: Milk collection
+Priority: High
+
+Subject: Tanker missed us twice this week
+
+Hello,
+
+The collection tanker did not come to our farm gate on Saturday morning or again on Monday morning. We have a 4,000 litre bulk tank and it was at 91 per cent full by Monday at 7. I rang the depot line twice and both times it went to a recorded message saying the office opens at 9. We had to pour away about 600 litres on Sunday evening to keep the tank from overflowing when the evening milking came in, and that is money I cannot afford to lose. I have been with the cooperative for fourteen years and this has never happened.
+
+I want to know why it happened, whether I will be paid for the milk I poured away, and what you are going to do so that it does not happen again. Our farm reference is AD-0312.
+
+Bronwen Aldercott
+
+--- Internal note added by depot dispatcher (Monday 09:40) ---
+Route 6 tanker was off the road from Friday afternoon with a failed air compressor. Cover vehicle was sent to Route 4 and Route 9 only because those have the largest volumes. Route 6 was not covered on Saturday or Monday. Tanker repaired and back on Route 6 from Tuesday. Farm AD-0312 collected Tuesday 06:50, 3,870 litres.
+
+=== TICKET #4473 ===
+Channel: Email
+Opened: Monday 11:02
+Member: Joaquim Ferreira-Hale, Ferreira-Hale Orchards (member since 2022)
+Category: Payments
+Priority: Normal
+
+Subject: Apple payment for September looks wrong
+
+Hi there,
+
+I have just received the payment statement for September deliveries and I think it is short. I delivered 14.2 tonnes of Grade 1 eating apples across September, which at the published Grade 1 rate of 612 pounds per tonne should come to about 8,690 pounds. The statement says 7,914 pounds. There is a line called "Grading adjustment" for minus 776 pounds and I have no idea what that is. Nobody told me any of my fruit was downgraded and I did not receive a grading report.
+
+Could you send me the grading report for each of my deliveries and explain the adjustment? If it is a mistake please correct it. If some of the fruit really was downgraded I would like to see the photographs, because last year a similar thing happened and the photos turned out to be of somebody else's load.
+
+Joaquim
+
+--- Internal note added by accounts (Monday 14:30) ---
+Statement 9-FH-0044 checked. Grading adjustment relates to delivery on 19 Sept, 3.1 tonnes, where 1.27 tonnes were graded Grade 2 (rate 408 pounds per tonne) due to bitter pit above 5 per cent threshold. Difference is 1.27 x (612 - 408) = 259.08 pounds. This does not explain the whole 776 pounds. The remainder of 516.92 pounds appears to be a second adjustment keyed twice on 26 Sept. Probable duplicate entry; needs confirming with the packhouse before reversal. Grading report for 19 Sept exists, has four photos. Grading report for 26 Sept: not located.
+
+=== TICKET #4476 ===
+Channel: Phone call, logged by Dev
+Opened: Monday 15:48
+Member: Teodora Vasquez-Moriarty, Hillcrest Smallholding (member since March this year)
+Category: Onboarding
+Priority: Normal
+
+Subject: Cannot log in to the ordering system
+
+Teodora called to say she has been trying for three days to log in to the member ordering system to buy seed potatoes for next spring and cannot get in. She says she received a welcome pack in March with a username, but she never set a password because the welcome email went to an old address. She has tried the "forgot password" link and it says the address is not recognised. She is also confused because she thinks she has already paid the 150 pound joining share but it is not showing on her account. She has a deadline of 31 October for the early seed order, which gives a 6 per cent discount. She is not confident with computers and would like step by step instructions that she can follow with the page open next to the letter.
+
+Dev's note: the record has her email as teodora.vm@example.org, but she says her address is teodora.vasquez@example.org. Joining share: payment of 150 pounds shows as received on 14 March by bank transfer under reference "HILLCREST". It was not allocated to a member number because the reference did not match.
+
+=== TICKET #4480 ===
+Channel: Member portal form
+Opened: Tuesday 07:31
+Member: Ambrose Kettleby, Kettleby & Daughters Egg Farm (member since 2017)
+Category: Contract and compliance
+Priority: Normal
+
+Subject: Is the new welfare standard compulsory for us?
+
+Hello,
+
+I have had a letter saying that from 1 January all egg suppliers must meet the "Tallowfield Assured Free Range v4" standard and that there will be an audit visit. We have 3,200 hens in two sheds and we are already on the older v3 standard. I do not understand what has changed, whether I will have to rebuild anything, and what it will cost. In particular the letter mentions "maximum stocking density of 8 birds per square metre in the house" and "verandah access". Our sheds are 400 and 410 square metres, and I think we are at about 7.8 birds per square metre but I do not know how you measure it. I would also like to know if there is any grant or help with the cost, and what happens if the audit finds a problem. Can you tell me whether we will lose our contract?
+
+Ambrose Kettleby
+
+--- Internal note added by standards officer (Tuesday 10:15) ---
+v4 is compulsory for all egg suppliers from 1 January; the board decided in June. Stocking density is measured on usable area, excluding nest boxes and feeders. Kettleby sheds 400 and 410 usable gross, but the audit counts usable area only, which is typically about 92 per cent of gross. Verandah (covered veranda area) is required to be at least 10 per cent of the house floor area, which for 810 square metres gross is 81 square metres. Transitional support: members with fewer than 5,000 birds can apply to the Rural Improvement Fund for up to 40 per cent of costs, applications close 30 November. A first failed audit gives a 90 day corrective period; the contract is only suspended if the second audit also fails.
+
+=== TICKET #4483 ===
+Channel: Email
+Opened: Tuesday 09:55
+Member: Seren Obradovic, Obradovic Veg Box Co. (trading customer, not a member)
+Category: Wholesale orders
+Priority: Low
+
+Subject: Short delivery and missing invoice
+
+Good morning,
+
+We ordered 120 kg of mixed salad leaves, 80 kg of rainbow chard and 60 kg of spring onions for delivery last Thursday. The driver delivered the chard and spring onions but only 70 kg of the salad leaves, and the delivery note was not signed by anyone on our side because our goods-in person had gone home. Also, we have not yet received an invoice for the delivery, and our accounts department needs it by the end of the month to pay on the 30-day terms.
+
+Please can you confirm what happened to the missing 50 kg of salad leaves, issue a credit note or send the missing goods, and send the correct invoice. We are planning our weekly boxes around this supply so we would also like to know whether the supply will be reliable over the winter.
+
+Seren Obradovic
+
+--- Internal note added by wholesale desk (Tuesday 11:20) ---
+Order WO-22817. Picking sheet shows 120 kg salad leaves picked, but the cold-room log shows a pallet of 50 kg was left behind in Bay 3 when the van was loaded and was thrown out on Friday as past its use-by. The invoice was raised for the delivered quantity only: 70 kg x 6.40 + 80 kg x 3.10 + 60 kg x 2.85 = 448.00 + 248.00 + 171.00 = 867.00 pounds. Invoice 22817-A dated Friday, emailed to an old accounts address. Winter salad supply: the heated polytunnels at the cooperative's Marsh Lane site produce salad leaves until mid-December, then from February; there is a gap of about six weeks.
+
+=== TICKET #4486 ===
+Channel: Member portal form
+Opened: Wednesday 08:02
+Member: Isidore Penhale-Grant, Penhale Mill Farm (member since 1998)
+Category: Complaint
+Priority: High
+
+Subject: Complaint about the new grain store booking system
+
+I would like to make a formal complaint. Since the grain store moved to an online booking system for harvest delivery slots I have been unable to get a slot at the time I want. I am 74 and have farmed here for fifty years and I have always delivered wheat in the morning, because the grain is dry after the dew has gone and because my son-in-law only has Tuesdays and Thursdays free to drive the trailer. This year the system gave all the morning slots on those days to larger farms in the first minute after booking opened at 6 a.m. I do not use a smartphone and I had to ask my neighbour to book for me, and by then there was only a Wednesday afternoon slot.
+
+I think it is unfair that a system designed for the convenience of the cooperative shuts out older members. I want a decision on whether I can be given a reserved slot every harvest, and I want to know who decided this and whether members were consulted.
+
+Yours faithfully,
+Isidore Penhale-Grant
+
+--- Internal note added by operations manager (Wednesday 09:30) ---
+Online booking was introduced for the first time this harvest following a board decision in March, with a members' briefing in April attended by 41 of 612 members. Slots open at 06:00 on the first of each month for the following month. There is a phone booking line open 08:00 to 17:00, but it is not advertised on the portal. A "reserved slots for members over 70 or without internet access" proposal was raised at the May board meeting and deferred to the November meeting. Penhale was given the Wednesday 14:00 slot and delivered 38 tonnes on Wednesday 20 August.
+
+=== TICKET #4488 ===
+Channel: Email
+Opened: Wednesday 10:41
+Member: Lucinda Achterberg, Achterberg Mixed Farm (member since 2015)
+Category: Shared machinery
+Priority: Normal
+
+Subject: Combine booking was cancelled without telling me
+
+Dear support,
+
+I booked the cooperative's shared combine harvester for Monday 25 August through the machinery calendar, three weeks ahead, for 60 acres of spring barley. On Sunday evening I got a text from the driver saying the combine was "not available". I had already arranged two tractor drivers and a grain trailer, and I lost a day of fine weather. It rained on Tuesday and Wednesday and I am worried about the moisture in the crop.
+
+Nobody from the office told me the booking had been cancelled, and when I looked at the calendar it showed my booking as deleted. Who deleted it, and why? I am paying the hourly hire rate plus the driver, so I do not understand how another member could take priority over mine. I would like an explanation, an assurance that I will get the next free slot, and some kind of compensation for the cost of the helpers I had arranged, which was 180 pounds.
+
+Lucinda Achterberg
+
+--- Internal note added by machinery coordinator (Wednesday 12:05) ---
+The combine suffered a hydraulic hose failure on Sunday afternoon while working for another member, and was taken out of service until Thursday. The coordinator deleted the Monday bookings from the calendar on Sunday night but the automatic cancellation email failed because the calendar is not linked to the new mail server. Seven members were affected. Next free slots: Friday 29 August (08:00) and Monday 1 September (08:00). Barley moisture on Achterberg farm was last sampled at 17.5 per cent on the previous Friday.
+
+=== POLICY NOTES FOR REPLIES (support team use) ===
+
+1. Missed milk collections: if the cooperative fails to collect, milk that has to be discarded is compensated at 85 per cent of the average milk price for the month, on production of the tank record or a photograph of the dump. The average milk price for the month in question is 38.5 pence per litre. Support can approve compensation up to 500 pounds; above that, the finance manager must approve.
+2. Payment queries: statements are corrected within 5 working days once an error is confirmed, and the correction appears on the next weekly payment run (Fridays). Support may not reverse a payment adjustment without written confirmation from the relevant packhouse.
+3. Onboarding: the member number is assigned only once the joining share is allocated. Support can correct the email address on a record after phone verification of the member's postcode and farm name. Members who cannot use the portal can place orders by phone on 01632 960 118, 08:00 to 17:00 on weekdays, and the early seed discount can be honoured by phone order up to the deadline.
+4. Standards: members should be sent the v4 standards guide and offered a free pre-audit visit. Support must not give opinions about whether a farm will pass.
+5. Wholesale customers: short deliveries are credited at the invoiced price on the next invoice. Missing invoices are reissued the same day to the address the customer specifies.
+6. Complaints: formal complaints are acknowledged in writing within 2 working days and answered within 15 working days by the operations manager. Support should acknowledge, explain what happens next, and not promise any outcome.
+7. Shared machinery: if the cooperative cancels a booking because of breakdown, the member is offered the earliest free slot and, on receipt of invoices from helpers or contractors that were already committed, up to 150 pounds towards documented costs. Anything higher needs the machinery coordinator's approval. Members are not charged hire for cancelled slots.

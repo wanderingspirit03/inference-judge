@@ -1,0 +1,161 @@
+I have just joined the digitisation team at the Thornfield Museum of Local History as a volunteer coordinator, and I have been told to read and follow the policy below, which I find hard to understand. Could you explain it to me in plain language, clause by clause, and then tell me what the risks are for me and for the museum if the rules are not followed? Please point out anything that looks unclear, contradictory or likely to cause trouble in practice.
+
+THORNFIELD MUSEUM OF LOCAL HISTORY
+DIGITISATION, DATA AND IMAGE LICENSING POLICY
+Version 3.2, approved by the Board of Trustees. Review date: two years from approval.
+
+1. Purpose and scope
+
+1.1 This policy sets out how the Museum creates, stores, describes, shares and licenses digital copies of objects, documents, photographs and recordings in its collection ("Digital Assets"), and the duties of the staff, volunteers and contractors who handle them ("Team Members").
+
+1.2 It applies to all Digital Assets created by or for the Museum from the date of approval, and to existing Digital Assets when they are next edited, re-published or licensed to a third party.
+
+1.3 It does not apply to the Museum's administrative records, fundraising data or visitor images taken by security cameras, which are covered by separate policies.
+
+2. Definitions
+
+2.1 "Master File" means the highest quality digital copy made from an original item, produced to the standard in Schedule A and never edited.
+
+2.2 "Access Copy" means a lower resolution file derived from a Master File for display, research or publication.
+
+2.3 "Rights Holder" means the person or organisation that owns the copyright or other rights in the original item, which may be the Museum, a donor, a creator or the creator's heirs.
+
+2.4 "Orphan Work" means an item where the Rights Holder cannot be identified or found after a diligent search as described in clause 6.
+
+2.5 "Sensitive Material" means any item that shows or describes living individuals, human remains, sacred or ceremonial objects, or events that may cause distress to a community, whether or not it is subject to copyright.
+
+3. Creating Digital Assets
+
+3.1 Every Master File must be captured by a trained Team Member using the equipment listed in Schedule A. Volunteers may operate equipment only under the supervision of a trained Team Member until they have completed the induction.
+
+3.2 Before an item is digitised, a Team Member must check the item's record in the collections database and confirm that its condition allows handling. Items marked "fragile" or "do not handle" must not be digitised without the written approval of the Conservator.
+
+3.3 Master Files must be saved in the formats given in Schedule A and must not be edited, cropped, colour corrected or compressed. Any improvement must be made on an Access Copy.
+
+3.4 A Team Member who damages an item or equipment in the course of digitisation must report it to the Collections Manager on the same working day. Failure to report a known incident is a breach of this policy.
+
+3.5 Each Master File must be given a unique identifier in the format set out in Schedule B at the time it is created. Identifiers must never be reused, even if a file is deleted.
+
+3.6 Team Members must record in the collections database, for each digitisation session, the date, the items digitised, the equipment used, and the identifiers allocated. The record must be completed on the day of the session.
+
+3.7 Items belonging to another institution and lent to the Museum may be digitised only if the loan agreement allows it. Where the agreement is silent, the Rights Officer must obtain the lender's written consent first.
+
+3.8 A Team Member who finds that an identifier has been given to the wrong file must tell the Digital Collections Officer, who will correct the record and note the correction. The Team Member must not rename the file themselves.
+
+4. Description and metadata
+
+4.1 Every Digital Asset must have, at a minimum, the following metadata before it is published: identifier, title, date or date range if known, creator if known, description, Rights Holder, rights status, and the name of the Team Member who created it.
+
+4.2 Descriptions must be accurate and written in neutral language. Where the Museum is not certain of a fact, the description must say so, using words such as "probably" or "attributed to".
+
+4.3 Where an item is Sensitive Material, the metadata must record the reason and the name of the community or person consulted before publication.
+
+4.4 Team Members must not alter or delete metadata created by others without recording the reason in the history field of the record.
+
+5. Storage and preservation
+
+5.1 Master Files must be stored in three copies on at least two different types of storage, one of which must be held at a different physical site from the Museum building.
+
+5.2 The Digital Collections Officer will check the integrity of all Master Files at least once every six months and record the result. Files that fail the check must be restored from another copy within ten working days.
+
+5.3 Access to Master Files is limited to the Digital Collections Officer and one named deputy. Other Team Members may request an Access Copy, but must not copy a Master File to a personal device, email account or cloud service.
+
+5.4 Storage media must be replaced no later than the age recommended by the manufacturer or five years from first use, whichever is sooner.
+
+5.5 Born-digital material, such as photographs or documents donated on a memory card or by email, must be treated as a Master File from the moment it is received. The donor's original file names and dates must be kept in the metadata, and the files must not be opened in editing software.
+
+5.6 Digital Assets may be deleted only with the written approval of the Collections Manager and the Digital Collections Officer, who must record the reason. A deleted file's identifier remains in the register with a note of the date and reason.
+
+6. Rights and Orphan Works
+
+6.1 Before publishing or licensing a Digital Asset, a Team Member must record the rights status as one of: Museum owned, Licensed to the Museum, Public domain, Third party owned, or Unknown.
+
+6.2 An item is treated as Public domain only where the creator died more than seventy years before the first day of the current calendar year, or where the item is a document produced by a public authority and published without restriction. A Team Member who is unsure must ask the Rights Officer.
+
+6.3 If the Rights Holder is unknown, the Rights Officer must carry out a diligent search, including at least three sources, which must include the donor file, the national archive catalogue and one public notice of the Museum's search that stays open for ninety days. The result must be recorded in the rights record.
+
+6.4 An Orphan Work may be published as an Access Copy for non-commercial purposes after a diligent search is complete, with the statement "Rights holder unknown: contact the Museum". It must not be licensed to a third party for commercial use.
+
+6.5 If a Rights Holder comes forward after publication, the Museum will within fifteen working days either agree terms with the Rights Holder or remove the Digital Asset from public access, and the Rights Officer will record the decision.
+
+7. Access and licensing
+
+7.1 Access Copies of Museum owned items will be published online under a licence that permits reuse with attribution, unless the Director decides otherwise for a stated reason.
+
+7.2 Requests for commercial use of a Digital Asset, including use in books, advertising, products or broadcast, must be sent to the Rights Officer and may be charged a fee set out in the Museum's published fee schedule. Team Members must not agree fees or terms directly with the requester.
+
+7.3 The Museum will not provide a Master File to any third party, except to a conservator, a partner institution under a written agreement, or a court.
+
+7.4 Where a donor has set conditions on the use of an item, those conditions override clauses 7.1 and 7.2. The conditions must be recorded in the item's record at the time of donation and displayed to Team Members when they open it.
+
+7.5 Researchers using Access Copies for study must be told that they cannot republish without permission, even where an Access Copy is shown online.
+
+7.6 The Museum will keep a log of every licence granted for commercial use, showing the requester, the Digital Asset, the purpose, the territory, the length of the licence and the fee. The Rights Officer will report the log to the Board of Trustees each year.
+
+7.7 A licence for commercial use is for the use described in it and no other. A requester who wishes to use a Digital Asset in a different way, or after the licence ends, must apply again.
+
+8. Sensitive Material and communities
+
+8.1 Sensitive Material must not be published online until the consultation recorded in clause 4.3 has taken place and the Director has signed off the release.
+
+8.2 If a living individual shown in an image, or their close family, asks for an image to be taken down, the Museum will remove it from public access within ten working days of a verified request, without needing to give a reason. The Master File will be retained.
+
+8.3 Images of children must not be published with names, and only where the Museum holds a written release from a parent or guardian, or where the image is more than seventy years old.
+
+9. Personal data
+
+9.1 Some Digital Assets, including oral history recordings, letters and registers, contain personal data about living or recently deceased people. The Museum is the controller of this data under the data protection law that applies to it.
+
+9.2 Team Members must not copy, share or transcribe personal data other than as needed for the purposes of this policy. They must not discuss the content of recordings or documents with anyone outside the Museum except in accordance with clause 7.
+
+9.3 A person whose personal data appears in a Digital Asset has the right to see what the Museum holds, to ask for corrections, and, in the circumstances set out in law, to ask for erasure. Requests must be passed to the Data Protection Lead on the same working day and answered within thirty calendar days.
+
+9.4 A loss or suspected loss of personal data must be reported to the Data Protection Lead immediately, and no later than twenty-four hours after discovery.
+
+10. Volunteers and contractors
+
+10.1 Volunteers and contractors must sign the confidentiality statement in Schedule C before they handle any Digital Asset.
+
+10.2 The Museum owns all Digital Assets created by volunteers and contractors in the course of their work, and the creator assigns to the Museum any rights they might have in the files, but not in the original item.
+
+10.3 Contractors must return or delete all Digital Assets at the end of the contract and confirm this in writing. Contractors may not subcontract digitisation work without the Museum's written consent.
+
+11. Partners and online platforms
+
+11.1 The Museum may place Access Copies on the websites of partner institutions or on third party platforms where this has been approved in writing by the Director. Before approval, the Rights Officer must read the terms of the platform and record whether they require the Museum to give the platform a licence over the files.
+
+11.2 A platform may be approved only if it allows the Museum to remove a file at any time, shows the Museum's rights statement beside every file, and does not claim ownership of the file or of any metadata provided with it.
+
+11.3 Team Members must not upload a Digital Asset to any platform, including a personal social media account, unless the upload has been approved under clause 11.1. Sharing a link to an approved page is permitted.
+
+11.4 Where a partner institution receives Access Copies of items that are Sensitive Material, the written agreement must require the partner to follow clause 8, to pass takedown requests to the Museum within two working days, and to delete the files on request.
+
+11.5 The Museum will keep a register of all approved platforms and partners, and the Digital Collections Officer will check it each year to confirm that each approval is still needed.
+
+12. Complaints and corrections
+
+12.1 Any person may complain to the Museum about the way a Digital Asset has been described, published or licensed. Complaints may be made in writing, by email or in person at the front desk, and any Team Member who receives one must pass it to the Collections Manager within one working day.
+
+12.2 The Collections Manager will acknowledge a complaint within five working days and will give a reply within thirty calendar days. If the complaint concerns Sensitive Material, a living person, or the rights status of an item, the Collections Manager must consult the Director before replying.
+
+12.3 Where a complaint shows that a description is wrong or offensive, the Museum will correct it and note the correction in the history field. The earlier wording will be kept in the history field, and not shown to the public.
+
+12.4 While a complaint is being considered, the Collections Manager may restrict access to the Digital Asset to staff only. Restriction in these circumstances is not an admission that the complaint is correct.
+
+12.5 A person who is not satisfied with the Museum's reply may ask the Board of Trustees to review it. The Board's decision will be given within sixty days and is final.
+
+13. Breach and review
+
+13.1 A breach of this policy may lead to withdrawal of access to Digital Assets, to disciplinary action for employees, and to the end of a volunteer placement or contract.
+
+13.2 The Museum may remove a published Digital Asset at any time and without notice if it believes that publication breaches this policy, the law or a donor's conditions.
+
+13.3 This policy will be reviewed after two years, or sooner if the law changes. Questions about its meaning may be put to the Collections Manager, whose interpretation is final.
+
+Schedule A: Capture standards. Master Files of documents and photographs are captured at no less than 600 dots per inch in uncompressed TIFF. Audio is captured at 96 kHz and 24 bits in WAV. Video is captured in an uncompressed or lossless format.
+
+Schedule B: Identifier format. TMLH, a hyphen, the four digit year of capture, a hyphen and a five digit serial number, for example TMLH-2025-00417.
+
+Schedule C: Confidentiality statement. I understand that the Digital Assets and records I handle for the Museum may contain personal and confidential information. I will not copy, keep or share any such information except as the Museum's policy allows. I will report any loss or suspected loss to the Data Protection Lead at once. I understand that my duty of confidentiality continues after my work with the Museum ends. The signed statement is kept by the Collections Manager.
+
+Schedule D: Response times. Takedown request from a living person or family: remove within ten working days (clause 8.2). Rights Holder coming forward: agree terms or remove within fifteen working days (clause 6.5). Personal data request: pass on the same working day, reply within thirty calendar days (clause 9.3). Data loss: report within twenty-four hours (clause 9.4). Complaint: acknowledge within five working days, reply within thirty calendar days (clause 12.2). Failed integrity check: restore within ten working days (clause 5.2). Damage to an item or equipment: report on the same working day (clause 3.4).

@@ -1,0 +1,46 @@
+I'd like a proper critique of this design from someone who has built this kind of thing. Please tell me what is weak or risky, give two or three alternative approaches with their trade-offs, and then lay out an implementation plan with milestones for a team of two part-time volunteers. We have about 400 members and almost no budget.
+
+Design: Hive Records and Disease Alert System, Wessex Vale Beekeepers' Association
+Author: Gareth Pomeroy (volunteer). Version 2.
+
+1. Problem
+
+Our 400 members keep around 1,900 colonies in apiaries spread across three counties. Each member inspects hives through the season and keeps notes on paper or in their own spreadsheets. When foulbrood or a Varroa surge appears, the regional bee inspector contacts us and we phone round by hand. In last year's American foulbrood case it took four days to warn members within five kilometres, and two of them had moved equipment in the meantime. We want a shared system that records inspections and warns nearby members quickly.
+
+2. Requirements
+
+- Members can record an inspection in under a minute, from a phone, in a field with poor signal.
+- The association can see aggregate data: Varroa counts by month, winter losses, swarm reports.
+- When a notifiable disease is confirmed, the system alerts every member with an apiary within a chosen radius, by text and email, within an hour.
+- Members control what others see. Exact apiary locations are private by default; only distance-based alerts are shared.
+- Cost under 30 a month, run by volunteers.
+
+3. Proposed solution
+
+A single web application written in a popular framework, with a PostgreSQL database hosted on a small rented virtual server. The server also sends the alerts through a commercial text message provider, charged per message. Members log in with an email address and a password.
+
+The mobile experience is a responsive web page. To handle poor signal, the page keeps inspection forms in the browser's local storage and sends them when a connection returns.
+
+Data model: a member has apiaries (with latitude and longitude, rounded to 100 m); an apiary has colonies; a colony has inspections (date, queen seen, brood pattern, Varroa count per 24 hours, temperament, notes, treatment given). Disease reports carry a type, a date, and the location of the confirmed case supplied by the inspector.
+
+4. Alert logic
+
+When the secretary confirms a case, she enters a location and a radius (default 5 km). The server selects all apiaries within the radius using straight-line distance computed in application code and sends a text message to each affected member. A message is retried once after ten minutes if the provider reports a failure. Alert history is stored so members can see when they were warned.
+
+5. Privacy
+
+Exact locations are visible only to the member and to the two administrators. Other members see only aggregates by area of at least 20 apiaries. Data is deleted on request. Backups are taken nightly onto the same server and kept for seven days.
+
+6. Operations
+
+The two volunteers will deploy by hand over SSH. Updates will be applied when needed. Monitoring consists of the hosting provider's uptime email. There is no test server; we will test on the live system in winter, when members are not inspecting.
+
+7. Risks identified so far
+
+- Members who are not comfortable with phones.
+- Volunteer turnover: the author may move away next year.
+- Text message cost if there are many alerts.
+
+8. Rough plan
+
+Build the data model in March, forms in April, alerts in May, invite 30 pilot members in June, full launch before the next season.

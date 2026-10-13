@@ -6,7 +6,8 @@
 #
 #   tpu_devices        the chips are on the host: probes.present counts accelerator.chips
 #   tpu_mount_disk     the persistent cache disk (provision.cache_disk.label) is mounted,
-#                      and mounted again after a reboot (fstab, nofail)
+#                      and mounted again after a reboot (fstab, nofail); a new disk gets
+#                      its empty cache directories
 #   tpu_engine_image   engine.image is in the local docker store at its pinned digest:
 #                      loaded from the disk's tar, else pulled
 #   tpu_gate           THE chip gate: in that image, with the target's own docker_flags
@@ -67,7 +68,7 @@ tpu_devices() {
 # copies the run's results every hour and before it deletes the VM: the mount point
 # goes into the one file the guard reads, <its state dir>/save-to.
 tpu_mount_disk() {
-  local fstab="${IJ_FSTAB:-/etc/fstab}" dev guard="${IJ_DEADMAN_DIR:-/var/lib/inference-judge-deadman}"
+  local fstab="${IJ_FSTAB:-/etc/fstab}" dev sub guard="${IJ_DEADMAN_DIR:-/var/lib/inference-judge-deadman}"
   if [ -z "$T_DISK_LABEL" ]; then tpu_say "target names no cache disk"; return 0; fi
   [ -n "$T_DISK_MOUNT" ] || { echo "provision.cache_disk.mount is missing in $T_ID" >&2; return 1; }
   if mountpoint -q "$T_DISK_MOUNT"; then
@@ -77,12 +78,21 @@ tpu_mount_disk() {
       echo "no disk with the ext4 label '$T_DISK_LABEL' is attached to this VM" >&2
       echo "  from your laptop: gcloud alpha compute tpus tpu-vm attach-disk <node> --disk <disk> \\" >&2
       echo "                      --mode read-write --zone <zone> --project <project>" >&2
+      echo "  attached but new? it has no label yet. find it with lsblk, then (this erases that disk):" >&2
+      echo "    sudo mkfs.ext4 -L $T_DISK_LABEL -m 0 /dev/<disk>" >&2
       return 1
     fi
     mkdir -p "$T_DISK_MOUNT"
     mount -o noatime "$dev" "$T_DISK_MOUNT"
     tpu_say "mounted $dev ($T_DISK_LABEL) at $T_DISK_MOUNT"
   fi
+  # A new disk is empty.  Its cache directories are made here, so the later steps
+  # find a cache with nothing in it and say what that costs.
+  for sub in "$T_DISK_HF" "$T_DISK_COMPILE"; do
+    [ -n "$sub" ] && [ ! -d "$T_DISK_MOUNT/$sub" ] || continue
+    mkdir -p "$T_DISK_MOUNT/$sub"
+    tpu_say "made $T_DISK_MOUNT/$sub (the disk had none: a new disk)"
+  done
   # nofail: a reboot without the disk must not stop the VM from booting.
   if ! grep -qs "^LABEL=${T_DISK_LABEL}[[:space:]]" "$fstab"; then
     printf 'LABEL=%s %s ext4 defaults,nofail,noatime 0 2\n' "$T_DISK_LABEL" "$T_DISK_MOUNT" >> "$fstab"
@@ -279,14 +289,21 @@ EOF
 # ($real); the bind mount shows it at $dir, where it is then read and checked the way
 # the ruler will see it.
 tpu_models() {
-  local fstab="${IJ_FSTAB:-/etc/fstab}" dir="$T_MODEL_DIR" parent backing real hub snap f rel src dst blob n=0 manifest
+  local fstab="${IJ_FSTAB:-/etc/fstab}" dir="$T_MODEL_DIR" parent backing real cache hub snap f rel src dst blob n=0 manifest
   if [ -z "$T_DISK_LABEL" ] || [ -z "$T_DISK_HF" ] || [ -z "$dir" ]; then
     tpu_say "no cache-disk model for $T_ID"; return 0
   fi
   [[ "$T_MODEL_REV" =~ ^[0-9a-f]{40}$ ]] || { echo "model.revision '$T_MODEL_REV' is not a 40-hex commit" >&2; return 1; }
-  hub="$T_DISK_MOUNT/$T_DISK_HF/models--${T_MODEL_ID//\//--}"
+  cache="$T_DISK_MOUNT/$T_DISK_HF"
+  hub="$cache/models--${T_MODEL_ID//\//--}"
   snap="$hub/snapshots/$T_MODEL_REV"
-  [ -d "$snap" ] || { echo "the disk's Hugging Face cache has no $snap (model.revision $T_MODEL_REV)" >&2; return 1; }
+  if [ ! -d "$snap" ]; then
+    echo "the disk's Hugging Face cache has no $snap (model.revision $T_MODEL_REV)" >&2
+    echo "  a new disk? download the model onto it once, then run this again:" >&2
+    echo "    sudo pip3 install -q --target /opt/hfcli huggingface_hub" >&2
+    echo "    sudo PYTHONPATH=/opt/hfcli python3 -c 'from huggingface_hub import snapshot_download; snapshot_download(repo_id=\"$T_MODEL_ID\", revision=\"$T_MODEL_REV\", cache_dir=\"$cache\", max_workers=16)'" >&2
+    return 1
+  fi
   parent=$(dirname "$dir"); backing=$(tpu_models_backing)
   mkdir -p "$backing" "$parent"
   if ! mountpoint -q "$parent"; then
@@ -304,13 +321,23 @@ tpu_models() {
   while IFS= read -r f; do
     rel="${f#"$snap"/}"
     src=$(readlink -f "$f")
-    case "$src" in "$hub"/blobs/*) ;; *) echo "$rel resolves to $src, outside $hub/blobs: refusing to link it" >&2; return 1 ;; esac
+    # The blob's name IS its hash: sha256 for LFS files, the git blob sha1 for small ones.
+    case "$src" in
+      "$hub"/blobs/*) blob=$(basename "$src") ;;
+      "$cache"/blobs/*)
+        # Newer huggingface_hub: the hash-named blob is itself a link into one store
+        # at the root of the cache, whose file names are not the hashes.  The name
+        # comes from the entry's own link, which must be that blob.
+        blob=$(basename "$(readlink "$f")")
+        if [ ! -L "$hub/blobs/$blob" ] || [ ! "$hub/blobs/$blob" -ef "$src" ]; then
+          echo "$rel resolves to $src, but not through a blob in $hub/blobs: refusing to link it" >&2; return 1
+        fi ;;
+      *) echo "$rel resolves to $src, outside $hub/blobs: refusing to link it" >&2; return 1 ;;
+    esac
     [ -f "$src" ] || { echo "$rel: blob $src is missing from the disk" >&2; return 1; }
     dst="$real/$rel"
     mkdir -p "$(dirname "$dst")"
     [ "$src" -ef "$dst" ] || ln -f "$src" "$dst"
-    # The blob's name IS its hash: sha256 for LFS files, the git blob sha1 for small ones.
-    blob=$(basename "$src")
     if   [[ "$blob" =~ ^[0-9a-f]{64}$ ]]; then printf 'sha256 %s %s\n' "$blob" "$rel" >> "$manifest.new"
     elif [[ "$blob" =~ ^[0-9a-f]{40}$ ]]; then printf 'gitsha1 %s %s\n' "$blob" "$rel" >> "$manifest.new"
     else tpu_warn "$rel: blob name $blob is not a hash; not verified"; fi
@@ -359,6 +386,8 @@ tpu_compile_seed() {
   src="$T_DISK_MOUNT/$T_DISK_COMPILE"
   [ -d "$src" ] || { echo "$src is not a directory: the disk has no compile cache" >&2; return 1; }
   install -d -o bench -g bench -m 0750 "$T_COMPILE_SEED"
+  [ -n "$(find "$src" -type f | head -1)" ] \
+    || tpu_say "$src is empty (a new disk): the first launch compiles everything"
   had=$(find "$T_COMPILE_SEED" -type f | wc -l | tr -d ' ')
   rsync -a --ignore-existing "$src/" "$T_COMPILE_SEED/"
   chown -R bench:bench "$T_COMPILE_SEED"

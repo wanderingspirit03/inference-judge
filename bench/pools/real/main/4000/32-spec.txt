@@ -1,0 +1,182 @@
+Here is the product spec for the new job intake and assignment feature at our agency. Can you write me a complete test plan for it, with numbered test cases (preconditions, steps, expected result) grouped by section, plus the edge cases and the things you think the spec leaves unclear? QA starts on Monday and I want something I can hand straight to them.
+
+# Product Specification: Job Intake and Assignment ("Relay 2.3")
+
+Owner: Hanne Vestergaard (Head of Operations), Draft 4, status: approved for build
+Reviewers: Tomasz Brandt (Lead Project Manager), Ines Okafor (Vendor Management), Ravi Chaudhary (Engineering)
+Company: Meridian Wordworks, a translation and localisation agency with 14 staff and a pool of about 220 freelance linguists
+
+## 1. Purpose
+
+Today, new translation jobs reach us by email, through a web form, or by phone, and project managers (PMs) copy the details into the job board by hand. Assignment to a freelancer is done through a shared spreadsheet and a chain of emails. This causes duplicate jobs, missed deadlines and unclear ownership. Relay 2.3 replaces both steps with one flow: a job is created once, scored against the freelancer pool, offered to the best candidates in order, and tracked until delivery.
+
+The release does not change invoicing, the client portal login, or the terminology database. Those stay as they are in Relay 2.2.
+
+## 2. Users and roles
+
+- **Client contact**: an employee of a customer company. Can submit jobs through the client portal and see the status of their own company's jobs only.
+- **PM**: Meridian staff member who owns jobs. Can create, edit, cancel and reassign jobs, and can see every job.
+- **Vendor manager**: Meridian staff member who maintains freelancer profiles, rates and availability. Cannot edit jobs.
+- **Freelancer**: an external linguist. Can see only the offers sent to them and the jobs they have accepted.
+- **Admin**: Meridian staff member with configuration rights (scoring weights, holiday calendar, languages list).
+
+## 3. Job record
+
+A job has the following fields. Fields marked * are required at submission.
+
+| Field | Type | Rules |
+|---|---|---|
+| Title* | text | 3 to 120 characters |
+| Client company* | reference | Must be an active client |
+| Source language* | list | One of the configured languages |
+| Target languages* | multi-select | 1 to 8 languages, none equal to the source |
+| Service type* | list | Translation, Translation plus review, Review only, Transcreation, Subtitling |
+| Word count* | integer | 1 to 250,000. For subtitling, replaced by duration in minutes (1 to 600) |
+| Subject area* | list | Legal, Medical, Technical, Marketing, Finance, General |
+| Deadline* | date and time | Must be at least 4 working hours after submission, in the client's time zone |
+| Files | upload | Up to 20 files, 50 MB each, formats DOCX, XLSX, PPTX, PDF, SRT, TXT, IDML |
+| Reference material | upload | Same limits, optional |
+| Notes to linguist | text | Up to 2,000 characters |
+| Priority | list | Normal (default) or Rush. Rush is set automatically when the deadline is less than 24 working hours away |
+| Confidentiality | list | Standard or Restricted |
+
+A job gets a reference number in the form MW-YYYY-NNNNN, assigned at creation and never reused. Numbering restarts at 00001 on the first of January.
+
+### 3.1 Working hours and deadlines
+
+Working hours are 08:00 to 18:00, Monday to Friday, in the time zone of the client. Public holidays come from the holiday calendar configured by an admin for each country. A "working hour" in any rule below means an hour that falls inside these rules. The deadline check at submission counts working hours between the submission time and the deadline.
+
+If a client submits a job outside working hours, the clock for the four-hour minimum starts at the next opening time. The job record stores the deadline exactly as entered and also stores the deadline converted to UTC.
+
+## 4. Submission channels
+
+### 4.1 Client portal
+
+The client contact fills in the form. The form validates every field on the page before submit. On success the contact sees the reference number and receives a confirmation email within two minutes. Files are scanned for malware; if a file fails the scan the job is not created and the contact sees which file was rejected.
+
+### 4.2 Email intake
+
+Clients can send a request to the intake address of their account (for example intake-northvale@example.org). The system creates a draft job, not a live job. A PM must open the draft, complete the missing required fields and press Publish. Attachments in allowed formats are added to the draft. The email subject becomes the title, truncated to 120 characters. Drafts older than 7 days are deleted automatically, and the PM who owns the account is notified two days before deletion.
+
+An email from an address that does not match any contact of an active client is placed in a quarantine list visible to PMs and is never turned into a draft automatically.
+
+### 4.3 Manual creation
+
+A PM can create a job directly, on behalf of a client. The job is marked "Created by PM" and the PM's name is stored. A PM can duplicate an earlier job; the duplicate gets a new reference number, copies all fields except deadline, files and status, and requires a new deadline.
+
+## 5. Duplicate detection
+
+When a job is submitted or published, the system compares it with all jobs of the same client created in the last 14 days. A job is flagged as a possible duplicate when the file name list is identical, or when title, source language and word count all match exactly. A flagged job is held in the state "Needs check" and a PM must either confirm it as new or merge it into the earlier job. Merging adds any extra target languages to the earlier job and deletes the new record, keeping a log entry. Confirming removes the flag and the job continues.
+
+## 6. Scoring and offers
+
+### 6.1 Eligibility
+
+A freelancer is eligible for a job and target language when all of these hold:
+
+1. The freelancer has the language pair on their profile and the profile status is Active.
+2. The freelancer has the subject area on their profile, except for General, which every freelancer with the pair has.
+3. The freelancer has marked themselves available for the whole period between expected start and deadline, with at least the needed hours free. Needed hours are computed as word count divided by 350 words per hour for translation, 900 for review, and 250 for transcreation.
+4. If the job is Restricted, the freelancer has a signed confidentiality agreement on file that has not expired.
+5. The freelancer is not on the client's exclusion list.
+
+### 6.2 Score
+
+Each eligible freelancer receives a score from 0 to 100 made of four parts with weights set by an admin. The default weights are:
+
+- Quality rating: 40 (average of the last 10 reviewed jobs, scaled from the 1 to 5 scale to 0 to 40)
+- On-time rate: 30 (share of the last 20 jobs delivered before the deadline)
+- Rate fit: 20 (full marks if the freelancer's per-word rate is at or below the client's budget rate, falling linearly to zero at 50 percent above it)
+- Familiarity: 10 (10 if the freelancer has done at least 3 jobs for this client in the last 12 months, 5 for 1 or 2, otherwise 0)
+
+The weights must add up to 100. The settings page rejects a save where they do not. A freelancer with fewer than 5 reviewed jobs gets the pool average for the quality part and a "New" badge shown to the PM.
+
+### 6.3 Offer round
+
+For each target language the system takes the top three scoring freelancers and sends offers to them one at a time. Each offer shows the title, language pair, word count, subject area, deadline, the rate and the confidentiality level, but not the client's name when the job is Restricted. The freelancer has 30 minutes to answer for a Rush job and 4 working hours for a Normal job. The answer can be Accept, Decline with a reason from a list, or no answer. The first Accept ends the round for that language.
+
+If all three freelancers decline or time out, the language is moved to "Needs manual assignment" and the PM is notified by email and in the board. The PM can then offer the job to any eligible freelancer by hand, or to a freelancer who is not eligible, in which case the system asks the PM to confirm and records the override with a reason.
+
+A freelancer who declines three offers in a row has their next score reduced by 10 points for 14 days. A timeout counts as a decline for this rule.
+
+### 6.4 Multiple languages
+
+A job with several target languages creates one assignment per language. The job status is the least advanced status among its assignments. The job is Delivered only when all assignments are Delivered. A PM can cancel one language without cancelling the others.
+
+## 7. Statuses
+
+Job statuses: Draft, Needs check, Open, In progress, In review, Delivered, Cancelled.
+Assignment statuses: Offered, Needs manual assignment, Accepted, Working, Submitted, Approved, Returned.
+
+Allowed transitions:
+
+- Draft to Open (Publish) or to Needs check; Needs check to Open or to Cancelled
+- Open to In progress when the first assignment is Accepted
+- In progress to In review when all assignments are Submitted
+- In review to Delivered when all assignments are Approved; In review to In progress when any assignment is Returned
+- Any status except Delivered to Cancelled, by a PM only
+
+A Delivered job cannot be edited, cancelled or reopened. A new job must be created instead, using the duplicate function.
+
+## 8. Changes after publication
+
+A PM can change the deadline, the word count and the notes after publication. A change of word count by more than 10 percent, or a deadline moved earlier, triggers a re-check: every freelancer with an Accepted or Working assignment receives a message and has 2 working hours to confirm or withdraw. If a freelancer withdraws, the assignment goes back to the offer round with the next best candidate, skipping the freelancers who already declined this job.
+
+Changing languages, service type or subject area after publication is not allowed. The PM must cancel the job and create a new one.
+
+## 9. Notifications
+
+- Client confirmation on creation (portal and published drafts)
+- Offer notification to freelancers by email and by push message
+- Reminder to the freelancer at 50 percent of the response window if no answer has come
+- Daily digest to each PM at 07:30 local time listing jobs due within 48 working hours and any assignment in Needs manual assignment
+- Alert to the PM who owns the job if an assignment is Accepted but no file has been uploaded 24 working hours before the deadline
+
+Every notification is logged with time, recipient and result. Failed emails are retried three times, 5 minutes apart.
+
+## 10. Reporting
+
+PMs can export the job list to CSV with the filters client, status, date range, language and PM. The export contains at most 50,000 rows; above that the user is asked to narrow the filters. Dates in the export are in the time zone of the person who exports. Admins can view a page showing average time from submission to first Accept, per language pair, for any chosen month.
+
+## 11. Non-functional requirements
+
+- Job form submission completes in under 3 seconds for jobs with up to 5 files of 10 MB.
+- The offer round starts within 60 seconds of a job becoming Open.
+- The system supports 40 simultaneous PM sessions and 150 simultaneous freelancer sessions.
+- All times are stored in UTC and shown in the user's own time zone setting.
+- Every change to a job is recorded in an audit log with user, time, field, old value and new value. The log cannot be edited.
+- Files are stored encrypted. Restricted job files can be downloaded only by the PM who owns the job and the freelancers with an Accepted assignment.
+- The interface is available in English and German. Dates follow the locale of the user.
+
+## 12. Open questions from review
+
+1. Ines asks whether the familiarity score should count jobs for a client's parent company. Hanne's answer: not in 2.3, revisit in 2.4.
+2. Tomasz wants a way to pause the offer round while a client confirms a question. Not agreed. Ravi says it would add a new status and needs its own spec.
+3. Ravi asks how holidays are handled for a client with offices in two countries. Current rule: the country of the client contact who submitted the job.
+
+## 13. Out of scope
+
+Automatic machine translation pre-processing, translation memory matching, payment of freelancers, and the mobile app for freelancers (the push message opens the web page).
+
+## 14. Freelancer availability calendar
+
+Eligibility in section 6.1 depends on the availability that each freelancer enters, so the rules for it are part of this release.
+
+- A freelancer sets availability in blocks of whole days, each with a number of free hours per day from 1 to 10. Days with no block count as unavailable.
+- A block can be recurring (for example every Monday to Wednesday, 6 hours) or one-off. A one-off block overrides a recurring one on the same day.
+- The needed hours for a job are spread over the working days between the expected start and the deadline. A freelancer is eligible only if the free hours in that period are at least the needed hours. Hours already promised to other Accepted or Working assignments are subtracted first.
+- The expected start is the moment the offer is sent for Rush jobs, and the next working morning at 08:00 for Normal jobs.
+- A freelancer can switch on "Holiday mode" with a start and end date. During holiday mode the profile is treated as unavailable, no offers are sent, and existing assignments are not affected.
+- The vendor manager can edit any freelancer's availability on their behalf; the audit log records who made the change.
+- Availability is read at the moment the offer round starts. A change made afterwards does not cancel offers already sent.
+
+## 15. Rollout and acceptance
+
+Relay 2.3 goes live on the first Monday of the next month. The first two weeks run in "shadow mode": offers are computed and shown to PMs as suggestions, but nothing is sent to freelancers automatically, and PMs continue to assign by hand. After the two weeks, Hanne decides together with Tomasz whether to switch on automatic offers, based on these acceptance criteria:
+
+1. In the shadow period, the freelancer who was finally assigned by the PM is in the top three of the system's list for at least 70 percent of assignments.
+2. No job is lost: every job submitted by any channel appears on the board with a reference number.
+3. No Restricted job was shown to a freelancer without a valid confidentiality agreement.
+4. Notifications are delivered for at least 99 percent of events, measured by the notification log.
+
+Old jobs from Relay 2.2 are not migrated. They stay readable in the archive view, and their reference numbers keep the old format MW-NNNNN.

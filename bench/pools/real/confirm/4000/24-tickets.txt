@@ -1,0 +1,129 @@
+These are nine tickets that came in this week to the customer desk at Brackenridge Aggregates, a quarry and building-materials supplier. I need an individual, complete reply to each one that I can send as it is, in a polite and direct tone. Where the ticket does not give us enough to decide something, say what we need from the customer rather than guessing. Please also add a short note after each reply for our internal team about what to follow up.
+
+Some background that applies to all of them: we deliver by tipper lorry within 40 kilometres, the minimum load is 6 tonnes, the delivery slots are 7:00 to 12:00 and 12:00 to 16:00, and we need 24 hours' notice to cancel a delivery without charge. A late-cancellation charge of 85 pounds applies after that. Weights are checked on our weighbridge and the ticket is printed at the gate. Our standard price list for the year is attached to every quote.
+
+---
+
+TICKET #7241
+Received: Monday 7 October, 07:42
+Channel: Web form
+Customer: Hollis & Bright Landscaping (account HB-2201)
+Contact: Garfield Obuya
+Subject: Wrong material delivered
+
+Message:
+I ordered 12 tonnes of 20mm clean limestone for a drainage job. The order confirmation says 20mm clean limestone. Your driver tipped 12 tonnes this morning at 6:50 and when my foreman looked at it he said it is the dusty mixed stuff, 6F2 or whatever, full of fines. We have a trench open with a subcontractor standing around. I have photos. I want this removed today and the right stone here by lunchtime or I will be asking for the cost of the downtime. Last time this happened was March. This is the second time in one year.
+
+Internal order note (visible to staff): Order BA-55102, 12 t, product code LS20C, loaded from Stockpile 4 at 06:10. Stockpile 4 was topped up on Friday with 6F2 after the crusher change. Driver: Imogen Pratchett. Weighbridge ticket 3360881.
+
+---
+
+TICKET #7243
+Received: Monday 7 October, 09:15
+Channel: Email
+Customer: Mrs Philippa Danquah (no account)
+Contact: Philippa Danquah
+Subject: Small quantity of gravel for my driveway
+
+Message:
+Hello, I live in Wexcombe and I need gravel for a driveway about 15 metres long and 3 metres wide. A man at the builders' merchant said you sell decorative gravel but I could not find prices on your website. Do you deliver to private houses and what is the smallest amount I can buy? I do not have much room, and my road is quite narrow, with a lot of parked cars. I would also like to know how much I need. I do not know how deep to make it. Do you also sell the membrane that goes under it? I am not in a hurry, I would like it before the end of the month.
+
+Internal order note: none. Wexcombe is 31 km from the quarry, within the delivery area. The decorative gravel line is 14mm golden flint and 10mm grey granite, sold in bulk bags of 850 kg at 96 pounds and 104 pounds, delivered by a small crane lorry at 45 pounds per delivery. Membrane is not sold by us.
+
+---
+
+TICKET #7246
+Received: Tuesday 8 October, 11:03
+Channel: Phone, logged by Winifred Aguirre
+Customer: Tamarisk Civil Engineering (account TC-0418)
+Contact: Lucian Fairweather, site manager
+Subject: Invoice dispute, September
+
+Message (summary of call):
+Mr Fairweather says invoice INV-30871 for September shows 318.4 tonnes of Type 1 sub-base at 18.60 per tonne, but his own site records show only 301 tonnes were received, based on the tickets signed by his gatehouse. He is asking for a credit for the difference. He also says that on 19 September two loads were charged as delivered at the afternoon rate, but they arrived in the morning slot, and wants the 2 pounds per tonne premium taken off. He says his accounts team will not pay the invoice until this is sorted and the payment is due on 21 October. He was calm but firm.
+
+Internal note: the weighbridge records for September show 318.4 tonnes across 21 loads for account TC-0418. Two loads on 19 September (BA-54410 and BA-54411, 20.2 t and 19.8 t) were booked as 12:00 to 16:00 and left the gate at 11:48. The afternoon rate is 2 pounds per tonne more than the morning rate. Three tickets from 26 September show a driver's note that the site gatehouse was closed and loads were tipped by the driver following the foreman's instruction.
+
+---
+
+TICKET #7249
+Received: Tuesday 8 October, 14:30
+Channel: Web form
+Customer: Marchmont Farm Partnership (account MF-0077)
+Contact: Esther Lindqvist
+Subject: Damage to our track and gate
+
+Message:
+One of your lorries came to us on Friday to deliver 18 tonnes of hardcore for the new yard. The driver reversed into the field gate and bent the post, and the gate no longer closes. He also went off the edge of our concrete track and left deep ruts in the verge, which has been damaged where the ditch is. He did not stop to tell anyone. My husband saw it from the barn and took photos on his phone. We have livestock in that field and we had to move them. I want someone to come and look at it and I want the gate fixed. I would also like to know if the load was correctly weighed because it looked short to me.
+
+Internal order note: Order BA-55040, 18 t hardcore (Type 2), delivered Friday 4 October, 13:05, driver Teodor Nakamura. Weighbridge ticket 3359774 shows 18.04 t. No incident report was filed by the driver. Our insurance policy requires that any damage claim be reported within 14 days to the insurer through the operations manager, Priscilla Ahlgren.
+
+---
+
+TICKET #7252
+Received: Wednesday 9 October, 08:05
+Channel: Email
+Customer: Odalys Reeve, sole trader builder (account OR-0911)
+Contact: Odalys Reeve
+Subject: Cancel tomorrow's delivery and a question on pricing
+
+Message:
+Hi, I need to cancel the delivery booked for tomorrow morning (order BA-55188, 8 tonnes of sharp sand) because the customer has pulled out of the job and I do not want it. I know it is less than 24 hours, I am sorry. Is there any way you could waive the charge? I have been buying from you for six years and I have never cancelled before. Also, unrelated, I got a quote last month for 40 tonnes of mot type 1 at 17.90 a tonne and I want to go ahead with it now. Is the price still good? The quote number was Q-20871. I will need it delivered in two loads of 20 tonnes on the same day, early if possible.
+
+Internal order note: Order BA-55188 is booked in the 7:00 to 12:00 slot on Thursday 10 October. It is now 08:05 on Wednesday 9 October, so notice is about 23 hours, just under the 24-hour limit. The sharp sand has not yet been loaded. Quote Q-20871 was issued on 11 September, valid for 30 days, which would have ended on 11 October, at 17.90 per tonne delivered. Account OR-0911 has no overdue balance and a 2,000 pound credit limit, with 1,260 pounds currently used.
+
+---
+
+TICKET #7254
+Received: Wednesday 9 October, 10:20
+Channel: Web form
+Customer: Councillor Barnaby Itoh-Wells, on behalf of Wexcombe Parish Council
+Contact: Barnaby Itoh-Wells
+Subject: Lorry movements through the village
+
+Message:
+I am writing as chair of the parish council's highways committee. We have had a number of complaints from residents on Mill Lane and Church Street about your tipper lorries passing through the village between 6:30 and 7:30 in the morning, which is before the hour you told us last year you would start. Residents say there were at least 14 lorries last Thursday alone. There is a weight limit sign at the bridge, and one resident has sent a photograph of a lorry with your name on the door crossing it. Could you tell us what your drivers have been instructed to do, which route they should take and who we can ring at the time to report a problem? The committee meets on 22 October and would like a written answer before then.
+
+Internal note: Our agreement with the parish council from last November says that lorries should not leave the site before 7:00 and should use the bypass route via the A-road roundabout, avoiding Mill Lane. The bridge on Mill Lane has a 7.5 tonne limit. Gate records show 11 loads left the quarry between 6:30 and 7:00 on Thursday 3 October. Operations manager Priscilla Ahlgren has been told about the complaint but has not yet replied. A new driver started on 23 September and may not have been given the route sheet.
+
+---
+
+TICKET #7257
+Received: Wednesday 9 October, 13:48
+Channel: Email
+Customer: Dunmore Prefab Homes (account DP-1530)
+Contact: Raghnall Svensson, purchasing
+Subject: Request to increase credit limit and change payment terms
+
+Message:
+We are starting a development of 36 houses in Lower Pelham in January and expect to buy about 4,500 tonnes of materials from you between January and June, mostly Type 1, concrete sand and 10mm pea gravel, with some drainage stone. Our current credit limit is 15,000 pounds on 30-day terms. We would like it raised to 60,000 pounds with 60-day terms because the developer pays us on stage completion. In return we can commit to this volume and would like a fixed price on the main materials for the six months. We can send three years of accounts and a bank reference. Could you tell me what the process is and how long it takes?
+
+Internal note: Account DP-1530 has been open since April last year, and has always paid within 28 days. The credit committee meets on the first Tuesday of each month. Credit limits above 25,000 pounds need a director's signature and a credit check. Our standard terms are 30 days from the end of the month of invoice; 60-day terms have been granted only twice before. Fixed prices for more than three months need approval from the commercial director, Hester Moyo. Planned stock is sufficient for about 3,000 tonnes of Type 1 over the same period, so the volumes asked for might need more crushing capacity.
+
+---
+
+TICKET #7261
+Received: Thursday 10 October, 07:55
+Channel: Phone, logged by Winifred Aguirre
+Customer: Yvette Castellanos-Moore (no account)
+Contact: Yvette Castellanos-Moore
+Subject: Lost property and a safety question after a visit
+
+Message (summary of call):
+Ms Castellanos-Moore visited the quarry shop yesterday afternoon to collect a bulk bag of decorative gravel for her garden, which she loaded into her estate car with help from a member of staff. She says that when she got home she realised her husband's work glove was missing, probably dropped near the loading bay, and asks if it was found. She also says that when she was waiting she noticed that a customer's child, about eight years old, was walking around the yard near the loading area while a loader was moving. She was shocked and wants to know why this is allowed. She says she does not want to make a formal complaint but feels strongly that someone should look at it.
+
+Internal note: Shop and yard visitors must sign in and wear a high-visibility vest, and children under 16 are not allowed beyond the shop door. The yard camera log for 9 October is held for 30 days. Shop staff on duty yesterday were Cormac Tilley and Bronagh Westerhuis. A glove was handed in at the weighbridge office last evening but it is a left-hand brown leather glove.
+
+---
+
+TICKET #7263
+Received: Thursday 10 October, 09:12
+Channel: Email
+Customer: Aldous Tremaine Fencing & Groundworks (account AT-0302)
+Contact: Marguerite Tremaine
+Subject: Standing order for weekly deliveries not happening
+
+Message:
+We set up a standing order in August for 10 tonnes of 6F2 every Monday morning for the car park job at Oakley Retail Park. The first three weeks were fine. On 23 September there was no delivery and nobody told us. On 30 September a lorry came at 14:20 instead of the morning and my men had left. On Monday this week the delivery came at 7:10 but the driver would not tip because the site manager was not there to sign, and he took the load back. We have now lost about 20 hours of labour, and the surfacing contractor is threatening to move us in his programme. Can you tell me whether the standing order is still active, who is responsible for confirming each delivery, and what you will do to make sure next Monday works? I would like a named person to contact.
+
+Internal note: Standing order SO-2204 shows as active but a hold was placed on 20 September by the credit team because an invoice for 1,740 pounds was 3 days overdue. The hold was lifted on 25 September, but the schedule for the week of 30 September was not regenerated and the dispatcher set up a manual load. On 7 October the driver took the load back following a site rule that deliveries to retail park sites need a signature. Nobody has asked the customer whether another person can sign. The dispatch supervisor is Lorcan Whitcombe.

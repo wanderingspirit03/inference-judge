@@ -1,0 +1,84 @@
+Could you walk me through this module part by part so I understand what it does, point out what's fragile or confusing, propose a refactoring, and write tests for it (Vitest is fine)? I'm new to this codebase and it was written by someone who has left.
+
+```ts
+// site-log.ts: daily site diary and delay tracking for the project office
+
+export type Weather = "dry" | "rain" | "snow" | "wind";
+
+export interface Entry {
+  id: number;
+  date: string; // YYYY-MM-DD
+  weather: Weather;
+  workers: number;
+  hoursLost: number;
+  notes?: string;
+  reportedBy: string;
+}
+
+export interface Delay {
+  entryId: number;
+  cause: "weather" | "supply" | "inspection" | "other";
+  hours: number;
+}
+
+const entries: Entry[] = [];
+const delays: Delay[] = [];
+let nextId = 1;
+
+export function addEntry(e: Omit<Entry, "id">): Entry {
+  if (e.workers < 0) throw new Error("negative workers");
+  const entry = { ...e, id: nextId++ };
+  entries.push(entry);
+  return entry;
+}
+
+export function addDelay(entryId: number, cause: Delay["cause"], hours: number) {
+  const entry = entries.find((x) => x.id === entryId);
+  if (!entry) throw new Error("no such entry");
+  delays.push({ entryId, cause, hours });
+  entry.hoursLost = entry.hoursLost + hours;
+}
+
+export function entriesBetween(from: string, to: string): Entry[] {
+  return entries.filter((e) => e.date >= from && e.date <= to);
+}
+
+export function delayHoursByCause(from: string, to: string) {
+  const result: Record<string, number> = {};
+  const ids = entriesBetween(from, to).map((e) => e.id);
+  for (const d of delays) {
+    if (ids.includes(d.entryId)) {
+      result[d.cause] = (result[d.cause] || 0) + d.hours;
+    }
+  }
+  return result;
+}
+
+export function averageCrew(from: string, to: string): number {
+  const list = entriesBetween(from, to);
+  const total = list.reduce((sum, e) => sum + e.workers, 0);
+  return total / list.length;
+}
+
+export function weatherDays(from: string, to: string) {
+  const counts: any = {};
+  entriesBetween(from, to).forEach((e) => {
+    counts[e.weather] = (counts[e.weather] || 0) + 1;
+  });
+  return counts;
+}
+
+export function weeklyReport(weekStart: string): string {
+  const end = new Date(weekStart);
+  end.setDate(end.getDate() + 6);
+  const endStr = end.toISOString().slice(0, 10);
+  const list = entriesBetween(weekStart, endStr);
+  const lost = list.reduce((s, e) => s + e.hoursLost, 0);
+  const lines = list.map(
+    (e) => `${e.date} ${e.weather} crew=${e.workers} lost=${e.hoursLost}h`
+  );
+  lines.push(`Total hours lost: ${lost}`);
+  lines.push(`Average crew: ${averageCrew(weekStart, endStr).toFixed(1)}`);
+  return lines.join("\n");
+}
+```

@@ -1,0 +1,172 @@
+Can you explain what each part of this TypeScript file does, suggest how to refactor it, and write tests for it? It's from our fault-tracking tool at Brightway Lighting, the contractor that maintains the street lights for three councils. Fault reports come in from residents and from sensors, and this module decides priority, the repair deadline and which crew gets the job. I'd like to understand it well enough to change the contract rules without breaking anything.
+
+```typescript
+export type FaultKind = "lamp-out" | "flicker" | "column-down" | "exposed-wire" | "cabinet";
+
+export interface Fault {
+  id: string;
+  kind: FaultKind;
+  councilId: string;
+  road: string;
+  reportedAt: Date;
+  lat: number;
+  lon: number;
+  source: "resident" | "sensor" | "police";
+  duplicates: number;
+}
+
+export interface Crew {
+  id: string;
+  name: string;
+  hasLiftingPlatform: boolean;
+  lat: number;
+  lon: number;
+  jobsToday: number;
+  onCall: boolean;
+}
+
+export interface ContractTerms {
+  councilId: string;
+  hoursByKind: Partial<Record<FaultKind, number>>;
+  nightPenaltyPerHour: number;
+  maxJobsPerCrew: number;
+}
+
+const HIGH_RISK: FaultKind[] = ["exposed-wire", "column-down"];
+
+export function priority(f: Fault): number {
+  let score = 0;
+  if (HIGH_RISK.includes(f.kind)) score += 100;
+  if (f.kind === "cabinet") score += 40;
+  if (f.kind === "lamp-out") score += 20;
+  if (f.kind === "flicker") score += 5;
+  if (f.source === "police") score += 30;
+  score += Math.min(f.duplicates, 5) * 3;
+  return score;
+}
+
+export function deadline(f: Fault, terms: ContractTerms): Date {
+  const hours = terms.hoursByKind[f.kind] || 72;
+  return new Date(f.reportedAt.getTime() + hours * 3600 * 1000);
+}
+
+export function isNight(d: Date): boolean {
+  const h = d.getHours();
+  return h >= 21 || h < 6;
+}
+
+export function penalty(f: Fault, repairedAt: Date, terms: ContractTerms): number {
+  const due = deadline(f, terms);
+  if (repairedAt <= due) return 0;
+  const lateHours = Math.ceil((repairedAt.getTime() - due.getTime()) / 3600000);
+  let amount = lateHours * 4;
+  if (isNight(f.reportedAt)) {
+    amount += lateHours * terms.nightPenaltyPerHour;
+  }
+  if (HIGH_RISK.includes(f.kind)) amount *= 3;
+  return amount;
+}
+
+function km(aLat: number, aLon: number, bLat: number, bLon: number): number {
+  const dx = (aLon - bLon) * 111 * Math.cos((aLat * Math.PI) / 180);
+  const dy = (aLat - bLat) * 111;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+export function pickCrew(
+  f: Fault,
+  crews: Crew[],
+  terms: ContractTerms
+): Crew | null {
+  const needsPlatform = f.kind === "column-down" || f.kind === "cabinet";
+  const candidates = crews.filter((c) => {
+    if (c.jobsToday >= terms.maxJobsPerCrew) return false;
+    if (needsPlatform && !c.hasLiftingPlatform) return false;
+    if (isNight(new Date()) && !c.onCall) return false;
+    return true;
+  });
+  if (candidates.length === 0) return null;
+  candidates.sort(
+    (a, b) => km(a.lat, a.lon, f.lat, f.lon) - km(b.lat, b.lon, f.lat, f.lon)
+  );
+  return candidates[0];
+}
+
+export function groupNearby(faults: Fault[], radiusKm = 0.3): Fault[][] {
+  const groups: Fault[][] = [];
+  for (const f of faults) {
+    let placed = false;
+    for (const g of groups) {
+      const first = g[0];
+      if (
+        first.councilId === f.councilId &&
+        km(first.lat, first.lon, f.lat, f.lon) <= radiusKm
+      ) {
+        g.push(f);
+        placed = true;
+        break;
+      }
+    }
+    if (!placed) groups.push([f]);
+  }
+  return groups;
+}
+
+export function mergeDuplicate(existing: Fault[], incoming: Fault): Fault[] {
+  const match = existing.find(
+    (e) =>
+      e.kind === incoming.kind &&
+      e.road === incoming.road &&
+      km(e.lat, e.lon, incoming.lat, incoming.lon) < 0.05
+  );
+  if (match) {
+    match.duplicates++;
+    return existing;
+  }
+  return [...existing, incoming];
+}
+
+export function workList(
+  faults: Fault[],
+  crews: Crew[],
+  contracts: Map<string, ContractTerms>
+): { fault: Fault; crew: Crew | null; due: Date }[] {
+  const ordered = [...faults].sort((a, b) => priority(b) - priority(a));
+  const result = [];
+  for (const f of ordered) {
+    const terms = contracts.get(f.councilId);
+    if (!terms) continue;
+    const crew = pickCrew(f, crews, terms);
+    if (crew) crew.jobsToday++;
+    result.push({ fault: f, crew, due: deadline(f, terms) });
+  }
+  return result;
+}
+
+export function monthlyPenaltyTotal(
+  repairs: { fault: Fault; repairedAt: Date }[],
+  contracts: Map<string, ContractTerms>
+): number {
+  let total = 0;
+  for (const r of repairs) {
+    const terms = contracts.get(r.fault.councilId);
+    if (terms) total += penalty(r.fault, r.repairedAt, terms);
+  }
+  return total;
+}
+
+export function overdueByCouncil(
+  faults: Fault[],
+  contracts: Map<string, ContractTerms>,
+  now: Date
+): Record<string, { open: number; overdue: number }> {
+  const out: Record<string, { open: number; overdue: number }> = {};
+  for (const f of faults) {
+    const terms = contracts.get(f.councilId);
+    if (!out[f.councilId]) out[f.councilId] = { open: 0, overdue: 0 };
+    out[f.councilId].open++;
+    if (terms && deadline(f, terms) < now) out[f.councilId].overdue++;
+  }
+  return out;
+}
+```

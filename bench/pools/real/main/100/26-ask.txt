@@ -1,0 +1,1 @@
+Can you write a troubleshooting manual for operators of a small wastewater treatment plant? Cover foaming, bulking sludge, odour complaints, and blower failures, with symptoms, likely causes, and step-by-step fixes for each.

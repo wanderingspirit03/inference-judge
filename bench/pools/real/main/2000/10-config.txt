@@ -1,0 +1,173 @@
+I inherited the deployment setup for our city bike-share scheme (the docks API and the rebalancing worker) and I'm worried about it. Please audit the files below: list the problems you find in order of seriousness, explain why each one matters, and give me corrected versions of the Dockerfile, the workflow and the three scripts.
+
+`Dockerfile`
+
+```dockerfile
+FROM python:latest
+
+WORKDIR /app
+COPY . /app
+
+RUN apt-get update && apt-get install -y curl vim git
+RUN pip install -r requirements.txt
+
+ENV DATABASE_URL=postgres://dockapi:Sp0keH4ll!@db.internal.example.org:5432/docks
+ENV SECRET_KEY=bike-share-2023
+
+EXPOSE 8000
+USER root
+
+CMD python manage.py migrate && gunicorn dockapi.wsgi:application --bind 0.0.0.0:8000 --workers 2
+```
+
+`.github/workflows/deploy.yml`
+
+```yaml
+name: Deploy
+
+on:
+  push:
+    branches: [ main, staging, "feature/**" ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+      - name: Install
+        run: pip install -r requirements.txt
+      - name: Test
+        run: pytest || true
+      - name: Build image
+        run: docker build -t registry.example.org/bikeshare/dockapi:latest .
+      - name: Push image
+        run: |
+          docker login registry.example.org -u deploy -p ${{ secrets.REGISTRY_PASSWORD }}
+          docker push registry.example.org/bikeshare/dockapi:latest
+      - name: Deploy
+        run: |
+          echo "${{ secrets.SSH_KEY }}" > key.pem
+          chmod 777 key.pem
+          ssh -o StrictHostKeyChecking=no -i key.pem deploy@app1.example.org "docker pull registry.example.org/bikeshare/dockapi:latest && docker stop dockapi; docker rm dockapi; docker run -d --name dockapi -p 80:8000 registry.example.org/bikeshare/dockapi:latest"
+```
+
+`scripts/rebalance.sh` (runs from cron on app1 every 10 minutes)
+
+```bash
+#!/bin/bash
+cd /home/deploy/dockapi
+LOG=/tmp/rebalance.log
+echo "start $(date)" >> $LOG
+
+STATIONS=$(curl -s http://localhost/api/stations/low)
+for s in $STATIONS; do
+  echo "moving bikes to $s" >> $LOG
+  python rebalance.py --station $s --count 5
+  rm -rf /tmp/rebalance_cache/*
+done
+
+if [ $? -ne 0 ]; then
+  curl -X POST https://chat.example.org/hooks/ops -d "rebalance failed"
+fi
+echo "done $(date)" >> $LOG
+```
+
+`docker-compose.yml` (what the team uses on laptops, and what a contractor once used on app1 for a week in March)
+
+```yaml
+version: "3"
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgres://dockapi:dockapi@db:5432/docks
+      - DEBUG=1
+      - ALLOWED_HOSTS=*
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+    restart: always
+
+  db:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: dockapi
+      POSTGRES_PASSWORD: dockapi
+      POSTGRES_DB: docks
+
+  worker:
+    build: .
+    command: python rebalance.py --loop
+    environment:
+      - DATABASE_URL=postgres://dockapi:dockapi@db:5432/docks
+    depends_on:
+      - api
+```
+
+`requirements.txt`
+
+```
+Django
+gunicorn
+psycopg2
+dj-database-url
+requests
+pytest
+```
+
+`scripts/backup.sh` (cron on the database server, 02:00 every night)
+
+```bash
+#!/bin/bash
+DATE=`date +%Y%m%d`
+pg_dump -h localhost -U dockapi docks > /backups/docks_$DATE.sql
+gzip /backups/docks_$DATE.sql
+find /backups -name "*.gz" -mtime +90 -exec rm {} \;
+scp /backups/docks_$DATE.sql.gz backup@archive.example.org:/data/bikeshare/
+echo "backup ok" | mail -s "backup" ops@example.org
+```
+
+`scripts/healthcheck.sh` (called by the uptime monitor over SSH every minute)
+
+```bash
+#!/bin/bash
+code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/api/health)
+if [ $code = 200 ]; then
+  echo OK
+else
+  docker restart dockapi
+  echo "restarted"
+fi
+```
+
+`dockapi/settings.py` (the relevant part, as the Dockerfile uses it)
+
+```python
+import os
+
+import dj_database_url
+
+DEBUG = os.environ.get("DEBUG", True)
+SECRET_KEY = os.environ.get("SECRET_KEY", "dev-key-not-for-production")
+ALLOWED_HOSTS = ["*"]
+DATABASES = {"default": dj_database_url.parse(os.environ["DATABASE_URL"])}
+CORS_ALLOW_ALL_ORIGINS = True
+STATIC_ROOT = "/app/static"
+LOGGING = {
+    "version": 1,
+    "handlers": {"console": {"class": "logging.StreamHandler"}},
+    "root": {"handlers": ["console"], "level": "DEBUG"},
+}
+```
+
+A few notes on how it runs today. The backup disk is the same disk as the database, and nobody has ever tested a restore. There is one app server, app1, and one database server. We have around 380 docks across the city and roughly 4,000 requests per minute at the evening peak, mostly from the phone app and the dock hardware. The stations/low endpoint returns a plain list of station ids, one per line, and sometimes returns an HTML error page when the API is restarting. The cron entry is `*/10 * * * * /home/deploy/dockapi/scripts/rebalance.sh`. Nobody has ever rolled back a deploy, and we have no staging server even though the workflow mentions a staging branch.

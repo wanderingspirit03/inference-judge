@@ -1,0 +1,51 @@
+Soy la responsable de atención al cliente de la naviera y tengo seis tickets abiertos desde ayer. Redacta una respuesta completa e individual para cada uno, con un tono amable y profesional, que explique con claridad qué vamos a hacer y qué tiene que hacer el cliente. Si falta algún dato, indícalo al final de la respuesta correspondiente, entre corchetes, para que yo lo complete antes de enviarla.
+
+Datos útiles de nuestras condiciones: los billetes de pasajeros se pueden cambiar sin coste hasta 48 horas antes de la salida; la cancelación da derecho a devolución del 80 % hasta 7 días antes y del 50 % hasta 48 horas antes; si la naviera cancela una travesía por mal tiempo, se ofrece cambio gratuito o devolución del 100 %. Los animales de compañía viajan en cubierta exterior habilitada o en camarote para mascotas (reserva obligatoria, 15 euros por trayecto). El equipaje facturado no puede superar los 25 kg por persona; el exceso se cobra a 2 euros por kilo, con un máximo de 10 kg adicionales. Las bombonas de gas no se admiten a bordo. Los dos barcos de la ruta tienen rampa de acceso y espacios reservados para sillas de ruedas, y el personal del puerto ayuda al embarque si se avisa con 24 horas de antelación. Si una travesía sale con más de 45 minutos de retraso, se entrega un bono de 10 euros para la cafetería de a bordo a cada pasajero que lo solicite. La tarifa de empresa permite un cambio de fecha con un recargo de 10 euros, y las facturas con CIF se emiten desde el área de cliente o a petición nuestra, en un plazo de 3 días laborables.
+
+---
+
+**Ticket n.º 4471** — Canal: formulario web — Prioridad: alta
+Cliente: Evangelina Montoya Ferrer
+Reserva: ISL-88213, ruta Puerto de Almaría – Isla de Santa Brígida, salida el sábado 18 de octubre a las 08:30, 2 adultos y 1 niño, vehículo (turismo).
+
+«Buenas tardes. Ayer, 11 de octubre, recibí un correo diciendo que la travesía del sábado se cancela por el temporal. Me ofrecen cambiar la fecha, pero mi hijo tiene un examen el lunes y no podemos viajar el domingo. ¿Puedo cambiar al viernes 17 por la tarde? Además pagué 38 euros extra por el camarote y no sé qué pasa con eso. Necesito una respuesta antes del jueves porque tengo que avisar a mis suegros.»
+
+---
+
+**Ticket n.º 4472** — Canal: correo electrónico — Prioridad: media
+Cliente: Baltasar Echeverría Núñez
+Reserva: ISL-87650, ruta Puerto de Almaría – Santa Brígida, salida el 25 de octubre a las 14:00, 1 adulto.
+
+«Quiero cancelar mi billete. Lo compré hace tres semanas por 46 euros. Mi empresa me ha cambiado la fecha de la reunión. Hoy es 12 de octubre. Quiero saber cuánto dinero me devolvéis y cuándo, porque la última vez tardó más de un mes. Además, el correo de confirmación me llegó con el apellido mal escrito (Echevarría con "a"). ¿Eso me va a causar problemas al embarcar?»
+
+---
+
+**Ticket n.º 4473** — Canal: teléfono (transcrito por el agente) — Prioridad: alta
+Cliente: Sofronia Alcántara Ibáñez
+Reserva: ISL-88391, ruta Santa Brígida – Puerto de Almaría, salida el 20 de octubre a las 17:15, 2 adultos, 1 perro mediano.
+
+La clienta llamó a las 10:40. Dice que reservó el camarote para mascotas hace un mes, pero en el billete no aparece. En el resumen de la reserva figuran los 2 adultos y el perro, pero no el cargo de 15 euros por la mascota. Tiene miedo de que no dejen subir al perro. El perro pesa 22 kg y está vacunado. Pide que se le confirme por escrito, para enseñarlo en el puerto. Se le dijo que se le respondería hoy.
+
+---
+
+**Ticket n.º 4474** — Canal: redes sociales (mensaje privado) — Prioridad: baja
+Cliente: Amadeo Quintanilla Soler
+Reserva: ISL-86002, ruta Puerto de Almaría – Santa Brígida, salida el 5 de octubre a las 08:30 (ya realizada), 4 adultos.
+
+«Quiero quejarme. El viaje del 5 de octubre salió con 55 minutos de retraso y no nos dijeron nada hasta que llevábamos media hora esperando en el muelle. En la cafetería se acabó el café y la lista de espera para el comedor era enorme. Además, uno de los asientos de la sala principal tenía el reposabrazos roto. No pido dinero, solo que alguien lo lea y se lo tome en serio. Pienso comentarlo en una reseña pública si no recibo respuesta.»
+
+---
+
+**Ticket n.º 4475** — Canal: formulario web — Prioridad: media
+Cliente: Rosalba Villanueva Cordero
+Reserva: ISL-88777, ruta Puerto de Almaría – Santa Brígida, salida el 30 de octubre a las 11:00, 6 adultos (grupo de senderismo).
+
+«Somos un grupo de seis personas con mochilas grandes. Dos de nosotros llevamos bastones plegables y tienda de campaña, y calculo que el peso del equipaje de cada persona será de unos 28 a 30 kg. ¿Podemos facturar así o tenemos que pagar algo más? Tampoco sabemos si podemos llevar bombonas de gas pequeñas para el hornillo. Si no es posible, ¿dónde podemos comprarlas en la isla? Además, una de las personas del grupo va en silla de ruedas; ¿cómo se accede al barco y a la sala de pasajeros?»
+
+---
+
+**Ticket n.º 4476** — Canal: correo electrónico — Prioridad: media
+Cliente: Hermenegildo Pardo Salvatierra
+Reserva: ISL-88102, ruta Puerto de Almaría – Santa Brígida, salida el 22 de octubre a las 08:30, 1 adulto, camión de reparto (furgoneta de 3,5 toneladas).
+
+«Hola. Soy autónomo y llevo mercancía a la isla cada semana. Hoy he intentado cambiar mi reserva del miércoles 22 al jueves 23 desde la web y me sale un error que dice "tarifa no modificable". Pagué la tarifa de empresa y creo que tengo derecho al cambio. Además necesito una factura con el CIF de mi empresa, y en la que figure por separado el importe del vehículo y el del pasajero. La factura que me llegó solo muestra un total de 124 euros.»

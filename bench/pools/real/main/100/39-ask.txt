@@ -1,0 +1,1 @@
+Create a twelve-month maintenance programme for a shipyard's dry dock and cranes, with inspection intervals, responsible roles, spare parts to stock, and a simple way to record and follow up findings.

@@ -1,0 +1,1 @@
+I coordinate a volunteer project that maps footpaths and benches in our region. Write a full onboarding course for new contributors, split into six sessions, with goals, exercises, common mistakes, and a quiz with answers at the end.

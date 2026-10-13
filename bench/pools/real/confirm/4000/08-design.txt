@@ -1,0 +1,144 @@
+Here is the design doc for our new turnaround tracking service at Halvorsen Ground Handling. I'm presenting it to the architecture group on Thursday and I would like a hard critique of it first: what is weak, what is missing, what could fail at the airport in real life. Please also propose at least two alternative designs for the parts you think are wrong, say which you would choose and why, and then give me a phased implementation plan with estimates, dependencies and what we should not build yet.
+
+TECHNICAL DESIGN: TURNAROUND TRACKER (TT)
+Author: Mirela Santoro-Eze. Reviewers: Anders Okwuosa, Beatrix Lindahl-Moreau. Status: draft 3.
+
+1. Background
+
+Halvorsen Ground Handling serves 11 airlines at Caldmoor Airport, with an average of 142 aircraft turnarounds a day in summer and 96 in winter. A turnaround is everything that happens between an aircraft arriving at a stand and leaving it again: chocks, passenger bridge or steps, unloading bags, cargo, cleaning, catering, fuelling, water and toilet service, loading, pushback. At present each task is recorded on paper by the team leader, and typed into a spreadsheet by the planning desk after the flight has left. This has three problems: delays are discovered late, our airline customers dispute delay codes because the times are written from memory, and the planning desk cannot see in real time which crews are free.
+
+2. Goals
+
+G1. Record the start and end of every turnaround task in real time, with the person who did it, from a handheld device.
+G2. Show the operations control room a live board of all stands, with each aircraft's progress and an early warning if the turnaround is going to miss its scheduled off-block time (STD).
+G3. Produce, for each flight, a delay report with the cause code, in the format required by our airline contracts, within 15 minutes of off-block.
+G4. Allocate crews to tasks automatically, based on the schedule, qualifications and where each crew is.
+
+Non-goals: payroll, fuel billing, baggage reconciliation (the baggage system stays as it is), and any change to the airport's own flight information system.
+
+3. Constraints
+
+- The apron has patchy Wi-Fi. Our measurements last winter show 7 percent of the apron is a dead zone, mainly behind Stands 14 to 17 and near the de-icing pad.
+- Devices: 120 rugged handhelds (Android, 5 inch screens, gloves in winter). Team leaders carry one per team. There are 31 teams on a peak shift.
+- Data from the airport: a flight schedule feed (arrivals, departures, stand, aircraft type, estimated times) sent as messages every time anything changes, about 40 messages per minute at peak.
+- The airline contracts require 99.5 percent availability of the delay report data per month and keeping records for 5 years.
+- The IT team is four engineers. Budget approved for development: 9 months, including testing.
+
+4. Proposed architecture
+
+TT is composed of the following parts:
+
+4.1 Handheld app. A native Android app. The team leader taps one of the task buttons for the aircraft on their stand (for example "Bridge on", "Bags off started", "Bags off done"). Each tap creates an event with a timestamp from the handheld clock, the stand, the flight number, the task code and the user id. Events are saved in a local database on the handheld and sent to the server when a connection is available.
+
+4.2 Event API. An HTTP service that receives events from the handhelds and writes them to a PostgreSQL database. It checks the user's token, rejects events from unknown devices, and returns the list of events it has stored. One server, two instances behind a load balancer.
+
+4.3 Schedule ingest. A service that reads the flight schedule feed from the airport and updates the "flights" table. When a message arrives it overwrites the row for that flight. Estimated times are replaced by the newest estimate.
+
+4.4 Progress engine. Every 30 seconds a job reads all open flights and all their events, and computes for each flight: which tasks are done, which are late relative to a standard timeline for the aircraft type, and the predicted off-block time. The result is written to a "flight_status" table.
+
+4.5 Control room board. A web page that reads "flight_status" every 5 seconds and shows one row per stand, with colour: green, amber (predicted to leave up to 5 minutes late), red (more than 5 minutes late). The page is shown on four screens in the control room.
+
+4.6 Delay report. A nightly job generates a PDF per delayed flight from the events and the cause code the team leader picked, and emails it to the airline's operations address. A planner can edit the cause code before 06:00.
+
+4.7 Crew allocation. A rule-based assignment: when a flight is within 90 minutes of arrival, the system picks the team for the flight by matching aircraft type qualification and choosing the team whose previous task ended earliest. The planner can overrule. The plan is pushed to the handhelds as a list of flights for the shift.
+
+5. Data model (outline)
+
+- flights(id, number, aircraft_type, stand, sta, std, eta, etd, status)
+- events(id, flight_id, task_code, kind [start|end], device_time, server_time, user_id)
+- teams(id, name, shift, qualifications[])
+- assignments(id, flight_id, team_id, planned_start)
+- flight_status(flight_id, predicted_offblock, state, late_tasks[])
+- delay_reports(flight_id, cause_code, edited_by, pdf_url, sent_at)
+
+6. Failure handling
+
+- If a handheld is offline, events are stored locally and sent later. The server keeps events in the order of device_time.
+- If the event API is down, handhelds retry every 60 seconds.
+- If the schedule feed is down, the board shows the last known data with a banner "Schedule feed interrupted".
+- The database is backed up each night. In case of a failure we restore the last backup.
+- If a team leader taps the wrong button, the only fix is to ask the planning desk, who change the record the next morning.
+- If two handhelds send the same event twice (for example after a retry), the server stores both.
+
+7. Security
+
+- Each handheld logs in with the team leader's badge number and a four digit PIN. The token is valid for 12 hours.
+- All traffic uses TLS. The control room board has no login because it is only on the internal network.
+- Cause codes can be edited by planners only.
+- Handhelds are managed devices: a lost device can be wiped from the office, and the app stores no personal data other than the user id.
+- The event table is append-only. A correction is a new event that refers to the one it replaces, so the history of what was tapped and when is never lost.
+- The database and the backup are in the airport's own data room. Backups are kept for 35 days and a restore has not yet been tested.
+
+8. Rollout
+
+Phase 1 (months 1 to 3): build the handheld app, event API and database. Phase 2 (months 4 to 6): schedule ingest, progress engine and board. Phase 3 (months 7 to 9): delay report and crew allocation. Pilot with one airline (Skyward Nordic, 14 flights a day) in month 8 and full rollout in month 9, in the first week of April.
+
+9. Sizing and load
+
+- A turnaround has about 12 recorded tasks, each with a start and an end, so about 24 events per flight. At 142 flights a day that is about 3,400 events a day, and at most perhaps 60 events a minute in the busiest 15 minutes of the morning bank. Schedule messages add 40 a minute at peak.
+- Open flights at any moment: about 40 at peak. The progress engine therefore reads 40 flights and about 500 events every 30 seconds.
+- Retention: 5 years of events is about 6.2 million rows (3,400 x 365 x 5), plus the PDF reports, around 300 KB each for about 20 percent of flights, which is roughly 15 GB over five years.
+- Handhelds: 120 devices, of which about 62 are in use on a peak shift (31 teams, one handheld for the team leader and one spare per team).
+- The control room board is the only component with a latency target: a tap on a handheld must show on the board within 10 seconds when the handheld has a connection.
+
+10. Standard timeline (narrow-body example)
+
+The progress engine compares actual events with a standard timeline for each aircraft type. For a typical narrow-body aircraft with 45 minutes scheduled on stand, in minutes after on-block (chocks on):
+
+| Task | Planned start | Planned end |
+|---|---|---|
+| Chocks on, bridge or steps on | 0 | 3 |
+| Bags and cargo off | 4 | 18 |
+| Cleaning | 5 | 20 |
+| Catering | 8 | 25 |
+| Fuelling | 10 | 28 |
+| Water and toilet service | 12 | 22 |
+| Bags and cargo on | 22 | 36 |
+| Boarding (airline, shown for reference) | 24 | 40 |
+| Bridge off, doors closed | 40 | 42 |
+| Pushback ready, chocks off | 42 | 45 |
+
+For the prediction of off-block, the author proposes to take the latest planned end among tasks not yet done, plus the gap that task normally has before off-block, and add the average overrun of that task for that aircraft type over the last 30 days.
+
+11. Testing and acceptance
+
+- Unit tests for the progress engine using recorded days of events from the spreadsheet (we have 14 months).
+- A replay tool that sends a recorded day of schedule messages and handheld events at 20 times speed.
+- A field test on three stands for two weeks with a paper backup in place, comparing the times typed in by the planning desk with the times in the system. Acceptance: for 95 percent of tasks the two agree within 2 minutes.
+- Acceptance for the delay report: the airline's operations manager signs off 30 consecutive flights.
+- A test where the Wi-Fi is disconnected for 20 minutes on a stand in the dead zone, and all events appear on the server afterwards in the right order.
+
+12. Delay cause codes and the delay report
+
+- Each airline contract uses its own list of delay causes, but 80 percent of delay minutes fall into a few groups: late arriving aircraft, late bags or cargo, late fuel, late catering, late cleaning, crew not available, equipment not available, passenger or airline-caused (late boarding, late paperwork), and weather. The team leader picks one primary cause on the handheld at pushback, and may add a second.
+- The report for a delayed flight shows: scheduled and actual on-block and off-block, the timeline of each task with actual start and end, the primary and secondary cause, the minutes of delay attributed to us and to others, and free text from the team leader (up to 300 characters).
+- Today Skyward Nordic and two other airlines dispute about 6 percent of the delay codes we send. The goal of G3 is to cut disputes by half in the first six months.
+- The report is signed in the system by the planner who edited it, if any; edits are logged with the old value, new value, user and time.
+
+13. Open questions
+
+- What is the standard timeline per aircraft type? We have it for 6 of the 14 types.
+- Who owns the delay cause codes taxonomy, which differs between airlines?
+- Should team leaders be able to correct an event after it has been sent?
+- Do we need to store handheld GPS positions? The unions have not been asked.
+
+14. Estimates and risks (author's view)
+
+Team: 4 engineers for 9 months, no dedicated tester. Main risk: the airline contract requires 99.5 percent availability for delay report data, and we have no standby server. Second risk: clock differences between handhelds, which have shown up to 4 minutes of drift in our spot checks. Third: the planning desk may not trust automatic crew allocation. The author thinks the biggest technical risk is the prediction of off-block time.
+
+Effort estimate by component (engineer-months, author's numbers):
+
+| Component | Estimate |
+|---|---|
+| Handheld app (offline storage, sync, UI) | 8 |
+| Event API and database | 3 |
+| Schedule ingest | 3 |
+| Progress engine and prediction | 6 |
+| Control room board | 3 |
+| Delay report and cause code editing | 4 |
+| Crew allocation | 5 |
+| Testing, replay tool and field trials | 2 |
+| Deployment, monitoring and training | 2 |
+| **Total** | **36** |
+
+Four engineers for nine months is also 36 engineer-months, so the plan has no slack for illness, holidays, or the open questions in section 13.

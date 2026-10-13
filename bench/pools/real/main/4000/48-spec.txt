@@ -1,0 +1,136 @@
+We are about to start testing the system described below and I need a complete test plan for it. Please give me the test strategy, then detailed test cases grouped by requirement (with ID, preconditions, steps, expected result and priority), the negative and boundary cases, the data and environments we will need, and a short list of the cases that must pass before we can go live on the paper machine. Flag any requirement that is ambiguous or untestable as written.
+
+PRODUCT SPECIFICATION
+Reel Tracking and Quality Release System (RTQ), version 1.2
+Ashgrove Fine Paper Mill, Paper Machine 3 (PM3)
+Owner: Quality Systems. Specification author: Wilhelmina Ostrander. Status: approved for build.
+
+1. Purpose
+
+PM3 produces coated and uncoated fine paper in jumbo reels up to 8.4 metres wide, which are rewound into customer reels and sheeted. At present the quality laboratory records its measurements on forms, the operators write the reel number on the reel by hand, and the warehouse learns about quality holds by telephone. Twice last year a reel that should have been held was shipped. RTQ replaces the forms and phone calls with a system that identifies each reel, receives its measurements, decides whether it can be released, and prevents the warehouse from loading a reel that is not released.
+
+2. Definitions
+
+- Jumbo reel: the full-width reel that comes off the machine's reel-up, identified by a jumbo number.
+- Child reel: a reel cut from a jumbo at the winder, identified by the jumbo number plus a two-digit position.
+- Grade: a product specification, such as G-90C (90 gram per square metre coated). Each grade has limits for basis weight, moisture, caliper, brightness and smoothness.
+- Test: a measurement of one property, taken from a sample strip cut from the end of the jumbo reel by the laboratory.
+- Hold: a state that prevents loading and shipping of a reel.
+- Release: a state that allows a reel to be loaded and shipped.
+
+3. Users and roles
+
+| Role | Can do |
+|---|---|
+| Machine operator | Start and finish jumbo reels; view test results; request a hold |
+| Laboratory technician | Enter and amend test results; cannot release |
+| Quality supervisor | Release or reject reels; override a hold with a reason; change grade limits |
+| Winder operator | Create child reels from a jumbo; print child labels |
+| Warehouse clerk | View status; scan reels for loading; cannot change status |
+| Administrator | Manage users and roles |
+
+4. Functional requirements
+
+4.1 Reel identification
+
+REQ-101. When an operator starts a new jumbo reel at the reel-up, the system shall create a record with a unique jumbo number, the grade, the start time and the machine speed at start. Jumbo numbers are the date in the form YYMMDD followed by a three-digit daily sequence that restarts at 001 each day at 06:00.
+REQ-102. The system shall not allow two jumbo reels with the same number, and shall not allow a jumbo to be started while another jumbo on PM3 is open, unless the earlier one has been finished.
+REQ-103. When a jumbo is finished, the operator shall enter the finishing weight in kilograms and the system shall record the end time. The weight must be between 8,000 and 32,000 kilograms; values outside this range shall be rejected with a message.
+REQ-104. The system shall print a label for each jumbo reel containing the number, the grade, the weight, and a Code 128 barcode of the number.
+
+4.2 Test results
+
+REQ-201. The laboratory technician shall enter results for the following properties for each jumbo: basis weight (g/m2), moisture (percent), caliper (micrometres), brightness (percent) and smoothness (ml/min). Each result is stored with the technician, the time of entry, and the instrument identifier.
+REQ-202. Test results shall be validated against physical bounds: basis weight 30 to 300, moisture 0 to 15, caliper 20 to 400, brightness 50 to 120, smoothness 5 to 5,000. A value outside bounds shall be rejected.
+REQ-203. The system shall compare each result with the limits of the jumbo's grade and mark it as in limits, in warning (within 10 percent of the width of the permitted band from either limit), or out of limits.
+REQ-204. A result may be amended by a laboratory technician only within 60 minutes of entry. After that, only a quality supervisor may amend it, and the original value shall be kept in the history with the reason for the change.
+REQ-205. For each property a jumbo may have up to three results (the first test and up to two retests). The latest result is used for the decision in 4.3, but all are displayed.
+
+4.3 Automatic decision and release
+
+REQ-301. When all five properties have at least one result, the system shall compute a recommended status for the jumbo: "recommend release" if every latest result is in limits or in warning; "recommend hold" if any latest result is out of limits; "incomplete" if any property has no result.
+REQ-302. A jumbo shall be in state Held automatically from the moment it is finished until a quality supervisor releases it. No jumbo is released automatically, even if the recommendation is "recommend release".
+REQ-303. A quality supervisor may release a jumbo only if the status is "recommend release", or after an override with a reason of at least 20 characters when the status is "recommend hold".
+REQ-304. A quality supervisor may reject a jumbo. A rejected jumbo cannot be released later; it may only be reclassified by creating a new record with a new grade, subject to REQ-303.
+REQ-305. An operator may place a released jumbo back on hold at any time by giving a reason. Only a quality supervisor can release it again.
+REQ-306. Every status change shall be logged with the user, the time, the old and new state and the reason (where required).
+
+4.4 Child reels
+
+REQ-401. The winder operator shall create child reels from a jumbo by entering for each child the width in millimetres, the diameter in millimetres, and the weight in kilograms. Position numbers are assigned automatically from 01.
+REQ-402. A child reel inherits the status of its jumbo. If the jumbo is placed on hold, all of its children are placed on hold, including those already created.
+REQ-403. The sum of child weights shall not exceed the jumbo's finishing weight. The system shall warn if the sum is less than 90 percent of the finishing weight and require confirmation to proceed.
+REQ-404. The system shall print a label for each child reel with a barcode of the child number, the grade, width, diameter and weight, and the customer order number if one is entered.
+REQ-405. A child reel can be assigned to a customer order only if its jumbo is Released.
+
+4.5 Warehouse scan
+
+REQ-501. When a warehouse clerk scans a child reel for loading, the system shall respond within 2 seconds with Released, Held, Rejected or Unknown.
+REQ-502. Only reels in the Released state may be added to a shipment. A scan of any other state shall show a red screen and sound a tone, and shall be logged.
+REQ-503. A reel may appear on only one shipment. A second scan of an already loaded reel shall show the shipment it is on.
+REQ-504. The warehouse shall be able to print a shipment list of reels with their numbers, weights and customer order numbers.
+
+4.6 Notifications
+
+REQ-701. When a jumbo is finished, the system shall display it on the laboratory's work list within 10 seconds, sorted by finish time, oldest first. A jumbo not fully tested 90 minutes after finishing shall be shown in amber, and after 180 minutes in red.
+REQ-702. When a jumbo is placed on hold or rejected, the system shall send an email to the quality supervisor on duty, the shift manager and the warehouse supervisor within one minute. The message shall include the jumbo number, the grade, the reason and the number of child reels affected.
+REQ-703. When a released jumbo is placed back on hold and any of its children are already on a closed shipment, the system shall flag the shipment as "affected" and display it on the quality supervisor's home screen until acknowledged.
+REQ-704. The shift list of the quality supervisors on duty is maintained by the administrator. If no supervisor is on duty, notifications go to the shift manager only and a note is written to the audit log.
+
+4.7 Retained samples
+
+REQ-801. For every jumbo, the laboratory shall record the storage location of the retained sample strip (a rack letter and a slot number, such as C-14). The record is mandatory before the jumbo's first release.
+REQ-802. Retained samples are kept for 24 months. The system shall list each month the samples that have passed their retention date, and the laboratory technician shall mark them as discarded.
+
+5. Reports
+
+REQ-601. A daily quality report shall list each jumbo finished in the previous 24 hours, with its test results, status, and the name of the person who released it.
+REQ-602. A traceability report, given a child reel number, shall show the jumbo, its tests, its status history and the shipment, within 5 seconds.
+REQ-603. A monthly report shall show the percentage of jumbos released first time, the percentage held, the percentage rejected, and the mean time from finish to release.
+
+6. Non-functional requirements
+
+NFR-1. The system shall be available 24 hours a day, every day, with unplanned downtime not exceeding 8 hours a year. Planned maintenance is announced 48 hours in advance.
+NFR-2. All screens shall work on the mill's rugged tablets (10-inch, a standard browser) and on desktop computers.
+NFR-3. If the network between the laboratory and the server is lost, the laboratory screens shall keep data entered for up to 4 hours and send it when the network returns. Releases and holds are not allowed while offline.
+NFR-4. Passwords expire every 90 days. Accounts lock after five failed attempts for 15 minutes.
+NFR-5. The audit log is read-only for all users including administrators and is kept for 10 years.
+NFR-6. The system shall support 15 simultaneous users with all screens responding in under 2 seconds at the 95th percentile.
+NFR-7. Data shall be backed up every night and restored to an alternative server within 4 hours.
+
+7. Interfaces
+
+7.1 Machine control system. At the start and end of each jumbo, the machine control system sends a message with the machine speed and the grade code. If the grade code in the message does not match any known grade, the start is rejected and the operator is told.
+7.2 Laboratory instruments. The moisture and brightness instruments export a result file every minute to a shared folder. RTQ reads these files and offers the values to the technician for confirmation; the technician must confirm each value before it is stored. Files that cannot be parsed are moved to an error folder and an alert is displayed.
+7.3 Enterprise resource planning (ERP). RTQ receives open customer orders from ERP each night at 01:00 and sends shipment confirmations to ERP when a shipment is closed.
+
+8. Grade limits, initial data
+
+| Grade | Basis weight | Moisture | Caliper | Brightness | Smoothness |
+|---|---|---|---|---|---|
+| G-80U (80 g/m2 uncoated) | 78 to 82 | 4.5 to 5.5 | 100 to 108 | 92 to 96 | 150 to 250 |
+| G-90C (90 g/m2 coated) | 88 to 92 | 4.8 to 5.8 | 82 to 90 | 94 to 98 | 800 to 1,200 |
+| G-115C (115 g/m2 coated) | 112 to 118 | 4.8 to 5.8 | 105 to 115 | 94 to 98 | 800 to 1,200 |
+
+9. Out of scope
+
+Coating recipes, machine process control, maintenance management, and the invoicing of customers are not in this release.
+
+10. Acceptance criteria for go-live
+
+AC-1. All requirements of priority "must" in sections 4 and 6 pass in the test environment with the data in section 8.
+AC-2. A complete pilot of five working days on PM3 runs in parallel with the paper forms, with no discrepancy between the system's status and the status on the forms that cannot be explained.
+AC-3. Every operator, technician, winder operator, warehouse clerk and quality supervisor has been trained by a trainer from Quality Systems, and has completed a practice session on the training copy.
+AC-4. A restore from backup has been demonstrated within the 4 hours in NFR-7.
+AC-5. The cutover plan has been agreed with the shift managers of all four shifts. The cutover takes place on a Sunday at 06:00, at the start of the production day, so that no jumbo is open during the change.
+
+11. Priorities
+
+Requirements REQ-101 to REQ-103, REQ-201 to REQ-205, REQ-301 to REQ-306, REQ-402, REQ-405, REQ-501 to REQ-503, NFR-3 and NFR-5 are priority "must". REQ-104, REQ-401, REQ-403, REQ-404, REQ-504, REQ-601, REQ-602, REQ-701 to REQ-704 and NFR-1, NFR-2, NFR-4, NFR-6 and NFR-7 are priority "should". All others are priority "could".
+
+12. Known assumptions
+
+- The machine control system can send the start and end messages in section 7.1; the supplier has confirmed this but the message format has not yet been tested at the mill.
+- The two laboratory instruments in section 7.2 continue to export one file per measurement, as they do now.
+- A jumbo reel is never split between two grades.
+- Time on the server, the tablets and the machine control system is synchronised from the same source.

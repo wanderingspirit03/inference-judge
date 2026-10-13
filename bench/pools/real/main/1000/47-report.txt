@@ -1,0 +1,42 @@
+Please summarise this quarterly operations report for the plant board, section by section, and finish with your recommendations. I would like the summary to flag anything the board has to decide and anything that looks like a risk to our discharge permit.
+
+**Hollowbrook Wastewater Treatment Plant: Operations Report, Third Quarter**
+Prepared by: Marit Sandvik, Plant Manager
+Distribution: Board of the Hollowbrook Water Authority
+
+**1. Overview**
+
+The plant treated an average of 18,400 cubic metres per day during the quarter, against a design capacity of 24,000. The wettest month was August, with a peak day of 31,200 cubic metres on 14 August after a storm that delivered 52 mm of rain in nine hours. On that day, the storm tank filled to 94% and released 1,900 cubic metres of screened overflow to the Hollow River for roughly two hours. The release was reported to the regulator within the required 24 hours.
+
+**2. Effluent quality**
+
+All monthly averages met the permit limits. The table shows the quarter's results.
+
+| Parameter | Permit limit | July | August | September |
+|---|---|---|---|---|
+| BOD (mg/l) | 15 | 6.1 | 8.4 | 5.7 |
+| Total suspended solids (mg/l) | 25 | 11 | 17 | 10 |
+| Ammonia (mg/l) | 4 | 1.2 | 2.9 | 1.0 |
+| Total phosphorus (mg/l) | 1.0 | 0.62 | 0.71 | 0.58 |
+
+Ammonia in August reached 2.9 mg/l, the highest value in three years. Mr. Okonkwo, the process engineer, attributes this to cold, diluted inflow after the storm and to the loss of one of the four aeration blowers for eleven days.
+
+**3. Equipment and maintenance**
+
+Blower 3 failed on 6 August when a bearing seized. The replacement part took nine days to arrive because the supplier had no stock, and the repair cost 14,700 euros. Blower 1 has now run 41,000 hours and its vibration readings are rising. The inlet screen was cleared of rags 23 times in the quarter, compared with 14 in the second quarter, and operators believe the increase comes from wet wipes in the network. The sludge dewatering press ran for 61% of planned hours; the rest was lost to two belt replacements.
+
+**4. Sludge and energy**
+
+The plant produced 1,260 tonnes of dewatered sludge, all of which went to the agricultural contractor under the existing agreement. The contractor warned that from next spring it can only accept sludge below a certain heavy metal threshold and asked us to supply new test results by December. Energy use was 0.41 kWh per cubic metre, a 4% rise on last quarter, mostly because the blowers ran longer in August. The new solar array on the sludge building supplied 11% of the plant's electricity.
+
+**5. Safety and staffing**
+
+There were no lost-time injuries. Two near misses were recorded: a hose burst in the chemical store, and a lone worker who entered the inlet chamber without the gas monitor. Both led to retraining. Two of the fourteen operators will retire by March, and one position has been open since June without a suitable applicant.
+
+**6. Budget**
+
+Spending was 2.31 million euros against a plan of 2.18 million. The overspend of 130,000 euros is explained by the blower repair, storm-related overtime of 21,000 euros and higher electricity prices. Income from the authority's tariff matched the plan.
+
+**7. Proposed decisions**
+
+The board is asked to approve a new spare blower at 38,000 euros, a two-year study of the inlet network at 55,000 euros, and an extra operator trainee post.

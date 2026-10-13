@@ -1,0 +1,80 @@
+These are my lecture notes for the new-starter training day at our dental clinics. Could you turn them into a proper study guide with worked examples, and then add a quiz of about fifteen questions with full answers and explanations? The trainees are dental nurses and reception staff, so please keep the language practical.
+
+# Instrument decontamination and cross-infection control — Session 3
+
+Presenter: Wilhelmina Oyelaran, Lead Nurse, Birchfield Dental Group (9 clinics)
+
+## 1. Why this session matters
+
+Every instrument that enters a patient's mouth must be treated as contaminated afterwards, whatever the patient looks like or says. We cannot tell by looking who carries a blood-borne virus. So we follow one standard: "standard precautions" for everyone. Our group inspection last spring found that the weakest point was not the sterilising machine but the steps either side of it: the moment instruments leave the surgery, and the moment they are put away.
+
+## 2. The decontamination cycle
+
+The route is always one way, from dirty to clean, and never back:
+
+1. Collect and transport (dirty zone)
+2. Clean (manual wash or washer-disinfector)
+3. Rinse
+4. Inspect under a magnifier
+5. Sterilise (autoclave)
+6. Package and date-label
+7. Store (clean zone)
+
+Each clinic has a decontamination room divided into a dirty side and a clean side, with a separate sink for hand washing. Staff must never carry a tray from the clean side back to the dirty side.
+
+## 3. Cleaning
+
+Cleaning removes the blood, saliva and debris that protect germs from sterilisation. An instrument that is not clean cannot be made sterile.
+
+- **Washer-disinfector (preferred).** A cycle runs a cold rinse, a wash at 55 degrees C, and a thermal disinfection hold at 90 degrees C for at least one minute. Never overload the racks: instruments must not overlap or touch.
+- **Manual cleaning (backup only).** Use a dedicated sink, water at no more than 45 degrees C (hotter water fixes proteins onto the metal), detergent at the dilution on the label, and a long-handled brush. Keep instruments below the water surface while brushing to avoid splashes. Use a second sink or a clean bowl to rinse.
+
+Routine test: a cleaning-efficacy test strip is run through the washer-disinfector once a week, and its result is recorded in the log.
+
+## 4. Inspection
+
+Check every instrument under a lit magnifier. Look for remaining debris, rust or pitting, bent tips and loose joints. Dental handpieces should be flushed and lubricated according to the maker's instructions. Anything damaged is taken out of use and reported to the practice manager.
+
+## 5. Sterilisation
+
+Our clinics use bench-top vacuum autoclaves, type B, which can sterilise wrapped and hollow instruments.
+
+- Standard cycle: 134 degrees C for 3.5 minutes at about 2.1 bar of pressure.
+- Each load must have a printout or data record showing that temperature, pressure and time were reached.
+- Do not overload: the chamber should be at most two thirds full. Pouches go in with the paper side facing the plastic side of the next pouch so steam can pass.
+- A helix test is run every morning before the first load. A vacuum leak test (a "Bowie-Dick type" test) is run weekly. If the test fails, take the autoclave out of use and do not process any instruments until it is checked.
+- Pouches are valid for 12 months if stored dry and intact. Unwrapped instruments must be used immediately.
+
+## 6. Storage and dating
+
+After the autoclave finishes, wait until the pouches are dry. A wet pouch is considered unsterile and must be repackaged and put through the autoclave again. Label each pouch with the date of sterilisation, the autoclave number and the initials of the person who packed it. Store pouches in closed drawers on the clean side, at least 20 cm from the floor.
+
+## 7. Worked case for the tutorial
+
+At the Elmbridge clinic, the morning helix test strip shows an incomplete colour change. The nurse, Tavita, has already run a load of 14 pouches at 08:05 for the 08:30 patient.
+
+What should she do? First she stops using the autoclave and puts a sign on it. Then she informs the practice manager. The pouches from the 08:05 load are quarantined and must be reprocessed in a different autoclave once a passing test has been recorded on that machine. The 08:30 patient's treatment must use instruments from a verified source, such as a second autoclave in the same clinic or a sealed set sterilised at another site. The incident is written in the log with the time, the machine number, the test result and the action taken.
+
+## 8. Personal protective equipment
+
+Before touching dirty instruments: gloves (heavy-duty for cleaning, single-use nitrile for chairside work), a plastic apron, eye protection and a fluid-resistant mask. Gloves are never washed and reused. Hands are washed before and after glove use, for at least 20 seconds, using the six-step technique on the poster above each sink.
+
+## 9. Sharps and spillages
+
+Needles and blades go into a sharps box immediately after use, by the person who used them. Never re-sheath a needle with two hands. If you suffer a needlestick injury: let the wound bleed, wash with soap and running water, do not scrub or suck, cover it, and tell the practice manager at once. A medical assessment is needed within two hours if possible. A blood spill is covered with absorbent granules containing chlorine at 10,000 ppm, left for the contact time on the label, and then removed with a scoop into a clinical waste bag.
+
+## 10. Mistakes we found in last spring's inspection
+
+- Instruments left to soak in a bowl on the dirty side for over an hour. Soaking is allowed only to stop blood drying, and for no more than 30 minutes.
+- Handpieces put in a pouch without lubrication, which shortened their life and left residue in the autoclave.
+- Pouches stored on the windowsill of the decontamination room, where sunlight and condensation damaged the seals.
+- Missing initials on pouches, so no one could tell who packed a failed load.
+- Reception staff carrying used trays through the waiting room instead of using the sealed transport box.
+
+## 10a. Second worked case
+
+At the Holloway clinic, the washer-disinfector breaks down on a Tuesday and the engineer cannot come until Thursday. The clinic has 38 patients booked on Wednesday and has only two spare sets of instruments per surgery. Nurse Alinta decides to wash manually. Her checklist: fill the dedicated sink with water at 40 degrees C and add detergent; brush each instrument under the surface for at least 30 seconds, paying attention to hinges and serrations; rinse in the second sink; dry on a lint-free cloth; inspect under the magnifier; then autoclave as normal. The manual method takes about 6 minutes per tray and it must be recorded in the log that the washer was out of service. She also asks the practice manager to cancel the weekly efficacy test, which no longer applies, but to restart it as soon as the machine is repaired.
+
+## 11. Records to keep
+
+Daily autoclave log, weekly cleaning-efficacy test, helix and vacuum tests, load printouts for two years, sharps injury register, and training records for every member of staff.

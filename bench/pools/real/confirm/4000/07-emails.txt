@@ -1,0 +1,168 @@
+I'm the depot manager at Gasworks Lane tram depot and I have to answer this thread today. Please write me a detailed reply that settles every open point so nobody has to write back with another question, and under it a list of actions with a name and a date for each. Keep my tone firm but friendly, because several of these people have to work together for the next six weeks.
+
+---------- Thread, oldest first ----------
+
+From: Hester Brandvold <h.brandvold@trams.example.org>
+To: Depot operations group
+Date: Mon 5 Oct, 07:42
+Subject: Bay 4 pit floor - can we release it for the wheel lathe works?
+
+Morning all. The contractor from Orrin Rail Services (Kofi Mensah-Lindqvist) has asked to start installing the new under-floor wheel lathe in Bay 4 on Monday 19 October. They need the pit and the bay empty from the 19th until the end of the commissioning tests, which they say will be Friday 4 December. That is seven weeks. During that time we lose Bay 4, which is our only bay with a pit long enough for the long articulated cars (the 40 series).
+
+Today the 40 series cars (there are 9 of them) are done in Bay 4 for all their scheduled work, so I need to know how we cover them. I've been asked to give Orrin an answer by Friday. Please tell me your needs and objections by Wednesday.
+
+Hester (Fleet Engineering)
+
+---
+
+From: Tobias Ferreira-Lund <t.ferreira-lund@trams.example.org>
+To: Hester Brandvold; Depot operations group
+Date: Mon 5 Oct, 09:15
+Subject: RE: Bay 4 pit floor - can we release it for the wheel lathe works?
+
+Hester, we cannot give up Bay 4 for seven weeks, full stop. The 40 series are due their 60 day inspections in November: five of them fall between 9 November and 27 November. If we don't have the pit, I have no way of meeting the schedule that the regulator signed off. Bay 2 has a pit but it is 9 metres too short for the long cars. Please can we ask Orrin to start in January when the Christmas timetable is running and we have fewer cars in service?
+
+Also I want to flag that they keep saying "seven weeks", but the contract I saw said "six weeks plus two weeks contingency".
+
+Tobias (Night shift supervisor)
+
+---
+
+From: Kofi Mensah-Lindqvist <k.mensah-lindqvist@orrinrail.example.org>
+To: Hester Brandvold
+Cc: Depot operations group
+Date: Mon 5 Oct, 11:03
+Subject: RE: Bay 4 pit floor - can we release it for the wheel lathe works?
+
+Hello everyone. To clear up the duration: the programme is 6 weeks of installation (19 October to 27 November) and 1 week of commissioning tests (30 November to 4 December). The 2 weeks of contingency in the contract are on top of that and only used if we hit a problem, for example if we find old services under the floor. Our crew of 8 would be on site from 07:00 to 17:00, Monday to Friday. Heavy lifts (the lathe itself is 14 tonnes, in two pieces) are booked for Tuesday 20 October and Wednesday 21 October and need the overhead crane in Bay 4, so the crane should be free on those two days.
+
+Important: if we do not start on the 19th our crane slot and our crew are gone until the second week of January, because we are committed elsewhere. So a delay is not a few weeks, it is about eleven weeks.
+
+Best regards, Kofi
+
+---
+
+From: Priya Nakagawa-Osei <p.nakagawa-osei@trams.example.org>
+To: Depot operations group
+Date: Tue 6 Oct, 08:20
+Subject: RE: Bay 4 pit floor - can we release it for the wheel lathe works?
+
+Two things from the service planning side.
+
+1. For the 40 series cars we can take cars out of service for inspection in Bay 4 only if we have 6 of the 9 in service at peak. At the moment all 9 run on Routes 3 and 7. Dropping to 6 for a few weeks is OK on weekdays, but on Saturdays (the market) we need 8 of the 9, or we will get complaints.
+
+2. If we could do the five November inspections at the Eastbrook depot instead, that would solve it. Eastbrook has a long pit. I spoke to their manager, Dominic Achterberg, informally, and he said they could possibly take cars on 10, 16, 23 and 30 November, but only two at a time, and they would want a day's notice and our own fitters to do the work.
+
+Priya (Service planning)
+
+---
+
+From: Tobias Ferreira-Lund
+To: Priya Nakagawa-Osei; Hester Brandvold; Depot operations group
+Date: Tue 6 Oct, 10:40
+Subject: RE: Bay 4 pit floor - can we release it for the wheel lathe works?
+
+Priya, that's helpful, thank you. But there are practical problems with Eastbrook. Moving a car to Eastbrook means running it on the main line at night after 00:30, with a driver and a pilot, and that is about 3 hours each way. My night team is eleven fitters. If I send four with each car we lose half the team at Gasworks Lane. Dominic's dates are 10, 16, 23 and 30 November, two cars at a time, and the fifth car is due on 27 November, so one of the five has no slot at all. In my view the dates do not fit.
+
+Alternatively, we do the inspections on the street, in the stabling road with the mobile platform. That doesn't give us access to the underside. I won't sign it off.
+
+Tobias
+
+---
+
+From: Hester Brandvold
+To: Depot operations group
+Date: Wed 7 Oct, 16:05
+Subject: RE: Bay 4 pit floor - can we release it for the wheel lathe works?
+
+Thanks all. Let me try to put the facts together and then I need the depot manager to decide, because I can't.
+
+- Orrin's dates are fixed: start 19 October, finish installation 27 November, commissioning 30 November to 4 December, plus up to two weeks of contingency (to 18 December).
+- Five 40 series inspections are due between 9 and 27 November. Four more are due in December and January.
+- The regulator's schedule allows a 10 day window either side of the inspection date. I checked, and with the full window the five due dates could move to between 30 October and 7 December, but I haven't asked the regulator, and I doubt they will move all five.
+- Eastbrook can take two cars at a time on 10, 16, 23 and 30 November, with our fitters. If that means two cars in total on each date, it could be up to eight, but Dominic told Priya he could manage four in all, so I have assumed four.
+- I also checked: the new lathe will, once working, save us about 3 days per set of wheels versus sending them out, and we have 14 wheel sets overdue for turning. Waiting until January means we keep sending wheels out at about 2,300 pounds a set.
+
+Hester
+
+---
+
+From: Ngozi Halloran-Vance <n.halloran-vance@trams.example.org>
+To: Hester Brandvold; Depot operations group
+Date: Thu 8 Oct, 08:55
+Subject: RE: Bay 4 pit floor - can we release it for the wheel lathe works?
+
+Safety and compliance. My points:
+
+(a) If Orrin work in Bay 4, they will need a permit to work and an induction from me; each person, before they start. I can do inductions for all eight on Friday 16 October at 14:00 (about 90 minutes).
+(b) I need the traction power isolated in Bay 4 and the next bay, Bay 3, when the lathe pieces are lifted, which means Bay 3 is also out of use on 20 and 21 October.
+(c) I do not agree to any inspection on the stabling road without a pit, and I want that in writing.
+(d) The pit has to be pumped and tested for gas before anyone goes in. The pumping company is booked for 14 October at 09:00.
+(e) We should not forget the fire watch. The lathe base needs welding, so Orrin should supply a fire watch for the welding days and one hour afterwards.
+
+Ngozi (Safety and compliance)
+
+---
+
+From: Ewan Pirovano <e.pirovano@trams.example.org>
+To: Depot operations group
+Date: Thu 8 Oct, 11:30
+Subject: RE: Bay 4 pit floor - can we release it for the wheel lathe works?
+
+Finance view. The lathe is paid from the capital budget approved in June (410,000 pounds). The delay to January would cost nothing directly, but Orrin say a January start has a 6 percent uplift (about 24,600 pounds) because of new labour rates. Against that: sending 14 wheel sets out at 2,300 is 32,200 pounds. If we start now, I'd need approval for the Eastbrook costs (I'm guessing 1,800 pounds a car for their pit and their staff supervision, plus our overtime).
+
+Who has the authority to approve that? I think it is you, depot manager, up to 10,000 pounds.
+
+Ewan
+
+---
+
+From: Dominic Achterberg <d.achterberg@eastbrook.example.org>
+To: Hester Brandvold
+Cc: Priya Nakagawa-Osei; Ewan Pirovano
+Date: Thu 8 Oct, 14:20
+Subject: RE: Bay 4 pit floor - can we release it for the wheel lathe works?
+
+Hester, Priya, I have talked to my own team and can confirm in writing what I said informally. Eastbrook can accept a maximum of four 40 series cars in total in November. They would arrive on 10, 16, 23 and 30 November, one car on each date, not two, because I only have one fitter's bay free with a clear pit at a time. Each car would stay for three nights.
+
+Our charge is 2,150 pounds per car, covering the pit, our supervisor and the use of our test track. It does not cover your fitters' travel, parts or lunch. You must give us 48 hours' notice, and we must have the maintenance records for each car by 17:00 the working day before. If a car does not arrive on the date, the slot goes to our own fleet.
+
+Please let me know by Monday 12 October if you want any of the slots, because I am holding them and other people are asking.
+
+Dominic
+
+---
+
+From: Rosalind Eke-Marchetti <r.eke-marchetti@trams.example.org>
+To: Tobias Ferreira-Lund; Hester Brandvold; Depot operations group
+Date: Fri 9 Oct, 07:50
+Subject: RE: Bay 4 pit floor - can we release it for the wheel lathe works?
+
+Rostering. I can see the main line move would need a driver and a pilot after 00:30. The pilots are Engineering Possession Team and I can only have them on Tuesdays and Thursdays in November, which is not a fit for Dominic's dates unless they are moved: 10 November is a Tuesday and 16 November is a Monday, 23 November is a Monday, and 30 November is a Monday. I think only the 10th works. Drivers are not a problem as I have six trained for moves.
+
+If we use the 10th for one car and need the other four elsewhere, we should talk about asking for the regulator's window.
+
+Rosalind (Rostering)
+
+---
+
+From: Kofi Mensah-Lindqvist
+To: Hester Brandvold; Depot operations group
+Date: Fri 9 Oct, 09:10
+Subject: RE: Bay 4 pit floor - can we release it for the wheel lathe works?
+
+Hello, I have heard from the depot that there are concerns. Two ideas to help. First, we could do the installation in two phases: phase 1 from 19 October to 13 November, when the pit would be unusable but we leave it clean on Fridays at 17:00 and on 14 and 15 November (a weekend). Phase 2 would be from 16 November to 27 November. This does not give you a pit, but we could provide a temporary cover so that cars can be pushed in on the surface rails for non-pit work. Second, if you could confirm by Tuesday 13 October that Bay 3 and the crane will be free on 20 and 21 October we will keep the dates. I cannot hold them longer than that.
+
+Kofi
+
+---
+
+From: Hester Brandvold
+To: Depot manager
+Cc: Depot operations group
+Date: Fri 9 Oct, 11:45
+Subject: Decision needed on Bay 4 - by Monday 12 October
+
+I think the thread has all the facts now. Orrin need a yes by Tuesday 13 October, Eastbrook need a yes by Monday 12 October. I need you to decide on the dates and the money, and to answer the points that are still open: whether to ask the regulator to move the five November inspections, how to deal with the pilot problem, what Eastbrook costs, and whether Orrin's two-phase idea can work. Please reply to all.
+
+Hester

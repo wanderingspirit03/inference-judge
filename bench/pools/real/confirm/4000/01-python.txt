@@ -1,0 +1,320 @@
+Can you do a proper code review of this module we use at the Lantern Row Players to book rehearsal rooms and cast people into shows? I want to know about bugs, unclear parts and anything risky, and then I'd like a full set of pytest unit tests for it.
+
+```python
+"""rehearsal.py - room booking and casting helper for the Lantern Row Players.
+
+Used by the stage managers to book rehearsal slots, check that nobody is
+double-booked, and work out who still needs a call time for a given show.
+"""
+
+from __future__ import annotations
+
+import csv
+import io
+from collections import defaultdict
+from dataclasses import dataclass, field
+from datetime import date, datetime, time, timedelta
+from typing import Dict, Iterable, List, Optional, Tuple
+
+ROOMS = {
+    "main": 40,
+    "studio": 18,
+    "foyer": 12,
+    "attic": 8,
+}
+
+MIN_SLOT_MINUTES = 30
+MAX_SLOT_MINUTES = 240
+DAY_START = time(9, 0)
+DAY_END = time(22, 0)
+
+
+class BookingError(Exception):
+    """Raised when a booking cannot be made."""
+
+
+@dataclass
+class Person:
+    name: str
+    roles: List[str] = field(default_factory=list)
+    unavailable: List[date] = field(default_factory=list)
+
+    def is_free(self, day: date) -> bool:
+        return day not in self.unavailable
+
+
+@dataclass
+class Booking:
+    room: str
+    day: date
+    start: time
+    minutes: int
+    show: str
+    people: List[str] = field(default_factory=list)
+
+    @property
+    def end(self) -> time:
+        started = datetime.combine(self.day, self.start)
+        return (started + timedelta(minutes=self.minutes)).time()
+
+    def overlaps(self, other: "Booking") -> bool:
+        if self.day != other.day:
+            return False
+        a_start = datetime.combine(self.day, self.start)
+        a_end = a_start + timedelta(minutes=self.minutes)
+        b_start = datetime.combine(other.day, other.start)
+        b_end = b_start + timedelta(minutes=other.minutes)
+        return a_start < b_end and b_start < a_end
+
+
+class Schedule:
+    def __init__(self) -> None:
+        self.bookings: List[Booking] = []
+        self.people: Dict[str, Person] = {}
+
+    def add_person(self, person: Person) -> None:
+        if person.name in self.people:
+            raise BookingError("duplicate person: " + person.name)
+        self.people[person.name] = person
+
+    def _check_basic(self, booking: Booking) -> None:
+        if booking.room not in ROOMS:
+            raise BookingError("unknown room: " + booking.room)
+        if booking.minutes < MIN_SLOT_MINUTES or booking.minutes > MAX_SLOT_MINUTES:
+            raise BookingError("slot length out of range")
+        if booking.start < DAY_START or booking.end > DAY_END:
+            raise BookingError("slot outside opening hours")
+        if len(booking.people) > ROOMS[booking.room]:
+            raise BookingError("too many people for room")
+
+    def add_booking(self, booking: Booking) -> None:
+        self._check_basic(booking)
+        for existing in self.bookings:
+            if existing.room == booking.room and existing.overlaps(booking):
+                raise BookingError("room already booked at that time")
+        for name in booking.people:
+            person = self.people.get(name)
+            if person is None:
+                raise BookingError("unknown person: " + name)
+            if not person.is_free(booking.day):
+                raise BookingError(name + " is unavailable on " + booking.day.isoformat())
+            for existing in self.bookings:
+                if name in existing.people and existing.overlaps(booking):
+                    raise BookingError(name + " is double-booked")
+        self.bookings.append(booking)
+
+    def cancel(self, room: str, day: date, start: time) -> bool:
+        for i, b in enumerate(self.bookings):
+            if b.room == room and b.day == day and b.start == start:
+                del self.bookings[i]
+                return True
+        return False
+
+    def bookings_for_person(self, name: str) -> List[Booking]:
+        result = [b for b in self.bookings if name in b.people]
+        result.sort(key=lambda b: (b.day, b.start))
+        return result
+
+    def hours_by_show(self) -> Dict[str, float]:
+        totals: Dict[str, float] = defaultdict(float)
+        for b in self.bookings:
+            totals[b.show] += b.minutes / 60
+        return dict(totals)
+
+    def free_slots(self, room: str, day: date, minutes: int) -> List[time]:
+        if room not in ROOMS:
+            raise BookingError("unknown room: " + room)
+        slots: List[time] = []
+        cursor = datetime.combine(day, DAY_START)
+        limit = datetime.combine(day, DAY_END)
+        while cursor + timedelta(minutes=minutes) <= limit:
+            candidate = Booking(room, day, cursor.time(), minutes, "")
+            clash = any(
+                b.room == room and b.overlaps(candidate) for b in self.bookings
+            )
+            if not clash:
+                slots.append(cursor.time())
+            cursor += timedelta(minutes=30)
+        return slots
+
+    def people_without_calls(self, show: str, days: Iterable[date]) -> List[str]:
+        wanted = set(days)
+        called = set()
+        for b in self.bookings:
+            if b.show == show and b.day in wanted:
+                called.update(b.people)
+        cast = [p.name for p in self.people.values() if show in p.roles]
+        return sorted(n for n in cast if n not in called)
+
+
+def parse_time(text: str) -> time:
+    hours, minutes = text.split(":")
+    return time(int(hours), int(minutes))
+
+
+def load_bookings_csv(text: str, schedule: Schedule) -> Tuple[int, List[str]]:
+    """Load bookings from CSV text.
+
+    Columns: room, day (YYYY-MM-DD), start (HH:MM), minutes, show, people
+    (people separated by semicolons). Returns the number loaded and a list of
+    error messages for rows that were rejected.
+    """
+    loaded = 0
+    errors: List[str] = []
+    reader = csv.DictReader(io.StringIO(text))
+    for line_no, row in enumerate(reader, start=2):
+        try:
+            booking = Booking(
+                room=row["room"].strip(),
+                day=date.fromisoformat(row["day"].strip()),
+                start=parse_time(row["start"].strip()),
+                minutes=int(row["minutes"]),
+                show=row["show"].strip(),
+                people=[p.strip() for p in row["people"].split(";") if p.strip()],
+            )
+            schedule.add_booking(booking)
+            loaded += 1
+        except (BookingError, KeyError, ValueError) as exc:
+            errors.append("line " + str(line_no) + ": " + str(exc))
+    return loaded, errors
+
+
+def weekly_summary(schedule: Schedule, week_start: date) -> str:
+    lines: List[str] = []
+    for offset in range(7):
+        day = week_start + timedelta(days=offset)
+        todays = [b for b in schedule.bookings if b.day == day]
+        todays.sort(key=lambda b: b.start)
+        lines.append(day.strftime("%A %d %B"))
+        if not todays:
+            lines.append("  (nothing booked)")
+        for b in todays:
+            lines.append(
+                "  {0}-{1} {2} - {3} ({4} people)".format(
+                    b.start.strftime("%H:%M"),
+                    b.end.strftime("%H:%M"),
+                    b.room,
+                    b.show,
+                    len(b.people),
+                )
+            )
+    return "\n".join(lines)
+
+
+def busiest_people(schedule: Schedule, top: int = 3) -> List[Tuple[str, float]]:
+    minutes: Dict[str, int] = defaultdict(int)
+    for b in schedule.bookings:
+        for name in b.people:
+            minutes[name] += b.minutes
+    ranked = sorted(minutes.items(), key=lambda kv: (-kv[1], kv[0]))
+    return [(name, mins / 60) for name, mins in ranked[:top]]
+
+
+def suggest_day(schedule: Schedule, show: str, names: List[str],
+                candidates: List[date]) -> Optional[date]:
+    """Return the first candidate day when every named person is free and has
+    no booking that day for any show, or None if there is no such day."""
+    for day in candidates:
+        ok = True
+        for name in names:
+            person = schedule.people.get(name)
+            if person is None or not person.is_free(day):
+                ok = False
+                break
+            if any(name in b.people and b.day == day for b in schedule.bookings):
+                ok = False
+                break
+        if ok:
+            return day
+    return None
+
+
+def export_bookings_csv(schedule: Schedule) -> str:
+    """Write every booking back out in the same format load_bookings_csv reads."""
+    out = io.StringIO()
+    writer = csv.writer(out, lineterminator="\n")
+    writer.writerow(["room", "day", "start", "minutes", "show", "people"])
+    ordered = sorted(schedule.bookings, key=lambda b: (b.day, b.start, b.room))
+    for b in ordered:
+        writer.writerow([
+            b.room,
+            b.day.isoformat(),
+            b.start.strftime("%H:%M"),
+            b.minutes,
+            b.show,
+            ";".join(b.people),
+        ])
+    return out.getvalue()
+
+
+def call_sheet(schedule: Schedule, show: str, day: date) -> str:
+    """Build the plain-text call sheet that is pinned to the green room door."""
+    todays = [b for b in schedule.bookings if b.show == show and b.day == day]
+    if not todays:
+        return "No calls for " + show + " on " + day.isoformat()
+    todays.sort(key=lambda b: b.start)
+    lines = ["CALL SHEET - " + show, day.strftime("%A %d %B %Y"), ""]
+    for b in todays:
+        lines.append(
+            "{0} to {1}, {2}".format(
+                b.start.strftime("%H:%M"), b.end.strftime("%H:%M"), b.room
+            )
+        )
+        for name in sorted(b.people):
+            roles = schedule.people[name].roles if name in schedule.people else []
+            suffix = " (" + ", ".join(roles) + ")" if roles else ""
+            lines.append("    " + name + suffix)
+        lines.append("")
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def room_utilisation(schedule: Schedule, day: date) -> Dict[str, float]:
+    """Fraction of the opening day each room is booked, between 0 and 1."""
+    open_minutes = (
+        datetime.combine(day, DAY_END) - datetime.combine(day, DAY_START)
+    ).seconds / 60
+    booked: Dict[str, int] = {room: 0 for room in ROOMS}
+    for b in schedule.bookings:
+        if b.day == day:
+            booked[b.room] += b.minutes
+    return {room: mins / open_minutes for room, mins in booked.items()}
+
+
+def move_booking(schedule: Schedule, room: str, day: date, start: time,
+                 new_day: date, new_start: time) -> None:
+    """Move an existing booking to a new day and time, keeping its room.
+
+    If the new slot is not allowed the original booking is put back and the
+    error is raised again.
+    """
+    original = None
+    for b in schedule.bookings:
+        if b.room == room and b.day == day and b.start == start:
+            original = b
+            break
+    if original is None:
+        raise BookingError("no such booking")
+    schedule.cancel(room, day, start)
+    moved = Booking(room, new_day, new_start, original.minutes,
+                    original.show, list(original.people))
+    try:
+        schedule.add_booking(moved)
+    except BookingError:
+        schedule.bookings.append(original)
+        raise
+
+
+if __name__ == "__main__":
+    demo = Schedule()
+    demo.add_person(Person("Marta Okonkwo", roles=["Winter Lanterns"]))
+    demo.add_person(Person("Dev Halloran", roles=["Winter Lanterns"],
+                           unavailable=[date(2026, 11, 3)]))
+    demo.add_booking(Booking("studio", date(2026, 11, 2), time(18, 0), 120,
+                             "Winter Lanterns", ["Marta Okonkwo", "Dev Halloran"]))
+    print(weekly_summary(demo, date(2026, 11, 2)))
+    print(demo.people_without_calls("Winter Lanterns", [date(2026, 11, 2)]))
+```
+
+A bit of background so you know where it hurts. Last month a stage manager booked the studio from 21:30 for 150 minutes and the system accepted it, and another time two people who had a rehearsal ending at 18:00 and one starting at 18:00 were reported as double-booked. We also get odd results from free_slots on days when we run late. Please say which of these are real bugs in the code and which are just misuse, and tell me what you would change first if you only had an hour.
+
+I would also like the tests to cover the CSV loader, including a row with a bad time, and to be written so that a new volunteer can read them and understand what the rules of the booking system are. Keep each test small and give each one a clear name.

@@ -1,0 +1,151 @@
+I own a flat in a building that is being connected to the Ostergaard district heating network, and the heat company has sent me the contract below to sign. I'm not a lawyer and I find it hard to follow. Please explain it to me clause by clause in plain language, tell me what each clause means for me in practice, and then list the risks and the things I should ask the company to change or clarify before I sign.
+
+---
+
+OSTERGAARD DISTRICT HEAT LTD
+HEAT SUPPLY AGREEMENT FOR RESIDENTIAL CUSTOMERS
+Version 4.2, effective 1 September
+
+This Agreement is made between Ostergaard District Heat Ltd, registered in England under number 08817245, whose registered office is at 14 Foundry Wharf, Ostergaard (the "Company"), and the person or persons named in the Heat Supply Order Form (the "Customer").
+
+1. DEFINITIONS
+
+1.1 "Heat Network" means the system of insulated pipes, pumping stations, energy centre and related equipment owned or operated by the Company for generating and distributing heat.
+1.2 "Heat Interface Unit" or "HIU" means the unit installed in the Customer's premises that transfers heat from the Heat Network to the Customer's heating and hot water systems.
+1.3 "Premises" means the dwelling identified in the Order Form.
+1.4 "Heat Meter" means the meter that measures the heat energy delivered to the Premises, in kilowatt hours (kWh).
+1.5 "Standing Charge" means the fixed daily charge for being connected to the Heat Network, whether or not heat is used.
+1.6 "Unit Rate" means the charge per kWh of heat delivered.
+1.7 "Billing Period" means each calendar month, unless the Company notifies otherwise.
+1.8 "Connection Date" means the date on which heat is first supplied to the Premises.
+
+2. TERM AND CONNECTION
+
+2.1 This Agreement begins on the Connection Date and continues for an initial period of 36 months (the "Initial Term"). After that it continues from month to month until ended under clause 14.
+2.2 The Company will use reasonable endeavours to connect the Premises on the date set out in the Order Form. If the Connection Date is delayed by more than 60 days for reasons within the Company's control, the Customer may cancel this Agreement without charge by giving written notice.
+2.3 The Customer must give the Company and its contractors access to the Premises at reasonable times, with at least 48 hours' notice, to install, inspect, maintain, read, test or replace the HIU and the Heat Meter.
+2.4 The connection fee shown on the Order Form is payable before the Connection Date. If the Customer cancels after paying the connection fee and after the Company has begun installation work, the Company may keep the part of the fee that reflects the work already done.
+
+3. WHAT THE COMPANY PROVIDES
+
+3.1 The Company will supply heat for space heating and hot water to the Premises through the HIU.
+3.2 The Company will aim to supply hot water at not less than 50 degrees Celsius at the HIU and space heating flow at a temperature suited to the Customer's heating system, within the design values set out in Schedule 1.
+3.3 The Company will maintain the Heat Network up to and including the primary side of the HIU. The Customer is responsible for the pipework, radiators and fittings on the secondary side of the HIU.
+3.4 The Company will own the HIU and the Heat Meter. The Customer must not tamper with, move or disconnect them.
+
+4. PRICES AND CHARGES
+
+4.1 The Customer will pay the Standing Charge and the Unit Rate shown on the Order Form. At the start of this Agreement, the Standing Charge is 0.62 pounds per day and the Unit Rate is 9.4 pence per kWh, including VAT at the applicable rate.
+4.2 The Company may review and change the Standing Charge and the Unit Rate on 1 April each year. It will notify the Customer at least 30 days beforehand. The Company will not increase the Unit Rate by more than the percentage rise in the index named in Schedule 2 over the previous 12 months, plus 2 percentage points.
+4.3 If the Company's costs of fuel or electricity change substantially during a year, the Company may apply an additional temporary adjustment, called a "Fuel Adjustment", with 14 days' notice. The Fuel Adjustment shall not exceed 15 percent of the Unit Rate and will end when the cost change ends or after 6 months, whichever is sooner.
+4.4 Heat is charged according to the Heat Meter. If the Heat Meter is faulty or cannot be read, the Company may estimate the Customer's use based on previous use or on the use of comparable premises, and will correct the bill when a correct reading is available.
+4.5 The Customer will also pay, where applicable, the fees set out in Schedule 3 (for example for missed appointments, reconnection and returned payments).
+
+5. BILLING AND PAYMENT
+
+5.1 The Company will issue a bill each Billing Period. Bills will be sent by email unless the Customer asks for paper bills, in which case a fee set out in Schedule 3 applies.
+5.2 The Customer must pay each bill within 14 days of the bill date, by direct debit unless otherwise agreed.
+5.3 If the Customer does not pay a bill by the due date, the Company may charge interest on the unpaid amount at 4 percent per year above the base rate of the Bank of England from the due date until payment, and a late payment fee as set out in Schedule 3.
+5.4 If the Customer disputes a bill in good faith, the Customer must tell the Company within 28 days of the bill date and pay the undisputed part. The Company will investigate and respond within 20 working days. The Company will not apply interest on a disputed amount that the Company later agrees was wrongly charged.
+5.5 The Company may ask for a security deposit or the installation of a prepayment meter if the Customer has missed two or more payments in any 12-month period.
+
+6. SERVICE LEVELS AND INTERRUPTIONS
+
+6.1 The Company will attend to a complete loss of heat or hot water within 4 hours of being notified between 07:00 and 21:00 and within 8 hours at other times, and will restore supply as soon as reasonably practicable.
+6.2 The Company may interrupt supply for planned maintenance or improvements. It will give at least 5 working days' notice and will try to limit the interruption to 8 hours.
+6.3 If supply is interrupted for more than 24 hours in a row, for reasons within the Company's control, the Customer is entitled to a payment of 30 pounds, and a further 30 pounds for each additional full 24 hours, up to 300 pounds in any one year. The payment will be credited to the Customer's next bill.
+6.4 The Company is not liable for interruptions caused by events outside its reasonable control, including severe weather, a failure of the electricity supply, industrial action, and damage by third parties, but will tell the Customer of the expected duration when it knows.
+6.5 The Customer is responsible for keeping the secondary side of the system in good order. If a fault on the Customer's side causes or contributes to a problem with the Heat Network, the Company may charge the Customer the reasonable cost of repair.
+
+7. HEAT INTERFACE UNIT AND METER
+
+7.1 The Company will service the HIU every 24 months free of charge. The Customer must allow access for the service and for annual safety checks.
+7.2 If the Customer misses an appointment without giving 24 hours' notice, the Company may charge a missed appointment fee.
+7.3 The Customer must tell the Company at once if there is a leak, an unusual noise or a loss of pressure.
+7.4 The Company may replace the Heat Meter at any time. The Customer may ask for the meter to be tested. If it is found to be accurate within the allowed tolerance in Schedule 1, the Customer pays the testing fee; otherwise the Company pays and will adjust the bills for the previous 12 months.
+
+8. CUSTOMER'S OBLIGATIONS
+
+8.1 The Customer must use heat only for heating and hot water in the Premises and not for commercial purposes without the Company's written consent.
+8.2 The Customer must not connect any other heat source to the system serving the Premises, apart from a solar water heating panel that has been approved by the Company in writing.
+8.3 The Customer must tell the Company within 14 days if the Customer sells the Premises, rents it to someone else, or is going to be away for more than 60 days.
+8.4 The Customer must keep the HIU accessible and free of storage. No cupboard or box may be built around it without the Company's agreement.
+
+9. VULNERABLE CUSTOMERS
+
+9.1 If the Customer, or someone living in the Premises, is over 75, has a disability or long-term illness, or has a child under 5, the Customer may ask to be put on the Company's Priority Services Register. The Company will then give priority in restoring supply and will not disconnect the Customer for non-payment between 1 October and 31 March.
+9.2 The Company will ask the Customer to confirm their details every two years.
+
+10. DISCONNECTION
+
+10.1 The Company may disconnect the Premises if the Customer fails to pay an undisputed amount after two written reminders and 28 days' final notice, or if the Customer seriously breaches this Agreement, for example by tampering with the Heat Meter.
+10.2 Before disconnecting the Customer for non-payment, the Company will offer the Customer a payment plan. The Company is not required to do so if the Customer has already failed to keep to a payment plan in the past 12 months.
+10.3 The Company will reconnect the Premises within two working days after the Customer has paid the overdue amount and the reconnection fee in Schedule 3.
+
+11. DATA AND PRIVACY
+
+11.1 The Company will collect and use the Customer's personal data, including meter readings every 30 minutes, to supply and bill for heat, to maintain the Heat Network and to meet its legal obligations.
+11.2 The Company may share the Customer's data with its contractors, billing agents and debt collection agents, and, in anonymised form, with the local authority and research bodies.
+11.3 The Customer may ask for a copy of their data, ask for corrections, or object to the use of data for marketing, by writing to the Company.
+11.4 The Company will keep billing records for 7 years after the end of this Agreement.
+
+12. LIABILITY
+
+12.1 Nothing in this Agreement limits liability for death or personal injury caused by negligence, or for fraud.
+12.2 Subject to clause 12.1, the Company's total liability to the Customer for loss or damage under or in connection with this Agreement, in any 12-month period, is limited to the greater of 1,000 pounds and the total charges paid by the Customer in that period.
+12.3 The Company is not liable for any loss of profit, loss of data, or indirect or consequential loss, including the cost of alternative heating during an interruption, except as set out in clause 6.3.
+
+13. COMPLAINTS
+
+13.1 The Customer may complain to the Company by email, phone or post. The Company will acknowledge within 2 working days and give a full response within 15 working days.
+13.2 If the Customer is not satisfied with the response, or if there is no response within 8 weeks, the Customer may refer the complaint to the independent energy ombudsman scheme named in Schedule 4, free of charge.
+
+14. ENDING THIS AGREEMENT
+
+14.1 After the Initial Term, either party may end this Agreement by giving 30 days' written notice.
+14.2 If the Customer ends the Agreement during the Initial Term for any reason other than those permitted in this Agreement, the Customer must pay an early termination charge equal to the Standing Charge for the remaining months of the Initial Term, up to a maximum of 450 pounds.
+14.3 If the Customer sells the Premises, the Customer may end this Agreement without the early termination charge if the buyer signs a new agreement with the Company, or after giving 30 days' notice if the Premises will be vacant.
+14.4 On ending the Agreement, the Customer must allow the Company access to read the Heat Meter and, if the Company requires, to remove the HIU.
+
+15. CHANGES TO THIS AGREEMENT
+
+15.1 The Company may change these terms if the change is required by law or by the regulator, or if the change is to the Customer's advantage. The Company may also change other terms with 60 days' written notice, and if the change is to the Customer's disadvantage in a significant way, the Customer may end the Agreement without charge within 30 days of the notice.
+
+16. GENERAL
+
+16.1 This Agreement, with the Order Form and Schedules, is the entire agreement between the parties.
+16.2 This Agreement is governed by the law of England and Wales.
+
+SCHEDULE 1: TECHNICAL VALUES
+
+- Design flow temperature on the primary side: 70 degrees Celsius in winter, not below 60 degrees Celsius in summer.
+- Maximum return temperature from the HIU: 40 degrees Celsius. If the Customer's system regularly returns heat above 45 degrees Celsius, the Company may ask the Customer to have the secondary system adjusted at the Customer's cost.
+- Hot water: minimum 50 degrees Celsius at the HIU outlet, delivered at a flow of at least 10 litres per minute at a differential pressure of 1 bar.
+- Heat Meter accuracy: within plus or minus 5 percent of the true value when tested.
+
+SCHEDULE 2: PRICE INDEX
+
+The index used in clause 4.2 is the Regional Heat Supply Cost Index published each January by the Ostergaard Energy Observatory, series RH-7. If the index stops being published, the Company will use the nearest equivalent measure after telling the Customer.
+
+SCHEDULE 3: FEES
+
+| Item | Fee (pounds, including VAT) |
+|---|---|
+| Connection fee (flat) | 1,150.00 |
+| Paper bill, each | 2.50 |
+| Missed appointment | 45.00 |
+| Late payment | 12.00 |
+| Returned direct debit | 15.00 |
+| Reconnection after disconnection | 120.00 |
+| Meter test, if meter found accurate | 85.00 |
+| Replacement of damaged HIU or meter (customer fault) | at cost, up to 1,400.00 |
+
+SCHEDULE 4: ENERGY OMBUDSMAN SCHEME
+
+Customers may contact the Heat and Power Ombudsman Service, PO Box 410, Ostergaard OS2 8RT, or by phone on 0300 555 0142, or through the website of the service.
+
+SIGNED
+
+Customer: ______________________   Date: ____________
+
+For Ostergaard District Heat Ltd: ______________________   Date: ____________

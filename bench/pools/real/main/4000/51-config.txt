@@ -1,0 +1,359 @@
+I volunteer as the tech person for our food bank. A friend set up the stock and volunteer-rota app and its deployment a few years ago and has since moved away, and I now have to keep it running. Below are the files that build, deploy and back it up. Please audit them: list the problems you find ordered by seriousness (security, data loss, reliability, maintainability), explain each one in plain terms, and then give me a corrected version of each file. I'm comfortable with a terminal but I'm not a DevOps person, so say what each change does.
+
+=== Dockerfile ===
+
+FROM node:latest
+
+WORKDIR /app
+COPY . .
+RUN npm install
+RUN npm run build
+
+ENV NODE_ENV=production
+ENV DATABASE_URL=postgres://foodbank:Winter2021!@db:5432/foodbank
+ENV SESSION_SECRET=abc123
+EXPOSE 3000
+
+CMD ["npm", "start"]
+
+=== docker-compose.yml ===
+
+version: "3"
+
+services:
+  web:
+    build: .
+    ports:
+      - "80:3000"
+    depends_on:
+      - db
+    restart: always
+    environment:
+      - SMTP_HOST=smtp.example.org
+      - SMTP_USER=rota@example.org
+      - SMTP_PASSWORD=Pantry#2022
+      - ADMIN_EMAIL=coordinator@example.org
+    volumes:
+      - ./uploads:/app/uploads
+
+  db:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: foodbank
+      POSTGRES_PASSWORD: Winter2021!
+      POSTGRES_DB: foodbank
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+
+  adminer:
+    image: adminer
+    ports:
+      - "8080:8080"
+    restart: always
+
+volumes:
+  dbdata:
+
+=== .ci/pipeline.yml ===
+
+name: build-and-deploy
+
+on:
+  push:
+    branches: [main, develop, "feature/**"]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: checkout-action@main
+      - uses: setup-node-action@main
+        with:
+          node-version: 16
+      - run: npm install
+      - run: npm test || true
+      - run: npm run lint || echo "lint failed"
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: checkout-action@main
+      - name: Deploy to server
+        run: |
+          echo "$SSH_KEY" > key.pem
+          chmod 777 key.pem
+          ssh -o StrictHostKeyChecking=no -i key.pem deploy@pantry.example.org "cd /srv/foodbank && git pull && docker-compose up -d --build"
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_KEY }}
+      - name: Notify
+        run: curl -X POST -d "deployed $GITHUB_SHA by $GITHUB_ACTOR" https://hooks.example.org/T0000/B0000/XXXXXXXXXXXXXXXX
+
+=== scripts/backup.sh ===
+
+#!/bin/bash
+# Nightly backup for the food bank database
+# cron: 0 2 * * * /srv/foodbank/scripts/backup.sh
+
+BACKUP_DIR=/srv/backups
+DATE=`date +%d-%m-%Y`
+cd /srv/foodbank
+
+docker exec foodbank_db_1 pg_dump -U foodbank foodbank > $BACKUP_DIR/db_$DATE.sql
+
+tar -czf $BACKUP_DIR/uploads_$DATE.tar.gz uploads
+
+# remove old backups
+find $BACKUP_DIR -name "*.sql" -mtime +7 -exec rm {} \;
+find $BACKUP_DIR -name "*.tar.gz" -mtime +7 -exec rm {} \;
+
+echo "Backup finished $DATE" >> /var/log/foodbank_backup.log
+
+=== scripts/restore.sh ===
+
+#!/bin/bash
+# usage: restore.sh <date>
+DATE=$1
+BACKUP_DIR=/srv/backups
+
+cd /srv/foodbank
+docker-compose down
+docker volume rm foodbank_dbdata
+docker-compose up -d db
+sleep 5
+cat $BACKUP_DIR/db_$DATE.sql | docker exec -i foodbank_db_1 psql -U foodbank foodbank
+tar -xzf $BACKUP_DIR/uploads_$DATE.tar.gz -C /srv/foodbank
+docker-compose up -d
+echo done
+
+=== scripts/server-setup.sh ===
+
+#!/bin/sh
+# Run once on a fresh Ubuntu server as root
+apt-get update
+apt-get install -y docker.io docker-compose git ufw cron
+adduser deploy
+usermod -aG docker deploy
+mkdir -p /srv/foodbank /srv/backups
+chown -R deploy /srv
+ufw allow 22
+ufw allow 80
+ufw allow 5432
+ufw allow 8080
+ufw --force enable
+(crontab -l 2>/dev/null; echo "0 2 * * * /srv/foodbank/scripts/backup.sh") | crontab -
+git clone https://git.example.org/foodbank/foodbank-app.git /srv/foodbank
+echo "root password is pantry2021 for emergencies" > /root/NOTES.txt
+cd /srv/foodbank && docker-compose up -d
+
+=== scripts/cleanup-uploads.sh ===
+
+#!/bin/bash
+# Remove the delivery photos that volunteers upload once they are older than 90 days
+UPLOAD_DIR=$1
+cd $UPLOAD_DIR
+rm -rf `ls -t | tail -n +100`
+find . -mtime +90 -name "*.jpg" | xargs rm
+echo "Cleaned $UPLOAD_DIR"
+
+=== scripts/healthcheck.sh ===
+
+#!/bin/bash
+# Check the site is up every 5 minutes: */5 * * * * /srv/foodbank/scripts/healthcheck.sh
+URL=http://localhost:3000/health
+CODE=$(curl -s -o /dev/null -w "%{http_code}" $URL)
+if [ $CODE != 200 ]; then
+  echo "Site down at `date`" | mail -s "foodbank DOWN" coordinator@example.org
+  docker restart foodbank_web_1
+fi
+df -h / | tail -1 | awk '{ if ($5+0 > 90) print "disk almost full: " $5 }' | mail -s "foodbank disk" coordinator@example.org
+
+=== scripts/db-init.sh ===
+
+#!/bin/bash
+# Create the schema on a new database and load the starter data
+set -x
+until docker exec foodbank_db_1 pg_isready -U foodbank; do
+  sleep 1
+done
+docker exec -i foodbank_db_1 psql -U foodbank foodbank < db/schema.sql
+docker exec -i foodbank_db_1 psql -U foodbank foodbank < db/seed.sql
+for f in db/migrations/*.sql; do
+  echo "applying $f"
+  docker exec -i foodbank_db_1 psql -U foodbank foodbank < $f
+done
+echo "UPDATE users SET password='admin' WHERE email='coordinator@example.org';" | docker exec -i foodbank_db_1 psql -U foodbank foodbank
+
+=== Makefile ===
+
+.PHONY: up down logs backup restore
+
+up:
+	docker-compose up -d --build
+
+down:
+	docker-compose down
+
+logs:
+	docker-compose logs -f web
+
+backup:
+	./scripts/backup.sh
+
+restore:
+	./scripts/restore.sh $(DATE)
+
+clean:
+	docker system prune -a --volumes -f
+
+=== .env (committed to the repository) ===
+
+NODE_ENV=production
+PORT=3000
+DATABASE_URL=postgres://foodbank:Winter2021!@db:5432/foodbank
+SESSION_SECRET=abc123
+SMTP_HOST=smtp.example.org
+SMTP_PORT=587
+SMTP_USER=rota@example.org
+SMTP_PASSWORD=Pantry#2022
+LOG_LEVEL=debug
+ALLOW_ORIGIN=*
+UPLOAD_MAX_MB=200
+
+=== /etc/logrotate.d/foodbank ===
+
+/var/log/foodbank_backup.log {
+    weekly
+    rotate 52
+    compress
+}
+
+=== .ci/nightly.yml ===
+
+name: nightly-check
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: checkout-action@main
+      - run: npm audit --audit-level=none
+      - run: |
+          for host in pantry.example.org www.pantry.example.org; do
+            curl -sI https://$host | head -1
+          done
+
+=== scripts/rota-reminder.sh (runs inside the web container, cron 0 17 * * 4) ===
+
+#!/bin/sh
+cd /app
+node scripts/send-rota.js >> /tmp/rota.log 2>&1
+if [ $? -ne 0 ]; then
+  echo "rota failed"
+fi
+cat /tmp/rota.log | tail -50
+
+=== scripts/export-volunteers.sh ===
+
+#!/bin/bash
+# Export all volunteers and households for the annual report to the trustees
+OUT=/tmp/export_$(date +%Y).csv
+docker exec foodbank_db_1 psql -U foodbank foodbank -c "COPY (SELECT * FROM households) TO STDOUT WITH CSV HEADER" > $OUT
+docker exec foodbank_db_1 psql -U foodbank foodbank -c "COPY (SELECT * FROM volunteers) TO STDOUT WITH CSV HEADER" >> $OUT
+chmod 644 $OUT
+echo "Export is at $OUT, please email it to the trustees"
+
+=== /etc/systemd/system/foodbank.service ===
+
+[Unit]
+Description=Food bank app
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/srv/foodbank
+ExecStart=/usr/bin/docker-compose up
+ExecStop=/usr/bin/docker-compose down
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+=== scripts/renew-cert.sh ===
+
+#!/bin/bash
+# Certificates are issued by hand twice a year. Run this to renew.
+cd /srv/foodbank
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout certs/server.key -out certs/server.crt -subj "/CN=pantry.example.org"
+cp certs/server.* /etc/nginx/
+service nginx restart
+
+=== docker-compose.override.yml (also present on the server) ===
+
+version: "3"
+services:
+  web:
+    volumes:
+      - .:/app
+    environment:
+      - NODE_ENV=development
+      - DEBUG=*
+    command: npm run dev
+  db:
+    command: postgres -c log_statement=all -c fsync=off
+
+=== scripts/deploy-hook.sh (called by the webhook on the server) ===
+
+#!/bin/bash
+cd /srv/foodbank
+git fetch
+git reset --hard origin/$1
+docker-compose build
+docker-compose down
+docker-compose up -d
+docker image prune -f
+sleep 10
+curl -s localhost/health || echo "app did not start"
+
+=== Dockerfile.worker ===
+
+FROM node:16
+WORKDIR /app
+COPY . /app
+RUN npm install && npm run build
+RUN apt-get update && apt-get install -y cron vim curl netcat
+COPY crontab /etc/cron.d/rota
+CMD cron -f
+
+=== nginx notes (from the server, /etc/nginx/sites-enabled/foodbank) ===
+
+server {
+    listen 80;
+    server_name pantry.example.org;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_set_header Host $host;
+    }
+
+    location /uploads/ {
+        alias /srv/foodbank/uploads/;
+        autoindex on;
+    }
+}
+
+=== Notes from the previous maintainer (README excerpt) ===
+
+- The app holds names, phone numbers and addresses of about 1,400 households who receive food parcels, plus around 90 volunteers and their availability. It is run by a small charity with no paid staff.
+- Backups go to the same server. Once, a few years ago, the server disk filled and the app was down for a weekend.
+- The rota emails go out on Thursday at 17:00 for the weekend shifts and the cron for that is inside the application container.
+- We deploy by pushing to main. Sometimes people push to develop by mistake and it deploys too.
+- Uploaded delivery photos can include house fronts, and sometimes people's faces.
+- If the server dies, the plan is "Dana will rebuild it from this repo".

@@ -1,0 +1,91 @@
+Could you explain what this Go package does, piece by piece, then give me a proper code review (bugs, edge cases, style, anything unsafe) and write table-driven tests for it? We use it to offer appointment slots at our dental clinics.
+
+```go
+package slots
+
+import (
+	"errors"
+	"sort"
+	"time"
+)
+
+// Booking is an existing appointment in a dentist's diary.
+type Booking struct {
+	Start time.Time
+	End   time.Time
+}
+
+// Diary holds the working hours and bookings of one dentist for one day.
+type Diary struct {
+	DayStart time.Time
+	DayEnd   time.Time
+	Bookings []Booking
+}
+
+var ErrInvalidDuration = errors.New("slots: duration must be positive")
+
+// FreeSlots returns the start times at which an appointment of the given
+// duration could begin, stepping by the given interval.
+func FreeSlots(d Diary, duration, step time.Duration) ([]time.Time, error) {
+	if duration <= 0 || step <= 0 {
+		return nil, ErrInvalidDuration
+	}
+	bookings := make([]Booking, len(d.Bookings))
+	copy(bookings, d.Bookings)
+	sort.Slice(bookings, func(i, j int) bool {
+		return bookings[i].Start.Before(bookings[j].Start)
+	})
+
+	var result []time.Time
+	for t := d.DayStart; !t.Add(duration).After(d.DayEnd); t = t.Add(step) {
+		end := t.Add(duration)
+		free := true
+		for _, b := range bookings {
+			if t.Before(b.End) && end.After(b.Start) {
+				free = false
+				break
+			}
+		}
+		if free {
+			result = append(result, t)
+		}
+	}
+	return result, nil
+}
+
+// Merge combines the diaries of several dentists and returns the times at
+// which at least one dentist is free, with the number of dentists free.
+func Merge(diaries []Diary, duration, step time.Duration) (map[time.Time]int, error) {
+	counts := make(map[time.Time]int)
+	for _, d := range diaries {
+		slots, err := FreeSlots(d, duration, step)
+		if err != nil {
+			return nil, err
+		}
+		for _, s := range slots {
+			counts[s]++
+		}
+	}
+	return counts, nil
+}
+
+// NextAvailable returns the earliest slot at or after from, across diaries.
+func NextAvailable(diaries []Diary, from time.Time, duration, step time.Duration) (time.Time, bool) {
+	counts, err := Merge(diaries, duration, step)
+	if err != nil {
+		return time.Time{}, false
+	}
+	var best time.Time
+	found := false
+	for t := range counts {
+		if t.Before(from) {
+			continue
+		}
+		if !found || t.Before(best) {
+			best = t
+			found = true
+		}
+	}
+	return best, found
+}
+```

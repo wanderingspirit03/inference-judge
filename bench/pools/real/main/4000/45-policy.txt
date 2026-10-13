@@ -1,0 +1,135 @@
+My company has just been sent this trade effluent agreement by the wastewater treatment plant that serves our factory, and I have to sign it by the end of the month. I'm not a lawyer and I run operations, not legal. Please explain it to me clause by clause in plain language, tell me what each clause means in practice for our day-to-day work, and then list the biggest risks and the things you would try to negotiate before signing.
+
+TRADE EFFLUENT ACCEPTANCE AGREEMENT
+
+Between Oakhollow Water Reclamation Authority ("the Authority"), operator of the Sedgefield Lane Wastewater Treatment Works ("the Works"), and Brindlemoor Preserves Ltd ("the Discharger"), a producer of jams, sauces and pickles at Unit 4, Tannery Close, Oakhollow.
+
+Agreement reference: TEA-2026-0187. Commencement date: 1 January 2027. Initial term: three years.
+
+1. Definitions
+
+1.1 "Effluent" means liquid waste discharged from the Discharger's premises to the Authority's sewer at the connection point identified as Manhole M-14.
+1.2 "Daily Volume" means the volume of Effluent measured over a period of twenty-four hours beginning at 06:00.
+1.3 "Strength" means the Chemical Oxygen Demand of the Effluent, expressed in milligrams of oxygen per litre, measured on a composite sample in accordance with the method in Schedule 2.
+1.4 "Prohibited Substances" means the substances listed in Schedule 3.
+1.5 "Working Day" means any day other than a Saturday, Sunday or public holiday in the region.
+
+2. Permission to discharge
+
+2.1 The Authority permits the Discharger to discharge Effluent at Manhole M-14 on the terms of this Agreement and for no other purpose.
+2.2 The permission is personal to the Discharger. It may not be transferred to a successor, a tenant or a sub-contractor without the Authority's written consent, which may not be unreasonably withheld where the successor takes on the premises and the same process.
+2.3 The Discharger shall not connect any additional drain, pipe or tanker discharge point to the sewer without prior written approval.
+
+3. Limits on volume and flow
+
+3.1 The Daily Volume shall not exceed 220 cubic metres.
+3.2 The instantaneous flow rate shall not exceed 12 litres per second.
+3.3 If the Discharger expects to exceed either limit for more than three consecutive days because of seasonal production, it shall notify the Authority at least ten Working Days in advance, stating the expected volumes and dates. The Authority may agree a temporary increase, with a surcharge under clause 8.4.
+3.4 Where the Authority reasonably considers that the Works is at risk of overload, it may require the Discharger to hold Effluent in balancing storage and release it between 22:00 and 05:00. The Discharger shall comply within two hours of notice.
+
+4. Limits on quality
+
+4.1 The Effluent shall at all times comply with the limits in Schedule 1. In summary these are: pH between 6.0 and 10.0; temperature not above 40 degrees Celsius; Strength not above 3,000 milligrams per litre as a daily composite; suspended solids not above 800 milligrams per litre; fats, oils and grease not above 100 milligrams per litre; and total sulphite not above 10 milligrams per litre.
+4.2 The Discharger shall not discharge any Prohibited Substance, whether or not the limits in clause 4.1 are met.
+4.3 The Discharger shall not dilute the Effluent with water for the purpose of meeting any limit.
+4.4 The Discharger shall install and maintain a screen with openings not larger than 6 millimetres and a fat trap sized in accordance with Schedule 4 before the connection point.
+
+5. Monitoring and sampling
+
+5.1 The Discharger shall install, at its own cost, a flow meter and a sampling chamber at or near Manhole M-14 by 1 April 2027. Until then, the Authority will estimate the Daily Volume from the Discharger's metered water supply, less an allowance of 8 percent for water leaving the premises as product.
+5.2 The Authority may take samples at any time without notice. A sample taken by the Authority is conclusive evidence of the quality of the Effluent unless the Discharger gives written notice of challenge within five Working Days and pays for an independent analysis of a retained split sample.
+5.3 The Discharger shall carry out its own composite sampling at least once every two weeks and shall send the results to the Authority within seven days of receiving them from the laboratory.
+5.4 The Discharger shall keep records of production, cleaning chemicals used, and flow readings for six years and make them available on request.
+
+6. Notification of incidents
+
+6.1 The Discharger shall tell the Authority by telephone without delay, and in any event within one hour of becoming aware, of any spill, leak or accident that has caused or is likely to cause a breach of this Agreement or the discharge of a Prohibited Substance.
+6.2 A written report shall follow within three Working Days, setting out the cause, the quantity and nature of the substance, the actions taken, and measures to prevent a recurrence.
+6.3 Failure to report an incident under this clause is a material breach, even if no harm results.
+
+7. Change of process
+
+7.1 The Discharger shall not change its process, raw materials or cleaning chemicals in a way that is likely to alter the volume or quality of the Effluent materially without giving the Authority thirty days' written notice.
+7.2 The Authority may, within twenty Working Days of notice under clause 7.1, require a revised assessment, the cost of which shall be borne by the Discharger, and may vary the limits in Schedule 1 to reflect the change.
+
+8. Charges
+
+8.1 The Discharger shall pay the Authority a charge for each quarter calculated by the formula in Schedule 5, which reflects the volume received and the Strength of the Effluent as measured under clause 5.
+8.2 The standard unit rates at the Commencement Date are: 1.12 pounds per cubic metre for volume; 0.38 pounds per cubic metre for sewer conveyance; and 0.0161 pounds per cubic metre for each 100 milligrams per litre of Strength above 400 milligrams per litre.
+8.3 Rates may be revised each 1 April by the Authority, up to a cap equal to the increase in the national consumer price index over the previous year plus 3 percentage points. Increases above the cap require the Discharger's consent.
+8.4 A surcharge of 25 percent applies to the volume charge for any day on which the Daily Volume exceeds the limit in clause 3.1 with the Authority's agreement, and a surcharge of 100 percent applies to any day on which it exceeds that limit without agreement.
+8.5 Invoices are payable within thirty days. Interest on late payments accrues at 4 percent a year above the reference rate published by the Authority.
+8.6 The Discharger shall pay the Authority's reasonable costs of sampling and analysis, including the costs of any analysis showing a breach, and a fixed administration fee of 450 pounds for each sample showing a breach of Schedule 1.
+
+9. Breach and enforcement
+
+9.1 If the Effluent breaches Schedule 1 or the Discharger breaches clause 4.2, 4.3 or 6, the Authority may by written notice require remedy within a time that is reasonable in the circumstances, and where there is an immediate risk to the Works, the sewer or public health, the Authority may suspend the discharge without notice.
+9.2 The Authority may recover from the Discharger the costs it reasonably incurs in dealing with any damage to the sewer or the Works, or in treating Effluent that exceeds limits, including any fine imposed on the Authority by a regulator as a result of the Discharger's breach.
+9.3 Three breaches of Schedule 1 in any twelve-month period entitle the Authority to terminate this Agreement on fourteen days' notice.
+9.4 Nothing in this clause limits the Authority's statutory powers.
+
+10. Liability and insurance
+
+10.1 The Discharger is liable for loss or damage caused to the Authority, its staff or its property by Effluent not complying with this Agreement, without limit.
+10.2 The Authority's liability to the Discharger for any failure to receive Effluent, including by reason of a blockage, flood or breakdown of the Works, is limited to a refund of the volume charge for the days affected. The Authority is not liable for lost production or lost profit.
+10.3 The Discharger shall maintain pollution liability insurance of not less than 2 million pounds for each claim and shall produce the certificate on request.
+
+11. Term, renewal and termination
+
+11.1 This Agreement runs for three years from the Commencement Date and then renews for successive one-year periods unless either party gives six months' written notice before the end of the term.
+11.2 Either party may terminate this Agreement on ninety days' written notice if a material change in law or in the licence under which the Works is operated makes it impracticable to continue.
+11.3 On termination the Discharger shall cap or seal the connection at its own cost within thirty days, unless the Authority agrees otherwise.
+
+12. Confidentiality and data
+
+12.1 Each party shall keep confidential the information the other supplies under this Agreement, except where disclosure is required by law, by a regulator, or in proceedings under this Agreement.
+12.2 The Authority may publish aggregated data on trade effluent in its area, provided the Discharger is not named.
+
+13. General
+
+13.1 This Agreement is the entire agreement between the parties about its subject matter.
+13.2 Notices must be in writing and sent to the addresses in the Particulars, and are treated as received two Working Days after posting or on the next Working Day after an email sent before 17:00.
+13.3 This Agreement is governed by the law of England and Wales. Disputes about the quality of Effluent shall be referred to an independent expert who is a Fellow of the relevant professional body, whose determination is final on matters of fact. Other disputes are for the courts.
+
+14. Access and inspection
+
+14.1 Authorised officers of the Authority may enter the Discharger's premises at any reasonable time, and at any time in an emergency, to inspect pipework, take samples, read meters and check the screen and fat trap, on production of identification.
+14.2 The Discharger shall provide a safe means of access to Manhole M-14 and the sampling chamber and shall keep both clear of obstruction. If the Authority cannot sample because access is blocked, the Authority may treat the next result obtained as representative of the intervening period.
+14.3 The Authority shall give the Discharger a copy of any inspection report within ten Working Days.
+
+15. Events beyond a party's control
+
+15.1 Neither party is in breach of this Agreement to the extent that it is prevented from performing by flood, fire, strike (other than by its own staff), failure of public utilities or an order of a public authority, provided that it tells the other party promptly and does what it reasonably can to limit the effect.
+15.2 This clause does not excuse a failure to pay money, and does not excuse the discharge of a Prohibited Substance.
+
+16. Assignment of the Authority's rights
+
+16.1 The Authority may transfer this Agreement to any successor body that takes over operation of the Works, on notice to the Discharger. The Discharger's rights under this Agreement are unaffected.
+
+Schedule 1 (limits, full table)
+
+Parameter | Limit | Type of limit
+pH | 6.0 to 10.0 | any single sample
+Temperature | 40 degrees Celsius | any single sample
+Chemical Oxygen Demand | 3,000 mg/l | daily composite
+Suspended solids | 800 mg/l | daily composite
+Fats, oils and grease | 100 mg/l | daily composite
+Total sulphite | 10 mg/l | any single sample
+Ammoniacal nitrogen | 200 mg/l | daily composite
+Total phosphorus | 40 mg/l | daily composite
+
+Schedule 2 (sampling method, summary)
+
+A composite sample is made from at least twelve equal portions taken at regular intervals over the twenty-four hours beginning at 06:00, or from a flow-proportional sampler where one is installed. Samples are stored at not more than 4 degrees Celsius and delivered to an accredited laboratory within twenty-four hours. Each sample is divided into two parts; one is analysed and one is retained, sealed, for fourteen days. Analysis for Chemical Oxygen Demand uses the unsettled sample, shaken before analysis.
+
+Schedule 3 (extract): Prohibited Substances include petrol and other flammable solvents; pesticides and herbicides; whole fruit stones and shell in quantities likely to block pipes; wipes and plastic packaging; hot water above 40 degrees Celsius; strong acid or alkali outside the pH range; and chlorine bleach above 50 milligrams per litre in the Effluent.
+
+Schedule 4 (screen and fat trap)
+
+The screen must be cleared at least daily and its contents disposed of as solid waste, not rinsed into the drain. The fat trap shall have a retention volume of not less than 6 cubic metres and shall be emptied by a licensed carrier at least every four weeks; waste transfer notes shall be kept for six years. The Authority may require a larger trap if the fats, oils and grease results exceed 80 milligrams per litre on two occasions in a quarter.
+
+Schedule 5 (charging formula, summary)
+
+The quarterly charge is the sum of: the volume charge (the metered or estimated volume received, in cubic metres, multiplied by the volume rate); the conveyance charge (the same volume multiplied by the conveyance rate); and the strength charge. The strength charge is the volume multiplied by the strength rate multiplied by the amount by which the average Strength for the quarter, taken from the results of samples under clause 5, exceeds 400 milligrams per litre, divided by 100. Where fewer than three valid results exist for the quarter, the Authority may use the highest result in the preceding twelve months.
+
+Particulars: Authority contact, Trade Effluent Officer, Gwyneth Darrowby, telephone 01632 960 114, email effluent@example.org. Discharger contact, Operations Director, Callum Ashgrove. Out-of-hours emergency line for the Authority: 01632 960 999.

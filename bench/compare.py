@@ -205,7 +205,10 @@ def tps_launch(block_dirs: Sequence[str | Path], *, label: str, role: str,
     elif not all(b["sanity_ok"] for b in blocks):
         status = "insane_text"
     elif not usable:
-        status = "compile_stalls" if blocks else "no_blocks"
+        # no summary at all: the harness never measured (it says why in the
+        # run's log), which is not a block the engine stalled in
+        status = ("no_blocks" if not blocks else "compile_stalls"
+                  if any(b["summary_found"] for b in blocks) else "no_measurement")
     elif any(b["headline"] <= 0 for b in usable):
         status = "no_goodput"
     else:
@@ -224,7 +227,8 @@ def tps_launch(block_dirs: Sequence[str | Path], *, label: str, role: str,
             "by_isl": _mean_sizes([b["by_isl"] for b in usable]),
             "n_invalid": n_invalid, "invalid_reasons": reasons,
             "n_blocks": len(blocks), "n_usable": len(usable),
-            "n_stalled": sum(1 for b in blocks if b["stalled"])}
+            "n_stalled": sum(1 for b in blocks if b["stalled"]),
+            "n_unmeasured": sum(1 for b in blocks if not b["summary_found"])}
 
 
 def _mean_of(rows: Sequence[dict], key: str) -> float | None:
@@ -252,6 +256,10 @@ def _launch_problem(launch: dict) -> tuple[str, list[str]] | None:
     if st == "insane_text":
         return "INVALID", [f"text outside the sanity band in {launch['label']} "
                            "(distinct-4-gram / compression)"]
+    if st == "no_measurement":
+        return "INVALID", [f"no_measurement in {launch['label']}: "
+                           f"{launch['n_unmeasured']} of {launch['n_blocks']} sweeps "
+                           "wrote no summary; the harness's own message is in run.log"]
     if st in ("compile_stalls", "no_blocks"):
         return "INVALID", [f"{st} in {launch['label']}: {launch['n_stalled']} of "
                            f"{launch['n_blocks']} blocks stalled; raise the warm "
@@ -283,12 +291,22 @@ def tps_screen(launch: dict, board: dict, tol: float) -> dict:
                 f"{math.exp(float(sentinel)):.1f}"]}
 
 
+def tps_calibration_problems(launches: Sequence[dict]) -> list[str]:
+    """Why these launches cannot make a calibration: the reason of every one
+    that is not a measurement, or []. The ruler does not choose which launches
+    of the incumbent count, so one such launch refuses them all. run.sh asks
+    after each launch (tps-calibrate --so-far): the launches after a bad one
+    could change nothing and are not run."""
+    return [why for l in launches if l["value"] is None
+            for why in (_launch_problem(l) or ("", [f"{l['label']}: {l['status']}"]))[1]]
+
+
 def tps_calibration(launches: Sequence[dict], stamps: dict | None) -> dict:
     """Step 0 from >= 2 launches of one configuration."""
     import stats
-    bad = [l["label"] for l in launches if l["value"] is None]
+    bad = tps_calibration_problems(launches)
     if bad:
-        raise ValueError(f"calibration launches without a value: {bad}")
+        raise ValueError("; ".join(bad))
     cal = stats.calibrate([l["block_values"] for l in launches])
     raw = cal["sigma_L"]
     if raw < SIGMA_L_FLOOR:
@@ -601,6 +619,12 @@ def cmd_tps_preflight(args: argparse.Namespace) -> int:
 
 
 def cmd_tps_calibrate(args: argparse.Namespace) -> int:
+    if args.so_far:
+        why = tps_calibration_problems(_launches(args.launch))
+        res = {"ok": not why, "verdict": "INVALID" if why else None, "reasons": why}
+        atomic_write_json(args.out, res)
+        print(json.dumps(res))
+        return 0 if res["ok"] else 1
     try:
         cal = tps_calibration(_launches(args.launch), _load(args.stamps))
     except ValueError as exc:
@@ -720,6 +744,8 @@ def build_parser() -> argparse.ArgumentParser:
     t = sub.add_parser("tps-calibrate", help="step 0: sigma_L, sigma_B, MDE")
     t.add_argument("--launch", action="append", default=[])
     t.add_argument("--stamps", default=None)
+    t.add_argument("--so-far", action="store_true",
+                   help="only say whether these launches can still make a calibration")
     t.add_argument("--out", required=True)
     t.set_defaults(func=cmd_tps_calibrate)
 

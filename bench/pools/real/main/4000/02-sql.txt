@@ -1,0 +1,250 @@
+I inherited this timetable and ticketing database at Calder Vale Rail when our previous data engineer left, and the passenger-facing reports have been getting slower every month. Could you review the schema design properly, tell me which indexes are missing or wasted, and rewrite the six queries at the bottom so they run better? Please explain each change so I can defend it to the team.
+
+We use PostgreSQL 15. The tables below hold about 40 stations, 310 daily train services, 1.8 million tickets a year and roughly 9 million service-stop records a year. The schema and queries are exactly as they are in production.
+
+```sql
+-- Calder Vale Rail operations database
+
+CREATE TABLE station (
+    station_id      integer PRIMARY KEY,
+    code            varchar(4) NOT NULL,
+    name            varchar(80) NOT NULL,
+    zone            integer NOT NULL,
+    step_free       boolean NOT NULL DEFAULT false,
+    opened_on       date
+);
+
+CREATE TABLE route (
+    route_id        integer PRIMARY KEY,
+    name            varchar(60) NOT NULL,
+    origin_id       integer NOT NULL REFERENCES station(station_id),
+    destination_id  integer NOT NULL REFERENCES station(station_id),
+    length_km       numeric(6,2) NOT NULL
+);
+
+CREATE TABLE route_stop (
+    route_id        integer NOT NULL REFERENCES route(route_id),
+    stop_number     integer NOT NULL,
+    station_id      integer NOT NULL REFERENCES station(station_id),
+    minutes_from_origin integer NOT NULL,
+    PRIMARY KEY (route_id, stop_number)
+);
+
+CREATE TABLE train_unit (
+    unit_id         integer PRIMARY KEY,
+    class_code      varchar(10) NOT NULL,
+    seats           integer NOT NULL,
+    in_service_from date NOT NULL,
+    retired_on      date
+);
+
+CREATE TABLE service (
+    service_id      bigint PRIMARY KEY,
+    route_id        integer NOT NULL REFERENCES route(route_id),
+    unit_id         integer REFERENCES train_unit(unit_id),
+    service_date    date NOT NULL,
+    scheduled_departure timestamp NOT NULL,
+    status          varchar(20) NOT NULL DEFAULT 'scheduled'
+);
+
+CREATE TABLE service_stop (
+    service_stop_id bigint PRIMARY KEY,
+    service_id      bigint NOT NULL REFERENCES service(service_id),
+    station_id      integer NOT NULL REFERENCES station(station_id),
+    stop_number     integer NOT NULL,
+    scheduled_arrival   timestamp NOT NULL,
+    actual_arrival      timestamp,
+    scheduled_departure timestamp NOT NULL,
+    actual_departure    timestamp,
+    platform        varchar(4)
+);
+
+CREATE TABLE passenger (
+    passenger_id    bigint PRIMARY KEY,
+    email           varchar(120) NOT NULL,
+    full_name       varchar(100) NOT NULL,
+    railcard        varchar(20),
+    created_at      timestamp NOT NULL DEFAULT now()
+);
+
+CREATE TABLE ticket (
+    ticket_id       bigint PRIMARY KEY,
+    passenger_id    bigint REFERENCES passenger(passenger_id),
+    service_id      bigint NOT NULL REFERENCES service(service_id),
+    from_station_id integer NOT NULL REFERENCES station(station_id),
+    to_station_id   integer NOT NULL REFERENCES station(station_id),
+    fare_pence      integer NOT NULL,
+    ticket_type     varchar(20) NOT NULL,
+    purchased_at    timestamp NOT NULL,
+    refunded_at     timestamp,
+    seat_number     varchar(6)
+);
+
+CREATE TABLE delay_claim (
+    claim_id        bigint PRIMARY KEY,
+    ticket_id       bigint NOT NULL REFERENCES ticket(ticket_id),
+    submitted_at    timestamp NOT NULL,
+    delay_minutes   integer NOT NULL,
+    status          varchar(20) NOT NULL,
+    paid_pence      integer
+);
+
+CREATE TABLE crew_member (
+    crew_id         integer PRIMARY KEY,
+    full_name       varchar(100) NOT NULL,
+    role            varchar(20) NOT NULL,
+    depot_station_id integer REFERENCES station(station_id),
+    hired_on        date NOT NULL
+);
+
+CREATE TABLE crew_assignment (
+    assignment_id   bigint PRIMARY KEY,
+    service_id      bigint NOT NULL REFERENCES service(service_id),
+    crew_id         integer NOT NULL REFERENCES crew_member(crew_id),
+    duty            varchar(20) NOT NULL,
+    signed_on       timestamp,
+    signed_off      timestamp
+);
+
+CREATE TABLE incident (
+    incident_id     bigint PRIMARY KEY,
+    service_id      bigint REFERENCES service(service_id),
+    station_id      integer REFERENCES station(station_id),
+    category        varchar(30) NOT NULL,
+    description     text,
+    reported_at     timestamp NOT NULL,
+    resolved_at     timestamp,
+    delay_minutes_caused integer NOT NULL DEFAULT 0
+);
+
+CREATE VIEW v_ticket_detail AS
+SELECT t.ticket_id,
+       t.purchased_at,
+       t.fare_pence,
+       t.ticket_type,
+       p.full_name,
+       p.email,
+       fs.name AS from_station,
+       ts.name AS to_station,
+       r.name  AS route_name,
+       s.service_date
+FROM ticket t
+LEFT JOIN passenger p ON p.passenger_id = t.passenger_id
+JOIN station fs ON fs.station_id = t.from_station_id
+JOIN station ts ON ts.station_id = t.to_station_id
+JOIN service s ON s.service_id = t.service_id
+JOIN route r ON r.route_id = s.route_id;
+
+-- Indexes that exist today
+CREATE INDEX idx_service_date ON service (service_date);
+CREATE INDEX idx_service_route ON service (route_id);
+CREATE INDEX idx_service_status ON service (status);
+CREATE INDEX idx_stop_service ON service_stop (service_id);
+CREATE INDEX idx_stop_station ON service_stop (station_id);
+CREATE INDEX idx_stop_station_arrival ON service_stop (station_id, scheduled_arrival);
+CREATE INDEX idx_ticket_passenger ON ticket (passenger_id);
+CREATE INDEX idx_ticket_service ON ticket (service_id);
+CREATE INDEX idx_ticket_type ON ticket (ticket_type);
+CREATE INDEX idx_ticket_purchased ON ticket (purchased_at);
+CREATE INDEX idx_passenger_email ON passenger (lower(email));
+CREATE INDEX idx_claim_ticket ON delay_claim (ticket_id);
+CREATE INDEX idx_assign_service ON crew_assignment (service_id);
+CREATE INDEX idx_assign_crew ON crew_assignment (crew_id);
+CREATE INDEX idx_incident_service ON incident (service_id);
+CREATE INDEX idx_incident_category ON incident (category);
+```
+
+Some facts about the data that may matter. The `status` column in `service` has five values, and 97 percent of rows are 'completed'. `ticket_type` has six values: 'single', 'return', 'season', 'advance', 'off_peak' and 'group'. About 62 percent of tickets have a null `passenger_id` because they are sold at ticket machines without an account. Tickets are never deleted, and `refunded_at` is set for about 3 percent of them. A delay claim exists for roughly 4 percent of tickets. About 1,100 incidents are logged a year, in twelve categories, and about 40 percent of them have no service attached. Crew assignments run at around four per service. We keep all history since 2019, and the table `service_stop` grows by about 25,000 rows each day.
+
+These are the six queries behind our reports. Each currently takes between 8 seconds and 3 minutes.
+
+```sql
+-- Q1: Daily punctuality by route for the last 30 days (dashboard, run every few minutes)
+SELECT r.name AS route_name,
+       s.service_date,
+       COUNT(*) AS stops,
+       SUM(CASE WHEN ss.actual_arrival IS NOT NULL
+                 AND ss.actual_arrival <= ss.scheduled_arrival + interval '5 minutes'
+                THEN 1 ELSE 0 END) AS on_time_stops,
+       ROUND(100.0 * SUM(CASE WHEN ss.actual_arrival IS NOT NULL
+                 AND ss.actual_arrival <= ss.scheduled_arrival + interval '5 minutes'
+                THEN 1 ELSE 0 END) / COUNT(*), 1) AS on_time_pct
+FROM service s
+JOIN route r ON r.route_id = s.route_id
+JOIN service_stop ss ON ss.service_id = s.service_id
+WHERE s.service_date >= current_date - 30
+  AND s.status = 'completed'
+GROUP BY r.name, s.service_date
+ORDER BY s.service_date DESC, r.name;
+
+-- Q2: Revenue per route per month for one year (finance, run monthly)
+SELECT to_char(t.purchased_at, 'YYYY-MM') AS month,
+       r.name AS route_name,
+       SUM(t.fare_pence) / 100.0 AS revenue,
+       COUNT(*) AS tickets
+FROM ticket t
+JOIN service s ON s.service_id = t.service_id
+JOIN route r ON r.route_id = s.route_id
+WHERE EXTRACT(year FROM t.purchased_at) = 2025
+  AND t.refunded_at IS NULL
+GROUP BY to_char(t.purchased_at, 'YYYY-MM'), r.name
+ORDER BY month, route_name;
+
+-- Q3: Passengers who bought more than 20 tickets this year, with their most recent ticket (marketing)
+SELECT p.passenger_id,
+       p.full_name,
+       p.email,
+       (SELECT COUNT(*) FROM ticket t WHERE t.passenger_id = p.passenger_id
+          AND t.purchased_at >= date_trunc('year', now())) AS tickets_this_year,
+       (SELECT MAX(t2.purchased_at) FROM ticket t2 WHERE t2.passenger_id = p.passenger_id) AS last_purchase
+FROM passenger p
+WHERE (SELECT COUNT(*) FROM ticket t WHERE t.passenger_id = p.passenger_id
+          AND t.purchased_at >= date_trunc('year', now())) > 20
+ORDER BY tickets_this_year DESC;
+
+-- Q4: Worst ten stations by average arrival delay in the last quarter, where delay is above zero (control room)
+SELECT st.name,
+       AVG(EXTRACT(epoch FROM (ss.actual_arrival - ss.scheduled_arrival)) / 60.0) AS avg_delay_minutes,
+       COUNT(*) AS late_arrivals
+FROM service_stop ss
+JOIN station st ON st.station_id = ss.station_id
+WHERE ss.scheduled_arrival >= date_trunc('quarter', now()) - interval '3 months'
+  AND ss.scheduled_arrival < date_trunc('quarter', now())
+  AND ss.actual_arrival > ss.scheduled_arrival
+GROUP BY st.name
+ORDER BY avg_delay_minutes DESC
+LIMIT 10;
+
+-- Q5: Delay claims that were rejected but where the train really was more than 30 minutes late at the destination (customer services audit)
+SELECT c.claim_id, c.submitted_at, t.ticket_id, p.email
+FROM delay_claim c
+JOIN ticket t ON t.ticket_id = c.ticket_id
+LEFT JOIN passenger p ON p.passenger_id = t.passenger_id
+WHERE c.status = 'rejected'
+  AND t.ticket_id IN (
+        SELECT t2.ticket_id
+        FROM ticket t2
+        JOIN service_stop ss ON ss.service_id = t2.service_id
+                            AND ss.station_id = t2.to_station_id
+        WHERE ss.actual_arrival > ss.scheduled_arrival + interval '30 minutes')
+ORDER BY c.submitted_at DESC;
+
+-- Q6: Incidents by category and station for the last 12 months, with the crew who were on the affected services (operations review, run weekly)
+SELECT i.category,
+       st.name AS station_name,
+       COUNT(DISTINCT i.incident_id) AS incidents,
+       SUM(i.delay_minutes_caused) AS total_delay_minutes,
+       STRING_AGG(DISTINCT cm.full_name, ', ') AS crew_involved
+FROM incident i
+LEFT JOIN station st ON st.station_id = i.station_id
+LEFT JOIN service s ON s.service_id = i.service_id
+LEFT JOIN crew_assignment ca ON ca.service_id = s.service_id
+LEFT JOIN crew_member cm ON cm.crew_id = ca.crew_id
+WHERE i.reported_at > now() - interval '1 year'
+  AND lower(i.category) LIKE '%signal%'
+   OR i.category = 'trespass'
+GROUP BY i.category, st.name
+ORDER BY total_delay_minutes DESC;
+```
+
+Two further constraints. We cannot take the database offline for more than a short maintenance window on Sunday nights, so please tell me which of your suggestions can be done online and which cannot. And our reporting server has far less memory than production, so I would like to know if any of the changes you suggest will make that situation better or worse.
