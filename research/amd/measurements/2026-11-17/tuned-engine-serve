@@ -1,0 +1,25 @@
+#!/bin/bash
+# serve <port>: AMD's tuned engine (proaditya/ATOM qwen38-megakernels, image ij-atom-tuned:dev973), the flags of its
+# blog_benchmark/build_and_repro.sh megakernel arm, in a container ij-engine on <port>+1, and shim.py on <port>.
+# ARM=regular serves that script's regular arm instead (MXFP4 online quantization, no megakernel).
+set -euo pipefail
+PORT="$1"
+INNER=$((PORT + 1))
+SHIM=/opt/ij-amd/amd/examples/atom-engine/shim.py
+MONO=1; EXTRA=()
+if [ "${ARM:-megakernel}" = regular ]; then
+  MONO=0; EXTRA=(--online_quant_config '{"global_quant_config": "mxfp4", "exclude_layer": ["*conv1d*"]}')
+fi
+docker rm -f ij-engine > /dev/null 2>&1 || true
+cleanup() { docker rm -f ij-engine > /dev/null 2>&1 || true; }
+trap cleanup EXIT TERM INT
+docker run --rm --name ij-engine --network host --ipc host --shm-size 16g \
+  --device /dev/kfd --device /dev/dri --group-add video --security-opt seccomp=unconfined \
+  -v /srv/models:/models:ro \
+  -e ATOM_MONO_ENABLE=$MONO -e GPU_MAX_HW_QUEUES=1 -e ATOM_DFLASH2_AOT=/opt/qwen38/drafter-objects \
+  ij-atom-tuned:dev973 env -u TEMP python3 -m atom.entrypoints.openai_server \
+  --model /models/Qwen3.8-27B --served-model-name qwen3.8-27b --kv_cache_dtype bf16 -tp 1 --max-model-len 40000 --max-num-seqs 4 \
+  --server-port $INNER --method dflash --draft-model /models/Qwen3.8-27B-DFlash2 --num-speculative-tokens 7 \
+  "${EXTRA[@]}" &
+python3 "$SHIM" "$PORT" "http://127.0.0.1:$INNER" &
+wait -n

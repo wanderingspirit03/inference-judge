@@ -1,0 +1,462 @@
+#!/usr/bin/env python3
+"""./submit [--note TEXT]: hand the current commit to the judge.
+
+The judge takes the commit at HEAD of the git repository you are in (changes
+not committed are not part of it), copies it to its own directory, waits for
+the GPU and keeps it alone for the whole run:
+  1. it waits until no process outside the run has the GPU open; on the GPU
+     machine it then checks that cand's firewall rule is in place (only
+     loopback, no name lookups; controller/box/ij-fw) and stops with an
+     error, before any judged prompt is sent, when it is not;
+  2. if the tree has a Dockerfile, the judge builds its image (no network;
+     $IJ_ENGINE_IMAGE names it); it runs `build` if there is one, starts
+     `serve <port>` (on the GPU machine as the account `cand`, which cannot
+     read the judge's files; containers only through the Docker launcher);
+  3. warm-up: prompts of the same lengths as the judged ones, cut from
+     warm-up rows that are never judged, each sent twice;
+  4. the engine answers each judged prompt once, one request at a time, all
+     in the same request shape (lib/engine.py), each timed on the judge's
+     clock.  The judged prompts are drawn fresh for this run from the
+     judge's pool and never sent to an engine again;
+  5. the engine is stopped and every process of its account killed; then
+     the reference walks along each answer: the same measure as ./check;
+  6. if that passes: speed = the sum of the answer tokens over the sum of
+     the whole-request seconds of those same requests (prompt time
+     included); every token counted was checked in step 5;
+  7. it records the result; ./score lists it.
+
+Exit code 0 when the submission passed, 1 when it failed, 2 when the judge
+could not run it (nothing about the engine is recorded then except why).
+
+  ./submit --reference   (operator) measure the reference engine's speed the
+                         same way, on prompts the judge draws, for ./score
+  ./submit --tokenize IN OUT   (operator) the reference's token ids for the
+                         rows of IN (prompt or messages), written to OUT
+
+The judge on the controller (two-machine design) runs it on the GPU machine
+with --judge-src DIR --hidden FILE --warm FILE --out FILE --commit SHA: the
+source, the drawn prompts (with prompt_token_ids) and the warm-up rows are
+given, the result goes to FILE, no ledger is written.  With --ref-hidden FILE
+(a second draw) the reference, once up for the walk, is also timed on those
+prompts the same way (result key reference_speed): the machine's reference
+speed without a second start of the reference.
+
+With --tasks FILE (rows with token ids, answer and kind), measure B of the
+quality bar: after everything timed, the engine answers each task once (not
+timed, not in the speed); after the walk the reference answers the same
+tasks; both are graded by rule (lib/quality.py).  Measure A comes from the
+walk.  While config quality.bar is not set, the result says "quality bar not
+set" and PASS or FAIL is the agreement limit's, as before.
+
+Every prompt needs token ids, given or cached, so that the reference starts
+once per run; ./submit --tokenize makes them.  After the judged answers,
+submit.speed_repeats passes of extra requests give the speed in parts (as in
+./check); they never change the score.
+"""
+import json
+import os
+import subprocess
+import sys
+import tarfile
+import io
+import time
+from pathlib import Path
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "lib"))
+import answers  # noqa: E402
+import common  # noqa: E402
+import config as C  # noqa: E402
+import engine as E  # noqa: E402
+import gpuqueue as Q  # noqa: E402
+import ledger  # noqa: E402
+import ref as R  # noqa: E402
+import tokmap  # noqa: E402
+
+
+def git(repo: Path, *a) -> str:
+    return subprocess.run(["git", "-C", str(repo), *a], capture_output=True, text=True, check=True).stdout
+
+
+def vram_used_gib() -> float | None:
+    for card in sorted(Path("/sys/class/drm").glob("card*/device")):
+        try:
+            return int((card / "mem_info_vram_used").read_text()) / 2**30
+        except (OSError, ValueError):
+            continue
+    return None
+
+
+def wait_alone(cfg, h, log) -> str | None:
+    """None when nothing outside this run has the GPU open and VRAM is
+    nearly empty; else why not, after config submit.alone_wait_s."""
+    limit = cfg["submit"]["alone_wait_s"]
+    t0 = time.monotonic()
+    said = False
+    while True:
+        others = [u for u in Q.kfd_users() if u["token"] != h.token]
+        v = vram_used_gib()
+        if not others and (v is None or v < 4.0):
+            return None
+        if not said:
+            said = True
+            log(f"waiting for the GPU to be alone: {len(others)} process(es) outside this run have /dev/kfd open, "
+                f"VRAM in use {'?' if v is None else f'{v:.1f}'} GiB")
+        if time.monotonic() - t0 > limit:
+            what = "; ".join(f"pid {u['pid']} {u['cmd'][:80]}" for u in others) or "no process"
+            return f"the GPU was not free after {limit} s: {what} has it open, VRAM in use {'?' if v is None else f'{v:.1f}'} GiB"
+        time.sleep(2)
+
+
+def snapshot(repo: Path, dest: Path) -> None:
+    data = subprocess.run(["git", "-C", str(repo), "archive", "--format=tar", "HEAD"],
+                          capture_output=True, check=True).stdout
+    dest.mkdir(parents=True)
+    with tarfile.open(fileobj=io.BytesIO(data)) as t:
+        t.extractall(dest, filter="tar")
+
+
+class _Ref:
+    """The reference in the judge's request shape, for its own speed."""
+
+    def __init__(self, cfg):
+        self.cfg = cfg
+
+    def ask(self, ids, max_tokens):
+        d = R.generate(self.cfg, ids, max_tokens, self.cfg["check"]["engine_top"])
+        toks = d["tokens"] + ([d["stop"]["id"]] if d.get("stop") else [])
+        return {"tokens": toks, "lps": [], "finish": d["finish_reason"], "seconds": d["seconds"],
+                "prompt_tokens": len(ids)}
+
+
+def time_reference(cfg, s, prompts, warm, tm) -> dict:
+    """The reference's speed the way an engine is timed: warm-up from the
+    warm-up rows, then each prompt once.  Starts the reference in session s
+    unless it is up already (after a walk).  Raises RefError."""
+    items = answers.items_of(s, prompts, cfg["submit"]["max_tokens"])
+    s._ensure()
+    r = _Ref(cfg)
+    answers.warm_up(r, items, warm, common.log)
+    outs = answers.engine_answers(cfg, r, items, common.log)
+    sp = answers.speed(items, outs, tm.special_ids)
+    if sp is None:
+        raise R.RefError("a request failed: " + "; ".join(o["error"] for o in outs if "error" in o)[:500])
+    sp.update({"engine": R.identity(cfg), "measured": time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime())})
+    common.log(f"reference: {sp['tokens_per_s']} tokens/s")
+    return sp
+
+
+def run_reference(cfg, state, hidden: str | None, warm_file: str | None, out: str | None) -> int:
+    prompts = answers.load_prompts(Path(hidden or cfg["submit"]["hidden_prompts"]))
+    warm = [w["prompt_token_ids"] for w in answers.load_prompts(Path(warm_file))] if warm_file else []
+    tm = tokmap.load(cfg["model"]["dir"])
+    with common.hold(state, "submit", ["./submit", "--reference"]) as h:
+        s = R.Session(cfg, lambda: None, common.log, fresh=True)
+        s.hold = h
+        try:
+            sp = time_reference(cfg, s, prompts, warm, tm)
+        except R.RefError as e:
+            print(f"reference: failed: {e}")
+            return 2
+        finally:
+            s.close()
+    (state / "reference-speed.json").write_text(json.dumps(sp, indent=1))
+    if out:
+        Path(out).write_text(json.dumps(sp, indent=1))
+    print(f"reference: {sp['tokens_per_s']} tokens/s ({sp['engine']})")
+    return 0
+
+
+TASK_KEYS = ("answer", "kind", "lang", "max_tokens")
+TOKENIZE_THREADS = 16          # --tokenize: requests to the reference at a time
+
+
+def run_tokenize(cfg, state, src: str, dst: str) -> int:
+    """The judge's pool, prepared: each row's prompt as the reference's token
+    ids.  Keeps id, session and bucket (isl), and a task's answer, kind, lang
+    and max_tokens; drops the text.  TOKENIZE_THREADS requests at a time (one
+    at a time took about 20 minutes per 10,000 tasks on 2026-11-18); the rows
+    keep their order."""
+    from concurrent.futures import ThreadPoolExecutor
+    rows = answers.load_prompts(Path(src))
+    with common.hold(state, "submit", ["./submit", "--tokenize"]) as h:
+        s = R.Session(cfg, lambda: None, common.log)
+        s.hold = h
+        try:
+            if not all(s.ids_cached(r) for r in rows):
+                s._ensure()                  # once, before the threads (starting is not thread-safe)
+            with open(dst, "w") as f, ThreadPoolExecutor(TOKENIZE_THREADS) as pool:
+                for r, ids in zip(rows, pool.map(s.ids_for, rows)):
+                    f.write(json.dumps({"id": r.get("id"), "session": r.get("session") or r.get("id"),
+                                        "bucket": str(r.get("bucket") or r.get("isl") or len(ids)),
+                                        "prompt_token_ids": ids,
+                                        # a task row (measure B) keeps what grades it
+                                        **{k: r[k] for k in TASK_KEYS if k in r}}) + "\n")
+        finally:
+            s.close()
+    print(f"tokenized {len(rows)} rows into {dst}")
+    return 0
+
+
+def judged_run(cfg, h, s, src, sub, user, prompts, warm, lim, tm, times, tasks=None, extra=None):
+    """Steps 2-6 of the help.  Returns (status, reasons, aggregate, speed).
+    extra gets "quality" (measures A and B and the verdict) and
+    "measured_speed" (the judge's formula whenever every judged request was
+    answered, passed or not; never ranked)."""
+    extra = {} if extra is None else extra
+    items = answers.items_of(s, prompts, cfg["submit"]["max_tokens"])   # ids given or cached (main checks): no reference
+    titems = answers.task_items(s, tasks or [], (cfg.get("quality") or {}).get("tasks", {}).get("max_tokens", 512))
+    etexts = None
+    times["judged_sent"] = 0
+    if s.started:                 # never, after main's check; the engine must not run beside the reference
+        s.close()
+    srv = E.Server(cfg, h, src, sub, common.log, user=user)
+    outs = None
+    bd = None
+    try:
+        im = E.image_build(cfg, h, src, sub, common.log, user=user)      # from the judge's copy, before cand runs
+        if im is not None:
+            times["image_s"] = round(im, 1)
+        run_dir = E.stage(user, src, common.log) if user else src
+        srv.run_dir = run_dir
+        b = E.build(cfg, h, src, sub, common.log, user=user, run_dir=run_dir)
+        if b is not None:
+            times["build_s"] = round(b, 1)
+        times["engine_ready_s"] = round(srv.start(), 1)
+        tw = time.monotonic()
+        times["warm_up_requests"] = answers.warm_up(srv, items, warm, common.log)
+        times["warm_up_s"] = round(time.monotonic() - tw, 1)
+        times["judged_sent"] = len(items)        # from here on the drawn prompts reach the engine
+        ta = time.monotonic()
+        outs = answers.engine_answers(cfg, srv, items, common.log)
+        times["answers_s"] = round(time.monotonic() - ta, 1)
+        reps = int(cfg["submit"].get("speed_repeats", 2))
+        if reps > 0 and all("error" not in o for o in outs):
+            # after the judged answers, which alone are the score: the speed in parts, for the agents
+            tb = time.monotonic()
+            try:
+                bd = answers.breakdown(srv, items, outs, tm.special_ids, reps, common.log)
+            except Exception as e:  # noqa: BLE001 - extra requests; they never change the result
+                bd = {"error": f"the speed requests failed: {e}"[:300]}
+            times["speed_parts_s"] = round(time.monotonic() - tb, 1)
+        if titems and all("error" not in o for o in outs):
+            # measure B: after everything timed; the tasks are never in the speed
+            tt = time.monotonic()
+            etexts = answers.engine_task_texts(cfg, srv, titems, tm, common.log)
+            times["tasks_engine_s"] = round(time.monotonic() - tt, 1)
+    except (E.EngineFailed, answers.compare.RefFailed) as e:
+        return "failed", [f"the engine could not be judged: {e}"[:1500]], None, None
+    except Exception as e:  # noqa: BLE001 - a warm-up request failed: the engine's fault
+        return "failed", [f"the engine failed in the warm-up: {e}"[:1500]], None, None
+    finally:
+        left = srv.stop()
+        port_open = srv.answers_on_port()
+        squat = R.is_up(cfg)
+    if left:
+        return "failed", [f"{len(left)} process(es) or container(s) of the engine account survived its stop: "
+                          + " ".join(map(str, left[:8]))], None, None
+    if port_open:
+        return "failed", [f"port {srv.port} still answers after the engine was stopped"], None, None
+    if squat:
+        return "failed", [f"the reference's address {cfg['ref']['url']} answers after the engine was stopped"], None, None
+    tc = time.monotonic()
+    stopped = []           # the walk ends once FAIL is decided; measure B's reference side is then not run
+    rows = answers.walk(cfg, s, items, outs, lim, common.log, stopped=stopped)
+    times["walk_s"] = round(time.monotonic() - tc, 1)
+    times["reference_ready_s"] = round(s.start_s, 1)
+    qb = None
+    if stopped:
+        qb = {"tasks": 0, "note": "the reference did not answer the tasks: the walk had already decided FAIL"}
+    elif etexts is not None:
+        tr = time.monotonic()
+        qb = answers.quality.measure_b([it["task"] for it in titems], etexts,
+                                       answers.reference_task_texts(s, titems, tm),
+                                       int((cfg.get("quality") or {}).get("tasks", {}).get("bootstrap_resamples", 2000)))
+        times["tasks_reference_s"] = round(time.monotonic() - tr, 1)
+    elif not titems:
+        qb = {"tasks": 0, "note": "no tasks were given to this run"}
+    else:
+        qb = {"tasks": 0, "note": "the tasks were not sent: a judged request failed"}
+    ok, reasons, agg, q = answers.decide(cfg, [r["item"] for r in rows], lim, qb)
+    if stopped:
+        ok, reasons = False, reasons + stopped
+        agg["walk_stopped"] = stopped[0]
+    extra["quality"] = q
+    extra["measured_speed"] = answers.speed(items, outs, tm.special_ids)
+    for t in answers.quality.lines(q):
+        common.log(t)
+    sp = answers.speed(items, outs, tm.special_ids) if ok else None
+    if sp and bd:
+        sp["parts"] = {k: bd[k] for k in ("whole_tps", "decode_tps", "prompt_s", "samples", "repeats", "formula")
+                       if k in bd} if "error" not in bd else bd
+        sp["parts_note"] = ("from extra requests after the judged ones (the prompts rotated); "
+                            "they do not change the score, which is tokens_per_s")
+        (sub / "speed-parts.json").write_text(json.dumps(bd, indent=1))
+    if sp:
+        common.log(f"speed: {sp['tokens']} tokens in {sp['seconds']:.2f} s = {sp['tokens_per_s']:.2f} tokens/s "
+                   f"(per request {sp['per_request_min']}-{sp['per_request_max']})")
+    (sub / "answers.json").write_text(json.dumps(
+        [{"id": r["id"], "agreement": r["agreement"], "item": r["item"].summary(), "partings": r["partings"],
+          "why": answers.why(r, lim.required())} for r in rows], indent=1))
+    return ("passed" if ok else "failed"), reasons, agg, sp
+
+
+def opts(argv) -> dict:
+    """--note TEXT, and the judge's flags (two-machine design: the judge on
+    the controller sends the source, the drawn prompts and the warm-up rows
+    and keeps the ledger itself): --judge-src DIR --hidden FILE --warm FILE
+    --out FILE --commit SHA."""
+    o, a = {}, list(argv)
+    while a:
+        k = a.pop(0)
+        if k in ("--note", "--judge-src", "--hidden", "--warm", "--out", "--commit", "--ref-hidden", "--tasks") and a:
+            o[k[2:].replace("-", "_")] = a.pop(0)
+        elif k == "--reference":
+            o["reference"] = True
+        elif k == "--tokenize" and len(a) >= 2:
+            o["tokenize"] = (a.pop(0), a.pop(0))
+        else:
+            raise SystemExit(f"./submit: unknown argument {k!r} (see ./submit --help)")
+    return o
+
+
+def main(argv) -> int:
+    if argv and argv[0] in ("-h", "--help"):
+        print(__doc__.strip())
+        return 0
+    cfg, state = common.setup()
+    o = opts(argv)
+    if o.get("reference"):
+        return run_reference(cfg, state, o.get("hidden"), o.get("warm"), o.get("out"))
+    if o.get("tokenize"):
+        return run_tokenize(cfg, state, *o["tokenize"])
+    note = o.get("note", "")
+    # The reference starts once per run, for the walk: prompts whose token ids
+    # it would first have to make would start it a second time.
+    probe = R.Session(cfg, lambda: None, common.log)
+    hidden_path = Path(o.get("hidden") or cfg["submit"]["hidden_prompts"])
+    tasks_path = o.get("tasks") or (cfg["submit"].get("tasks") if not o.get("judge_src") else None)
+    tasks = answers.load_prompts(C.resolve(cfg, tasks_path)) if tasks_path else []
+    raw = [p.get("id", f"p{i}") for i, p in enumerate(answers.load_prompts(hidden_path) + tasks, 1)
+           if not probe.ids_cached(p)]
+    if raw:
+        print(f"./submit: {len(raw)} prompt(s) have no token ids (first: {raw[0]}); "
+              "make them once with ./submit --tokenize IN OUT (or ./submit --reference) and use OUT")
+        return 2
+    if o.get("judge_src"):
+        if not (o.get("hidden") and o.get("out") and o.get("warm")):
+            raise SystemExit("./submit --judge-src needs --hidden, --warm and --out")
+        src = Path(o["judge_src"]).resolve()
+        commit = o.get("commit") or "unknown"
+        n = 0
+        sub = src.parent
+        rec = {"id": None, "commit": commit, "note": note,
+               "submitted": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()), "dir": str(sub)}
+    else:
+        try:
+            repo = Path(git(Path.cwd(), "rev-parse", "--show-toplevel").strip())
+            commit = git(repo, "rev-parse", "HEAD").strip()
+            dirty = bool(git(repo, "status", "--porcelain").strip())
+        except (subprocess.CalledProcessError, OSError):
+            print("./submit: run it inside the git repository of the engine (with at least one commit)")
+            return 2
+        n = ledger.next_id(state)
+        sub = state / "submissions" / f"{n:04d}-{commit[:10]}"
+        snapshot(repo, sub / "src")
+        src = sub / "src"
+        common.log(f"submission {n}: commit {commit[:12]}" + (" (uncommitted changes in the working tree are not part of it)" if dirty else ""))
+        rec = {"id": n, "commit": commit, "repo": str(repo), "dirty": dirty, "note": note,
+               "submitted": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()), "dir": str(sub)}
+    prompts = answers.load_prompts(hidden_path)
+    warm =[w["prompt_token_ids"] for w in answers.load_prompts(Path(o["warm"]))] if o.get("warm") else []
+    user = None
+    if o.get("judge_src"):
+        # The judge streams this log to the agents: a hidden prompt's id
+        # can name what it is about, so they see a number instead.
+        for i, p in enumerate(prompts, 1):
+            p["id"] = f"hidden-{i}"
+        if any(not p.get("prompt_token_ids") for p in prompts):
+            raise SystemExit("./submit --judge-src: every drawn prompt needs prompt_token_ids")
+        if not warm:
+            raise SystemExit("./submit --judge-src: no warm-up rows; a cold engine is not timed")
+        user = cfg["submit"].get("engine_user")
+    lim = answers.limits(cfg)
+    need = lim.required()
+    t0 = time.monotonic()
+    times = {"judged_sent": 0}
+    status, reasons, agg, sp = "error", [], None, None
+    extra = {}
+    tm = tokmap.load(cfg["model"]["dir"])
+    with common.hold(state, "submit", ["./submit", commit[:12]]) as h:
+        times["queue_s"] = round(h.waited_s, 1)
+        why = wait_alone(cfg, h, common.log)
+        if not why and user:
+            # fail closed: no judged prompt reaches cand while it could send it out
+            why = E.firewall_problem()
+        if why:
+            reasons = [why]
+        else:
+            s = R.Session(cfg, lambda: None, common.log, fresh=True)
+            s.hold = h
+            try:
+                try:
+                    status, reasons, agg, sp = judged_run(cfg, h, s, src, sub, user, prompts, warm, lim, tm, times,
+                                                          tasks, extra)
+                except (R.RefError, answers.compare.RefFailed) as e:
+                    status, reasons = "error", [f"the reference failed: {e}"[:1500]]
+                if o.get("ref_hidden"):
+                    # The machine's reference speed while the reference is up for the walk: one start, not two.
+                    if s.started:
+                        tr = time.monotonic()
+                        try:
+                            rec["reference_speed"] = time_reference(
+                                cfg, s, answers.load_prompts(Path(o["ref_hidden"])), warm, tm)
+                        except (R.RefError, answers.compare.RefFailed) as e:
+                            rec["reference_speed"] = {"error": f"the reference's speed was not measured: {e}"[:500]}
+                        times["reference_speed_s"] = round(time.monotonic() - tr, 1)
+                    else:
+                        rec["reference_speed"] = {"error": "the reference was not started (the engine did not reach "
+                                                           "the walk); a later run measures its speed"}
+            finally:
+                s.close()
+            times["reference_starts"] = s.starts
+            if user:
+                late = E.user_pids(user) + [c["name"] for c in E.Q.owner_containers(user)]
+                if late:
+                    E.kill_user(user, common.log)
+                    E.Q.rm_owner_containers(user, common.log)
+                    status = "failed"
+                    reasons = reasons + [f"{len(late)} process(es) or container(s) of the engine account ran after the engine was "
+                                         "stopped, while the reference ran"]
+    times["total_s"] = round(time.monotonic() - t0, 1)
+    rec.update({"status": status, "reasons": reasons, "required_agreement": need,
+                "agreement": agg["agreement"] if agg else None,
+                "tokens_per_s": sp["tokens_per_s"] if (sp and status == "passed") else None,
+                "speed": sp if status == "passed" else None, "times": times, "protocol": answers.PROTOCOL,
+                "limits": cfg["limits"], "quality_bar": (cfg.get("quality") or {}).get("bar"),
+                "quality": extra.get("quality"),
+                # every run that reached the walk: for measuring (the tuned engine, draw noise); never ranked
+                "measured_speed": extra.get("measured_speed")})
+    if o.get("judge_src"):
+        Path(o["out"]).write_text(json.dumps(rec, indent=1))
+    else:
+        ledger.append(state, rec)
+        (sub / "result.json").write_text(json.dumps(rec, indent=1))
+    line = f"submission {n or ''} ({commit[:12]}): {status.upper()}"
+    if rec["agreement"] is not None:
+        line += f", agreement {rec['agreement']} " + (
+            "(reported; the quality bar replaces its limit)" if answers.quality.replaces_agreement(cfg) else f"(limit {need})")
+    if rec["tokens_per_s"] is not None:
+        line += f", {rec['tokens_per_s']} tokens/s"
+    print(line)
+    for r in reasons:
+        print(f"  {r}")
+    for t in answers.quality.lines(rec.get("quality")):
+        print(f"  {t}")
+    for t in answers.speed_lines(rec.get("speed")):
+        print(f"  {t}")
+    print(f"took {common.fmt_s(times['total_s'])}" + ("" if o.get("judge_src") else f"; details: {sub}/result.json"))
+    return {"passed": 0, "failed": 1}.get(status, 2)
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

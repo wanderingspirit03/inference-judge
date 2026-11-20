@@ -1,0 +1,565 @@
+{
+ "rows": [
+  {
+   "id": "p1-prose",
+   "identical": false,
+   "first_difference_token": 2,
+   "ref_tokens": 128,
+   "ref_text_chars": 515,
+   "tuned_text_chars": 572,
+   "ref_at_difference": " had been expecting it for three days, and he had ",
+   "tuned_at_difference": " had been counting the days, marking them with scr"
+  },
+  {
+   "id": "p2-code",
+   "identical": false,
+   "first_difference_token": 13,
+   "ref_tokens": 128,
+   "ref_text_chars": 487,
+   "tuned_text_chars": 456,
+   "ref_at_difference": "turn []\n\n    # Sort intervals by their start time\n    interv",
+   "tuned_at_difference": "turn []\n\n    # Sort by start time; if starts are equal, sort"
+  },
+  {
+   "id": "p3-math",
+   "identical": false,
+   "first_difference_token": 108,
+   "ref_tokens": 128,
+   "ref_text_chars": 288,
+   "tuned_text_chars": 281,
+   "ref_at_difference": ": A train leaves at 9:40 and arrives at 13:15. How many minu",
+   "tuned_at_difference": ": A train leaves at 14:20 and arrives at 17:45. How many min"
+  },
+  {
+   "id": "p4-list",
+   "identical": false,
+   "first_difference_token": 1,
+   "ref_tokens": 128,
+   "ref_text_chars": 567,
+   "tuned_text_chars": 437,
+   "ref_at_difference": " Use the `array` module for large arrays of n",
+   "tuned_at_difference": " Use a smaller data type:\n- Use `int8` instea"
+  },
+  {
+   "id": "p5-chat-explain",
+   "identical": false,
+   "first_difference_token": 0,
+   "ref_tokens": 125,
+   "ref_text_chars": 639,
+   "tuned_text_chars": 633,
+   "ref_at_difference": "The sky appears blue during the day beca",
+   "tuned_at_difference": "\n\nThe sky appears blue during the day be"
+  },
+  {
+   "id": "p6-chat-code",
+   "identical": false,
+   "first_difference_token": 40,
+   "ref_tokens": 98,
+   "ref_text_chars": 326,
+   "tuned_text_chars": 351,
+   "ref_at_difference": "istNode *prev = NULL, *curr = head, *next = NULL;\n    while ",
+   "tuned_at_difference": "istNode *prev = NULL;\n    struct ListNode *curr = head;\n    "
+  },
+  {
+   "id": "p7-json",
+   "identical": false,
+   "first_difference_token": 0,
+   "ref_tokens": 39,
+   "ref_text_chars": 81,
+   "tuned_text_chars": 153,
+   "ref_at_difference": "\n\n```json\n{\n  \"name\": \"The Eiffel Tower\",",
+   "tuned_at_difference": "\nThe user wants me to convert a text sent"
+  },
+  {
+   "id": "p8-translate",
+   "identical": false,
+   "first_difference_token": 1,
+   "ref_tokens": 18,
+   "ref_text_chars": 97,
+   "tuned_text_chars": 97,
+   "ref_at_difference": "Das Treffen wurde auf Donnerstag Nachmittag ",
+   "tuned_at_difference": "Das Meeting wurde auf Donnerstag Nachmittag "
+  },
+  {
+   "id": "q-q-0001-translate",
+   "identical": false,
+   "first_difference_token": 0,
+   "ref_tokens": 128,
+   "ref_text_chars": 591,
+   "tuned_text_chars": 585,
+   "ref_at_difference": "German:\n\n<think>\nThe user wants me to tr",
+   "tuned_at_difference": "\nThe user wants me to translate an Engli"
+  },
+  {
+   "id": "q-q-0007-translate",
+   "identical": false,
+   "first_difference_token": 0,
+   "ref_tokens": 128,
+   "ref_text_chars": 521,
+   "tuned_text_chars": 526,
+   "ref_at_difference": "German:\n\n<think>\nThe user wants me to tr",
+   "tuned_at_difference": "\nThe user wants me to translate an Engli"
+  },
+  {
+   "id": "q-q-0012-factual",
+   "identical": false,
+   "first_difference_token": 34,
+   "ref_tokens": 128,
+   "ref_text_chars": 646,
+   "tuned_text_chars": 595,
+   "ref_at_difference": "ts: one concerning administrative and maintenance tasks at a",
+   "tuned_at_difference": "ts: one concerning a medical practice (\"Slurry Store\") and a"
+  },
+  {
+   "id": "q-q-0016-arith",
+   "identical": false,
+   "first_difference_token": 113,
+   "ref_tokens": 128,
+   "ref_text_chars": 413,
+   "tuned_text_chars": 413,
+   "ref_at_difference": "after October 5. We know that October has 31 days in total. ",
+   "tuned_at_difference": "after October 5. We do this by subtracting the day of the ye"
+  },
+  {
+   "id": "q-q-0020-retrieve",
+   "identical": false,
+   "first_difference_token": 23,
+   "ref_tokens": 118,
+   "ref_text_chars": 389,
+   "tuned_text_chars": 404,
+   "ref_at_difference": " the sentences they appear in:\n\npine-9196\nNote from the offi",
+   "tuned_at_difference": " the sentences they come from:\n\n**Quarry Bank**\nThe access c"
+  },
+  {
+   "id": "q-q-0025-arith",
+   "identical": false,
+   "first_difference_token": 41,
+   "ref_tokens": 128,
+   "ref_text_chars": 365,
+   "tuned_text_chars": 364,
+   "ref_at_difference": "fy the base modulo 7.**\nFirst, we determine the remainder wh",
+   "tuned_at_difference": "fy the base modulo 7**\nFirst, we determine the remainder whe"
+  },
+  {
+   "id": "q-q-0029-arith",
+   "identical": false,
+   "first_difference_token": 0,
+   "ref_tokens": 128,
+   "ref_text_chars": 385,
+   "tuned_text_chars": 361,
+   "ref_at_difference": "\n\n<think>\nThe user is asking me to solve ",
+   "tuned_at_difference": "\nThe user is asking me to solve a math pr"
+  },
+  {
+   "id": "q-q-0033-translate",
+   "identical": false,
+   "first_difference_token": 0,
+   "ref_tokens": 128,
+   "ref_text_chars": 462,
+   "tuned_text_chars": 468,
+   "ref_at_difference": "Dutch:\n\n<think>\nThe user wants me to tra",
+   "tuned_at_difference": "\nThe user wants me to translate an Engli"
+  },
+  {
+   "id": "q-q-0039-translate",
+   "identical": false,
+   "first_difference_token": 0,
+   "ref_tokens": 128,
+   "ref_text_chars": 510,
+   "tuned_text_chars": 511,
+   "ref_at_difference": "# Lezioni da 7 Stagioni di Fotografia de",
+   "tuned_at_difference": "\nThe user wants me to translate the Engl"
+  },
+  {
+   "id": "q-q-0045-arith",
+   "identical": false,
+   "first_difference_token": 10,
+   "ref_tokens": 128,
+   "ref_text_chars": 376,
+   "tuned_text_chars": 409,
+   "ref_at_difference": "us devons convertir 8 heures et 17 minutes en secondes.\n\n**\u00c9",
+   "tuned_at_difference": "us devons convertir le temps total en secondes.\n\n**\u00c9tape 1 :"
+  },
+  {
+   "id": "q-q-0049-json",
+   "identical": false,
+   "first_difference_token": 7,
+   "ref_tokens": 128,
+   "ref_text_chars": 351,
+   "tuned_text_chars": 358,
+   "ref_at_difference": "[\n  {\n    \"type\": \"invoice\",\n    \"invoice_number\": ",
+   "tuned_at_difference": "[\n  {\n    \"record_type\": \"invoice\",\n    \"invoice_nu"
+  },
+  {
+   "id": "q-q-0053-translate",
+   "identical": false,
+   "first_difference_token": 0,
+   "ref_tokens": 128,
+   "ref_text_chars": 565,
+   "tuned_text_chars": 540,
+   "ref_at_difference": "French:\n\n<think>\nThe user wants me to tr",
+   "tuned_at_difference": "\nThe user wants me to translate a text f"
+  },
+  {
+   "id": "q-q-0060-translate",
+   "identical": false,
+   "first_difference_token": 0,
+   "ref_tokens": 128,
+   "ref_text_chars": 507,
+   "tuned_text_chars": 507,
+   "ref_at_difference": "Subject: Li\u00e7\u00f5es de 6 Temporadas de Prova",
+   "tuned_at_difference": "\nThe user wants me to translate the Engl"
+  },
+  {
+   "id": "q-q-0066-summary",
+   "identical": false,
+   "first_difference_token": 33,
+   "ref_tokens": 128,
+   "ref_text_chars": 581,
+   "tuned_text_chars": 566,
+   "ref_at_difference": "Henrik Mbeki, cover a diverse range of operational and maint",
+   "tuned_at_difference": "Henrik Mbeki, cover five distinct topics. The first section,"
+  },
+  {
+   "id": "q-q-0070-code",
+   "identical": false,
+   "first_difference_token": 73,
+   "ref_tokens": 128,
+   "ref_text_chars": 401,
+   "tuned_text_chars": 400,
+   "ref_at_difference": "eturn memo[n]\n\n\ndef summarise_platform_extension(rows, key='",
+   "tuned_at_difference": "eturn memo[n]\n\n\ndef check_platform_extension(rows, key='turn"
+  },
+  {
+   "id": "q-q-0076-factual",
+   "identical": false,
+   "first_difference_token": 12,
+   "ref_tokens": 128,
+   "ref_text_chars": 556,
+   "tuned_text_chars": 534,
+   "ref_at_difference": "side of a mountain, but instead of just rock and dirt, there",
+   "tuned_at_difference": "side of a mountain, and you can see a dark, circular opening"
+  },
+  {
+   "id": "q-q-0082-arith",
+   "identical": false,
+   "first_difference_token": 2,
+   "ref_tokens": 128,
+   "ref_text_chars": 372,
+   "tuned_text_chars": 354,
+   "ref_at_difference": "\n\nLet's trace through this Python program ste",
+   "tuned_at_difference": "\n\nLet me work through this step by step.\n\n**S"
+  },
+  {
+   "id": "q-q-0089-json",
+   "identical": true,
+   "first_difference_token": 128,
+   "ref_tokens": 128,
+   "ref_text_chars": 352,
+   "tuned_text_chars": 352,
+   "ref_at_difference": "uantity\": 4, \"item\":",
+   "tuned_at_difference": "uantity\": 4, \"item\":"
+  },
+  {
+   "id": "q-q-0093-retrieve",
+   "identical": false,
+   "first_difference_token": 18,
+   "ref_tokens": 120,
+   "ref_text_chars": 404,
+   "tuned_text_chars": 434,
+   "ref_at_difference": "r the named depots, each accompanied by the sentence it come",
+   "tuned_at_difference": "r the named depots, along with the sentences they come from:"
+  },
+  {
+   "id": "q-q-0099-code",
+   "identical": false,
+   "first_difference_token": 97,
+   "ref_tokens": 128,
+   "ref_text_chars": 434,
+   "tuned_text_chars": 445,
+   "ref_at_difference": "\ndef scan_final_act(path, retries=5):\n    \"\"\"Read a file, re",
+   "tuned_at_difference": "\ndef scan_final_act(graph):\n    \"\"\"Topological order of a di"
+  },
+  {
+   "id": "q-q-0104-arith",
+   "identical": false,
+   "first_difference_token": 28,
+   "ref_tokens": 128,
+   "ref_text_chars": 382,
+   "tuned_text_chars": 408,
+   "ref_at_difference": "e sum of the first $n$ terms:\n\n$$\nS_n = \\frac{n}{2} \\left[2a",
+   "tuned_at_difference": "e sum of the first $ n $ terms of an arithmetic sequence:\n\n$"
+  },
+  {
+   "id": "q-q-0109-code",
+   "identical": false,
+   "first_difference_token": 5,
+   "ref_tokens": 128,
+   "ref_text_chars": 449,
+   "tuned_text_chars": 458,
+   "ref_at_difference": "    out, buf, quoted = [], '', False\n    for ch in lin",
+   "tuned_at_difference": "    out, buf, in_q = [], '', False\n    for ch in line:"
+  },
+  {
+   "id": "q-q-0114-factual",
+   "identical": false,
+   "first_difference_token": 3,
+   "ref_tokens": 128,
+   "ref_text_chars": 618,
+   "tuned_text_chars": 489,
+   "ref_at_difference": "\n\nThe reason why some metals rust and others do not l",
+   "tuned_at_difference": "\n\nThe reason some metals \"rust\" while others do not c"
+  },
+  {
+   "id": "q-q-0118-translate",
+   "identical": false,
+   "first_difference_token": 0,
+   "ref_tokens": 128,
+   "ref_text_chars": 545,
+   "tuned_text_chars": 576,
+   "ref_at_difference": "Italian:\n\n<think>\nThe user wants me to t",
+   "tuned_at_difference": "\nThe user wants me to translate a long E"
+  },
+  {
+   "id": "q-q-0122-summary",
+   "identical": false,
+   "first_difference_token": 1,
+   "ref_tokens": 128,
+   "ref_text_chars": 673,
+   "tuned_text_chars": 581,
+   "ref_at_difference": "\n\nThe correspondence between Anouk Ekwueme",
+   "tuned_at_difference": "\n\nBased on the provided text, which consis"
+  },
+  {
+   "id": "q-q-0126-summary",
+   "identical": false,
+   "first_difference_token": 1,
+   "ref_tokens": 128,
+   "ref_text_chars": 610,
+   "tuned_text_chars": 630,
+   "ref_at_difference": "\n\nThe text opens with a series of administ",
+   "tuned_at_difference": "\n\nBased on the text provided, here is a su"
+  },
+  {
+   "id": "q-q-0130-summary",
+   "identical": false,
+   "first_difference_token": 2,
+   "ref_tokens": 128,
+   "ref_text_chars": 675,
+   "tuned_text_chars": 716,
+   "ref_at_difference": "\n\nThe first section, \"How Mission Planner Rebo",
+   "tuned_at_difference": "\n\nThe text opens with a series of vignettes fr"
+  },
+  {
+   "id": "q-q-0136-json",
+   "identical": false,
+   "first_difference_token": 86,
+   "ref_tokens": 128,
+   "ref_text_chars": 339,
+   "tuned_text_chars": 343,
+   "ref_at_difference": "oice\",\n    \"invoice_id\": \"INV-9406\",\n    \"customer\": \"Henrik",
+   "tuned_at_difference": "oice\",\n    \"invoice_number\": \"INV-9406\",\n    \"customer\": \"He"
+  },
+  {
+   "id": "q-q-0140-factual",
+   "identical": false,
+   "first_difference_token": 1,
+   "ref_tokens": 128,
+   "ref_text_chars": 531,
+   "tuned_text_chars": 569,
+   "ref_at_difference": "\n\nHello! That is a fantastic question. It ",
+   "tuned_at_difference": "\n\nImagine you are standing outside on a Tu"
+  },
+  {
+   "id": "q-q-0145-factual",
+   "identical": false,
+   "first_difference_token": 1,
+   "ref_tokens": 69,
+   "ref_text_chars": 295,
+   "tuned_text_chars": 309,
+   "ref_at_difference": "\n1.  **The chemical trigger:** When you c",
+   "tuned_at_difference": "\nOnions contain a sulfur-rich compound ca"
+  },
+  {
+   "id": "q-q-0150-arith",
+   "identical": false,
+   "first_difference_token": 1,
+   "ref_tokens": 128,
+   "ref_text_chars": 407,
+   "tuned_text_chars": 449,
+   "ref_at_difference": "\n\nPara resolver este problema, debemos con",
+   "tuned_at_difference": "\n\nTo determine the total number of seconds"
+  },
+  {
+   "id": "q-q-0154-json",
+   "identical": false,
+   "first_difference_token": 4,
+   "ref_tokens": 84,
+   "ref_text_chars": 239,
+   "tuned_text_chars": 240,
+   "ref_at_difference": "{\n  \"person\": [\n    {\n      \"name\": \"Jonas Ca",
+   "tuned_at_difference": "{\n  \"records\": [\n    {\n      \"name\": \"Jonas C"
+  },
+  {
+   "id": "q-q-0159-json",
+   "identical": false,
+   "first_difference_token": 63,
+   "ref_tokens": 128,
+   "ref_text_chars": 311,
+   "tuned_text_chars": 307,
+   "ref_at_difference": "\n  },\n  {\n    \"guest_name\": \"Anouk Castellano\",\n    \"destina",
+   "tuned_at_difference": "\n  },\n  {\n    \"guest\": \"Anouk Castellano\",\n    \"destination\""
+  },
+  {
+   "id": "q-q-0165-translate",
+   "identical": false,
+   "first_difference_token": 0,
+   "ref_tokens": 128,
+   "ref_text_chars": 580,
+   "tuned_text_chars": 593,
+   "ref_at_difference": "# Pourquoi les cadres de couvain sont im",
+   "tuned_at_difference": "\nThe user wants me to translate the Engl"
+  },
+  {
+   "id": "q-q-0169-factual",
+   "identical": false,
+   "first_difference_token": 18,
+   "ref_tokens": 128,
+   "ref_text_chars": 558,
+   "tuned_text_chars": 536,
+   "ref_at_difference": "ound spring (or the weight of a falling mass) into a regular",
+   "tuned_at_difference": "ound spring (or the falling weight of a pendulum) into a reg"
+  },
+  {
+   "id": "q-q-0173-translate",
+   "identical": false,
+   "first_difference_token": 0,
+   "ref_tokens": 128,
+   "ref_text_chars": 537,
+   "tuned_text_chars": 527,
+   "ref_at_difference": "Italian:\n\n<think>\nThe user wants me to t",
+   "tuned_at_difference": "\nThe user wants me to translate an Engli"
+  },
+  {
+   "id": "q-q-0179-retrieve",
+   "identical": false,
+   "first_difference_token": 18,
+   "ref_tokens": 120,
+   "ref_text_chars": 388,
+   "tuned_text_chars": 391,
+   "ref_at_difference": "r the named depots, each with the sentence it comes from:\n\nm",
+   "tuned_at_difference": "r the named depots, along with the sentences they come from:"
+  },
+  {
+   "id": "q-q-0183-summary",
+   "identical": false,
+   "first_difference_token": 1,
+   "ref_tokens": 128,
+   "ref_text_chars": 649,
+   "tuned_text_chars": 621,
+   "ref_at_difference": "\n\nThe text is a composite of several unrel",
+   "tuned_at_difference": "\n\nBased on the provided documents, here is"
+  },
+  {
+   "id": "q-q-0187-summary",
+   "identical": false,
+   "first_difference_token": 2,
+   "ref_tokens": 128,
+   "ref_text_chars": 591,
+   "tuned_text_chars": 613,
+   "ref_at_difference": "\n\nThe text is a collection of disjointed, semi",
+   "tuned_at_difference": "\n\nThe provided text is a collection of disjoin"
+  },
+  {
+   "id": "q-q-0194-code",
+   "identical": false,
+   "first_difference_token": 79,
+   "ref_tokens": 128,
+   "ref_text_chars": 498,
+   "tuned_text_chars": 503,
+   "ref_at_difference": "return fields\n\n\ndef compute_blood_pressure_cuffs(values, win",
+   "tuned_at_difference": "return fields\n\n\ndef rank_blood_pressure_cuffs(graph):\n    \"\""
+  },
+  {
+   "id": "q-q-0199-retrieve",
+   "identical": false,
+   "first_difference_token": 1,
+   "ref_tokens": 99,
+   "ref_text_chars": 279,
+   "tuned_text_chars": 338,
+   "ref_at_difference": "\n\n- dune-8423 \u2014 Note from the office: the ",
+   "tuned_at_difference": "\n\nBased on the notes provided, here are th"
+  },
+  {
+   "id": "q-q-0204-arith",
+   "identical": false,
+   "first_difference_token": 1,
+   "ref_tokens": 128,
+   "ref_text_chars": 348,
+   "tuned_text_chars": 420,
+   "ref_at_difference": "\n\nWe are asked to find the remainder when ",
+   "tuned_at_difference": "\n\nTo find the remainder when $24^{28}$ is "
+  },
+  {
+   "id": "q-q-0209-translate",
+   "identical": false,
+   "first_difference_token": 0,
+   "ref_tokens": 128,
+   "ref_text_chars": 624,
+   "tuned_text_chars": 632,
+   "ref_at_difference": "\n\n<think>\nThe user wants me to translate ",
+   "tuned_at_difference": "\nThe user wants me to translate a long En"
+  },
+  {
+   "id": "q-q-0215-retrieve",
+   "identical": false,
+   "first_difference_token": 0,
+   "ref_tokens": 93,
+   "ref_text_chars": 277,
+   "tuned_text_chars": 327,
+   "ref_at_difference": "\n\n- umber-4841 \u2014 Note from the office: th",
+   "tuned_at_difference": "\nThe user wants me to list the access cod"
+  },
+  {
+   "id": "q-q-0222-code",
+   "identical": false,
+   "first_difference_token": 1,
+   "ref_tokens": 128,
+   "ref_text_chars": 342,
+   "tuned_text_chars": 370,
+   "ref_at_difference": "    if not samples:\n        return 0.0\n    s",
+   "tuned_at_difference": "    data = sorted(samples)\n    if not data:\n"
+  },
+  {
+   "id": "q-q-0227-retrieve",
+   "identical": false,
+   "first_difference_token": 56,
+   "ref_tokens": 92,
+   "ref_text_chars": 359,
+   "tuned_text_chars": 349,
+   "ref_at_difference": "rch-4150.\"\n\nI found this at the very end of the notes, after",
+   "tuned_at_difference": "rch-4150.\"\n\nI found it at the very end of the notes, after t"
+  },
+  {
+   "id": "q-q-0232-json",
+   "identical": false,
+   "first_difference_token": 4,
+   "ref_tokens": 128,
+   "ref_text_chars": 394,
+   "tuned_text_chars": 363,
+   "ref_at_difference": "{\n  \"records\": [\n    {\n      \"type\": \"invoice\",\n   ",
+   "tuned_at_difference": "{\n  \"record_1\": {\n    \"type\": \"invoice\",\n    \"invoi"
+  },
+  {
+   "id": "q-q-0237-factual",
+   "identical": false,
+   "first_difference_token": 24,
+   "ref_tokens": 128,
+   "ref_text_chars": 567,
+   "tuned_text_chars": 578,
+   "ref_at_difference": " that allow them to sense gravity and light, enabling them t",
+   "tuned_at_difference": " that allow them to detect gravity and orient their growth a"
+  }
+ ],
+ "missing": []
+}

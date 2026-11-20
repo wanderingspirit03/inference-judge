@@ -1,0 +1,5 @@
+#!/bin/bash
+# The test engine with an FP8 KV cache.  On 2026-11-16 ATOM crashed on the
+# first request with it (aiter: "invalid argument for fmha_fwd"); the
+# server stays up and never answers.
+ENGINE_EXTRA="--kv_cache_dtype fp8" exec "$(dirname "$(readlink -f "$0")")/../atom-engine/serve" "$@"

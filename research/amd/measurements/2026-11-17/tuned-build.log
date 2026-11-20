@@ -1,0 +1,461 @@
+DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            Install the buildx component to build images with BuildKit:
+            https://docs.docker.com/go/buildx/
+
+Sending build context to Docker daemon   56.1MB
+Step 1/18 : FROM rocm/pytorch@sha256:bbdaba66029f905321be3bbc95206a2d9a56a2bc5300877d146ad24d40db9a12
+docker.io/rocm/pytorch@sha256:bbdaba66029f905321be3bbc95206a2d9a56a2bc5300877d146ad24d40db9a12: Pulling from rocm/pytorch
+53221f18f2d7: Pulling fs layer
+1d84df5da941: Pulling fs layer
+f03c5ebe721a: Pulling fs layer
+852c6c5f1194: Pulling fs layer
+e7a28c2674ce: Pulling fs layer
+f785e86a0cc4: Pulling fs layer
+9f0104d90f82: Pulling fs layer
+bcc582f36c3b: Pulling fs layer
+0926a8eb0e60: Pulling fs layer
+ae4bda2964a7: Pulling fs layer
+e7a28c2674ce: Download complete
+53221f18f2d7: Download complete
+0926a8eb0e60: Download complete
+9f0104d90f82: Download complete
+f03c5ebe721a: Download complete
+1d84df5da941: Download complete
+0926a8eb0e60: Pull complete
+9f0104d90f82: Pull complete
+1d84df5da941: Pull complete
+bcc582f36c3b: Download complete
+f785e86a0cc4: Download complete
+ae4bda2964a7: Download complete
+ae4bda2964a7: Pull complete
+e7a28c2674ce: Pull complete
+f03c5ebe721a: Pull complete
+bcc582f36c3b: Pull complete
+f785e86a0cc4: Pull complete
+852c6c5f1194: Download complete
+53221f18f2d7: Pull complete
+852c6c5f1194: Pull complete
+Digest: sha256:bbdaba66029f905321be3bbc95206a2d9a56a2bc5300877d146ad24d40db9a12
+Status: Downloaded newer image for rocm/pytorch@sha256:bbdaba66029f905321be3bbc95206a2d9a56a2bc5300877d146ad24d40db9a12
+ ---> bbdaba66029f
+Step 2/18 : ARG AITER_COMMIT=c53e9b3f4285c36ea785e614ce5cf8b04c78b3bd
+ ---> Running in fc016cd626b3
+ ---> Removed intermediate container fc016cd626b3
+ ---> 380ebac247e3
+Step 3/18 : ENV PYTHONDONTWRITEBYTECODE=1 AITER_LOG_LEVEL=WARNING HSA_COREDUMP_PATTERN=/dev/null
+ ---> Running in ff0812e820fc
+ ---> Removed intermediate container ff0812e820fc
+ ---> cf6cbdd9f384
+Step 4/18 : ENV GPU_MAX_HW_QUEUES=1
+ ---> Running in 1e7ea5853072
+ ---> Removed intermediate container 1e7ea5853072
+ ---> 1142ebc95a9f
+Step 5/18 : COPY scripts/qwen38_flash_mono/repro-constraints.txt /opt/constraints.txt
+ ---> 530aa7d12a57
+Step 6/18 : RUN PIP_CONSTRAINT=/opt/constraints.txt python3 -m pip install --no-cache-dir "rocm[devel]==10.0.0"         --index-url https://stable.repo.amd.com/rocm/whl-next     && python3 -m rocm_sdk init
+ ---> Running in 982f1ab2a1f4
+Looking in indexes: https://stable.repo.amd.com/rocm/whl-next
+Requirement already satisfied: rocm==10.0.0 in ./opt/venv/lib/python3.12/site-packages (from rocm[devel]==10.0.0) (10.0.0)
+Requirement already satisfied: rocm-sdk-core==10.0.0 in ./opt/venv/lib/python3.12/site-packages (from rocm==10.0.0->rocm[devel]==10.0.0) (10.0.0)
+Collecting rocm-sdk-devel==10.0.0 (from rocm[devel]==10.0.0)
+  Downloading rocm_sdk_devel-10.0.0-py3-none-linux_x86_64.whl (598.0 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 598.0/598.0 MB 409.3 MB/s  0:00:01
+Installing collected packages: rocm-sdk-devel
+Successfully installed rocm-sdk-devel-10.0.0
+Devel contents expanded to '/opt/venv/lib/python3.12/site-packages/_rocm_sdk_devel'
+ ---> Removed intermediate container 982f1ab2a1f4
+ ---> 2026767f3ac6
+Step 7/18 : ENV ROCM_PATH=/opt/venv/lib/python3.12/site-packages/_rocm_sdk_devel
+ ---> Running in 7087e1d68c81
+ ---> Removed intermediate container 7087e1d68c81
+ ---> 58c655b69857
+Step 8/18 : ENV HIP_PATH=$ROCM_PATH CMAKE_PREFIX_PATH=$ROCM_PATH PATH=$ROCM_PATH/bin:$PATH     LD_LIBRARY_PATH=$ROCM_PATH/lib:$ROCM_PATH/lib/host-math/lib
+ ---> Running in 66baa2a0dbe6
+ ---> Removed intermediate container 66baa2a0dbe6
+ ---> f82c2b387d4c
+Step 9/18 : RUN git clone --filter=blob:none https://github.com/ROCm/aiter.git /opt/aiter     && cd /opt/aiter && git checkout -q "$AITER_COMMIT" && git submodule update --init --recursive --depth 1     && PIP_CONSTRAINT=/opt/constraints.txt python3 -m pip install --no-cache-dir -r requirements.txt     && AITER_USE_SYSTEM_TRITON=1 MAX_JOBS=64 PREBUILD_KERNELS=0 GPU_ARCHS=gfx950 python3 setup.py develop
+ ---> Running in 382d3336ded1
+[91mCloning into '/opt/aiter'...
+[0m[91mUpdating files:   0% (2/8624)[0m[91mUpdating files:   1% (87/8624)[0m[91mUpdating files:   2% (173/8624)[0m[91mUpdating files:   3% (259/8624)[0m[91mUpdating files:   4% (345/8624)[0m[91mUpdating files:   5% (432/8624)[0m[91mUpdating files:   6% (518/8624)[0m[91mUpdating files:   7% (604/8624)[0m[91mUpdating files:   8% (690/8624)[0m[91mUpdating files:   9% (777/8624)[0m[91mUpdating files:  10% (863/8624)[0m[91mUpdating files:  11% (949/8624)[0m[91mUpdating files:  12% (1035/8624)[0m[91mUpdating files:  13% (1122/8624)[0m[91mUpdating files:  14% (1208/8624)[0m[91mUpdating files:  15% (1294/8624)[0m[91mUpdating files:  16% (1380/8624)[0m[91mUpdating files:  17% (1467/8624)[0m[91mUpdating files:  18% (1553/8624)[0m[91mUpdating files:  19% (1639/8624)[0m[91mUpdating files:  20% (1725/8624)[0m[91mUpdating files:  21% (1812/8624)[0m[91mUpdating files:  22% (1898/8624)[0m[91mUpdating files:  23% (1984/8624)[0m[91mUpdating files:  24% (2070/8624)[0m[91mUpdating files:  25% (2156/8624)[0m[91mUpdating files:  26% (2243/8624)[0m[91mUpdating files:  27% (2329/8624)[0m[91mUpdating files:  28% (2415/8624)[0m[91mUpdating files:  29% (2501/8624)[0m[91mUpdating files:  30% (2588/8624)[0m[91mUpdating files:  31% (2674/8624)[0m[91mUpdating files:  32% (2760/8624)[0m[91mUpdating files:  33% (2846/8624)[0m[91mUpdating files:  34% (2933/8624)[0m[91mUpdating files:  35% (3019/8624)[0m[91mUpdating files:  36% (3105/8624)[0m[91mUpdating files:  37% (3191/8624)[0m[91mUpdating files:  38% (3278/8624)[0m[91mUpdating files:  39% (3364/8624)[0m[91mUpdating files:  40% (3450/8624)[0m[91mUpdating files:  41% (3536/8624)[0m[91mUpdating files:  42% (3623/8624)[0m[91mUpdating files:  43% (3709/8624)[0m[91mUpdating files:  44% (3795/8624)[0m[91mUpdating files:  45% (3881/8624)[0m[91mUpdating files:  46% (3968/8624)[0m[91mUpdating files:  47% (4054/8624)[0m[91mUpdating files:  48% (4140/8624)[0m[91mUpdating files:  49% (4226/8624)[0m[91mUpdating files:  50% (4312/8624)[0m[91mUpdating files:  51% (4399/8624)[0m[91mUpdating files:  52% (4485/8624)[0m[91mUpdating files:  53% (4571/8624)[0m[91mUpdating files:  54% (4657/8624)[0m[91mUpdating files:  55% (4744/8624)[0m[91mUpdating files:  56% (4830/8624)[0m[91mUpdating files:  57% (4916/8624)[0m[91mUpdating files:  58% (5002/8624)[0m[91mUpdating files:  59% (5089/8624)[0m[91mUpdating files:  60% (5175/8624)[0m[91mUpdating files:  61% (5261/8624)[0m[91mUpdating files:  62% (5347/8624)[0m[91mUpdating files:  63% (5434/8624)[0m[91mUpdating files:  64% (5520/8624)[0m[91mUpdating files:  65% (5606/8624)[0m[91mUpdating files:  66% (5692/8624)[0m[91mUpdating files:  67% (5779/8624)[0m[91mUpdating files:  68% (5865/8624)[0m[91mUpdating files:  69% (5951/8624)[0m[91mUpdating files:  70% (6037/8624)[0m[91mUpdating files:  71% (6124/8624)[0m[91mUpdating files:  72% (6210/8624)[0m[91mUpdating files:  73% (6296/8624)[0m[91mUpdating files:  74% (6382/8624)[0m[91mUpdating files:  75% (6468/8624)[0m[91mUpdating files:  76% (6555/8624)[0m[91mUpdating files:  77% (6641/8624)[0m[91mUpdating files:  78% (6727/8624)[0m[91mUpdating files:  79% (6813/8624)[0m[91mUpdating files:  80% (6900/8624)[0m[91mUpdating files:  81% (6986/8624)[0m[91mUpdating files:  82% (7072/8624)[0m[91mUpdating files:  83% (7158/8624)[0m[91mUpdating files:  84% (7245/8624)[0m[91mUpdating files:  85% (7331/8624)[0m[91mUpdating files:  86% (7417/8624)[0m[91mUpdating files:  87% (7503/8624)[0m[91mUpdating files:  88% (7590/8624)[0m[91mUpdating files:  89% (7676/8624)[0m[91mUpdating files:  90% (7762/8624)[0m[91mUpdating files:  91% (7848/8624)[0m[91mUpdating files:  92% (7935/8624)[0m[91mUpdating files:  93% (8021/8624)[0m[91mUpdating files:  94% (8107/8624)[0m[91mUpdating files:  95% (8193/8624)[0m[91mUpdating files:  95% (8250/8624)[0m[91mUpdating files:  96% (8280/8624)[0m[91mUpdating files:  97% (8366/8624)[0m[91mUpdating files:  98% (8452/8624)[0m[91mUpdating files:  99% (8538/8624)[0m[91mUpdating files: 100% (8624/8624)Updating files: 100% (8624/8624), done.
+[0m[91mSubmodule '3rdparty/composable_kernel' (https://github.com/ROCm/composable_kernel.git) registered for path '3rdparty/composable_kernel'
+[0m[91mCloning into '/opt/aiter/3rdparty/composable_kernel'...
+[0m[91mFrom https://github.com/ROCm/composable_kernel
+ * branch            96afae1d54fc79c26857de7e1683b0dde1ff3c6f -> FETCH_HEAD
+[0mSubmodule path '3rdparty/composable_kernel': checked out '96afae1d54fc79c26857de7e1683b0dde1ff3c6f'
+Ignoring pandas: markers 'python_version < "3.11"' don't match your environment
+Collecting pandas==3.0.3 (from -r requirements.txt (line 15))
+  Downloading pandas-3.0.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (79 kB)
+Collecting pytest==9.0.3 (from -r requirements.txt (line 17))
+  Downloading pytest-9.0.3-py3-none-any.whl.metadata (7.6 kB)
+Collecting psutil==7.2.2 (from -r requirements.txt (line 18))
+  Downloading psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl.metadata (22 kB)
+Collecting matplotlib==3.10.9 (from -r requirements.txt (line 19))
+  Downloading matplotlib-3.10.9-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (52 kB)
+Requirement already satisfied: pyyaml==6.0.3 in /opt/venv/lib/python3.12/site-packages (from -r requirements.txt (line 20)) (6.0.3)
+Collecting einops==0.8.2 (from -r requirements.txt (line 21))
+  Downloading einops-0.8.2-py3-none-any.whl.metadata (13 kB)
+Collecting pybind11==3.0.4 (from -r requirements.txt (line 22))
+  Downloading pybind11-3.0.4-py3-none-any.whl.metadata (10 kB)
+Requirement already satisfied: ninja==1.13.0 in /opt/venv/lib/python3.12/site-packages (from -r requirements.txt (line 23)) (1.13.0)
+Collecting flydsl==0.3.4.1 (from -r requirements.txt (line 25))
+  Downloading flydsl-0.3.4.1-cp312-cp312-manylinux_2_27_x86_64.whl.metadata (18 kB)
+Requirement already satisfied: numpy>=1.26.0 in /opt/venv/lib/python3.12/site-packages (from pandas==3.0.3->-r requirements.txt (line 15)) (2.5.2)
+Requirement already satisfied: python-dateutil>=2.8.2 in /opt/venv/lib/python3.12/site-packages (from pandas==3.0.3->-r requirements.txt (line 15)) (2.9.0.post0)
+Requirement already satisfied: iniconfig>=1.0.1 in /opt/venv/lib/python3.12/site-packages (from pytest==9.0.3->-r requirements.txt (line 17)) (2.3.0)
+Requirement already satisfied: packaging>=22 in /opt/venv/lib/python3.12/site-packages (from pytest==9.0.3->-r requirements.txt (line 17)) (26.3)
+Requirement already satisfied: pluggy<2,>=1.5 in /opt/venv/lib/python3.12/site-packages (from pytest==9.0.3->-r requirements.txt (line 17)) (1.6.0)
+Requirement already satisfied: pygments>=2.7.2 in /opt/venv/lib/python3.12/site-packages (from pytest==9.0.3->-r requirements.txt (line 17)) (2.21.0)
+Requirement already satisfied: contourpy>=1.0.1 in /opt/venv/lib/python3.12/site-packages (from matplotlib==3.10.9->-r requirements.txt (line 19)) (1.3.3)
+Requirement already satisfied: cycler>=0.10 in /opt/venv/lib/python3.12/site-packages (from matplotlib==3.10.9->-r requirements.txt (line 19)) (0.12.1)
+Requirement already satisfied: fonttools>=4.22.0 in /opt/venv/lib/python3.12/site-packages (from matplotlib==3.10.9->-r requirements.txt (line 19)) (4.63.0)
+Requirement already satisfied: kiwisolver>=1.3.1 in /opt/venv/lib/python3.12/site-packages (from matplotlib==3.10.9->-r requirements.txt (line 19)) (1.5.0)
+Requirement already satisfied: pillow>=8 in /opt/venv/lib/python3.12/site-packages (from matplotlib==3.10.9->-r requirements.txt (line 19)) (12.3.0)
+Requirement already satisfied: pyparsing>=3 in /opt/venv/lib/python3.12/site-packages (from matplotlib==3.10.9->-r requirements.txt (line 19)) (3.3.2)
+Requirement already satisfied: six>=1.5 in /opt/venv/lib/python3.12/site-packages (from python-dateutil>=2.8.2->pandas==3.0.3->-r requirements.txt (line 15)) (1.17.0)
+Downloading pandas-3.0.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (10.9 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 10.9/10.9 MB 52.0 MB/s  0:00:00
+Downloading pytest-9.0.3-py3-none-any.whl (375 kB)
+Downloading psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl (155 kB)
+Downloading matplotlib-3.10.9-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (8.8 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 8.8/8.8 MB 166.0 MB/s  0:00:00
+Downloading einops-0.8.2-py3-none-any.whl (65 kB)
+Downloading pybind11-3.0.4-py3-none-any.whl (314 kB)
+Downloading flydsl-0.3.4.1-cp312-cp312-manylinux_2_27_x86_64.whl (76.4 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 76.4/76.4 MB 67.7 MB/s  0:00:01
+Installing collected packages: pytest, pybind11, psutil, flydsl, einops, pandas, matplotlib
+  Attempting uninstall: pytest
+    Found existing installation: pytest 9.1.1
+    Uninstalling pytest-9.1.1:
+      Successfully uninstalled pytest-9.1.1
+  Attempting uninstall: pandas
+    Found existing installation: pandas 3.0.5
+    Uninstalling pandas-3.0.5:
+      Successfully uninstalled pandas-3.0.5
+  Attempting uninstall: matplotlib
+    Found existing installation: matplotlib 3.11.1
+    Uninstalling matplotlib-3.11.1:
+      Successfully uninstalled matplotlib-3.11.1
+
+Successfully installed einops-0.8.2 flydsl-0.3.4.1 matplotlib-3.10.9 pandas-3.0.3 psutil-7.2.2 pybind11-3.0.4 pytest-9.0.3
+[91m
+[notice] A new release of pip is available: 26.2.1 -> 26.3
+[notice] To update, run: pip install --upgrade pip
+[0m[91m/opt/venv/lib/python3.12/site-packages/setuptools/__init__.py:92: _DeprecatedInstaller: setuptools.installer and fetch_build_eggs are deprecated.
+!!
+
+        ********************************************************************************
+        Requirements should be satisfied by a PEP 517 installer.
+        If you are using pip, you can try `pip install --use-pep517`.
+
+        This deprecation is overdue, please update your project and remove deprecated
+        calls to avoid build errors in the future.
+        ********************************************************************************
+
+!!
+  dist.fetch_build_eggs(dist.setup_requires)
+[0m[91m/opt/venv/lib/python3.12/site-packages/setuptools/dist.py:765: SetuptoolsDeprecationWarning: License classifiers are deprecated.
+!!
+
+        ********************************************************************************
+        Please consider removing the following classifiers in favor of a SPDX license expression:
+
+        License :: OSI Approved :: BSD License
+
+        See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#license for details.
+        ********************************************************************************
+
+!!
+  self._finalize_license_expression()
+[0m[aiter] AITER_USE_SYSTEM_TRITON=1, keeping triton==3.8.0+git4cff872c.rocm10.0.0.
+[aiter] To ensure compatibility, consider running .github/scripts/install_triton.sh.
+running develop
+[91m/opt/venv/lib/python3.12/site-packages/setuptools/_distutils/cmd.py:90: DevelopDeprecationWarning: develop command is deprecated.
+!!
+
+        ********************************************************************************
+        Please avoid running ``setup.py`` and ``develop``.
+        Instead, use standards-based tools like pip or uv.
+
+        This deprecation is overdue, please update your project and remove deprecated
+        calls to avoid build errors in the future.
+
+        See https://github.com/pypa/setuptools/issues/917 for details.
+        ********************************************************************************
+
+!!
+  self.initialize_options()
+[0mObtaining file:///opt/aiter
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Checking if build backend supports build_editable: started
+  Checking if build backend supports build_editable: finished with status 'done'
+  Getting requirements to build editable: started
+  Getting requirements to build editable: finished with status 'done'
+  Preparing editable metadata (pyproject.toml): started
+  Preparing editable metadata (pyproject.toml): finished with status 'done'
+Requirement already satisfied: pybind11>=3.0.1 in /opt/venv/lib/python3.12/site-packages (from amd-aiter==0.1.25) (3.0.4)
+Requirement already satisfied: ninja in /opt/venv/lib/python3.12/site-packages (from amd-aiter==0.1.25) (1.13.0)
+Requirement already satisfied: pandas in /opt/venv/lib/python3.12/site-packages (from amd-aiter==0.1.25) (3.0.3)
+Requirement already satisfied: einops in /opt/venv/lib/python3.12/site-packages (from amd-aiter==0.1.25) (0.8.2)
+Requirement already satisfied: psutil in /opt/venv/lib/python3.12/site-packages (from amd-aiter==0.1.25) (7.2.2)
+Requirement already satisfied: packaging in /opt/venv/lib/python3.12/site-packages (from amd-aiter==0.1.25) (26.3)
+Requirement already satisfied: flydsl==0.3.4.1 in /opt/venv/lib/python3.12/site-packages (from amd-aiter==0.1.25) (0.3.4.1)
+Requirement already satisfied: numpy>=1.26.0 in /opt/venv/lib/python3.12/site-packages (from pandas->amd-aiter==0.1.25) (2.5.2)
+Requirement already satisfied: python-dateutil>=2.8.2 in /opt/venv/lib/python3.12/site-packages (from pandas->amd-aiter==0.1.25) (2.9.0.post0)
+Requirement already satisfied: six>=1.5 in /opt/venv/lib/python3.12/site-packages (from python-dateutil>=2.8.2->pandas->amd-aiter==0.1.25) (1.17.0)
+Building wheels for collected packages: amd-aiter
+  Building editable for amd-aiter (pyproject.toml): started
+  Building editable for amd-aiter (pyproject.toml): finished with status 'done'
+  Created wheel for amd-aiter: filename=amd_aiter-0.1.25-0.editable-cp312-cp312-linux_x86_64.whl size=3772 sha256=42bf26185f4ab4672cf2186a4c3be4d86b2c67734b547302a88dd0e2b566e289
+  Stored in directory: /tmp/pip-ephem-wheel-cache-gsri19s5/wheels/63/36/ff/246700c647520c8cd7723a1e43f97fd081e57edf93a5967fbb
+Successfully built amd-aiter
+Installing collected packages: amd-aiter
+Successfully installed amd-aiter-0.1.25
+[91m
+[notice] A new release of pip is available: 26.2.1 -> 26.3
+[notice] To update, run: pip install --upgrade pip
+[0m ---> Removed intermediate container 382d3336ded1
+ ---> cd33434e09d7
+Step 10/18 : COPY . /opt/atom
+ ---> 1fc5ef743168
+Step 11/18 : WORKDIR /opt/atom
+ ---> Running in c698f02b0e68
+ ---> Removed intermediate container c698f02b0e68
+ ---> adbba3a8543e
+Step 12/18 : RUN git config --system --add safe.directory '*'     && PIP_CONSTRAINT=/opt/constraints.txt python3 -m pip install --no-cache-dir setuptools-scm     && PIP_CONSTRAINT=/opt/constraints.txt python3 -m pip install --no-cache-dir --no-build-isolation -e . msgpack
+ ---> Running in 45c4b2b4b8a2
+Collecting setuptools-scm
+  Downloading setuptools_scm-10.3.4-py3-none-any.whl.metadata (6.7 kB)
+Collecting vcs-versioning<3,>=2.5.0.dev0 (from setuptools-scm)
+  Downloading vcs_versioning-2.6.0-py3-none-any.whl.metadata (1.7 kB)
+Requirement already satisfied: packaging>=20 in /opt/venv/lib/python3.12/site-packages (from setuptools-scm) (26.3)
+Requirement already satisfied: setuptools in /opt/venv/lib/python3.12/site-packages (from setuptools-scm) (84.0.0)
+Downloading setuptools_scm-10.3.4-py3-none-any.whl (33 kB)
+Downloading vcs_versioning-2.6.0-py3-none-any.whl (123 kB)
+Installing collected packages: vcs-versioning, setuptools-scm
+
+Successfully installed setuptools-scm-10.3.4 vcs-versioning-2.6.0
+[91m
+[notice] A new release of pip is available: 26.2.1 -> 26.3
+[notice] To update, run: pip install --upgrade pip
+[0mObtaining file:///opt/atom
+  Checking if build backend supports build_editable: started
+  Checking if build backend supports build_editable: finished with status 'done'
+  Preparing editable metadata (pyproject.toml): started
+  Preparing editable metadata (pyproject.toml): finished with status 'done'
+Collecting msgpack
+  Downloading msgpack-1.2.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (8.3 kB)
+Requirement already satisfied: pybind11 in /opt/venv/lib/python3.12/site-packages (from atom==0.1.1.dev1595+g352229d6d) (3.0.4)
+Collecting transformers==5.16.1 (from atom==0.1.1.dev1595+g352229d6d)
+  Downloading transformers-5.16.1-py3-none-any.whl.metadata (32 kB)
+Collecting zmq (from atom==0.1.1.dev1595+g352229d6d)
+  Downloading zmq-0.0.0.zip (2.2 kB)
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Collecting msgspec (from atom==0.1.1.dev1595+g352229d6d)
+  Downloading msgspec-0.22.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (6.0 kB)
+Collecting xxhash (from atom==0.1.1.dev1595+g352229d6d)
+  Downloading xxhash-4.0.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (17 kB)
+Collecting fastapi<0.137,>=0.115 (from atom==0.1.1.dev1595+g352229d6d)
+  Downloading fastapi-0.136.3-py3-none-any.whl.metadata (27 kB)
+Requirement already satisfied: psutil in /opt/venv/lib/python3.12/site-packages (from atom==0.1.1.dev1595+g352229d6d) (7.2.2)
+Collecting prometheus_client<0.26,>=0.25 (from atom==0.1.1.dev1595+g352229d6d)
+  Downloading prometheus_client-0.25.0-py3-none-any.whl.metadata (2.1 kB)
+Collecting protobuf (from atom==0.1.1.dev1595+g352229d6d)
+  Downloading protobuf-7.36.2-cp310-abi3-manylinux2014_x86_64.whl.metadata (595 bytes)
+Collecting uvicorn (from atom==0.1.1.dev1595+g352229d6d)
+  Downloading uvicorn-0.54.0-py3-none-any.whl.metadata (6.6 kB)
+Collecting uvloop (from atom==0.1.1.dev1595+g352229d6d)
+  Downloading uvloop-0.23.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (5.1 kB)
+Collecting aiohttp (from atom==0.1.1.dev1595+g352229d6d)
+  Downloading aiohttp-3.14.5-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (8.3 kB)
+Collecting datasets (from atom==0.1.1.dev1595+g352229d6d)
+  Downloading datasets-5.1.0-py3-none-any.whl.metadata (24 kB)
+Collecting openpyxl (from atom==0.1.1.dev1595+g352229d6d)
+  Downloading openpyxl-3.1.5-py2.py3-none-any.whl.metadata (2.5 kB)
+Requirement already satisfied: tqdm in /opt/venv/lib/python3.12/site-packages (from atom==0.1.1.dev1595+g352229d6d) (4.70.0)
+Collecting setproctitle (from atom==0.1.1.dev1595+g352229d6d)
+  Downloading setproctitle-1.3.8-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (10 kB)
+Collecting huggingface-hub<2.0,>=1.5.0 (from transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d)
+  Downloading huggingface_hub-1.33.0-py3-none-any.whl.metadata (16 kB)
+Requirement already satisfied: numpy>=1.17 in /opt/venv/lib/python3.12/site-packages (from transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d) (2.5.2)
+Requirement already satisfied: packaging>=20.0 in /opt/venv/lib/python3.12/site-packages (from transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d) (26.3)
+Requirement already satisfied: pyyaml>=5.1 in /opt/venv/lib/python3.12/site-packages (from transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d) (6.0.3)
+Collecting regex>=2025.10.22 (from transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d)
+  Downloading regex-2026.9.29-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (40 kB)
+Collecting tokenizers<0.24.0,>=0.23.1 (from transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d)
+  Downloading tokenizers-0.23.3-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (9.8 kB)
+Collecting typer (from transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d)
+  Downloading typer-0.27.3-py3-none-any.whl.metadata (16 kB)
+Collecting safetensors>=0.8.0 (from transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d)
+  Downloading safetensors-0.8.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.2 kB)
+Collecting starlette>=0.46.0 (from fastapi<0.137,>=0.115->atom==0.1.1.dev1595+g352229d6d)
+  Downloading starlette-1.7.0-py3-none-any.whl.metadata (6.6 kB)
+Collecting pydantic>=2.9.0 (from fastapi<0.137,>=0.115->atom==0.1.1.dev1595+g352229d6d)
+  Downloading pydantic-2.14.1-py3-none-any.whl.metadata (133 kB)
+Requirement already satisfied: typing-extensions>=4.8.0 in /opt/venv/lib/python3.12/site-packages (from fastapi<0.137,>=0.115->atom==0.1.1.dev1595+g352229d6d) (4.16.0)
+Collecting typing-inspection>=0.4.2 (from fastapi<0.137,>=0.115->atom==0.1.1.dev1595+g352229d6d)
+  Downloading typing_inspection-0.4.4-py3-none-any.whl.metadata (2.6 kB)
+Collecting annotated-doc>=0.0.2 (from fastapi<0.137,>=0.115->atom==0.1.1.dev1595+g352229d6d)
+  Downloading annotated_doc-0.0.5-py3-none-any.whl.metadata (6.5 kB)
+Collecting click<9.0.0,>=8.4.2 (from huggingface-hub<2.0,>=1.5.0->transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d)
+  Downloading click-8.5.0-py3-none-any.whl.metadata (2.6 kB)
+Requirement already satisfied: filelock>=3.10.0 in /opt/venv/lib/python3.12/site-packages (from huggingface-hub<2.0,>=1.5.0->transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d) (3.32.3)
+Requirement already satisfied: fsspec>=2023.5.0 in /opt/venv/lib/python3.12/site-packages (from huggingface-hub<2.0,>=1.5.0->transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d) (2026.7.0)
+Collecting hf-xet<2.0.0,>=1.6.0 (from huggingface-hub<2.0,>=1.5.0->transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d)
+  Downloading hf_xet-1.7.0-cp38-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (4.9 kB)
+Collecting httpx<1,>=0.23.0 (from huggingface-hub<2.0,>=1.5.0->transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d)
+  Downloading httpx-0.28.1-py3-none-any.whl.metadata (7.1 kB)
+Collecting anyio (from httpx<1,>=0.23.0->huggingface-hub<2.0,>=1.5.0->transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d)
+  Downloading anyio-4.15.1-py3-none-any.whl.metadata (4.7 kB)
+Collecting certifi (from httpx<1,>=0.23.0->huggingface-hub<2.0,>=1.5.0->transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d)
+  Downloading certifi-2026.7.22-py3-none-any.whl.metadata (2.5 kB)
+Collecting httpcore==1.* (from httpx<1,>=0.23.0->huggingface-hub<2.0,>=1.5.0->transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d)
+  Downloading httpcore-1.0.9-py3-none-any.whl.metadata (21 kB)
+Collecting idna (from httpx<1,>=0.23.0->huggingface-hub<2.0,>=1.5.0->transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d)
+  Downloading idna-3.20-py3-none-any.whl.metadata (7.2 kB)
+Collecting h11>=0.16 (from httpcore==1.*->httpx<1,>=0.23.0->huggingface-hub<2.0,>=1.5.0->transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d)
+  Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+Collecting annotated-types>=0.6.0 (from pydantic>=2.9.0->fastapi<0.137,>=0.115->atom==0.1.1.dev1595+g352229d6d)
+  Downloading annotated_types-0.8.0-py3-none-any.whl.metadata (15 kB)
+Collecting pydantic-core==2.50.1 (from pydantic>=2.9.0->fastapi<0.137,>=0.115->atom==0.1.1.dev1595+g352229d6d)
+  Downloading pydantic_core-2.50.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.5 kB)
+Collecting aiohappyeyeballs>=2.5.0 (from aiohttp->atom==0.1.1.dev1595+g352229d6d)
+  Downloading aiohappyeyeballs-2.7.1-py3-none-any.whl.metadata (5.9 kB)
+Collecting aiosignal>=1.4.0 (from aiohttp->atom==0.1.1.dev1595+g352229d6d)
+  Downloading aiosignal-1.4.0-py3-none-any.whl.metadata (3.7 kB)
+Collecting attrs>=17.3.0 (from aiohttp->atom==0.1.1.dev1595+g352229d6d)
+  Downloading attrs-26.1.0-py3-none-any.whl.metadata (8.8 kB)
+Collecting frozenlist>=1.1.1 (from aiohttp->atom==0.1.1.dev1595+g352229d6d)
+  Downloading frozenlist-1.8.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (20 kB)
+Collecting multidict<8.0,>=4.5 (from aiohttp->atom==0.1.1.dev1595+g352229d6d)
+  Downloading multidict-7.1.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (6.2 kB)
+Collecting propcache>=0.2.0 (from aiohttp->atom==0.1.1.dev1595+g352229d6d)
+  Downloading propcache-0.5.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (25 kB)
+Collecting yarl<2.0,>=1.25.1 (from aiohttp->atom==0.1.1.dev1595+g352229d6d)
+  Downloading yarl-1.25.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (111 kB)
+Collecting pyarrow>=24.0.0 (from datasets->atom==0.1.1.dev1595+g352229d6d)
+  Downloading pyarrow-26.0.0-cp312-cp312-manylinux_2_28_x86_64.whl.metadata (3.0 kB)
+Collecting dill<0.4.2,>=0.3.0 (from datasets->atom==0.1.1.dev1595+g352229d6d)
+  Downloading dill-0.4.1-py3-none-any.whl.metadata (10 kB)
+Requirement already satisfied: pandas in /opt/venv/lib/python3.12/site-packages (from datasets->atom==0.1.1.dev1595+g352229d6d) (3.0.3)
+Collecting multiprocess<0.70.20 (from datasets->atom==0.1.1.dev1595+g352229d6d)
+  Downloading multiprocess-0.70.19-py312-none-any.whl.metadata (7.5 kB)
+Collecting et-xmlfile (from openpyxl->atom==0.1.1.dev1595+g352229d6d)
+  Downloading et_xmlfile-2.0.0-py3-none-any.whl.metadata (2.7 kB)
+Requirement already satisfied: python-dateutil>=2.8.2 in /opt/venv/lib/python3.12/site-packages (from pandas->datasets->atom==0.1.1.dev1595+g352229d6d) (2.9.0.post0)
+Requirement already satisfied: six>=1.5 in /opt/venv/lib/python3.12/site-packages (from python-dateutil>=2.8.2->pandas->datasets->atom==0.1.1.dev1595+g352229d6d) (1.17.0)
+Collecting shellingham>=1.3.0 (from typer->transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d)
+  Downloading shellingham-1.5.4-py2.py3-none-any.whl.metadata (3.5 kB)
+Collecting rich>=13.8.0 (from typer->transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d)
+  Downloading rich-15.0.0-py3-none-any.whl.metadata (18 kB)
+Collecting markdown-it-py>=2.2.0 (from rich>=13.8.0->typer->transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d)
+  Downloading markdown_it_py-4.2.0-py3-none-any.whl.metadata (7.4 kB)
+Requirement already satisfied: pygments<3.0.0,>=2.13.0 in /opt/venv/lib/python3.12/site-packages (from rich>=13.8.0->typer->transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d) (2.21.0)
+Collecting mdurl~=0.1 (from markdown-it-py>=2.2.0->rich>=13.8.0->typer->transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d)
+  Downloading mdurl-0.1.2-py3-none-any.whl.metadata (1.6 kB)
+Collecting pyzmq (from zmq->atom==0.1.1.dev1595+g352229d6d)
+  Downloading pyzmq-27.2.0-cp312-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl.metadata (3.8 kB)
+Downloading transformers-5.16.1-py3-none-any.whl (12.1 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.1/12.1 MB 380.1 MB/s  0:00:00
+Downloading fastapi-0.136.3-py3-none-any.whl (117 kB)
+Downloading huggingface_hub-1.33.0-py3-none-any.whl (846 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 846.4/846.4 kB 1.8 GB/s  0:00:00
+Downloading click-8.5.0-py3-none-any.whl (125 kB)
+Downloading hf_xet-1.7.0-cp38-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (4.2 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.2/4.2 MB 909.8 MB/s  0:00:00
+Downloading httpx-0.28.1-py3-none-any.whl (73 kB)
+Downloading httpcore-1.0.9-py3-none-any.whl (78 kB)
+Downloading prometheus_client-0.25.0-py3-none-any.whl (64 kB)
+Downloading tokenizers-0.23.3-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (3.4 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.4/3.4 MB 1.1 GB/s  0:00:00
+Downloading msgpack-1.2.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (472 kB)
+Downloading annotated_doc-0.0.5-py3-none-any.whl (5.3 kB)
+Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+Downloading pydantic-2.14.1-py3-none-any.whl (488 kB)
+Downloading pydantic_core-2.50.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.2 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.2/2.2 MB 1.7 GB/s  0:00:00
+Downloading annotated_types-0.8.0-py3-none-any.whl (13 kB)
+Downloading regex-2026.9.29-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (807 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 807.8/807.8 kB 1.1 GB/s  0:00:00
+Downloading safetensors-0.8.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (516 kB)
+Downloading starlette-1.7.0-py3-none-any.whl (78 kB)
+Downloading anyio-4.15.1-py3-none-any.whl (132 kB)
+Downloading idna-3.20-py3-none-any.whl (69 kB)
+Downloading typing_inspection-0.4.4-py3-none-any.whl (14 kB)
+Downloading aiohttp-3.14.5-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (1.9 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.9/1.9 MB 1.1 GB/s  0:00:00
+Downloading multidict-7.1.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (483 kB)
+Downloading yarl-1.25.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (117 kB)
+Downloading aiohappyeyeballs-2.7.1-py3-none-any.whl (15 kB)
+Downloading aiosignal-1.4.0-py3-none-any.whl (7.5 kB)
+Downloading attrs-26.1.0-py3-none-any.whl (67 kB)
+Downloading frozenlist-1.8.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (242 kB)
+Downloading propcache-0.5.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (250 kB)
+Downloading certifi-2026.7.22-py3-none-any.whl (136 kB)
+Downloading datasets-5.1.0-py3-none-any.whl (604 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 604.4/604.4 kB 1.0 GB/s  0:00:00
+Downloading dill-0.4.1-py3-none-any.whl (120 kB)
+Downloading multiprocess-0.70.19-py312-none-any.whl (150 kB)
+Downloading pyarrow-26.0.0-cp312-cp312-manylinux_2_28_x86_64.whl (53.9 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 53.9/53.9 MB 870.9 MB/s  0:00:00
+Downloading msgspec-0.22.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (230 kB)
+Downloading openpyxl-3.1.5-py2.py3-none-any.whl (250 kB)
+Downloading et_xmlfile-2.0.0-py3-none-any.whl (18 kB)
+Downloading protobuf-7.36.2-cp310-abi3-manylinux2014_x86_64.whl (343 kB)
+Downloading setproctitle-1.3.8-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (32 kB)
+Downloading typer-0.27.3-py3-none-any.whl (123 kB)
+Downloading rich-15.0.0-py3-none-any.whl (310 kB)
+Downloading markdown_it_py-4.2.0-py3-none-any.whl (91 kB)
+Downloading mdurl-0.1.2-py3-none-any.whl (10.0 kB)
+Downloading shellingham-1.5.4-py2.py3-none-any.whl (9.8 kB)
+Downloading uvicorn-0.54.0-py3-none-any.whl (87 kB)
+Downloading uvloop-0.23.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (4.5 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.5/4.5 MB 849.3 MB/s  0:00:00
+Downloading xxhash-4.0.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (261 kB)
+Downloading pyzmq-27.2.0-cp312-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl (872 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 872.3/872.3 kB 1.3 GB/s  0:00:00
+Building wheels for collected packages: atom, zmq
+  Building editable for atom (pyproject.toml): started
+  Building editable for atom (pyproject.toml): finished with status 'done'
+  Created wheel for atom: filename=atom-0.1.1.dev1595+g352229d6d-0.editable-py3-none-any.whl size=11686 sha256=14570cbb59b57e12adce6894e4a0465b4f4ab265f7e826a80957139964b42fc3
+  Stored in directory: /tmp/pip-ephem-wheel-cache-1g7nsp5g/wheels/e5/a1/e3/913a275074fa47ac06ca7869897d9d4f737eeca0851e393005
+  Building wheel for zmq (pyproject.toml): started
+  Building wheel for zmq (pyproject.toml): finished with status 'done'
+  Created wheel for zmq: filename=zmq-0.0.0-py3-none-any.whl size=1089 sha256=78fb8c1675b69621fb8babc9427dcefadf1406038c8636537953f5f9c00f9ae3
+  Stored in directory: /tmp/pip-ephem-wheel-cache-1g7nsp5g/wheels/68/8e/d4/3ed4272b059c74f0b9ae3930e45f075f295805c87d69b850f0
+Successfully built atom zmq
+Installing collected packages: xxhash, uvloop, typing-inspection, shellingham, setproctitle, safetensors, regex, pyzmq, pydantic-core, pyarrow, protobuf, propcache, prometheus_client, multidict, msgspec, msgpack, mdurl, idna, hf-xet, h11, frozenlist, et-xmlfile, dill, click, certifi, attrs, annotated-types, annotated-doc, aiohappyeyeballs, zmq, yarl, uvicorn, pydantic, openpyxl, multiprocess, markdown-it-py, httpcore, anyio, aiosignal, starlette, rich, httpx, aiohttp, typer, huggingface-hub, fastapi, tokenizers, datasets, transformers, atom
+
+Successfully installed aiohappyeyeballs-2.7.1 aiohttp-3.14.5 aiosignal-1.4.0 annotated-doc-0.0.5 annotated-types-0.8.0 anyio-4.15.1 atom-0.1.1.dev1595+g352229d6d attrs-26.1.0 certifi-2026.7.22 click-8.5.0 datasets-5.1.0 dill-0.4.1 et-xmlfile-2.0.0 fastapi-0.136.3 frozenlist-1.8.0 h11-0.16.0 hf-xet-1.7.0 httpcore-1.0.9 httpx-0.28.1 huggingface-hub-1.33.0 idna-3.20 markdown-it-py-4.2.0 mdurl-0.1.2 msgpack-1.2.3 msgspec-0.22.0 multidict-7.1.0 multiprocess-0.70.19 openpyxl-3.1.5 prometheus_client-0.25.0 propcache-0.5.4 protobuf-7.36.2 pyarrow-26.0.0 pydantic-2.14.1 pydantic-core-2.50.1 pyzmq-27.2.0 regex-2026.9.29 rich-15.0.0 safetensors-0.8.0 setproctitle-1.3.8 shellingham-1.5.4 starlette-1.7.0 tokenizers-0.23.3 transformers-5.16.1 typer-0.27.3 typing-inspection-0.4.4 uvicorn-0.54.0 uvloop-0.23.0 xxhash-4.0.1 yarl-1.25.1 zmq-0.0.0
+[91m
+[notice] A new release of pip is available: 26.2.1 -> 26.3
+[notice] To update, run: pip install --upgrade pip
+[0m ---> Removed intermediate container 45c4b2b4b8a2
+ ---> 30b0f1a1f3dd
+Step 13/18 : ENV FLYDSL_DIR=/opt/qwen38/flydsl     DRAFTER_OBJECTS=/opt/qwen38/drafter-objects     ATOM_QWEN38_MK_CACHE=/opt/qwen38/kernel-cache
+ ---> Running in ddcac24cee4b
+ ---> Removed intermediate container ddcac24cee4b
+ ---> b3dafb085b01
+Step 14/18 : RUN SETUP_ONLY=1 WORK=/tmp/setup PY=python3 bash blog_benchmark/build_and_repro.sh     && rm -rf /tmp/setup "$FLYDSL_DIR/wheel/x"
+ ---> Running in c429be081ac1
+
+== 0. checks
+
+== 1. ATOM
+
+== 2. checkpoints
+skipped (SETUP_ONLY)
+
+== 3. FlyDSL (build time only; serving loads the code objects)
+[91mERROR: Could not find a version that satisfies the requirement flydsl==0.4.0.dev963 (from versions: 0.0.1.dev95158637, 0.1.1.dev409, 0.1.1.dev442, 0.1.1, 0.1.2, 0.1.3, 0.1.3.1, 0.1.4, 0.1.4.2, 0.1.5, 0.1.6, 0.1.7, 0.1.8, 0.2.0, 0.2.1, 0.2.2, 0.2.3, 0.2.4, 0.3.0, 0.3.1, 0.3.2, 0.3.3.dev887, 0.3.3.dev909, 0.3.4, 0.3.4.1, 0.4.0.dev973, 0.4.0.dev974, 0.4.0, 0.4.1.dev1005, 0.4.1, 0.4.2.dev1007, 0.4.2.dev1008, 0.4.2, 0.5.0.dev1018, 0.5.0.dev1035, 0.5.0.dev1036, 0.5.0)
+[0m[91m
+[notice] A new release of pip is available: 26.2.1 -> 26.3
+[notice] To update, run: pip install --upgrade pip
+[0m[91mERROR: No matching distribution found for flydsl==0.4.0.dev963
+[0mThe command '/bin/sh -c SETUP_ONLY=1 WORK=/tmp/setup PY=python3 bash blog_benchmark/build_and_repro.sh     && rm -rf /tmp/setup "$FLYDSL_DIR/wheel/x"' returned a non-zero code: 1
+
+real	11m12.971s
+user	0m0.271s
+sys	0m0.121s
+exit 1

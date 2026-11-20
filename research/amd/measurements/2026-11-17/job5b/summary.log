@@ -1,0 +1,9 @@
+14:57:24 waiting for /tmp/ij-job5b-go on the box
+15:03:35 go
+15:03:35 worktrees rc 0
+15:05:03 ref rc 0 88 s
+15:05:05 ref-cached rc 0 2 s
+15:08:20 check rc 0 195 s
+15:22:52 submit-a rc 0 617 s; submit-b rc 0 872 s (both started at once)
+15:22:52 score rc 0 0 s
+15:22:55 done (hidden set removed; /tmp/ij-job5b-done on the box: rc 0)

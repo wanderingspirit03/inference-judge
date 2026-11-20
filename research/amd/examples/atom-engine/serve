@@ -1,0 +1,15 @@
+#!/bin/bash
+# serve <port>: ATOM (the reference's image and flags, plus $ENGINE_EXTRA) in a
+# container named ij-engine on <port>+1, and shim.py on <port>.  A test
+# engine for ./check and ./submit.
+set -euo pipefail
+PORT="$1"
+HERE="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
+export IJ_REF_CONTAINER=ij-engine IJ_REF_PORT=$((PORT + 1)) IJ_REF_EXTRA="${ENGINE_EXTRA:-}" IJ_REF_MEM=0.5
+R="$HERE/../../reference/atom-serve.sh"
+[ -x "$R" ] || R=/opt/ij-amd/amd/reference/atom-serve.sh  # copied into an agent's tree: the box's copy
+cleanup() { "$R" stop >/dev/null 2>&1 || true; }
+trap cleanup EXIT TERM INT
+"$R" start
+python3 "$HERE/shim.py" "$PORT" "http://127.0.0.1:$((PORT + 1))" &
+wait $!

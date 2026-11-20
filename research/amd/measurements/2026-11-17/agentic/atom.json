@@ -1,0 +1,263 @@
+{
+ "/opt/ij-amd/amd/prompts/public.jsonl": {
+  "requests": 7,
+  "completion_tokens": 1540,
+  "seconds": 32.14,
+  "whole_request_tps": 47.92,
+  "decode_tps": 79.56,
+  "median_ttft_s": 0.115,
+  "median_prompt_tokens": 73,
+  "per_request": [
+   {
+    "seconds": 14.927372916000422,
+    "ttft": 12.175522945000012,
+    "completion_tokens": 220,
+    "prompt_tokens": 74,
+    "id": "p2-code"
+   },
+   {
+    "seconds": 2.871222916000079,
+    "ttft": 0.11839906400018663,
+    "completion_tokens": 220,
+    "prompt_tokens": 90,
+    "id": "p3-math"
+   },
+   {
+    "seconds": 2.8772549510003955,
+    "ttft": 0.12580376599999,
+    "completion_tokens": 220,
+    "prompt_tokens": 68,
+    "id": "p4-list"
+   },
+   {
+    "seconds": 2.8663430769993283,
+    "ttft": 0.11530794899954344,
+    "completion_tokens": 220,
+    "prompt_tokens": 71,
+    "id": "p5-chat-explain"
+   },
+   {
+    "seconds": 2.866486865999832,
+    "ttft": 0.11004327200043917,
+    "completion_tokens": 220,
+    "prompt_tokens": 70,
+    "id": "p6-chat-code"
+   },
+   {
+    "seconds": 2.8615911560000313,
+    "ttft": 0.10913752800024668,
+    "completion_tokens": 220,
+    "prompt_tokens": 84,
+    "id": "p7-json"
+   },
+   {
+    "seconds": 2.867112855999949,
+    "ttft": 0.1146214840000539,
+    "completion_tokens": 220,
+    "prompt_tokens": 73,
+    "id": "p8-translate"
+   }
+  ]
+ },
+ "/root/agentic/main-8000-9.jsonl": {
+  "requests": 8,
+  "completion_tokens": 1760,
+  "seconds": 24.24,
+  "whole_request_tps": 72.62,
+  "decode_tps": 78.47,
+  "median_ttft_s": 0.205,
+  "median_prompt_tokens": 7502.5,
+  "per_request": [
+   {
+    "seconds": 3.3169815339997513,
+    "ttft": 0.5258273109993752,
+    "completion_tokens": 220,
+    "prompt_tokens": 7817,
+    "id": "agentic-main-8000-001"
+   },
+   {
+    "seconds": 2.9766407770002843,
+    "ttft": 0.18636220100052014,
+    "completion_tokens": 220,
+    "prompt_tokens": 7291,
+    "id": "agentic-main-8000-002"
+   },
+   {
+    "seconds": 2.9796229339999627,
+    "ttft": 0.18994953600031295,
+    "completion_tokens": 220,
+    "prompt_tokens": 7038,
+    "id": "agentic-main-8000-003"
+   },
+   {
+    "seconds": 2.9923050110000986,
+    "ttft": 0.20239092100018752,
+    "completion_tokens": 220,
+    "prompt_tokens": 7423,
+    "id": "agentic-main-8000-004"
+   },
+   {
+    "seconds": 2.997164464999514,
+    "ttft": 0.2067040129995803,
+    "completion_tokens": 220,
+    "prompt_tokens": 7582,
+    "id": "agentic-main-8000-005"
+   },
+   {
+    "seconds": 2.9567471379996277,
+    "ttft": 0.1669200890000866,
+    "completion_tokens": 220,
+    "prompt_tokens": 7095,
+    "id": "agentic-main-8000-006"
+   },
+   {
+    "seconds": 3.0113796120003826,
+    "ttft": 0.21609026199985237,
+    "completion_tokens": 220,
+    "prompt_tokens": 7900,
+    "id": "agentic-main-8000-007"
+   },
+   {
+    "seconds": 3.0042275030000383,
+    "ttft": 0.21404268500009493,
+    "completion_tokens": 220,
+    "prompt_tokens": 7802,
+    "id": "agentic-main-8000-008"
+   }
+  ]
+ },
+ "/root/agentic/main-16000-9.jsonl": {
+  "requests": 8,
+  "completion_tokens": 1760,
+  "seconds": 27.66,
+  "whole_request_tps": 63.63,
+  "decode_tps": 77.79,
+  "median_ttft_s": 0.675,
+  "median_prompt_tokens": 14835.5,
+  "per_request": [
+   {
+    "seconds": 3.276092983000126,
+    "ttft": 0.4611468370003422,
+    "completion_tokens": 220,
+    "prompt_tokens": 11454,
+    "id": "agentic-main-16000-001"
+   },
+   {
+    "seconds": 3.266862546000084,
+    "ttft": 0.454001228999914,
+    "completion_tokens": 220,
+    "prompt_tokens": 11404,
+    "id": "agentic-main-16000-002"
+   },
+   {
+    "seconds": 3.4604035379998095,
+    "ttft": 0.6451176809996468,
+    "completion_tokens": 220,
+    "prompt_tokens": 14598,
+    "id": "agentic-main-16000-003"
+   },
+   {
+    "seconds": 3.4615814200005843,
+    "ttft": 0.647167623000314,
+    "completion_tokens": 220,
+    "prompt_tokens": 14410,
+    "id": "agentic-main-16000-004"
+   },
+   {
+    "seconds": 3.546794628000498,
+    "ttft": 0.731934476000788,
+    "completion_tokens": 220,
+    "prompt_tokens": 15503,
+    "id": "agentic-main-16000-005"
+   },
+   {
+    "seconds": 3.540043175000392,
+    "ttft": 0.7249441860003571,
+    "completion_tokens": 220,
+    "prompt_tokens": 15735,
+    "id": "agentic-main-16000-006"
+   },
+   {
+    "seconds": 3.5211314130001483,
+    "ttft": 0.7022678460007228,
+    "completion_tokens": 220,
+    "prompt_tokens": 15073,
+    "id": "agentic-main-16000-007"
+   },
+   {
+    "seconds": 3.587896260999514,
+    "ttft": 0.7721167979998427,
+    "completion_tokens": 220,
+    "prompt_tokens": 15682,
+    "id": "agentic-main-16000-008"
+   }
+  ]
+ },
+ "/root/agentic/main-32000-9.jsonl": {
+  "requests": 8,
+  "completion_tokens": 1760,
+  "seconds": 38.59,
+  "whole_request_tps": 45.61,
+  "decode_tps": 76.42,
+  "median_ttft_s": 1.976,
+  "median_prompt_tokens": 31714.5,
+  "per_request": [
+   {
+    "seconds": 4.871481924999898,
+    "ttft": 2.0041198499993698,
+    "completion_tokens": 220,
+    "prompt_tokens": 31974,
+    "id": "agentic-main-32000-001"
+   },
+   {
+    "seconds": 4.861249364999821,
+    "ttft": 1.9962879579998116,
+    "completion_tokens": 220,
+    "prompt_tokens": 31740,
+    "id": "agentic-main-32000-002"
+   },
+   {
+    "seconds": 4.842527298000277,
+    "ttft": 1.9761407169999075,
+    "completion_tokens": 220,
+    "prompt_tokens": 31825,
+    "id": "agentic-main-32000-003"
+   },
+   {
+    "seconds": 4.829047541999898,
+    "ttft": 1.9633250790002421,
+    "completion_tokens": 220,
+    "prompt_tokens": 31689,
+    "id": "agentic-main-32000-004"
+   },
+   {
+    "seconds": 4.840840199000013,
+    "ttft": 1.9753861929993946,
+    "completion_tokens": 220,
+    "prompt_tokens": 31630,
+    "id": "agentic-main-32000-005"
+   },
+   {
+    "seconds": 4.8816297100001975,
+    "ttft": 2.0165228129999377,
+    "completion_tokens": 220,
+    "prompt_tokens": 31564,
+    "id": "agentic-main-32000-006"
+   },
+   {
+    "seconds": 4.83736108300036,
+    "ttft": 1.971465633000662,
+    "completion_tokens": 220,
+    "prompt_tokens": 31740,
+    "id": "agentic-main-32000-007"
+   },
+   {
+    "seconds": 4.621171617000073,
+    "ttft": 1.7548767630005386,
+    "completion_tokens": 220,
+    "prompt_tokens": 29019,
+    "id": "agentic-main-32000-008"
+   }
+  ]
+ }
+}

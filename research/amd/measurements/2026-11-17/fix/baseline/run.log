@@ -1,0 +1,49 @@
+[run.sh 15:23:01] experiment baseline-atom-mi350x (score), target mi350x-qwen38-27b-tps (tps, launcher docker), results in /opt/bench/results/baseline-atom-mi350x
+[run.sh 15:23:01] + mkdir -p /tmp/inference-judge-baseline-atom-mi350x-bAmK5t/exp
+[run.sh 15:23:01] + rsync -a --delete --safe-links --no-specials --no-devices /home/researcher/research/experiments/baseline-atom-mi350x/ /tmp/inference-judge-baseline-atom-mi350x-bAmK5t/exp/
+[run.sh 15:23:01] + mkdir -p /opt/bench/results/baseline-atom-mi350x/snapshot/exp
+[run.sh 15:23:01] + rsync -a --delete --safe-links --no-specials --no-devices /home/researcher/research/experiments/baseline-atom-mi350x/ /opt/bench/results/baseline-atom-mi350x/snapshot/exp/
+[run.sh 15:23:02] + mkdir -p /opt/bench/results/baseline-atom-mi350x/snapshot
+[run.sh 15:23:02] experiment brought no Dockerfile, using ij-atom-ref:ad256a94-lp1
+[run.sh 15:23:02] image digest sha256:be6dd1f1e4ad4486a60b557f56176cfaa0766768002ac5325ac157eea5ded33f
+{"network": "none", "writable_mounts": [], "exfil_probe": "blocked", "seal": "full", "notes": [], "probe": {"net": "blocked", "net_err": "OSError", "sockets": {}, "writable": []}, "host_sockets": []}
+[run.sh 15:23:02] + mkdir -p /opt/bench/results/baseline-atom-mi350x/launches/B
+[run.sh 15:23:02] launch B (candidate)
+[run.sh 15:23:02] + docker run -d --name inference-judge-exp-baseline-atom-mi350x-B --label inference-judge.experiment=baseline-atom-mi350x --network none --device /dev/kfd --device /dev/dri --group-add 992 --shm-size 16g --entrypoint= --ipc=host -v /opt/models:/opt/models:ro -v /tmp/inference-judge-baseline-atom-mi350x-bAmK5t/exp:/ro/exp:ro -e IJ_EXPERIMENT_ID=baseline-atom-mi350x -e IJ_TARGET=mi350x-qwen38-27b-tps -e IJ_SERVED_NAME=qwen3.8-27b -e IJ_MODEL_DIR=/opt/models/Qwen3.8-27B -e PORT=8000 -e GPU_MAX_HW_QUEUES=1 -e HF_HUB_OFFLINE=1 ij-atom-ref:ad256a94-lp1 bash -c set -eu
+mkdir -p /exp /src
+cp -a /ro/exp/. /exp/
+for d in /ro/src/*/; do
+  if [ -d "$d" ]; then e="$(basename "$d")"; mkdir -p "/src/$e" && cp -a "$d." "/src/$e/"; fi
+done
+cd /exp
+exec bash /exp/launch.sh
+[run.sh 15:24:35] server healthy after 93s
+[run.sh 15:24:35] + [sidecar] python -I /opt/bench/harness.py --mode tps --tps-load closed --concurrency 1 --isl 100,1000,2000,4000 --osl 512 --ramp-s 5 --window-s 60 --prompt-pool /opt/bench/pools/qwen38-main.jsonl --tokenizer /opt/models/Qwen3.8-27B/tokenizer.json --chips 1 --slo {"p99_tpot_ms":50,"p95_ttft_ms":2000} --seed 849296 --base-url http://127.0.0.1:8000/v1 --model qwen3.8-27b --run-id baseline-atom-mi350x-20261117T152301Z-124954 --phase warm --out /opt/bench/results/baseline-atom-mi350x/launches/B/warm --length-tol 0.01 --isl-tol 0.3 --chat-template-kwargs {"enable_thinking":false} --warm-cycles 1 --first-chunk-timeout 1800 --total-timeout 1800
+[harness] tps closed level=1 goodput/chip=76.8 tps/chip=76.8 p99_tpot=13 p95_ttft=253 ms invalid=0/14 slo_met=True
+[harness] tps   isl=100 n=2 decode=79.9 stream=78.7 tok/s p50_ttft=110 ms
+[harness] tps   isl=1000 n=3 decode=79.5 stream=78.1 tok/s p50_ttft=129 ms
+[harness] tps   isl=2000 n=2 decode=79.4 stream=77.4 tok/s p50_ttft=183 ms
+[harness] tps   isl=4000 n=2 decode=79.3 stream=76.5 tok/s p50_ttft=253 ms
+[harness] tps headline=77.7 tok/s/chip (one stream: 77.7 tok/s for the whole answer, 79.5 decoding) -> /opt/bench/results/baseline-atom-mi350x/launches/B/warm
+[run.sh 15:27:09] staging the canary reference instead of checking it
+[run.sh 15:27:09] + [sidecar] python -I /opt/bench/harness.py --mode canary --base-url http://127.0.0.1:8000/v1 --model qwen3.8-27b --canary-prompts /opt/bench/canary/prompts.json --canary-timeout 1920 --canary-max-timeouts 1 --chat-template-kwargs {"enable_thinking":false} --out /opt/bench/results/baseline-atom-mi350x/launches/B
+canary baseline written to /opt/bench/results/baseline-atom-mi350x/launches/B/canary.json (10/10 prompts answered)
+[run.sh 15:27:24] + [sidecar] python -I /opt/bench/harness.py --mode tps --tps-load closed --concurrency 1 --isl 100,1000,2000,4000 --osl 512 --ramp-s 5 --window-s 60 --prompt-pool /opt/bench/pools/qwen38-main.jsonl --tokenizer /opt/models/Qwen3.8-27B/tokenizer.json --chips 1 --slo {"p99_tpot_ms":50,"p95_ttft_ms":2000} --seed 849297 --base-url http://127.0.0.1:8000/v1 --model qwen3.8-27b --run-id baseline-atom-mi350x-20261117T152301Z-124954 --phase block1 --out /opt/bench/results/baseline-atom-mi350x/launches/B/b1 --length-tol 0.01 --isl-tol 0.3 --chat-template-kwargs {"enable_thinking":false} --pool-exclude /opt/bench/results/baseline-atom-mi350x/launches/B/warm/tps_records.jsonl
+[harness] tps closed level=1 goodput/chip=76.8 tps/chip=76.8 p99_tpot=13 p95_ttft=277 ms invalid=0/10 slo_met=True
+[harness] tps   isl=100 n=2 decode=79.9 stream=78.7 tok/s p50_ttft=114 ms
+[harness] tps   isl=1000 n=3 decode=79.5 stream=77.5 tok/s p50_ttft=128 ms
+[harness] tps   isl=2000 n=2 decode=79.4 stream=77.4 tok/s p50_ttft=177 ms
+[harness] tps   isl=4000 n=2 decode=79.2 stream=76.4 tok/s p50_ttft=256 ms
+[harness] tps headline=77.5 tok/s/chip (one stream: 77.5 tok/s for the whole answer, 79.5 decoding) -> /opt/bench/results/baseline-atom-mi350x/launches/B/b1
+[run.sh 15:28:31] + [sidecar] python -I /opt/bench/harness.py --mode tps --tps-load closed --concurrency 1 --isl 100,1000,2000,4000 --osl 512 --ramp-s 5 --window-s 60 --prompt-pool /opt/bench/pools/qwen38-main.jsonl --tokenizer /opt/models/Qwen3.8-27B/tokenizer.json --chips 1 --slo {"p99_tpot_ms":50,"p95_ttft_ms":2000} --seed 849298 --base-url http://127.0.0.1:8000/v1 --model qwen3.8-27b --run-id baseline-atom-mi350x-20261117T152301Z-124954 --phase block2 --out /opt/bench/results/baseline-atom-mi350x/launches/B/b2 --length-tol 0.01 --isl-tol 0.3 --chat-template-kwargs {"enable_thinking":false} --pool-exclude /opt/bench/results/baseline-atom-mi350x/launches/B/b1/tps_records.jsonl
+[harness] tps closed level=1 goodput/chip=68.2 tps/chip=76.7 p99_tpot=13 p95_ttft=236 ms invalid=1/10 slo_met=True
+[harness] tps   isl=100 n=2 decode=79.9 stream=78.7 tok/s p50_ttft=117 ms
+[harness] tps   isl=1000 n=3 decode=79.4 stream=78.0 tok/s p50_ttft=132 ms
+[harness] tps   isl=2000 n=2 decode=79.4 stream=77.5 tok/s p50_ttft=169 ms
+[harness] tps   isl=4000 n=1 decode=79.2 stream=76.2 tok/s p50_ttft=269 ms
+[harness] tps headline=0.0 tok/s/chip (one stream: n/a tok/s for the whole answer, n/a decoding) -> /opt/bench/results/baseline-atom-mi350x/launches/B/b2
+[run.sh 15:29:37] + [sidecar] python -I /opt/bench/quality2.py collect --base-url http://127.0.0.1:8000/v1 --model qwen3.8-27b --target /opt/bench/targets/mi350x-qwen38-27b-tps.yaml --prompts /opt/bench/pools/qwen38-quality-prompts.jsonl --tasks /opt/bench/pools/qwen38-quality-tasks.jsonl --max-tokens 128 --request-timeout 1920 --out /opt/bench/results/baseline-atom-mi350x/staged/reference-launches/0
+[quality2] collected launch -> /opt/bench/results/baseline-atom-mi350x/staged/reference-launches/0
+[run.sh 15:33:40] + python -I /opt/bench/compare.py tps-launch --label B --role candidate --block /opt/bench/results/baseline-atom-mi350x/launches/B/b1 --block /opt/bench/results/baseline-atom-mi350x/launches/B/b2 --stall-ms 1000 --out /opt/bench/results/baseline-atom-mi350x/launches/B/launch.json
+{"label": "B", "status": "invalid_requests", "headline": 0.0, "n_usable": 2, "n_blocks": 2, "invalid_reasons": {"length": 1}}
+VERDICT INVALID  /opt/bench/results/baseline-atom-mi350x/results.json

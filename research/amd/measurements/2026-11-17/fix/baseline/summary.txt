@@ -1,0 +1,20 @@
+experiment: baseline-atom-mi350x  (baseline, run baseline-atom-mi350x-20261117T152301Z-124954)
+verdict:    INVALID
+target:     mi350x-qwen38-27b-tps (tps)
+ran:        2026-11-17T15:23:01Z to 2026-11-17T15:33:40Z (639s)
+image:      ij-atom-ref:ad256a94-lp1 (sha256:be6dd1f1e4ad4486a60b557f56176cfaa0766768002ac5325ac157eea5ded33f)
+isolation:  network none, exfil probe blocked
+cleanup:    ok
+
+reasons:
+  - baseline launch is not a measurement: invalid_requests
+speed:      one stream 77.5 tok/s for the whole answer, 79.5 decoding; headline 0.0 tok/s per chip
+  isl 100: 78.7 tok/s (79.9 decoding), TPOT 13 ms, TTFT 114 ms
+  isl 1000: 77.5 tok/s (79.5 decoding), TPOT 13 ms, TTFT 128 ms
+  isl 2000: 77.4 tok/s (79.4 decoding), TPOT 13 ms, TTFT 177 ms
+  isl 4000: 76.4 tok/s (79.2 decoding), TPOT 13 ms, TTFT 256 ms
+
+launches (whole-answer speed per chip over the mix of sizes, tok/s):
+  B   candidate invalid_requests headline 0.0  one stream 77.5 (79.5 decoding)  blocks 2/2
+
+quality2: passed=True

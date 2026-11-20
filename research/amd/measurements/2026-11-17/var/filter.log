@@ -1,0 +1,16 @@
+starting the reference engine (ATOM)
+reference ready after 66 s
+drop q-q-0001-translate the reference's logprobs cover 127 of its 128 tokens (finish length); a token without visi
+drop q-q-0007-translate the reference's logprobs cover 127 of its 128 tokens (finish length); a token without visi
+drop q-q-0029-arith the reference's logprobs cover 127 of its 128 tokens (finish length); a token without visi
+drop q-q-0033-translate the reference's logprobs cover 127 of its 128 tokens (finish length); a token without visi
+drop q-q-0039-translate the reference's logprobs cover 127 of its 128 tokens (finish length); a token without visi
+drop q-q-0053-translate the reference's logprobs cover 127 of its 128 tokens (finish length); a token without visi
+drop q-q-0060-translate the reference's logprobs cover 127 of its 128 tokens (finish length); a token without visi
+drop q-q-0118-translate the reference's logprobs cover 127 of its 128 tokens (finish length); a token without visi
+drop q-q-0154-json the reference returned no logprobs (fields: ['content'])
+drop q-q-0165-translate the reference's logprobs cover 127 of its 128 tokens (finish length); a token without visi
+drop q-q-0173-translate the reference's logprobs cover 127 of its 128 tokens (finish length); a token without visi
+drop q-q-0209-translate the reference's logprobs cover 127 of its 128 tokens (finish length); a token without visi
+drop q-q-0232-json the reference's logprobs cover 126 of its 128 tokens (finish length); a token without visi
+kept 43, dropped 13: ['q-q-0001-translate', 'q-q-0007-translate', 'q-q-0029-arith', 'q-q-0033-translate', 'q-q-0039-translate', 'q-q-0053-translate', 'q-q-0060-translate', 'q-q-0118-translate', 'q-q-0154-json', 'q-q-0165-translate', 'q-q-0173-translate', 'q-q-0209-translate', 'q-q-0232-json']

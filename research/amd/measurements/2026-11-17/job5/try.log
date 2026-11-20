@@ -1,0 +1,42 @@
+[14:43:15] gpu: GPU taken after 0.0 s in the queue
+hip_probe.cpp:27:5: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   27 |     hipMemset(a, 0, bytes);
+      |     ^~~~~~~~~~~~~~~~~~~~~~
+hip_probe.cpp:28:5: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   28 |     hipDeviceSynchronize();
+      |     ^~~~~~~~~~~~~~~~~~~~~~
+hip_probe.cpp:31:5: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   31 |     hipDeviceSynchronize();
+      |     ^~~~~~~~~~~~~~~~~~~~~~
+hip_probe.cpp:37:5: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   37 |     hipDeviceSynchronize();
+      |     ^~~~~~~~~~~~~~~~~~~~~~
+hip_probe.cpp:40:5: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   40 |     hipFree(a); hipFree(b);
+      |     ^~~~~~~~~~
+hip_probe.cpp:40:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   40 |     hipFree(a); hipFree(b);
+      |                 ^~~~~~~~~~
+6 warnings generated when compiling for gfx950.
+hip_probe.cpp:27:5: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   27 |     hipMemset(a, 0, bytes);
+      |     ^~~~~~~~~~~~~~~~~~~~~~
+hip_probe.cpp:28:5: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   28 |     hipDeviceSynchronize();
+      |     ^~~~~~~~~~~~~~~~~~~~~~
+hip_probe.cpp:31:5: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   31 |     hipDeviceSynchronize();
+      |     ^~~~~~~~~~~~~~~~~~~~~~
+hip_probe.cpp:37:5: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   37 |     hipDeviceSynchronize();
+      |     ^~~~~~~~~~~~~~~~~~~~~~
+hip_probe.cpp:40:5: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   40 |     hipFree(a); hipFree(b);
+      |     ^~~~~~~~~~
+hip_probe.cpp:40:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   40 |     hipFree(a); hipFree(b);
+      |                 ^~~~~~~~~~
+6 warnings generated when compiling for host.
+copy: 4702.9 GB/s (read+write)
+fma: 34.9 TFLOP/s (fp32)
+[14:43:17] gpu: exit code 0 after 1.3 s on the GPU (0.0 s in the queue)

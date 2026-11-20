@@ -1,0 +1,8 @@
+{"id": "h1-story", "prompt": "The lighthouse keeper had not seen a ship in eleven days. On the twelfth morning"}
+{"id": "h2-sql", "prompt": "-- PostgreSQL: monthly revenue per customer for 2025, highest first\nSELECT"}
+{"id": "h3-physics", "prompt": "Q: A ball is thrown straight up at 14 m/s. Ignoring air resistance, how high does it rise?\nA: Step by step,"}
+{"id": "h4-recipe", "prompt": "Ingredients for a simple bread loaf:\n1."}
+{"id": "h5-chat-why", "messages": [{"role": "user", "content": "Why do compilers do register allocation? Answer in two short paragraphs."}], "chat_template_kwargs": {"enable_thinking": false}}
+{"id": "h6-chat-rust", "messages": [{"role": "user", "content": "Write a Rust function that returns the n-th Fibonacci number using iteration."}], "chat_template_kwargs": {"enable_thinking": false}}
+{"id": "h7-yaml", "prompt": "# Kubernetes deployment for a web app with 3 replicas\napiVersion: apps/v1\nkind:"}
+{"id": "h8-chat-summary", "messages": [{"role": "user", "content": "Summarise the causes of the French Revolution in five bullet points."}], "chat_template_kwargs": {"enable_thinking": false}}

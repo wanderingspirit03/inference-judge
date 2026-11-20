@@ -1,0 +1,207 @@
+#!/usr/bin/env python3
+"""On the GPU machine: the one entry point the controller calls over ssh.
+
+  ij-box run <kind> <dir> -- <argv>     as `builder`
+      kind try|profile|check|ref|gpu: the AMD command of that name with argv
+      kind box: argv itself, without the GPU queue
+  ij-box judge <dir> -- <argv>          as `judge`: argv[0] is submit
+      (the AMD ./submit), run with the machine to itself
+
+Every run of `builder` holds a shared lock on the machine; a judged run takes
+it exclusively.  While the judge waits for it, new runs wait too.  When the
+builder's runs have not ended after config submit.alone_wait_s, the judge
+stops them (ij-reap --machine).  A judged run's timing therefore sees no
+other work of the agents on the machine, GPU or CPU.
+
+The command runs in its own process group.  When the caller's end of the
+ssh connection goes away (stdin reaches end of input), it is stopped:
+SIGTERM, then SIGKILL after 10 s.  The exit code is the command's (128+n
+when it was killed by signal n)."""
+import fcntl
+import json
+import os
+import pwd
+import signal
+import subprocess
+import sys
+import threading
+import time
+from pathlib import Path
+
+CODE = Path(os.path.realpath(__file__)).parents[2]          # /opt/ij-amd/amd
+BASE = Path("/var/lib/ij-amd")
+LOCK = BASE / "machine.lock"
+PENDING = BASE / "judge-flag" / "pending"
+CONFIG = Path("/etc/ij-amd/amd-config.json")
+REAP = CODE / "controller" / "box" / "ij-reap"
+AMD = {"try", "profile", "check", "ref", "gpu"}
+
+
+def say(msg: str) -> None:
+    print(f"[ij-box {time.strftime('%H:%M:%S', time.gmtime())}] {msg}", file=sys.stderr, flush=True)
+
+
+def env(user: str) -> dict:
+    e = dict(os.environ)
+    if CONFIG.exists():
+        e["IJ_AMD_CONFIG"] = str(CONFIG)
+    e["IJ_AMD_STATE"] = str(BASE / user)
+    e["IJ_AMD_QUEUE"] = str(BASE / "gpu")
+    e["IJ_AMD_REAP_SUDO"] = "1"
+    e["IJ_BOX_RUN"] = "1"
+    e.setdefault("PATH", "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin")
+    return e
+
+
+def amd_cfg() -> dict:
+    return json.loads((CONFIG if CONFIG.exists() else CODE / "config.json").read_text())
+
+
+def pending() -> dict | None:
+    try:
+        return json.loads(PENDING.read_text())
+    except (FileNotFoundError, ValueError):
+        return None
+
+
+def lock_fd() -> int:
+    return os.open(LOCK, os.O_RDWR | os.O_CREAT, 0o664)
+
+
+def shared_lock() -> int:
+    fd = lock_fd()
+    said = 0.0
+    while True:
+        p = pending()
+        if p is None:
+            try:
+                fcntl.flock(fd, fcntl.LOCK_SH | fcntl.LOCK_NB)
+                return fd
+            except BlockingIOError:
+                pass
+        if time.monotonic() - said > 300:
+            say("waiting: the judge is measuring a submission"
+                + (f" (since {p.get('since', '?')})" if p else "") + "; the machine is its alone until it ends")
+            said = time.monotonic()
+        time.sleep(1)
+
+
+def exclusive_lock(alone_wait_s: float) -> int:
+    PENDING.write_text(json.dumps({"pid": os.getpid(), "since": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime())}))
+    fd = lock_fd()
+    t0 = time.monotonic()
+    said = reaped = False
+    while True:
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            return fd
+        except BlockingIOError:
+            pass
+        if not said:
+            say(f"waiting up to {alone_wait_s:.0f} s for the agents' runs on this machine to end")
+            said = True
+        if not reaped and time.monotonic() - t0 > alone_wait_s:
+            r = subprocess.run(["sudo", "-n", str(REAP), "--machine"], capture_output=True, text=True, timeout=120)
+            say(("stopped the agents' runs still going: " + r.stdout.strip()) if r.returncode == 0
+                else f"could not stop the agents' runs ({r.returncode}): {r.stderr.strip()[:200]}")
+            reaped = True
+        time.sleep(0.5)
+
+
+def run_child(argv: list[str], cwd: str, e: dict) -> int:
+    try:
+        p = subprocess.Popen(argv, cwd=cwd, env=e, stdin=subprocess.DEVNULL, start_new_session=True)
+    except FileNotFoundError:
+        say(f"{argv[0]}: command not found")
+        return 127
+    except PermissionError:
+        say(f"{argv[0]}: permission denied")
+        return 126
+    stopping = threading.Event()
+
+    def stop(why: str):
+        if stopping.is_set():
+            return
+        stopping.set()
+        say(f"stopping the command: {why}")
+        try:
+            os.killpg(p.pid, signal.SIGTERM)
+        except OSError:
+            return
+        for _ in range(100):
+            if p.poll() is not None:
+                return
+            time.sleep(0.1)
+        try:
+            os.killpg(p.pid, signal.SIGKILL)
+        except OSError:
+            pass
+
+    def watch_stdin():
+        try:
+            while os.read(0, 4096):
+                pass
+        except OSError:
+            pass
+        stop("the caller went away")
+    threading.Thread(target=watch_stdin, daemon=True).start()
+    for s in (signal.SIGTERM, signal.SIGHUP, signal.SIGINT):
+        signal.signal(s, lambda n, _f: threading.Thread(target=stop, args=(f"signal {n}",), daemon=True).start())
+    while True:
+        try:
+            rc = p.wait()
+            break
+        except InterruptedError:
+            continue
+    try:
+        os.killpg(p.pid, signal.SIGKILL)                # what it left in its group
+    except OSError:
+        pass
+    return rc if rc >= 0 else 128 - rc
+
+
+def main(argv: list[str]) -> int:
+    user = pwd.getpwuid(os.getuid()).pw_name
+    if len(argv) >= 4 and argv[0] == "run" and "--" in argv:
+        kind, cwd, rest = argv[1], argv[2], argv[argv.index("--") + 1:]
+        if user != "builder":
+            say("ij-box run is for the user builder")
+            return 2
+        if kind in AMD:
+            cmd = [str(CODE / kind), *rest]
+        elif kind == "box":
+            cmd = rest
+        else:
+            say(f"unknown kind {kind!r}")
+            return 2
+        Path(cwd).mkdir(parents=True, exist_ok=True)
+        if kind == "gpu":
+            p = pending()
+            if p:
+                print(f"judge: measuring a submission since {p.get('since', '?')}; the machine is its alone")
+            return run_child(cmd, cwd, env(user))
+        fd = shared_lock()
+        try:
+            return run_child(cmd, cwd, env(user))
+        finally:
+            os.close(fd)
+    if len(argv) >= 4 and argv[0] == "judge" and "--" in argv:
+        cwd, rest = argv[1], argv[argv.index("--") + 1:]
+        if user != "judge" or not rest or rest[0] != "submit":
+            say("ij-box judge is for the user judge, with submit")
+            return 2
+        fd = exclusive_lock(float(amd_cfg()["submit"].get("alone_wait_s", 180)))
+        try:
+            return run_child([str(CODE / "submit"), *rest[1:]], cwd, env(user))
+        finally:
+            PENDING.unlink(missing_ok=True)
+            os.close(fd)
+    print(__doc__.strip(), file=sys.stderr)
+    return 2
+
+
+if __name__ == "__main__":
+    code = main(sys.argv[1:])
+    sys.stdout.flush()
+    sys.stderr.flush()
+    os._exit(code)          # not sys.exit: the stdin watcher thread may still be reading

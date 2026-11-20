@@ -30,3 +30,6 @@ research/queue/
 # build and test spill
 bench/bench/
 *.egg-info/
+
+# Local paper workspace and VM archive
+paper-amd/

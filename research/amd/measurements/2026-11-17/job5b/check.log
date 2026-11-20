@@ -1,0 +1,16 @@
+[15:05:08] gpu: GPU taken after 0.0 s in the queue
+[15:05:08] starting the reference engine (ATOM)
+[15:06:14] reference ready after 66 s
+[15:06:45] engine: starting ./serve 8100
+[15:07:49] engine: ready after 64 s (model id 'qwen3.8-27b')
+[15:08:06]   p1-prose: agreement 1.000, 0 parting(s)
+[15:08:07]   p2-code: agreement 1.000, 0 parting(s)
+[15:08:14]   p3-math: agreement 1.000, 0 parting(s)
+[15:08:16]   p4-list: agreement 1.000, 0 parting(s)
+[15:08:17]   p5-chat-explain: agreement 1.000, 0 parting(s)
+[15:08:19]   p6-chat-code: agreement 1.000, 0 parting(s)
+[15:08:19]   p7-json: agreement 1.000, 0 parting(s)
+[15:08:20]   p8-translate: agreement 1.000, 0 parting(s)
+PASS: agreement 1.0 over 792 positions of 8 prompts; limit 0.95 (not measured on AMD yet)
+strict agreement 1.0, close calls 0, partings 0, failed requests 0
+report: /var/lib/ij-amd/builder/check-runs/20261117-150508/report.json (engine log: /var/lib/ij-amd/builder/check-runs/20261117-150508/serve.log); took 3m12s

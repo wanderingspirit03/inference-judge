@@ -1,0 +1,63 @@
+[atom 15:36:00] Raised RLIMIT_NOFILE soft limit 1024 -> 65535 (hard=524288)
+[atom 15:36:00] Loading tokenizer from /models/Qwen3.8-27B...
+[atom 15:36:00] Initializing engine with model /models/Qwen3.8-27B...
+[atom 15:36:00] Reasoning channel: </think>
+[atom 15:36:00] Reasoning switches on enable_thinking: True on, False off.
+[atom 15:36:00] Tool-call format: qwen (from the chat template)
+[aiter] Current hipcc not support: -mllvm -amdgpu-coerce-illegal-types=1, skip it.
+[atom 15:36:12] Engine kwargs: {'trust_remote_code': False, 'tensor_parallel_size': 1, 'decode_context_parallel_size': 1, 'pipeline_parallel_size': 1, 'prefill_context_parallel_size': 1, 'data_parallel_size': 1, 'enforce_eager': False, 'enable_prefix_caching': True, 'port': 8006, 'kv_cache_dtype': 'bf16', 'index_cache_dtype': None, 'max_model_len': 40000, 'max_num_batched_tokens': 16384, 'long_prefill_token_threshold': 0, 'attn_prefill_chunk_size': 16384, 'state_checkpoint_interval_tokens': 8192, 'state_checkpoint_demand': True, 'enable_decoder_swa_bounded_replay': True, 'enable_chunked_prefill': True, 'enable_log_stats': True, 'throughput_log_interval': 10.0, 'cache_hit_rate_window': 1000, 'scheduler_delay_factor': 0.0, 'max_num_seqs': 4, 'gpu_memory_utilization': 0.9, 'load_dummy': None, 'enable_expert_parallel': False, 'fake_eplb': False, 'torch_profiler_dir': None, 'enable_dp_attention': False, 'dp_load_balance': 'least_requests', 'moe_backend': 'standard', 'kv_transfer_config': '{}', 'mark_trace': False, 'enable_rapidserve': False, 'disagg_prefill_max_num_seqs': None, 'disagg_constrained': False, 'online_quant_config': None, 'hf_overrides': None, 'eplb_enable': False, 'kv_cache_block_size': 16, 'compilation_config': CompilationConfig(level=3, use_cudagraph=True, local_cache_dir=None, cudagraph_capture_sizes=[1, 2, 3, 4, 5, 6, 7, 8, 16, 32, 48, 64, 128, 256, 512], cuda_graph_sizes=[512], debug_dump_path='', traced_files=set(), cache_dir='', use_inductor=True, cudagraph_mode=<CUDAGraphMode.FULL: 2>, compilation_time=0.0, splitting_ops=None, cudagraph_copy_inputs=False, inductor_compile_config={}, compile_sizes=None, static_forward_context={}), 'speculative_config': SpeculativeConfig(method='dflash', num_spec_tokens=7), 'enable_tbo': False, 'enable_tbo_decode': False, 'enable_low_latency': False, 'moe_all2all_backend': 'auto', 'dspark': DSparkConfig(confidence_schedule=False, ragged=False, ragged_graph_sizes='', q_buckets='', disable_sps_calib=False, calibration_profile=None), 'eplb_config': EPLBConfig(load_window_size=1000, rebalance_interval=3000, rebalance_layers_per_chunk=64, num_redundant_experts=0, rebalance_min_balancedness=2.0, rebalance_balancedness_agg='min', p2p_batch_chunk_size=32, placement_policy='naive'), 'dcp_config': DCPConfig(interleave_size=1, enable_query_replication=True, enable_project_before_merge=True, comm_backend='a2a', indexer_dcp_only=False), 'parallel_config': ParallelConfig(data_parallel_size=1, data_parallel_size_local=1, data_parallel_rank=0, data_parallel_rank_local=None, decode_context_parallel_size=1, pipeline_parallel_rank=0, pp_meta_addrs=[], pp_token_addr='', control_address='', pp_kv_status_addr='', data_parallel_master_port=29500, data_parallel_base_port=0, data_parallel_master_ip='127.0.0.1')}
+[atom 15:36:12] dcp_config.enable_query_replication disabled: decode_context_parallel_size <= 1 (no DCP group) not supported.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+[atom 15:36:12] Engine Core Mgr: model-runner TCPStore listening on 127.0.0.1:42191
+[atom 15:36:12] Engine Core Mgr: Creating EngineCore engine 0 (global dp=0, local dp=0, pp=0) of 1
+[atom 15:36:12] Creating EngineCore process: global DP rank 0 (local 0), GPUs 0 to 0
+[atom 15:36:12] Engine Core Mgr: Starting EngineCore for DP rank 0/1
+[atom 15:36:19] Create lazy wrapper for FusedMoE to change the naming
+[atom 15:36:20] ModelRunner rank=0, dp_rank_local=0, pp_rank=0, local_device_rank=0, device=cuda:0
+[atom 15:36:20] disable_mmap: False
+[atom 15:36:20] Prefetching 18/18 shards into page cache in the background (node-local rank 0 of 1, 4 threads, 16 MiB blocks)
+Loading safetensors shards[/models/Qwen3.8-27B]:   0%|          | 0/18 [00:00<?, ?it/s]Loading safetensors shards[/models/Qwen3.8-27B]:  33%|███▎      | 6/18 [00:00<00:00, 15.91it/s]Loading safetensors shards[/models/Qwen3.8-27B]:  72%|███████▏  | 13/18 [00:00<00:00, 30.65it/s]Loading safetensors shards[/models/Qwen3.8-27B]: 100%|██████████| 18/18 [00:00<00:00, 32.00it/s]
+[atom 15:36:21] Checkpoint prefetch finished: 18/18 shards in 0.6s
+[atom 15:36:31] Staging buffers: 0 allocated (0.0 GiB, 0.00s pinning)
+[atom 15:36:31] [rank_0] weight load phases: read+queue 0.57s (1184 tensors) | drain 9.60s | staging flush 0.00s | threads 16
+[atom 15:36:31] [rank_0] Weight post-processing done: 0.00 seconds
+[atom 15:36:31] [rank_0] Peak GPU memory during weight loading and post-processing: 51.00 GB
+[atom 15:36:31] [rank_0] Model load done: /models/Qwen3.8-27B (weights loaded in 10.26s)
+[atom 15:36:31] Loading drafter model...
+[atom 15:36:31] DFlash 2 draft loaded from /models/Qwen3.8-27B-DFlash2 (target embedding and LM head)
+[atom 15:36:32] DFlash 2 single-sequence drafter: DFlash2Mono (aot /opt/qwen38/drafter-objects, max_pos 40968)
+[atom 15:36:32] ReplaySSM disabled for linear attention (default, no speculative decoding).
+[atom 15:36:32] DFlash2Proposer aux capture on target layers: (5, 19, 33, 47, 61)
+[atom 15:36:41] Qwen3.8-27B megakernel ready (9.0 s): m8
+[atom 15:36:43] forward_vars ring: 1 slot (staging reuse gated on its H2D)
+[atom 15:36:43] H2D group token_inputs: packed
+[atom 15:36:43] H2D group prefill_inputs: packed
+[atom 15:36:43] H2D group mha_decode: packed
+[atom 15:36:43] H2D group gdn_state: packed
+[atom 15:36:43] Model Runner0/1: dp_size=1, dp_attn=False, warmup_max_tokens=16384 < max_model_len=40000. Using 1 seq(s) with length 16384 for warmup.
+[atom 15:36:56] Using cache directory: /root/.cache/atom/torch_compile_cache/4a620d4c4b/rank_0/backbone for vLLM's torch.compile
+[atom 15:36:56] Dynamo bytecode transform time: 12.68 s
+[atom 15:36:56] Cache the graph for dynamic shape for later use
+[atom 15:37:09] Compiling a graph for dynamic shape takes 12.81 s
+[atom 15:37:09] Computation graph saved to /root/.cache/atom/torch_compile_cache/4a620d4c4b/rank_0/backbone/computation_graph.py
+[aiter] Current hipcc not support: -mllvm -amdgpu-coerce-illegal-types=1, skip it.
+[aiter] type hints mismatch, override to --> fused_qk_rmsnorm_group_quant(q_out_quantized: Optional[aiter_tensor_t] = None, q_out_scale: Optional[aiter_tensor_t] = None, q: Optional[aiter_tensor_t] = None, q_weight: Optional[aiter_tensor_t] = None, q_epsilon: Optional[float] = None, q_out_unquantized: Optional[aiter_tensor_t] = None, k_out: Optional[aiter_tensor_t] = None, q_res_out: Optional[aiter_tensor_t] = None, k: Optional[aiter_tensor_t] = None, k_weight: Optional[aiter_tensor_t] = None, k_epsilon: Optional[float] = None, q_residual: Optional[aiter_tensor_t] = None, group_size: int = 128, transpose_scale: bool = False, gemma_norm: bool = False) -> None
+[atom 15:38:25] Model Runner0/1: warmup_model 102.14 seconds with 1 reqs 16384 tokens
+[atom 15:38:25] Model warmup done: /models/Qwen3.8-27B
+[atom 15:38:25] sub-pool kv: entries=126448, entry_bytes=1376256, reserved=162.07GB
+[atom 15:38:25] sub-pool state: entries=32, entry_bytes=160825344, reserved=4.79GB
+[atom 15:38:25] Memory budget: total_gpu=287.69GB, free=202.52GB, utilization=0.9, budget=258.92GB, peak_torch=84.41GB, non_torch=1.34GB, cudagraph_est=0.55GB, safety=5.75GB, available_for_kv=166.87GB, block_bytes=1376256, num_kvcache_blocks=126448
+[atom 15:38:25] Concurrent capacity vs context length (max_model_len=40000, block_size=16, max_slots=4, pool_blocks=126448):
+   10% (   4000 tok):    250 blk/req → max_concurrent=4     (bound by slots)
+   30% (  12000 tok):    750 blk/req → max_concurrent=4     (bound by slots)
+   50% (  20000 tok):   1250 blk/req → max_concurrent=4     (bound by slots)
+   70% (  28000 tok):   1750 blk/req → max_concurrent=4     (bound by slots)
+   90% (  36000 tok):   2250 blk/req → max_concurrent=4     (bound by slots)
+  100% (  40000 tok):   2500 blk/req → max_concurrent=4     (bound by slots)
+[atom 15:38:25] GDNAttentionMetadataBuilder caches 48 linear_state rows, 16 h4d256 rows
+[atom 15:38:25] Allocated draft KV pool: 126448 blocks, 41434480640 B of the paged allocation
+[atom 15:38:25] DraftKvBuilder caches 5 draft_kv rows
+[atom 15:38:25] Binding KV cache for the target model
+[atom 15:38:25] Binding KV cache for the draft model
+[atom 15:38:25] cudagraph capture sizes [512, 256, 128, 64, 48, 32, 16, 8, 7, 6, 5] exceed the schedulable batch size min(max_num_seqs=4, max_num_batched_tokens=16384 // (mtp_k+1)=8 = 2048) = 4; dropping. Remaining: [4, 3, 2, 1]
+  0%|          | 0/4 [00:00<?, ?it/s]Capturing bs=4, max_q_len=8:   0%|          | 0/4 [00:00<?, ?it/s]

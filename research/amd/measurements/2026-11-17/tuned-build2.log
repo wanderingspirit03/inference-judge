@@ -1,0 +1,338 @@
+DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            Install the buildx component to build images with BuildKit:
+            https://docs.docker.com/go/buildx/
+
+Sending build context to Docker daemon   56.1MB
+Step 1/18 : FROM rocm/pytorch@sha256:bbdaba66029f905321be3bbc95206a2d9a56a2bc5300877d146ad24d40db9a12
+ ---> bbdaba66029f
+Step 2/18 : ARG AITER_COMMIT=c53e9b3f4285c36ea785e614ce5cf8b04c78b3bd
+ ---> Using cache
+ ---> 380ebac247e3
+Step 3/18 : ENV PYTHONDONTWRITEBYTECODE=1 AITER_LOG_LEVEL=WARNING HSA_COREDUMP_PATTERN=/dev/null
+ ---> Using cache
+ ---> cf6cbdd9f384
+Step 4/18 : ENV GPU_MAX_HW_QUEUES=1
+ ---> Using cache
+ ---> 1142ebc95a9f
+Step 5/18 : COPY scripts/qwen38_flash_mono/repro-constraints.txt /opt/constraints.txt
+ ---> Using cache
+ ---> 530aa7d12a57
+Step 6/18 : RUN PIP_CONSTRAINT=/opt/constraints.txt python3 -m pip install --no-cache-dir "rocm[devel]==10.0.0"         --index-url https://stable.repo.amd.com/rocm/whl-next     && python3 -m rocm_sdk init
+ ---> Using cache
+ ---> 2026767f3ac6
+Step 7/18 : ENV ROCM_PATH=/opt/venv/lib/python3.12/site-packages/_rocm_sdk_devel
+ ---> Using cache
+ ---> 58c655b69857
+Step 8/18 : ENV HIP_PATH=$ROCM_PATH CMAKE_PREFIX_PATH=$ROCM_PATH PATH=$ROCM_PATH/bin:$PATH     LD_LIBRARY_PATH=$ROCM_PATH/lib:$ROCM_PATH/lib/host-math/lib
+ ---> Using cache
+ ---> f82c2b387d4c
+Step 9/18 : RUN git clone --filter=blob:none https://github.com/ROCm/aiter.git /opt/aiter     && cd /opt/aiter && git checkout -q "$AITER_COMMIT" && git submodule update --init --recursive --depth 1     && PIP_CONSTRAINT=/opt/constraints.txt python3 -m pip install --no-cache-dir -r requirements.txt     && AITER_USE_SYSTEM_TRITON=1 MAX_JOBS=64 PREBUILD_KERNELS=0 GPU_ARCHS=gfx950 python3 setup.py develop
+ ---> Using cache
+ ---> cd33434e09d7
+Step 10/18 : COPY . /opt/atom
+ ---> d55375a7d43c
+Step 11/18 : WORKDIR /opt/atom
+ ---> Running in c55008e1593c
+ ---> Removed intermediate container c55008e1593c
+ ---> c82ba86fdbdb
+Step 12/18 : RUN git config --system --add safe.directory '*'     && PIP_CONSTRAINT=/opt/constraints.txt python3 -m pip install --no-cache-dir setuptools-scm     && PIP_CONSTRAINT=/opt/constraints.txt python3 -m pip install --no-cache-dir --no-build-isolation -e . msgpack
+ ---> Running in 520e86283ee0
+Collecting setuptools-scm
+  Downloading setuptools_scm-10.3.4-py3-none-any.whl.metadata (6.7 kB)
+Collecting vcs-versioning<3,>=2.5.0.dev0 (from setuptools-scm)
+  Downloading vcs_versioning-2.6.0-py3-none-any.whl.metadata (1.7 kB)
+Requirement already satisfied: packaging>=20 in /opt/venv/lib/python3.12/site-packages (from setuptools-scm) (26.3)
+Requirement already satisfied: setuptools in /opt/venv/lib/python3.12/site-packages (from setuptools-scm) (84.0.0)
+Downloading setuptools_scm-10.3.4-py3-none-any.whl (33 kB)
+Downloading vcs_versioning-2.6.0-py3-none-any.whl (123 kB)
+Installing collected packages: vcs-versioning, setuptools-scm
+
+Successfully installed setuptools-scm-10.3.4 vcs-versioning-2.6.0
+[91m
+[notice] A new release of pip is available: 26.2.1 -> 26.3
+[notice] To update, run: pip install --upgrade pip
+[0mObtaining file:///opt/atom
+  Checking if build backend supports build_editable: started
+  Checking if build backend supports build_editable: finished with status 'done'
+  Preparing editable metadata (pyproject.toml): started
+  Preparing editable metadata (pyproject.toml): finished with status 'done'
+Collecting msgpack
+  Downloading msgpack-1.2.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (8.3 kB)
+Requirement already satisfied: pybind11 in /opt/venv/lib/python3.12/site-packages (from atom==0.1.1.dev1595+g352229d6d.d20261117) (3.0.4)
+Collecting transformers==5.16.1 (from atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading transformers-5.16.1-py3-none-any.whl.metadata (32 kB)
+Collecting zmq (from atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading zmq-0.0.0.zip (2.2 kB)
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Collecting msgspec (from atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading msgspec-0.22.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (6.0 kB)
+Collecting xxhash (from atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading xxhash-4.0.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (17 kB)
+Collecting fastapi<0.137,>=0.115 (from atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading fastapi-0.136.3-py3-none-any.whl.metadata (27 kB)
+Requirement already satisfied: psutil in /opt/venv/lib/python3.12/site-packages (from atom==0.1.1.dev1595+g352229d6d.d20261117) (7.2.2)
+Collecting prometheus_client<0.26,>=0.25 (from atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading prometheus_client-0.25.0-py3-none-any.whl.metadata (2.1 kB)
+Collecting protobuf (from atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading protobuf-7.36.2-cp310-abi3-manylinux2014_x86_64.whl.metadata (595 bytes)
+Collecting uvicorn (from atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading uvicorn-0.54.0-py3-none-any.whl.metadata (6.6 kB)
+Collecting uvloop (from atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading uvloop-0.23.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (5.1 kB)
+Collecting aiohttp (from atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading aiohttp-3.14.5-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (8.3 kB)
+Collecting datasets (from atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading datasets-5.1.0-py3-none-any.whl.metadata (24 kB)
+Collecting openpyxl (from atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading openpyxl-3.1.5-py2.py3-none-any.whl.metadata (2.5 kB)
+Requirement already satisfied: tqdm in /opt/venv/lib/python3.12/site-packages (from atom==0.1.1.dev1595+g352229d6d.d20261117) (4.70.0)
+Collecting setproctitle (from atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading setproctitle-1.3.8-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (10 kB)
+Collecting huggingface-hub<2.0,>=1.5.0 (from transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading huggingface_hub-1.33.0-py3-none-any.whl.metadata (16 kB)
+Requirement already satisfied: numpy>=1.17 in /opt/venv/lib/python3.12/site-packages (from transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d.d20261117) (2.5.2)
+Requirement already satisfied: packaging>=20.0 in /opt/venv/lib/python3.12/site-packages (from transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d.d20261117) (26.3)
+Requirement already satisfied: pyyaml>=5.1 in /opt/venv/lib/python3.12/site-packages (from transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d.d20261117) (6.0.3)
+Collecting regex>=2025.10.22 (from transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading regex-2026.9.29-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (40 kB)
+Collecting tokenizers<0.24.0,>=0.23.1 (from transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading tokenizers-0.23.3-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (9.8 kB)
+Collecting typer (from transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading typer-0.27.3-py3-none-any.whl.metadata (16 kB)
+Collecting safetensors>=0.8.0 (from transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading safetensors-0.8.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.2 kB)
+Collecting starlette>=0.46.0 (from fastapi<0.137,>=0.115->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading starlette-1.7.0-py3-none-any.whl.metadata (6.6 kB)
+Collecting pydantic>=2.9.0 (from fastapi<0.137,>=0.115->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading pydantic-2.14.1-py3-none-any.whl.metadata (133 kB)
+Requirement already satisfied: typing-extensions>=4.8.0 in /opt/venv/lib/python3.12/site-packages (from fastapi<0.137,>=0.115->atom==0.1.1.dev1595+g352229d6d.d20261117) (4.16.0)
+Collecting typing-inspection>=0.4.2 (from fastapi<0.137,>=0.115->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading typing_inspection-0.4.4-py3-none-any.whl.metadata (2.6 kB)
+Collecting annotated-doc>=0.0.2 (from fastapi<0.137,>=0.115->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading annotated_doc-0.0.5-py3-none-any.whl.metadata (6.5 kB)
+Collecting click<9.0.0,>=8.4.2 (from huggingface-hub<2.0,>=1.5.0->transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading click-8.5.0-py3-none-any.whl.metadata (2.6 kB)
+Requirement already satisfied: filelock>=3.10.0 in /opt/venv/lib/python3.12/site-packages (from huggingface-hub<2.0,>=1.5.0->transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d.d20261117) (3.32.3)
+Requirement already satisfied: fsspec>=2023.5.0 in /opt/venv/lib/python3.12/site-packages (from huggingface-hub<2.0,>=1.5.0->transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d.d20261117) (2026.7.0)
+Collecting hf-xet<2.0.0,>=1.6.0 (from huggingface-hub<2.0,>=1.5.0->transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading hf_xet-1.7.0-cp38-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (4.9 kB)
+Collecting httpx<1,>=0.23.0 (from huggingface-hub<2.0,>=1.5.0->transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading httpx-0.28.1-py3-none-any.whl.metadata (7.1 kB)
+Collecting anyio (from httpx<1,>=0.23.0->huggingface-hub<2.0,>=1.5.0->transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading anyio-4.15.1-py3-none-any.whl.metadata (4.7 kB)
+Collecting certifi (from httpx<1,>=0.23.0->huggingface-hub<2.0,>=1.5.0->transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading certifi-2026.7.22-py3-none-any.whl.metadata (2.5 kB)
+Collecting httpcore==1.* (from httpx<1,>=0.23.0->huggingface-hub<2.0,>=1.5.0->transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading httpcore-1.0.9-py3-none-any.whl.metadata (21 kB)
+Collecting idna (from httpx<1,>=0.23.0->huggingface-hub<2.0,>=1.5.0->transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading idna-3.20-py3-none-any.whl.metadata (7.2 kB)
+Collecting h11>=0.16 (from httpcore==1.*->httpx<1,>=0.23.0->huggingface-hub<2.0,>=1.5.0->transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+Collecting annotated-types>=0.6.0 (from pydantic>=2.9.0->fastapi<0.137,>=0.115->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading annotated_types-0.8.0-py3-none-any.whl.metadata (15 kB)
+Collecting pydantic-core==2.50.1 (from pydantic>=2.9.0->fastapi<0.137,>=0.115->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading pydantic_core-2.50.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.5 kB)
+Collecting aiohappyeyeballs>=2.5.0 (from aiohttp->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading aiohappyeyeballs-2.7.1-py3-none-any.whl.metadata (5.9 kB)
+Collecting aiosignal>=1.4.0 (from aiohttp->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading aiosignal-1.4.0-py3-none-any.whl.metadata (3.7 kB)
+Collecting attrs>=17.3.0 (from aiohttp->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading attrs-26.1.0-py3-none-any.whl.metadata (8.8 kB)
+Collecting frozenlist>=1.1.1 (from aiohttp->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading frozenlist-1.8.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (20 kB)
+Collecting multidict<8.0,>=4.5 (from aiohttp->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading multidict-7.1.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (6.2 kB)
+Collecting propcache>=0.2.0 (from aiohttp->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading propcache-0.5.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (25 kB)
+Collecting yarl<2.0,>=1.25.1 (from aiohttp->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading yarl-1.25.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (111 kB)
+Collecting pyarrow>=24.0.0 (from datasets->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading pyarrow-26.0.0-cp312-cp312-manylinux_2_28_x86_64.whl.metadata (3.0 kB)
+Collecting dill<0.4.2,>=0.3.0 (from datasets->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading dill-0.4.1-py3-none-any.whl.metadata (10 kB)
+Requirement already satisfied: pandas in /opt/venv/lib/python3.12/site-packages (from datasets->atom==0.1.1.dev1595+g352229d6d.d20261117) (3.0.3)
+Collecting multiprocess<0.70.20 (from datasets->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading multiprocess-0.70.19-py312-none-any.whl.metadata (7.5 kB)
+Collecting et-xmlfile (from openpyxl->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading et_xmlfile-2.0.0-py3-none-any.whl.metadata (2.7 kB)
+Requirement already satisfied: python-dateutil>=2.8.2 in /opt/venv/lib/python3.12/site-packages (from pandas->datasets->atom==0.1.1.dev1595+g352229d6d.d20261117) (2.9.0.post0)
+Requirement already satisfied: six>=1.5 in /opt/venv/lib/python3.12/site-packages (from python-dateutil>=2.8.2->pandas->datasets->atom==0.1.1.dev1595+g352229d6d.d20261117) (1.17.0)
+Collecting shellingham>=1.3.0 (from typer->transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading shellingham-1.5.4-py2.py3-none-any.whl.metadata (3.5 kB)
+Collecting rich>=13.8.0 (from typer->transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading rich-15.0.0-py3-none-any.whl.metadata (18 kB)
+Collecting markdown-it-py>=2.2.0 (from rich>=13.8.0->typer->transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading markdown_it_py-4.2.0-py3-none-any.whl.metadata (7.4 kB)
+Requirement already satisfied: pygments<3.0.0,>=2.13.0 in /opt/venv/lib/python3.12/site-packages (from rich>=13.8.0->typer->transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d.d20261117) (2.21.0)
+Collecting mdurl~=0.1 (from markdown-it-py>=2.2.0->rich>=13.8.0->typer->transformers==5.16.1->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading mdurl-0.1.2-py3-none-any.whl.metadata (1.6 kB)
+Collecting pyzmq (from zmq->atom==0.1.1.dev1595+g352229d6d.d20261117)
+  Downloading pyzmq-27.2.0-cp312-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl.metadata (3.8 kB)
+Downloading transformers-5.16.1-py3-none-any.whl (12.1 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.1/12.1 MB 50.5 MB/s  0:00:00
+Downloading fastapi-0.136.3-py3-none-any.whl (117 kB)
+Downloading huggingface_hub-1.33.0-py3-none-any.whl (846 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 846.4/846.4 kB 126.1 MB/s  0:00:00
+Downloading click-8.5.0-py3-none-any.whl (125 kB)
+Downloading hf_xet-1.7.0-cp38-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (4.2 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.2/4.2 MB 129.9 MB/s  0:00:00
+Downloading httpx-0.28.1-py3-none-any.whl (73 kB)
+Downloading httpcore-1.0.9-py3-none-any.whl (78 kB)
+Downloading prometheus_client-0.25.0-py3-none-any.whl (64 kB)
+Downloading tokenizers-0.23.3-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (3.4 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.4/3.4 MB 176.3 MB/s  0:00:00
+Downloading msgpack-1.2.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (472 kB)
+Downloading annotated_doc-0.0.5-py3-none-any.whl (5.3 kB)
+Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+Downloading pydantic-2.14.1-py3-none-any.whl (488 kB)
+Downloading pydantic_core-2.50.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.2 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.2/2.2 MB 214.4 MB/s  0:00:00
+Downloading annotated_types-0.8.0-py3-none-any.whl (13 kB)
+Downloading regex-2026.9.29-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (807 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 807.8/807.8 kB 270.3 MB/s  0:00:00
+Downloading safetensors-0.8.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (516 kB)
+Downloading starlette-1.7.0-py3-none-any.whl (78 kB)
+Downloading anyio-4.15.1-py3-none-any.whl (132 kB)
+Downloading idna-3.20-py3-none-any.whl (69 kB)
+Downloading typing_inspection-0.4.4-py3-none-any.whl (14 kB)
+Downloading aiohttp-3.14.5-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (1.9 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.9/1.9 MB 234.8 MB/s  0:00:00
+Downloading multidict-7.1.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (483 kB)
+Downloading yarl-1.25.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (117 kB)
+Downloading aiohappyeyeballs-2.7.1-py3-none-any.whl (15 kB)
+Downloading aiosignal-1.4.0-py3-none-any.whl (7.5 kB)
+Downloading attrs-26.1.0-py3-none-any.whl (67 kB)
+Downloading frozenlist-1.8.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (242 kB)
+Downloading propcache-0.5.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (250 kB)
+Downloading certifi-2026.7.22-py3-none-any.whl (136 kB)
+Downloading datasets-5.1.0-py3-none-any.whl (604 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 604.4/604.4 kB 303.3 MB/s  0:00:00
+Downloading dill-0.4.1-py3-none-any.whl (120 kB)
+Downloading multiprocess-0.70.19-py312-none-any.whl (150 kB)
+Downloading pyarrow-26.0.0-cp312-cp312-manylinux_2_28_x86_64.whl (53.9 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 53.9/53.9 MB 207.7 MB/s  0:00:00
+Downloading msgspec-0.22.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (230 kB)
+Downloading openpyxl-3.1.5-py2.py3-none-any.whl (250 kB)
+Downloading et_xmlfile-2.0.0-py3-none-any.whl (18 kB)
+Downloading protobuf-7.36.2-cp310-abi3-manylinux2014_x86_64.whl (343 kB)
+Downloading setproctitle-1.3.8-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (32 kB)
+Downloading typer-0.27.3-py3-none-any.whl (123 kB)
+Downloading rich-15.0.0-py3-none-any.whl (310 kB)
+Downloading markdown_it_py-4.2.0-py3-none-any.whl (91 kB)
+Downloading mdurl-0.1.2-py3-none-any.whl (10.0 kB)
+Downloading shellingham-1.5.4-py2.py3-none-any.whl (9.8 kB)
+Downloading uvicorn-0.54.0-py3-none-any.whl (87 kB)
+Downloading uvloop-0.23.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (4.5 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.5/4.5 MB 202.5 MB/s  0:00:00
+Downloading xxhash-4.0.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (261 kB)
+Downloading pyzmq-27.2.0-cp312-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl (872 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 872.3/872.3 kB 248.5 MB/s  0:00:00
+Building wheels for collected packages: atom, zmq
+  Building editable for atom (pyproject.toml): started
+  Building editable for atom (pyproject.toml): finished with status 'done'
+  Created wheel for atom: filename=atom-0.1.1.dev1595+g352229d6d.d20261117-0.editable-py3-none-any.whl size=11884 sha256=2c42d76b8480ba9be617b64976b25747cb0b8d1790378e4f1093ca3516855832
+  Stored in directory: /tmp/pip-ephem-wheel-cache-ty31k7ie/wheels/e5/a1/e3/913a275074fa47ac06ca7869897d9d4f737eeca0851e393005
+  Building wheel for zmq (pyproject.toml): started
+  Building wheel for zmq (pyproject.toml): finished with status 'done'
+  Created wheel for zmq: filename=zmq-0.0.0-py3-none-any.whl size=1089 sha256=94faee301588cee40fba0f47a0231b40d2745760c1c1ac615a5eebde25c31ecf
+  Stored in directory: /tmp/pip-ephem-wheel-cache-ty31k7ie/wheels/68/8e/d4/3ed4272b059c74f0b9ae3930e45f075f295805c87d69b850f0
+Successfully built atom zmq
+Installing collected packages: xxhash, uvloop, typing-inspection, shellingham, setproctitle, safetensors, regex, pyzmq, pydantic-core, pyarrow, protobuf, propcache, prometheus_client, multidict, msgspec, msgpack, mdurl, idna, hf-xet, h11, frozenlist, et-xmlfile, dill, click, certifi, attrs, annotated-types, annotated-doc, aiohappyeyeballs, zmq, yarl, uvicorn, pydantic, openpyxl, multiprocess, markdown-it-py, httpcore, anyio, aiosignal, starlette, rich, httpx, aiohttp, typer, huggingface-hub, fastapi, tokenizers, datasets, transformers, atom
+
+Successfully installed aiohappyeyeballs-2.7.1 aiohttp-3.14.5 aiosignal-1.4.0 annotated-doc-0.0.5 annotated-types-0.8.0 anyio-4.15.1 atom-0.1.1.dev1595+g352229d6d.d20261117 attrs-26.1.0 certifi-2026.7.22 click-8.5.0 datasets-5.1.0 dill-0.4.1 et-xmlfile-2.0.0 fastapi-0.136.3 frozenlist-1.8.0 h11-0.16.0 hf-xet-1.7.0 httpcore-1.0.9 httpx-0.28.1 huggingface-hub-1.33.0 idna-3.20 markdown-it-py-4.2.0 mdurl-0.1.2 msgpack-1.2.3 msgspec-0.22.0 multidict-7.1.0 multiprocess-0.70.19 openpyxl-3.1.5 prometheus_client-0.25.0 propcache-0.5.4 protobuf-7.36.2 pyarrow-26.0.0 pydantic-2.14.1 pydantic-core-2.50.1 pyzmq-27.2.0 regex-2026.9.29 rich-15.0.0 safetensors-0.8.0 setproctitle-1.3.8 shellingham-1.5.4 starlette-1.7.0 tokenizers-0.23.3 transformers-5.16.1 typer-0.27.3 typing-inspection-0.4.4 uvicorn-0.54.0 uvloop-0.23.0 xxhash-4.0.1 yarl-1.25.1 zmq-0.0.0
+[91m
+[notice] A new release of pip is available: 26.2.1 -> 26.3
+[notice] To update, run: pip install --upgrade pip
+[0m ---> Removed intermediate container 520e86283ee0
+ ---> f57f03ada9d4
+Step 13/18 : ENV FLYDSL_DIR=/opt/qwen38/flydsl     DRAFTER_OBJECTS=/opt/qwen38/drafter-objects     ATOM_QWEN38_MK_CACHE=/opt/qwen38/kernel-cache
+ ---> Running in 8fb22eb4725f
+ ---> Removed intermediate container 8fb22eb4725f
+ ---> a008fb455282
+Step 14/18 : RUN SETUP_ONLY=1 WORK=/tmp/setup PY=python3 bash blog_benchmark/build_and_repro.sh     && rm -rf /tmp/setup "$FLYDSL_DIR/wheel/x"
+ ---> Running in d8e7fa244cef
+
+== 0. checks
+
+== 1. ATOM
+
+== 2. checkpoints
+skipped (SETUP_ONLY)
+
+== 3. FlyDSL (build time only; serving loads the code objects)
+[91m
+[notice] A new release of pip is available: 26.2.1 -> 26.3
+[notice] To update, run: pip install --upgrade pip
+[0mflydsl /opt/qwen38/flydsl
+
+== 4. code objects
+[91mTraceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/opt/atom/atom/models/qwen38_27b/mono/kernels/build.py", line 157, in build
+[0m[91m    raise RuntimeError(f"megakernel {name} build failed:\n{run.stderr[-4000:]}")
+RuntimeError: megakernel m8 build failed:
+sl/python/flydsl/compiler/jit_function.py", line 1620, in _compile_or_execute
+    traced = self._trace_and_compile(ctx, sig, bound, bound_self)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/qwen38/flydsl/python/flydsl/compiler/jit_function.py", line 1475, in _trace_and_compile
+    self.func(**named_args)
+  File "/opt/qwen38/kernel-cache/tmp6mnowfhh/verify_m8__m8.py", line 3039, in launch
+    kernel(pointer_table).launch(grid=(256, 1, 1), block=(256, 1, 1), stream=stream)
+  File "/opt/qwen38/flydsl/python/flydsl/compiler/kernel_function.py", line 360, in launch
+    kernel_name, kernel_args, gpu_func_op, smem_bytes = self._kernel_function._emit_kernel(
+                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/qwen38/flydsl/python/flydsl/compiler/kernel_function.py", line 602, in _emit_kernel
+    self._func(**dsl_args)
+  File "/opt/qwen38/kernel-cache/tmp6mnowfhh/verify_m8__m8.py", line 89, in kernel
+    if tid == 0:
+^^^^^^^^^^^^^^^^
+  File "/opt/qwen38/flydsl/python/flydsl/compiler/ast_rewriter.py", line 722, in scf_if_dispatch
+    ReplaceIfWithDispatch._call_branch(then_fn, result_names, result_values)
+  File "/opt/qwen38/flydsl/python/flydsl/compiler/ast_rewriter.py", line 666, in _call_branch
+    return fn(result_names, *state_values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/qwen38/kernel-cache/tmp6mnowfhh/verify_m8__m8.py", line 91, in __then_1
+    if (xcc < 0) | (xcc >= 8) | (command_epoch < 1) | (command_epoch > MAX_COMMAND_EPOCH):
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/qwen38/flydsl/python/flydsl/compiler/ast_rewriter.py", line 722, in scf_if_dispatch
+    ReplaceIfWithDispatch._call_branch(then_fn, result_names, result_values)
+  File "/opt/qwen38/flydsl/python/flydsl/compiler/ast_rewriter.py", line 666, in _call_branch
+    return fn(result_names, *state_values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/qwen38/kernel-cache/tmp6mnowfhh/verify_m8__m8.py", line 92, in __then_0
+    fail_native()
+  File "/opt/qwen38/kernel-cache/tmp6mnowfhh/verify_m8__m8.py", line 85, in fail_native
+    prior, won = fx.atomic_cas(native + 289, fx.Int32(0), fx.Int32(2), syncscope='agent', success_ordering=fx.AtomicOrdering.AcqRel, failure_ordering=fx.AtomicOrdering.Acquire)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/qwen38/flydsl/python/flydsl/expr/meta.py", line 175, in wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/opt/qwen38/flydsl/python/flydsl/expr/llvm.py", line 714, in atomic_cas
+    _normalize_to_llvm_ptr(ptr),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/qwen38/flydsl/python/flydsl/expr/llvm.py", line 102, in _normalize_to_llvm_ptr
+    ptr = ptr.llvm_ptr
+          ^^^^^^^^^^^^
+  File "/opt/qwen38/flydsl/python/flydsl/expr/typing.py", line 1063, in llvm_ptr
+    return to_llvm_ptr(self)
+           ^^^^^^^^^^^^^^^^^
+  File "/opt/qwen38/flydsl/python/flydsl/expr/meta.py", line 170, in wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/opt/qwen38/flydsl/python/flydsl/expr/primitive.py", line 1269, in to_llvm_ptr
+    llvm_address_space = resolve_llvm_address_space(ptr.address_space)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/qwen38/flydsl/python/flydsl/compiler/backends/__init__.py", line 73, in resolve_llvm_address_space
+    return backend_cls.llvm_address_space(address_space)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/qwen38/flydsl/python/flydsl/compiler/backends/rocm.py", line 41, in llvm_address_space
+    raise ValueError(f"ROCm address space {address_space} does not lower to a bare LLVM pointer") from None
+ValueError: ROCm address space #fly.address_space<global> does not lower to a bare LLVM pointer
+
+[0mThe command '/bin/sh -c SETUP_ONLY=1 WORK=/tmp/setup PY=python3 bash blog_benchmark/build_and_repro.sh     && rm -rf /tmp/setup "$FLYDSL_DIR/wheel/x"' returned a non-zero code: 1
+
+real	0m59.066s
+user	0m0.134s
+sys	0m0.069s
+exit 1

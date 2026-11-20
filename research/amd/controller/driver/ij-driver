@@ -1,0 +1,611 @@
+#!/usr/bin/env python3
+"""The driver: runs as the Unix user `driver` on the controller.
+
+  ij-driver run      the loop: keeps one GPU machine within the limits below,
+                     keeps Prime Agent running, saves the records.  Refuses
+                     to start while driver.spend_cap_usd is not set.
+  ij-driver tick     one pass of the loop (tests)
+  ij-driver status   the GPU machine, money spent, creations in 24 h, the agent
+  ij-driver destroy  destroy the GPU machine now (the loop makes a new one)
+  ij-driver stop     destroy the GPU machine, stop the agent, mark the run stopped
+  ij-driver push-code  copy the installed code to the ready GPU machine and
+                     set its access again (setup-box.sh --code-access)
+
+The limits (config `driver`, enforced here, not by DigitalOcean):
+  - only size gpu-mi350x1-288gb-spot in region ric1 (fixed in this file);
+  - one machine at a time (every droplet with the tag counts);
+  - at most max_creations_per_day creations in any 24 hours;
+  - spend_cap_usd in total over all machines in the ledger (no default).
+    A machine is not created unless min_hours_left_to_create more hours fit
+    under the cap; a running machine is destroyed, the agent stopped and the
+    run marked stopped when the cap would be reached before the next check.
+Cost = hours from creation to destruction x the hourly price (config
+price_usd_per_hour, else DigitalOcean's price_hourly for the size).
+
+DigitalOcean's token is read from driver.do_token_file, which the user puts
+there by hand; nothing works without it.
+"""
+import base64
+import hashlib
+import json
+import os
+import shlex
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+from pathlib import Path
+
+HERE = Path(os.path.realpath(__file__)).parent
+sys.path.insert(0, str(HERE.parent / "lib"))
+import ijctl  # noqa: E402
+
+SIZE = "gpu-mi350x1-288gb-spot"
+REGION = "ric1"
+EXIT_STOPPED, EXIT_REFUSED = 3, 4
+
+CFG = ijctl.load()
+D = CFG["driver"]
+CTL = ijctl.ctl_dir(CFG)
+LEDGER = Path(D.get("ledger") or CTL / "machines.jsonl")
+KEY = str(CTL / "ssh" / "driver")
+CODE = Path(CFG["paths"]["code_dir"])
+
+
+def now_s() -> str:
+    return time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime())
+
+
+def log(msg: str) -> None:
+    print(f"[driver {now_s()}] {msg}", flush=True)
+
+
+class Refuse(Exception):
+    pass
+
+
+# ---- DigitalOcean ----
+
+def token() -> str:
+    p = Path(D["do_token_file"])
+    if not p.exists():
+        raise Refuse(f"no DigitalOcean token: put it in {p} (owner driver, mode 600); the driver does not create, "
+                     "list or destroy anything without it")
+    if p.stat().st_mode & 0o077:
+        raise Refuse(f"{p} can be read by other users; chmod 600 it")
+    t = p.read_text().strip()
+    if not t:
+        raise Refuse(f"{p} is empty")
+    return t
+
+
+def api(method: str, path: str, body=None) -> dict:
+    req = urllib.request.Request(D["api_base"].rstrip("/") + path, method=method,
+                                 data=None if body is None else json.dumps(body).encode(),
+                                 headers={"Authorization": f"Bearer {token()}", "Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            raw = r.read()
+            return json.loads(raw) if raw else {}
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            return {"_404": True}
+        raise RuntimeError(f"DigitalOcean {method} {path}: HTTP {e.code} {e.read()[:300]!r}") from None
+
+
+def paged(path: str, key: str, limit: int = 50) -> list[dict]:
+    """Every item of a list call: DigitalOcean answers at most 200 per page
+    (per_page above that is not honoured) and names the next page in
+    links.pages.next, a full URL."""
+    out, url = [], path
+    for _ in range(limit):
+        r = api("GET", url)
+        out += r.get(key) or []
+        nxt = ((r.get("links") or {}).get("pages") or {}).get("next")
+        if not nxt:
+            break
+        u = urllib.parse.urlsplit(nxt)
+        url = u.path + ("?" + u.query if u.query else "")
+    return out
+
+
+def tagged() -> list[dict]:
+    return paged(f"/v2/droplets?tag_name={D['tag']}&per_page=200", "droplets")
+
+
+def price() -> float:
+    if D.get("price_usd_per_hour") is not None:
+        return float(D["price_usd_per_hour"])
+    for s in paged("/v2/sizes?per_page=200", "sizes"):
+        if s.get("slug") == SIZE and s.get("price_hourly"):
+            return float(s["price_hourly"])
+    raise Refuse(f"no hourly price for {SIZE}: DigitalOcean's size list (every page) has none; "
+                 "set driver.price_usd_per_hour")
+
+
+def fingerprint(pub: str) -> str:
+    """DigitalOcean's fingerprint of a public key: MD5 of the key blob, colon hex."""
+    blob = base64.b64decode(pub.split()[1])
+    h = hashlib.md5(blob).hexdigest()
+    return ":".join(h[i:i + 2] for i in range(0, 32, 2))
+
+
+def ssh_key_ids() -> list:
+    """The DigitalOcean key ids for a new droplet. The image allows no root
+    password, so a droplet needs one: driver.do_ssh_key_ids if set, else the
+    driver's own public key, found on the account by fingerprint or
+    registered there (only the public key leaves this machine)."""
+    if D.get("do_ssh_key_ids"):
+        return list(D["do_ssh_key_ids"])
+    p = Path(KEY + ".pub")
+    if not p.exists():
+        raise Refuse(f"no driver.do_ssh_key_ids and no public key at {p}: a droplet of this image needs an ssh key")
+    pub = p.read_text().strip()
+    fp = fingerprint(pub)
+    for k in paged("/v2/account/keys?per_page=200", "ssh_keys"):
+        if k.get("fingerprint") == fp or (k.get("public_key") or "").split()[:2] == pub.split()[:2]:
+            return [k["id"]]
+    try:
+        k = api("POST", "/v2/account/keys", {"name": f"ij-amd-driver {fp[:11]}", "public_key": pub})["ssh_key"]
+    except (RuntimeError, KeyError) as e:
+        raise Refuse(f"no driver.do_ssh_key_ids, and registering the driver's public key with DigitalOcean "
+                     f"failed: {e}") from None
+    log(f"registered the driver's public key with DigitalOcean (key id {k['id']}, fingerprint {fp})")
+    return [k["id"]]
+
+
+# ---- the ledger of machines ----
+
+def events() -> list[dict]:
+    try:
+        return [json.loads(x) for x in LEDGER.read_text().splitlines() if x.strip()]
+    except FileNotFoundError:
+        return []
+
+
+def add_event(e: dict) -> None:
+    with open(LEDGER, "a") as f:
+        f.write(json.dumps(e) + "\n")
+
+
+def machines() -> dict:
+    out = {}
+    for e in events():
+        m = out.setdefault(str(e["id"]), {"id": e["id"]})
+        m.update(e)
+    return out
+
+
+def cost(m: dict, t: float | None = None) -> float:
+    end = m.get("ended_epoch") or t or time.time()
+    return max(0.0, end - m["created_epoch"]) / 3600 * m["price_usd_per_hour"]
+
+
+def spent(t: float | None = None) -> float:
+    return sum(cost(m, t) for m in machines().values() if "created_epoch" in m)
+
+
+def open_machines() -> list[dict]:
+    return [m for m in machines().values() if "created_epoch" in m and not m.get("ended_epoch")]
+
+
+def creations_24h() -> list[float]:
+    return [e["created_epoch"] for e in events() if e.get("event") == "create" and time.time() - e["created_epoch"] < 86400]
+
+
+def cap() -> float:
+    c = D.get("spend_cap_usd")
+    if c is None:
+        raise Refuse("driver.spend_cap_usd is not set in the controller config: the driver does not start a run "
+                     "without a spending cap (there is no default)")
+    return float(c)
+
+
+def close(m: dict, event: str, why: str) -> None:
+    t = time.time()
+    c = cost({**m, "ended_epoch": t})
+    add_event({"event": event, "id": m["id"], "ended": now_s(), "ended_epoch": t, "cost_usd": round(c, 4), "why": why})
+    log(f"machine {m['id']} {event}: ${c:.2f} ({why}); spent in total ${spent():.2f} of ${cap():.2f}")
+
+
+# ---- creating and destroying ----
+
+def keygen(dirpath: str) -> tuple[str, str]:
+    k = os.path.join(dirpath, "hk")
+    subprocess.run(["ssh-keygen", "-q", "-t", "ed25519", "-N", "", "-C", ijctl.ALIAS, "-f", k], check=True)
+    return Path(k).read_text(), Path(k + ".pub").read_text().strip()
+
+
+def user_data(host_priv: str, host_pub: str) -> str:
+    doc = {"ssh_deletekeys": True, "ssh_genkeytypes": [], "disable_root": False,
+           "ssh_keys": {"ed25519_private": host_priv, "ed25519_public": host_pub},
+           "write_files": [{"path": "/root/.ssh/authorized_keys", "permissions": "0600", "append": True,
+                            "content": Path(KEY + ".pub").read_text()}]}
+    return "#cloud-config\n" + json.dumps(doc, indent=1) + "\n"
+
+
+def destroy(m: dict, why: str) -> None:
+    ijctl.write_box_state(CFG, state="destroying", why=why)
+    r = api("DELETE", f"/v2/droplets/{m['id']}")
+    log(f"destroyed droplet {m['id']}" + (" (it was already gone)" if r.get("_404") else ""))
+    close(m, "destroy", why)
+    ijctl.write_box_state(CFG, state="none", why=why, id=None, ip=None)
+
+
+def create() -> None:
+    c, p = cap(), price()
+    left = c - spent()
+    need = p * float(D.get("min_hours_left_to_create", 1.0))
+    if left < need:
+        raise Refuse(f"spending cap: ${left:.2f} of ${c:.2f} left, a new machine needs ${need:.2f} "
+                     f"({D.get('min_hours_left_to_create', 1.0)} h at ${p}/h)")
+    n24 = creations_24h()
+    if len(n24) >= int(D["max_creations_per_day"]):
+        until = time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime(min(n24) + 86400))
+        raise Refuse(f"daily limit: {len(n24)} machines created in the last 24 h (limit {D['max_creations_per_day']}); "
+                     f"the next one may be created after {until}")
+    if tagged():
+        raise Refuse("a droplet with the tag already exists")
+    keys = ssh_key_ids()
+    with tempfile.TemporaryDirectory() as td:
+        priv, pub = keygen(td)
+    name = f"ij-amd-gpu-{time.strftime('%Y%m%d-%H%M%S', time.gmtime())}"
+    # The host key is pinned, with the droplet's name, before the droplet exists: a driver restarted at any
+    # point after this can still check the machine it finds (reconcile), and one it cannot check is destroyed.
+    pin_host_key(name, pub)
+    ijctl.write_box_state(CFG, state="creating", why=f"creating {name}", id=None, ip=None, name=name)
+    body = {"name": name, "region": REGION, "size": SIZE, "image": D["image"], "tags": [D["tag"]],
+            "user_data": user_data(priv, pub), "ssh_keys": keys, "ipv6": False}
+    try:
+        did = api("POST", "/v2/droplets", body)["droplet"]["id"]
+    except Exception as e:  # noqa: BLE001 - no droplet was made: the state goes back to none, with the reason
+        raise Refuse(f"DigitalOcean did not create {name}: {e}") from None
+    t = time.time()
+    add_event({"event": "create", "id": did, "name": name, "size": SIZE, "region": REGION, "created": now_s(),
+               "created_epoch": t, "price_usd_per_hour": p})
+    log(f"created droplet {did} ({name}, {SIZE} in {REGION}, ${p}/h); {len(n24) + 1} creations in 24 h")
+    ijctl.write_box_state(CFG, state="creating", why=f"creating {name}", id=did, name=name, ip=None)
+    set_up(did, name)
+
+
+PIN = "box_pin.json"
+
+
+def pin_host_key(name: str, pub: str) -> None:
+    (CTL / PIN).write_text(json.dumps({"name": name, "host_key": pub}) + "\n")
+    (CTL / "box_known_hosts").write_text(f"{ijctl.ALIAS} {pub}\n")
+
+
+def pinned_for(name: str | None) -> bool:
+    """Whether the pinned host key is the one made for the droplet called `name`
+    (and box_known_hosts holds it)."""
+    try:
+        pin = json.loads((CTL / PIN).read_text())
+    except (FileNotFoundError, ValueError):
+        return False
+    if not name or pin.get("name") != name or not pin.get("host_key"):
+        return False
+    (CTL / "box_known_hosts").write_text(f"{ijctl.ALIAS} {pin['host_key']}\n")
+    return True
+
+
+def push_code(st: dict, ssh: list[str]) -> bool:
+    """The code and the controller's public keys to the machine, owned by root
+    with no access for others until setup-box.sh opens what builder runs."""
+    keys = CTL / "pubkeys"
+    return (subprocess.run(["rsync", "-a", "--delete", "--exclude", "__pycache__", "--exclude", ".pytest_cache",
+                            "--chown=root:root", "--chmod=go-w,o-rwx",
+                            "--rsync-path", "mkdir -p /opt/ij-amd && rsync",
+                            "-e", ijctl.rsync_ssh(CFG, KEY, st), f"{CODE}/", f"root@{st['ip']}:/opt/ij-amd/amd/"]).returncode == 0
+            and subprocess.run(["rsync", "-a", "-e", ijctl.rsync_ssh(CFG, KEY, st), f"{keys}/",
+                                f"root@{st['ip']}:/opt/ij-amd/keys/"]).returncode == 0)
+
+
+def set_up(did, name: str) -> None:
+    """The end of create(), also where a restarted driver resumes (reconcile):
+    wait until the droplet is active, copy the code, run setup-box.sh, mark
+    the machine ready and have the judge measure it.  setup-box.sh is safe to
+    run again on a machine it set up in part."""
+    ip = None
+    t0 = time.monotonic()
+    while time.monotonic() - t0 < float(D.get("active_timeout_s", 900)):
+        d = api("GET", f"/v2/droplets/{did}").get("droplet") or {}
+        nets = [n["ip_address"] for n in (d.get("networks") or {}).get("v4", []) if n.get("type") == "public"]
+        if d.get("status") == "active" and nets:
+            ip = nets[0]
+            break
+        time.sleep(5)
+    if ip is None:
+        destroy({"id": did, **machines()[str(did)]}, "it did not become active in time")
+        return
+    ijctl.write_box_state(CFG, state="setting-up", why="copying the code, setting up users, downloading weights",
+                          id=did, name=name, ip=ip, port=22)
+    st = ijctl.box_state(CFG)
+    ssh = ijctl.ssh_base(CFG, KEY, "root", st)
+    for _ in range(60):                                   # sshd starts after cloud-init has written the key
+        if subprocess.run(ssh + ["true"], capture_output=True).returncode == 0:
+            break
+        time.sleep(5)
+    ok = push_code(st, ssh)
+    if ok:
+        flag = " --standin" if D.get("standin") else ""
+        ok = subprocess.run(ssh + [f"bash /opt/ij-amd/amd/controller/box/setup-box.sh{flag}"]).returncode == 0
+    if not ok:
+        destroy({"id": did, **machines()[str(did)]}, "its setup failed")
+        return
+    ijctl.write_box_state(CFG, state="ready", why=None)
+    log(f"machine {did} ready at {ip}; the judge measures the reference and the best engine on it")
+    with open(CTL / "judge-remeasure.log", "ab") as lf:
+        subprocess.Popen(["sudo", "-n", "-u", CFG["judge"]["user"], str(CODE / "controller/judge/ij-judge"), "remeasure"],
+                         stdout=lf, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, start_new_session=True)
+
+
+def reconcile() -> None:
+    """The ledger and DigitalOcean agree: a tagged droplet the ledger does not
+    know is adopted (it costs money); an open one DigitalOcean no longer has
+    is closed as gone (a spot reclaim).  A change the driver was making when
+    it stopped is finished: an open machine left in creating or setting-up
+    is set up (when its host key was pinned for it; otherwise destroyed,
+    since it cannot be checked), one left in destroying is destroyed."""
+    live = {str(d["id"]): d for d in tagged()}
+    known = machines()
+    for i, d in live.items():
+        if i not in known or known[i].get("ended_epoch"):
+            t = time.time()
+            add_event({"event": "create", "id": d["id"], "name": d.get("name"), "created": now_s(), "created_epoch": t,
+                       "price_usd_per_hour": price(), "adopted": True})
+            log(f"adopted droplet {i} with the tag {D['tag']} that the ledger did not know")
+    for m in open_machines():
+        if str(m["id"]) not in live:
+            close(m, "gone", "DigitalOcean no longer lists it (reclaimed or destroyed elsewhere)")
+            st = ijctl.box_state(CFG)
+            if str(st.get("id")) == str(m["id"]):
+                ijctl.write_box_state(CFG, state="none", why="the machine was taken away; a new one will be created",
+                                      id=None, ip=None)
+    st = ijctl.box_state(CFG)
+    om = open_machines()
+    if st.get("state") in ("creating", "setting-up", "destroying") and not om:
+        ijctl.write_box_state(CFG, state="none", why="the driver restarted during a change", id=None, ip=None)
+    elif st.get("state") == "destroying":
+        for m in om:
+            destroy(m, f"the driver restarted while destroying it ({st.get('why')})")
+    elif st.get("state") in ("creating", "setting-up"):
+        for m in om:
+            name = m.get("name") or (live.get(str(m["id"])) or {}).get("name")
+            if not pinned_for(name):
+                destroy(m, f"the driver restarted while creating it and holds no host key made for {name}; "
+                           "a machine it cannot check is not used")
+                continue
+            log(f"the driver restarted while machine {m['id']} ({name}) was {st['state']}: resuming its set-up")
+            ijctl.write_box_state(CFG, state=st["state"], why=f"resuming the set-up of {name} after a restart",
+                                  id=m["id"], name=name)
+            set_up(m["id"], name)
+
+
+# ---- the agent ----
+
+def agent_cfg() -> dict:
+    return CFG["agent"]
+
+
+def as_agents(argv: list[str], **kw) -> subprocess.CompletedProcess:
+    return subprocess.run(["sudo", "-n", "-u", "agents", "-H", "--", *argv], **kw)
+
+
+def agent_running() -> bool:
+    return as_agents(["tmux", "-L", "ij", "has-session", "-t", "prime"], capture_output=True).returncode == 0
+
+
+def run_dirs() -> list[Path]:
+    return sorted((CTL / "records").glob("run-*"))
+
+
+def save_run_end(rd: Path) -> None:
+    a = agent_cfg()
+    home = a["home"]
+    (rd / "ended").write_text(now_s() + "\n")
+    ex = as_agents(["cat", f"{home}/.ij-run/{rd.name}.exit"], capture_output=True, text=True)
+    (rd / "exit").write_text(ex.stdout if ex.returncode == 0 else "unknown\n")
+    # sessions and the refinement history, without auth files
+    tar = as_agents(["tar", "-C", f"{home}/.prime", "--exclude=*auth*", "--exclude=*credential*", "--exclude=*token*",
+                     "-cf", "-", "agent/sessions"], capture_output=True)
+    if tar.returncode == 0:
+        (rd / "sessions.tar").write_bytes(tar.stdout)
+    hist = as_agents(["find", f"{home}/.prime", "-name", "refinement_history*.jsonl"], capture_output=True, text=True)
+    for i, f in enumerate(hist.stdout.split()):
+        got = as_agents(["cat", f], capture_output=True)
+        (rd / f"refinement_history-{i}.jsonl").write_bytes(got.stdout)
+        (rd / f"refinement_history-{i}.path").write_text(f + "\n")
+    for name, argv in (("sessions.txt", ["sessions"]), ("telemetry.txt", ["telemetry"])):
+        got = as_agents(["env", "DO_NOT_TRACK=1", a["binary"], *argv], capture_output=True, text=True, timeout=60)
+        (rd / name).write_text(got.stdout + got.stderr)
+
+
+def start_agent() -> None:
+    a = agent_cfg()
+    rd = CTL / "records" / f"run-{len(run_dirs()) + 1:04d}"
+    rd.mkdir(parents=True)
+    goal = Path(a["goal_file"]).read_text()
+    argv = [x.format(goal=goal, repo=CFG["paths"]["engine_repo"], budget=a["goal_token_budget"]) for x in a["command"]]
+    (rd / "command.json").write_text(json.dumps(argv, indent=1))
+    (rd / "goal.txt").write_text(goal)
+    (rd / "started").write_text(now_s() + "\n")
+    pr = as_agents(["env", "DO_NOT_TRACK=1", a["binary"], "prompt", "--json", "--cwd", CFG["paths"]["engine_repo"]],
+                   capture_output=True, text=True, timeout=120)
+    (rd / "prompt.json").write_text(pr.stdout if pr.returncode == 0 else pr.stdout + pr.stderr)
+    runner = f"{CODE}/controller/driver/agent-run.sh"
+    as_agents(["tmux", "-L", "ij", "new-session", "-d", "-s", "prime", "-x", "220", "-y", "50",
+               runner, rd.name, CFG["paths"]["engine_repo"], json.dumps(argv)], check=True)
+    (CTL / "agent-current").write_text(rd.name)
+    log(f"started Prime Agent ({rd.name}) in tmux (sudo -u agents tmux -L ij attach -t prime)")
+
+
+def stop_agent(why: str) -> None:
+    if agent_running():
+        as_agents(["tmux", "-L", "ij", "kill-session", "-t", "prime"], capture_output=True)
+        log(f"stopped Prime Agent: {why}")
+    cur = CTL / "agent-current"
+    if cur.exists():
+        rd = CTL / "records" / cur.read_text().strip()
+        if rd.exists() and not (rd / "ended").exists():
+            save_run_end(rd)
+        cur.unlink()
+
+
+def keep_agent() -> None:
+    if not agent_cfg().get("enabled", True):
+        return
+    if agent_running():
+        return
+    cur = CTL / "agent-current"
+    if cur.exists():
+        rd = CTL / "records" / cur.read_text().strip()
+        if rd.exists() and not (rd / "ended").exists():
+            save_run_end(rd)
+            log(f"Prime Agent ended ({rd.name}, exit {(rd / 'exit').read_text().strip()})")
+        cur.unlink()
+        last = (CTL / "agent-last-start")
+        since = time.time() - float(last.read_text()) if last.exists() else 1e9
+        if since < float(agent_cfg().get("restart_delay_s", 60)):
+            return
+    (CTL / "agent-last-start").write_text(str(time.time()))
+    start_agent()
+
+
+# ---- the loop ----
+
+def check_cap() -> bool:
+    """True when the run must stop."""
+    c = cap()
+    om = open_machines()
+    rate = sum(m["price_usd_per_hour"] for m in om)
+    margin = rate * 2 * float(D.get("poll_s", 30)) / 3600
+    s = spent()
+    if s + margin >= c:
+        for m in om:
+            destroy(m, f"spending cap: ${s:.2f} spent of ${c:.2f}")
+        # The run is marked stopped (and the driver exits 3, which systemd
+        # does not restart) only once DigitalOcean lists no tagged droplet.
+        # Otherwise this raises, the pass is retried, and reconcile() adopts
+        # what is left so the next pass deletes it again.
+        for _ in range(30):
+            left = tagged()
+            if not left:
+                break
+            for d in left:
+                api("DELETE", f"/v2/droplets/{d['id']}")
+            time.sleep(10)
+        else:
+            raise RuntimeError(f"spending cap: droplets still listed after deletion: {[d['id'] for d in tagged()]}")
+        stop_agent("spending cap reached")
+        ijctl.write_box_state(CFG, state="stopped", why=f"the spending cap of ${c:.2f} is reached (${spent():.2f} spent)")
+        log("spending cap reached: GPU machine destroyed, agent stopped, run stopped")
+        return True
+    return False
+
+
+def tick() -> int:
+    if ijctl.box_state(CFG).get("state") == "stopped":
+        log(f"the run is stopped: {ijctl.box_state(CFG).get('why')}")
+        return EXIT_STOPPED
+    reconcile()
+    if check_cap():
+        return EXIT_STOPPED
+    if not open_machines():
+        try:
+            create()
+        except Refuse as e:
+            ijctl.write_box_state(CFG, state="none", why=str(e))
+            log(f"not creating a machine: {e}")
+    keep_agent()
+    return 0
+
+
+def run() -> int:
+    cap()
+    token()
+    log(f"driver starts: cap ${cap():.2f}, spent ${spent():.2f}, {len(creations_24h())} creations in 24 h "
+        f"(limit {D['max_creations_per_day']})")
+    while True:
+        try:
+            rc = tick()
+        except Refuse as e:
+            log(f"refused: {e}")
+            return EXIT_REFUSED
+        except Exception as e:  # noqa: BLE001 - a DigitalOcean hiccup must not end the run
+            log(f"error in this pass (retrying): {e}")
+            rc = 0
+        if rc:
+            return rc
+        time.sleep(float(D.get("poll_s", 30)))
+
+
+def push_code_by_hand() -> int:
+    """ij-driver push-code: the installed code to the ready machine, and its
+    access set again (setup-box.sh --code-access), without setting the
+    machine up again.  For a code change on a machine that is in use; run it
+    while no ./submit is running."""
+    st = ijctl.box_state(CFG)
+    if st.get("state") != "ready" or not st.get("ip"):
+        print(f"ij-driver push-code: the GPU machine is not ready ({ijctl.describe(st)})", file=sys.stderr)
+        return 1
+    ssh = ijctl.ssh_base(CFG, KEY, "root", st)
+    if not push_code(st, ssh):
+        print("ij-driver push-code: copying the code failed", file=sys.stderr)
+        return 1
+    r = subprocess.run(ssh + ["bash /opt/ij-amd/amd/controller/box/setup-box.sh --code-access"])
+    log(f"pushed the code ({(CODE / 'REVISION').read_text().strip() if (CODE / 'REVISION').exists() else 'no REVISION'}) "
+        f"to machine {st.get('id')}; access set again: exit {r.returncode}")
+    return r.returncode
+
+
+def status() -> int:
+    st = ijctl.box_state(CFG)
+    print(f"GPU machine: {ijctl.describe(st)}")
+    c = D.get("spend_cap_usd")
+    print(f"spent: ${spent():.2f} of " + ("NOT SET (the driver refuses to run)" if c is None else f"${float(c):.2f}"))
+    print(f"creations in the last 24 h: {len(creations_24h())} (limit {D['max_creations_per_day']})")
+    print(f"Prime Agent: {'running' if agent_running() else 'not running'}")
+    for m in machines().values():
+        print("  " + json.dumps(m))
+    return 0
+
+
+def main(argv) -> int:
+    os.umask(0o022)
+    try:
+        if argv == ["run"]:
+            return run()
+        if argv == ["tick"]:
+            cap()
+            return tick()
+        if argv == ["status"]:
+            return status()
+        if argv == ["destroy"]:
+            for m in open_machines():
+                destroy(m, "destroyed by hand (ij-driver destroy)")
+            return 0
+        if argv == ["stop"]:
+            for m in open_machines():
+                destroy(m, "run stopped by hand (ij-driver stop)")
+            stop_agent("run stopped by hand")
+            ijctl.write_box_state(CFG, state="stopped", why="stopped by hand (ij-driver stop)")
+            return 0
+        if argv == ["resume"]:
+            ijctl.write_box_state(CFG, state="none", why="resumed by hand")
+            return 0
+        if argv == ["push-code"]:
+            return push_code_by_hand()
+    except Refuse as e:
+        print(f"ij-driver: refused: {e}", file=sys.stderr)
+        return EXIT_REFUSED
+    print(__doc__.strip())
+    return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

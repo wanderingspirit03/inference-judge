@@ -1,0 +1,426 @@
+#!/usr/bin/env python3
+"""ij-docker: the one way builder and cand use Docker on the GPU machine.  Run
+as root through sudo (setup-box.sh allows builder, judge and cand); builder
+and cand are not in the docker group, which is root on the machine in effect.
+
+  ij-docker build DIR               builder: image ij-builder/engine from DIR
+  ij-docker build --for cand DIR    judge: image ij-cand/engine from its copy
+                                    of a submission (cand cannot build)
+  ij-docker run [OPTIONS] IMAGE [COMMAND ...]
+                                    builder, cand: run the caller's own image
+  ij-docker rm NAME | logs NAME [N] | ps
+                                    the caller's own containers
+  ij-docker ref start NAME PORT [MEM] | ref stop|status NAME | ref logs NAME [N]
+                                    builder, cand: the reference image with its
+                                    fixed flags (NAME ref or engine; the
+                                    reference's own start and examples/atom-engine)
+  ij-docker jobs                    the containers of GPU jobs: id name token owner
+  ij-docker reap --keep TOKEN | --end TOKEN
+                                    the queue holder: remove the job containers
+                                    of other tokens (start) or of TOKEN (end)
+
+What a container gets, whatever is asked:
+  - the caller's uid and gid (--user), render and video, /dev/kfd and
+    /dev/dri, no capabilities, no-new-privileges, its own IPC namespace;
+  - the host network, so it is under the same firewall rule as the caller's
+    own processes (controller/box/ij-fw: cand reaches loopback only); a
+    bridge network would be outside that rule;
+  - the model directory read-only at /models, and no other host path;
+  - the labels ij.gpu.job (the token of the GPU queue's holder: the caller's
+    own hold, or for cand the judge's) and ij.owner;
+  - only an image built by this launcher for the caller (--pull never).
+RUN OPTIONS allowed: -d/--detach, --rm, --name N (the container is named
+ij-<caller>-N), -e/--env K=V, --shm-size S (up to 64g), -w/--workdir DIR,
+--entrypoint CMD.  Anything else is refused and Docker is not called.
+
+Builds take DIR/Dockerfile and DIR as the context, packed by tar under the
+caller's own uid (a root packer could be pointed at files the caller cannot
+read), and run with --network none: RUN steps get no network, for builder
+and for judged builds alike, so the layer cache of one serves the other.  FROM
+images are pulled as usual.  The reference profile runs as root in the
+container, as reference/atom-serve.sh does, with nothing the caller chooses
+but the port, the name and the memory share; its cache is the caller's own
+(/var/cache/ij-ref-<caller>), never the judge's."""
+from __future__ import annotations
+
+import json
+import os
+import pwd
+import grp
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+CODE = Path(os.path.realpath(__file__)).parents[2]
+sys.path.insert(0, str(CODE / "lib"))
+import gpuqueue as Q  # noqa: E402
+
+CALLERS = ("builder", "judge", "cand")
+BUILD_ROOTS = {"builder": ("/home/builder", "/var/lib/ij-amd/builder"), "judge": ("/home/judge", "/var/lib/ij-amd/judge")}
+RUNNERS = ("builder", "cand")
+NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,40}$")
+ENV_KEY_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]{0,100}$")
+SHM_RE = re.compile(r"^(\d+)([bkmg]?)$", re.I)
+REF_NAMES = ("ref", "engine")
+
+
+class Refused(Exception):
+    pass
+
+
+class Ctx:
+    """Who calls, and the machine's facts.  Real: SUDO_USER under root.  Test
+    (IJ_DOCKER_TEST=1, never as root): everything from the environment."""
+
+    def __init__(self):
+        self.test = os.environ.get("IJ_DOCKER_TEST") == "1" and os.geteuid() != 0
+        if self.test:
+            e = os.environ
+            self.caller = e["IJ_DOCKER_TEST_CALLER"]
+            self.users = json.loads(e["IJ_DOCKER_TEST_USERS"])         # name -> [uid, gid]
+            self.gids = json.loads(e.get("IJ_DOCKER_TEST_GIDS") or '{"render": 109, "video": 44}')
+            self.docker = e["IJ_DOCKER_TEST_BIN"]
+            self.queue = Path(e["IJ_DOCKER_TEST_QUEUE"])
+            self.config = Path(e["IJ_DOCKER_TEST_CONFIG"])
+            self.cache_root = Path(e.get("IJ_DOCKER_TEST_CACHE") or "/tmp")
+            self.roots = json.loads(e.get("IJ_DOCKER_TEST_ROOTS") or "null") or BUILD_ROOTS
+            return
+        if os.geteuid() != 0:
+            raise Refused("run it through sudo")
+        self.caller = os.environ.get("SUDO_USER") or ""
+        self.users = {}
+        for u in CALLERS:
+            try:
+                p = pwd.getpwnam(u)
+                self.users[u] = [p.pw_uid, p.pw_gid]
+            except KeyError:
+                pass
+        self.gids = {}
+        for g in ("render", "video"):
+            try:
+                self.gids[g] = grp.getgrnam(g).gr_gid
+            except KeyError:
+                pass
+        self.docker = "/usr/bin/docker"
+        self.queue = Path("/var/lib/ij-amd/gpu")
+        etc = Path("/etc/ij-amd/amd-config.json")
+        self.config = etc if etc.exists() else CODE / "config.json"
+        self.cache_root = Path("/var/cache")
+        self.roots = BUILD_ROOTS
+        if self.caller not in CALLERS or self.caller not in self.users:
+            raise Refused("run it through sudo as builder, judge or cand")
+
+    def holder_uid(self, h: dict) -> int | None:
+        """The uid of the queue holder's process, if it is alive."""
+        if self.test:
+            v = os.environ.get("IJ_DOCKER_TEST_HOLDER_UID")
+            return int(v) if v else None
+        if not Q._alive(h.get("pid") or -1, h.get("pid_start")):
+            return None
+        try:
+            return os.stat(f"/proc/{h['pid']}").st_uid
+        except OSError:
+            return None
+
+    def cfg(self) -> dict:
+        return json.loads(self.config.read_text())
+
+    def uid(self, name: str) -> int | None:
+        return (self.users.get(name) or [None])[0]
+
+
+# ---- the GPU queue's holder ----
+
+def holder_token(ctx: Ctx, need_own: bool = False) -> str:
+    """The token of the queue's holder, if the caller may act under it: its
+    own hold (builder, judge), or the judge's hold for cand."""
+    h = Q.holder(ctx.queue)
+    if not h or not h.get("token"):
+        raise Refused("nobody holds the GPU queue: run it inside ./try, ./check or a judged run")
+    owner = ctx.holder_uid(h)
+    if owner is None:
+        raise Refused("the GPU queue's holder is gone")
+    ok = owner == ctx.uid(ctx.caller) or (not need_own and ctx.caller == "cand" and owner == ctx.uid("judge"))
+    if not ok:
+        raise Refused("the GPU queue is held by another account")
+    return h["token"]
+
+
+# ---- argv ----
+
+def _shm_ok(v: str) -> bool:
+    m = SHM_RE.match(v)
+    if not m:
+        return False
+    n, unit = int(m.group(1)), m.group(2).lower()
+    return n * {"": 1, "b": 1, "k": 2 ** 10, "m": 2 ** 20, "g": 2 ** 30}[unit] <= 64 * 2 ** 30
+
+
+def parse_run(caller: str, args: list[str]) -> tuple[list[str], str, list[str]]:
+    """The allowed options rebuilt (never passed through), the image, the
+    command.  Refused: anything not in the list."""
+    opts: list[str] = []
+    a = list(args)
+    while a:
+        t = a.pop(0)
+        if not t.startswith("-"):
+            image = t
+            break
+        if t in ("-d", "--detach"):
+            opts.append("--detach")
+            continue
+        if t == "--rm":
+            opts.append("--rm")
+            continue
+        key, val = (t.split("=", 1) + [None])[:2] if t.startswith("--") and "=" in t else (t, None)
+        if key not in ("--name", "-e", "--env", "--shm-size", "-w", "--workdir", "--entrypoint"):
+            raise Refused(f"option not allowed: {t}")
+        if val is None:
+            if not a:
+                raise Refused(f"{t} needs a value")
+            val = a.pop(0)
+        if key == "--name":
+            if not NAME_RE.match(val):
+                raise Refused(f"bad name {val!r}")
+            opts += ["--name", f"ij-{caller}-{val}"]
+        elif key in ("-e", "--env"):
+            k = val.split("=", 1)[0]
+            if "=" not in val or not ENV_KEY_RE.match(k):
+                raise Refused(f"-e needs KEY=VALUE (got {val!r})")
+            opts += ["--env", val]
+        elif key == "--shm-size":
+            if not _shm_ok(val):
+                raise Refused(f"bad --shm-size {val!r} (at most 64g)")
+            opts += ["--shm-size", val]
+        elif key in ("-w", "--workdir"):
+            if not val.startswith("/"):
+                raise Refused("--workdir must be an absolute path in the container")
+            opts += ["--workdir", val]
+        else:
+            opts += ["--entrypoint", val]
+    else:
+        raise Refused("no image given")
+    if not re.match(rf"^ij-{re.escape(caller)}/[a-z0-9][a-z0-9_.-]*(:[A-Za-z0-9_.-]+)?$", image):
+        raise Refused(f"image {image!r} is not one this launcher built for {caller} (ij-{caller}/...)")
+    return opts, image, a
+
+
+def forced(ctx: Ctx, token: str) -> list[str]:
+    uid, gid = ctx.users[ctx.caller]
+    cfg = ctx.cfg()
+    models = str(Path(cfg["model"]["dir"]).parent)
+    out = ["--pull", "never", "--network", "host", "--ipc", "private", "--user", f"{uid}:{gid}"]
+    for g in ("render", "video"):
+        if g in ctx.gids:
+            out += ["--group-add", str(ctx.gids[g])]
+    out += ["--device", "/dev/kfd", "--device", "/dev/dri", "--cap-drop", "ALL",
+            "--security-opt", "no-new-privileges", "--pids-limit", "8192",
+            "--label", f"ij.gpu.job={token}", "--label", f"ij.owner={ctx.caller}",
+            "--volume", f"{models}:/models:ro", "--env", "HOME=/tmp"]
+    return out
+
+
+def run_argv(ctx: Ctx, args: list[str], token: str) -> list[str]:
+    if ctx.caller not in RUNNERS:
+        raise Refused(f"{ctx.caller} does not run containers through the launcher")
+    opts, image, cmd = parse_run(ctx.caller, args)
+    return [ctx.docker, "run", *forced(ctx, token), *opts, image, *cmd]
+
+
+def ref_argv(ctx: Ctx, name: str, port: str, mem: str | None, token: str) -> list[str]:
+    """reference/atom-serve.sh's start, with the image, the model and the
+    flags from the config; the caller picks the name, the port and the
+    memory share."""
+    if ctx.caller not in RUNNERS:
+        raise Refused(f"{ctx.caller} starts the reference with Docker directly")
+    if name not in REF_NAMES:
+        raise Refused(f"the reference's container is named ref or engine, not {name!r}")
+    if not port.isdigit() or not 1024 <= int(port) <= 65535:
+        raise Refused(f"bad port {port!r}")
+    cfg = ctx.cfg()
+    r = cfg["ref"]
+    m = float(mem) if mem else float(r.get("gpu_memory_utilization", 0.5))
+    if not 0.05 <= m <= 0.95:
+        raise Refused(f"bad memory share {mem!r}")
+    md = Path(cfg["model"]["dir"])
+    cache = ctx.cache_root / f"ij-ref-{ctx.caller}"
+    argv = [ctx.docker, "run", "-d", "--pull", "never", "--name", f"ij-{ctx.caller}-{name}",
+            "--label", f"ij.gpu.job={token}", "--label", f"ij.owner={ctx.caller}", "--label", "ij.profile=ref",
+            "--network", "host"]
+    for g in ("render", "video"):
+        if g in ctx.gids:
+            argv += ["--group-add", str(ctx.gids[g])]
+    argv += ["--device", "/dev/kfd", "--device", "/dev/dri", "--ipc", "host", "--shm-size", "16g",
+             "--env", "GPU_MAX_HW_QUEUES=1", "--env", "AITER_LOG_LEVEL=WARNING",
+             "--volume", f"{md.parent}:/models:ro", "--volume", f"{cache}:/root/.cache",
+             r["image"], "python3", "-m", "atom.entrypoints.openai_server",
+             "--model", f"/models/{md.name}", "--served-model-name", r["served_model"],
+             "--kv_cache_dtype", "bf16", "-tp", "1", "--max-model-len", "16384",
+             "--gpu-memory-utilization", f"{m}", "--server-port", port]
+    return argv
+
+
+def own(ctx: Ctx, name: str) -> str:
+    if not NAME_RE.match(name):
+        raise Refused(f"bad name {name!r}")
+    full = f"ij-{ctx.caller}-{name}"
+    r = subprocess.run([ctx.docker, "inspect", "-f", '{{index .Config.Labels "ij.owner"}}', full],
+                       capture_output=True, text=True, timeout=60)
+    if r.returncode != 0:
+        raise Refused(f"no container {full}")
+    if r.stdout.strip() != ctx.caller:
+        raise Refused(f"{full} is not the caller's")
+    return full
+
+
+def jobs(ctx: Ctx) -> list[dict]:
+    r = subprocess.run([ctx.docker, "ps", "--filter", "label=ij.gpu.job", "--format",
+                        '{{.ID}} {{.Names}} {{.Label "ij.gpu.job"}} {{.Label "ij.owner"}}'],
+                       capture_output=True, text=True, timeout=60)
+    out = []
+    for line in r.stdout.splitlines():
+        p = line.split()
+        if len(p) >= 3:
+            out.append({"id": p[0], "name": p[1], "token": p[2], "owner": p[3] if len(p) > 3 else ""})
+    return out
+
+
+# ---- build ----
+
+def public_modes(src, dst) -> bool:
+    """Copy the tar stream src to dst with each member's mode as a checkout
+    under umask 022 has it (0755 for directories and executables, 0644 for
+    other files), the modes ./check builds with.  The judge unpacks a
+    submission with umask 077 to keep it from the box's other accounts; its
+    0600 files would go into the image as root's 0600 and the container,
+    which runs as cand, could not read them (submission #1, 2026-11-18).
+    Only the image gets these modes: the source on disk keeps its own."""
+    import tarfile
+    try:
+        with tarfile.open(fileobj=src, mode="r|") as tin, tarfile.open(fileobj=dst, mode="w|", format=tarfile.PAX_FORMAT) as tout:
+            for m in tin:
+                if m.isdir() or (m.isfile() and m.mode & 0o111):
+                    m.mode = 0o755
+                elif m.isfile():
+                    m.mode = 0o644
+                tout.addfile(m, tin.extractfile(m) if m.isfile() else None)
+        return True
+    except (tarfile.TarError, OSError) as e:
+        print(f"ij-docker: the context could not be packed: {e}", file=sys.stderr)
+        return False
+
+
+def build(ctx: Ctx, args: list[str]) -> int:
+    target = ctx.caller
+    if args[:2] == ["--for", "cand"]:
+        if ctx.caller != "judge":
+            raise Refused("only judge builds for cand")
+        target, args = "cand", args[2:]
+    elif ctx.caller not in ("builder",):
+        raise Refused(f"{ctx.caller} cannot build images" + ("; the judge builds a submission's" if ctx.caller == "cand" else ""))
+    if len(args) != 1:
+        raise Refused("build takes one directory")
+    d = os.path.realpath(args[0])
+    roots = ctx.roots.get(ctx.caller) or ()
+    if not any(d == r or d.startswith(r.rstrip("/") + "/") for r in roots):
+        raise Refused(f"{d} is not under {', '.join(roots) or 'any directory this caller may build from'}")
+    uid, gid = ctx.users[ctx.caller]
+
+    def drop():
+        if os.geteuid() == 0:
+            os.setgroups([])
+            os.setgid(gid)
+            os.setuid(uid)
+    # tar under the caller's uid: it reads what the caller can read, nothing more
+    tar = subprocess.Popen(["tar", "-C", d, "-cf", "-", "."], stdout=subprocess.PIPE, preexec_fn=drop)
+    tag = f"ij-{target}/engine:latest"
+    p = subprocess.Popen([ctx.docker, "build", "--network", "none", "--label", f"ij.built-by={ctx.caller}",
+                          "-t", tag, "-"], stdin=subprocess.PIPE)
+    packed = public_modes(tar.stdout, p.stdin)
+    p.stdin.close()
+    tar.stdout.close()
+    rc = p.wait()
+    if tar.wait() != 0 or not packed:
+        print("ij-docker: the context could not be packed", file=sys.stderr)
+        return 1
+    r = subprocess.CompletedProcess(p.args, rc)
+    if r.returncode == 0:
+        print(f"ij-docker: built {tag}")
+    return r.returncode
+
+
+# ---- main ----
+
+def main(argv: list[str]) -> int:
+    try:
+        ctx = Ctx()
+        if not argv or argv[0] in ("-h", "--help"):
+            print(__doc__.strip())
+            return 0 if argv else 2
+        cmd, rest = argv[0], argv[1:]
+        if cmd == "build":
+            return build(ctx, rest)
+        if cmd == "run":
+            argv2 = run_argv(ctx, rest, "?")                  # refuse before anything else
+            argv2 = run_argv(ctx, rest, holder_token(ctx))
+            return subprocess.run(argv2).returncode
+        if cmd == "ref" and rest[:1] == ["start"] and len(rest) in (3, 4):
+            ref_argv(ctx, rest[1], rest[2], rest[3] if len(rest) == 4 else None, "?")
+            a = ref_argv(ctx, rest[1], rest[2], rest[3] if len(rest) == 4 else None, holder_token(ctx))
+            cache = Path([x for x in a if x.endswith(":/root/.cache")][0].split(":")[0])
+            cache.mkdir(mode=0o700, exist_ok=True)
+            subprocess.run([ctx.docker, "rm", "-f", f"ij-{ctx.caller}-{rest[1]}"], capture_output=True, timeout=120)
+            r = subprocess.run(a, stdout=subprocess.DEVNULL)
+            if r.returncode == 0:
+                print(f"started ij-{ctx.caller}-{rest[1]} on port {rest[2]}")
+            return r.returncode
+        if cmd == "ref" and rest[:1] in (["stop"], ["status"], ["logs"]) and len(rest) in (2, 3):
+            if rest[1] not in REF_NAMES:
+                raise Refused(f"the reference's container is named ref or engine, not {rest[1]!r}")
+            cmd, rest = {"stop": "rm", "status": "ps", "logs": "logs"}[rest[0]], rest[1:]
+            if cmd == "ps":
+                full = f"ij-{ctx.caller}-{rest[0]}"
+                return subprocess.run([ctx.docker, "ps", "--filter", f"name=^{full}$", "--filter",
+                                       f"label=ij.owner={ctx.caller}", "--format", "{{.Names}} {{.Status}}"]).returncode
+        if cmd == "rm" and len(rest) == 1:
+            try:
+                full = own(ctx, rest[0])
+            except Refused as e:
+                print(f"{e}; nothing to stop")
+                return 0
+            subprocess.run([ctx.docker, "rm", "-f", full], capture_output=True, timeout=120)
+            print(f"stopped {full}")
+            return 0
+        if cmd == "logs" and len(rest) in (1, 2):
+            n = rest[1] if len(rest) == 2 else "40"
+            if not n.isdigit():
+                raise Refused("logs NAME [N]")
+            return subprocess.run([ctx.docker, "logs", "--tail", n, own(ctx, rest[0])]).returncode
+        if cmd == "ps" and not rest:
+            return subprocess.run([ctx.docker, "ps", "-a", "--filter", f"label=ij.owner={ctx.caller}",
+                                   "--format", "{{.Names}} {{.Image}} {{.Status}}"]).returncode
+        if cmd == "jobs" and not rest:
+            for c in jobs(ctx):
+                print(c["id"], c["name"], c["token"], c["owner"] or "-")
+            return 0
+        if cmd == "reap" and len(rest) == 2 and rest[0] in ("--keep", "--end"):
+            if ctx.caller == "cand":
+                raise Refused("cand does not hold the queue")
+            tok = holder_token(ctx, need_own=True)
+            if tok != rest[1]:
+                raise Refused("the caller does not hold the GPU queue with that token")
+            hit = [c for c in jobs(ctx) if (c["token"] != tok) == (rest[0] == "--keep")]
+            for c in hit:
+                subprocess.run([ctx.docker, "rm", "-f", c["id"]], capture_output=True, timeout=120)
+            if hit:
+                print(f"removed {len(hit)} container(s): {' '.join(c['name'] for c in hit)}")
+            return 0
+        raise Refused(f"unknown command: {' '.join(argv)[:200]}")
+    except Refused as e:
+        print(f"ij-docker: refused: {e}", file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

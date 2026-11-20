@@ -1,0 +1,164 @@
+#!/usr/bin/env python3
+"""./check [engine dir]: a fast answer check of the engine against the
+reference, on the small public prompt set (config check.prompts).
+
+The engine dir (default: the git top level of the current directory, else the
+current directory) must hold an executable `serve`; ./check runs
+`serve <port>` and talks to it as described in lib/engine.py.  An executable
+`build` runs first if there is one.
+
+The engine starts first (a `serve` that cannot start fails before the
+reference is started) and answers each prompt once.  Then it is stopped and
+the reference walks along each answer, the measure ./submit uses: at each
+position, given the engine's tokens so far, would the reference have chosen
+the engine's token?  Where it would not, the reference goes on from the
+engine's tokens.  Agreement is the share of positions where the engine's
+token is the reference's choice, or one the reference scored within tie_eps
+of it.  PASS needs the agreement over all prompts to reach the limit and
+every request to succeed.  Each prompt below the limit is printed with the
+first places where the engine parted from the reference.
+
+Quality (lib/quality.py): the walk also gives measure A (the share of the
+engine's tokens in the reference's top k, the mean gap), and the engine and
+the reference answer the public tasks (config quality.tasks.check_file),
+graded by rule: measure B.  While config quality.bar is not set, ./check
+prints "quality bar not set" and PASS or FAIL is the agreement limit's.
+
+Uses the GPU (waits in the queue).  Prints PASS or FAIL; exit code 0 or 1
+(2 when the engine could not be started or the reference failed).  The
+report is saved under the state directory.
+"""
+import json
+import os
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "lib"))
+import answers  # noqa: E402
+import common  # noqa: E402
+import config as C  # noqa: E402
+import engine as E  # noqa: E402
+import ref as R  # noqa: E402
+import tokmap  # noqa: E402
+
+
+def engine_dir(argv) -> Path:
+    if argv:
+        return Path(argv[0]).resolve()
+    try:
+        top = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True, timeout=10)
+        if top.returncode == 0 and top.stdout.strip():
+            return Path(top.stdout.strip())
+    except OSError:
+        pass
+    return Path.cwd()
+
+
+def main(argv) -> int:
+    if argv and argv[0] in ("-h", "--help"):
+        print(__doc__.strip())
+        return 0
+    cfg, state = common.setup()
+    src = engine_dir(argv)
+    prompts = answers.load_prompts(C.resolve(cfg, cfg["check"]["prompts"]))
+    qcfg = (cfg.get("quality") or {}).get("tasks") or {}
+    tasks = answers.load_prompts(C.resolve(cfg, qcfg["check_file"])) if qcfg.get("check_file") else []
+    etexts, qb = None, None
+    lim = answers.limits(cfg)
+    need = lim.required()
+    tm = tokmap.load(cfg["model"]["dir"])
+    stamp = time.strftime("%Y%m%d-%H%M%S", time.gmtime())
+    logdir = state / "check-runs" / stamp
+    logdir.mkdir(parents=True, exist_ok=True)
+    t0 = time.monotonic()
+    times = {}
+    with common.hold(state, "check", ["./check", str(src)]) as h:
+        times["queue_s"] = round(h.waited_s, 1)
+        s = R.Session(cfg, lambda: None, common.log)
+        s.hold = h
+        try:
+            srv = E.Server(cfg, h, src, logdir, common.log)
+            bd = None
+            try:
+                im = E.image_build(cfg, h, src, logdir, common.log)
+                if im is not None:
+                    times["image_s"] = round(im, 1)
+                b = E.build(cfg, h, src, logdir, common.log)
+                if b is not None:
+                    times["build_s"] = round(b, 1)
+                items, titems = answers.start_then_items(s, srv, prompts, cfg["check"]["max_tokens"], times, common.log,
+                                                         tasks, qcfg.get("max_tokens", 512))
+                tc = time.monotonic()
+                outs = answers.engine_answers(cfg, srv, items, common.log)
+                times["answers_s"] = round(time.monotonic() - tc, 1)
+                if all("error" not in o for o in outs) and titems:
+                    tt = time.monotonic()
+                    etexts = answers.engine_task_texts(cfg, srv, titems, tm, common.log)
+                    times["tasks_engine_s"] = round(time.monotonic() - tt, 1)
+                if all("error" not in o for o in outs):
+                    ts = time.monotonic()
+                    try:
+                        bd = answers.breakdown(srv, items, outs, tm.special_ids,
+                                               int(cfg["check"].get("speed_repeats", 2)), common.log)
+                    except Exception as e:  # noqa: BLE001 - the speed parts are extra; the check stands without them
+                        bd = {"error": f"the speed requests failed: {e}"[:300]}
+                    times["speed_s"] = round(time.monotonic() - ts, 1)
+            except E.EngineFailed as e:
+                print(f"FAIL: the engine could not be checked: {e}")
+                print(f"logs: {logdir}")
+                return 2
+            finally:
+                srv.stop()
+            tw = time.monotonic()
+            rows = answers.walk(cfg, s, items, outs, lim, common.log)
+            times["walk_s"] = round(time.monotonic() - tw, 1)
+            if etexts is not None:
+                tr = time.monotonic()
+                qb = answers.quality.measure_b([it["task"] for it in titems], etexts,
+                                               answers.reference_task_texts(s, titems, tm),
+                                               int(qcfg.get("bootstrap_resamples", 2000)))
+                times["tasks_reference_s"] = round(time.monotonic() - tr, 1)
+            else:
+                qb = {"tasks": 0, "note": "no tasks (config quality.tasks.check_file)" if not titems
+                      else "the tasks were not sent: a request failed"}
+        except (R.RefError, answers.compare.RefFailed) as e:
+            common.log(f"check: the reference failed: {e}")
+            return 2
+        finally:
+            s.close()
+    ok, reasons, agg, q = answers.decide(cfg, [r["item"] for r in rows], lim, qb)
+    times["total_s"] = round(time.monotonic() - t0, 1)
+    fails = [(r, answers.why(r, need)) for r in rows]
+    fails = [(r, w) for r, w in fails if w]
+    lim_text = f"{need} (not measured on AMD yet)" if cfg["limits"].get("not_measured_on_amd") else str(need)
+    if answers.quality.replaces_agreement(cfg):
+        lim_text = f"{need}, reported only: the quality bar replaces it"
+    print(f"{'PASS' if ok else 'FAIL'}: agreement {agg['agreement']} over {agg['positions']} positions "
+          f"of {len(rows)} prompts; limit {lim_text}")
+    print(f"strict agreement {agg['agreement_strict']}, close calls {agg['close_calls']}, partings {agg['partings']}, "
+          f"failed requests {agg['items_failed']}")
+    for r, w in fails:
+        print(f"  prompt {r['id']}: {w}")
+    for r in reasons:
+        if r.startswith("quality: "):
+            print(f"  {r}")
+    for t in answers.quality.lines(q):
+        print(t)
+    if bd and "error" not in bd:
+        print(f"speed (public prompts, not a score): {answers.breakdown_line(bd)}")
+        print("  whole request = the judge's formula: sum of answer tokens / sum of whole-request seconds, prompt time included")
+    elif bd:
+        print(f"speed: {bd['error']}")
+    rep = {"ok": ok, "reasons": reasons, "aggregate": agg, "limits": cfg["limits"], "engine_dir": str(src),
+           "quality": q, "quality_bar": (cfg.get("quality") or {}).get("bar"),
+           "speed": bd, "times": times, "prompts": [{"id": r["id"], "agreement": r["agreement"], "partings": r["partings"],
+                                        "item": r["item"].summary(), "why": answers.why(r, need)} for r in rows]}
+    (logdir / "report.json").write_text(json.dumps(rep, indent=1))
+    print(f"report: {logdir}/report.json (engine log: {logdir}/serve.log); took {common.fmt_s(times['total_s'])}")
+    return 0 if ok else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

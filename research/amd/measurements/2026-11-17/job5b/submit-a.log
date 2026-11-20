@@ -1,0 +1,65 @@
+submission #1: commit 40d697641bf6 queued; the judge runs it now (Ctrl-C stops watching, not the run)
+[judge 15:08:20] measuring the reference engine's speed on machine manual-checks-20261117
+[15:08:25] gpu: GPU taken after 0.0 s in the queue
+[15:08:25] starting the reference engine (ATOM)
+[15:09:32] reference ready after 66 s
+[15:11:17] speed: 3822 tokens in 48.88 s = 78.20 tokens/s
+reference: 78.2 tokens/s (atom image=ij-atom-ref:ad256a94-lp1 model=/srv/models/Qwen3.8-27B kv=bf16 mem=0.5 greedy v2)
+[judge 15:11:20] reference on machine manual-checks-20261117: 78.2 tokens/s
+[15:11:27] gpu: GPU taken after 0.0 s in the queue
+[15:11:27] starting the reference engine (ATOM)
+[15:12:33] reference ready after 66 s
+[15:14:22] waiting for the GPU to be alone: 0 process(es) outside this run have /dev/kfd open, VRAM in use 130.8 GiB
+[15:14:26] engine: starting ./serve 8100
+[15:15:31] engine: ready after 64 s (model id 'qwen3.8-27b')
+[15:15:54]   hidden-1: agreement 1.000, 0 parting(s)
+[15:15:55]   hidden-2: agreement 1.000, 0 parting(s)
+[15:15:57]   hidden-3: agreement 1.000, 0 parting(s)
+[15:15:59]   hidden-4: agreement 1.000, 1 parting(s)
+[15:16:01]   hidden-5: agreement 1.000, 0 parting(s)
+[15:16:07]   hidden-6: agreement 1.000, 0 parting(s)
+[15:16:09]   hidden-7: agreement 1.000, 0 parting(s)
+[15:16:11]   hidden-8: agreement 1.000, 0 parting(s)
+[15:16:13]   hidden-9: agreement 1.000, 0 parting(s)
+[15:16:14]   hidden-10: agreement 1.000, 0 parting(s)
+[15:16:16]   hidden-11: agreement 1.000, 0 parting(s)
+[15:16:18]   hidden-12: agreement 1.000, 0 parting(s)
+[15:16:20]   hidden-13: agreement 1.000, 0 parting(s)
+[15:16:21]   hidden-14: agreement 1.000, 0 parting(s)
+[15:16:23]   hidden-15: agreement 1.000, 0 parting(s)
+[15:16:25]   hidden-16: agreement 1.000, 0 parting(s)
+[15:16:27]   hidden-17: agreement 1.000, 0 parting(s)
+[15:16:29]   hidden-18: agreement 1.000, 0 parting(s)
+[15:16:30]   hidden-19: agreement 1.000, 0 parting(s)
+[15:16:32]   hidden-20: agreement 1.000, 0 parting(s)
+[15:16:34]   hidden-21: agreement 1.000, 0 parting(s)
+[15:16:36]   hidden-22: agreement 1.000, 0 parting(s)
+[15:16:37]   hidden-23: agreement 1.000, 0 parting(s)
+[15:16:39]   hidden-24: agreement 1.000, 0 parting(s)
+[15:16:41]   hidden-25: agreement 1.000, 0 parting(s)
+[15:16:43]   hidden-26: agreement 1.000, 0 parting(s)
+[15:16:45]   hidden-27: agreement 1.000, 0 parting(s)
+[15:16:46]   hidden-28: agreement 1.000, 0 parting(s)
+[15:16:48]   hidden-29: agreement 1.000, 0 parting(s)
+[15:16:49]   hidden-30: agreement 1.000, 0 parting(s)
+[15:16:51]   hidden-31: agreement 1.000, 0 parting(s)
+[15:16:52]   hidden-32: agreement 1.000, 0 parting(s)
+[15:16:54]   hidden-33: agreement 1.000, 0 parting(s)
+[15:16:56]   hidden-34: agreement 1.000, 0 parting(s)
+[15:16:57]   hidden-35: agreement 1.000, 0 parting(s)
+[15:16:59]   hidden-36: agreement 1.000, 0 parting(s)
+[15:17:01]   hidden-37: agreement 1.000, 0 parting(s)
+[15:17:03]   hidden-38: agreement 1.000, 0 parting(s)
+[15:17:04]   hidden-39: agreement 1.000, 0 parting(s)
+[15:17:06]   hidden-40: agreement 1.000, 0 parting(s)
+[15:17:08]   hidden-41: agreement 1.000, 0 parting(s)
+[15:17:09]   hidden-42: agreement 1.000, 0 parting(s)
+[15:17:11]   hidden-43: agreement 1.000, 0 parting(s)
+[15:17:12]   hidden-44: agreement 1.000, 0 parting(s)
+[15:17:14]   hidden-45: agreement 1.000, 0 parting(s)
+[15:17:16]   hidden-46: agreement 1.000, 0 parting(s)
+[15:17:17]   hidden-47: agreement 1.000, 0 parting(s)
+[15:17:19]   hidden-48: agreement 1.000, 0 parting(s)
+[15:18:32] speed: 3822 tokens in 48.81 s = 78.30 tokens/s
+submission  (40d697641bf6): PASSED, agreement 1.0 (limit 0.95), 78.3 tokens/s
+took 7m06s

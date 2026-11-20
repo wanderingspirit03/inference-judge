@@ -1,0 +1,127 @@
+#!/usr/bin/env python3
+"""On the GPU machine, as root through sudo (builder and judge may run it):
+
+  ij-reap --keep TOKEN   the caller has just taken the GPU queue with TOKEN:
+                         kill every process of builder, judge or cand that carries
+                         another GPU job token (a holder that died leaves
+                         such processes, and a user cannot kill another's).
+  ij-reap --kfd-users    judge only: the processes of builder, judge and cand
+                         that have /dev/kfd open, as JSON (gpuqueue.kfd_users():
+                         judge cannot read the /proc fds of builder or cand).
+  ij-reap --machine      judge only: stop the runs of builder (every
+                         `ij-box run` gets SIGTERM and 5 s), then kill every
+                         process of builder, detached ones too, before a
+                         judged run.
+
+It refuses anything else, and --keep only for the current holder of the
+queue."""
+import json
+import os
+import pwd
+import signal
+import sys
+import time
+from pathlib import Path
+
+CODE = Path(os.path.realpath(__file__)).parents[2]
+sys.path.insert(0, str(CODE / "lib"))
+import gpuqueue as Q  # noqa: E402
+
+QUEUE = Path("/var/lib/ij-amd/gpu")
+USERS = ("builder", "judge")             # who may call it
+REAPED = USERS + ("cand",)               # whose leftover processes --keep kills (cand: the judged engine)
+
+
+def uid_of(pid: int) -> int | None:
+    try:
+        return os.stat(f"/proc/{pid}").st_uid
+    except OSError:
+        return None
+
+
+def env_has(pid: int, key: bytes) -> bool:
+    try:
+        return any(kv.startswith(key + b"=") for kv in Path(f"/proc/{pid}/environ").read_bytes().split(b"\0"))
+    except OSError:
+        return False
+
+
+def main(argv) -> int:
+    caller = os.environ.get("SUDO_USER")
+    if os.geteuid() != 0 or caller not in USERS:
+        print("ij-reap: run it through sudo as builder or judge", file=sys.stderr)
+        return 2
+    uids = {}
+    for u in REAPED:
+        try:
+            uids[pwd.getpwnam(u).pw_uid] = u
+        except KeyError:
+            pass
+    hit = []
+    if argv == ["--kfd-users"] and caller == "judge":
+        # the three accounts' only: an operator's own root work on the card is not a judged run's business
+        print(json.dumps([u for u in Q.kfd_users_local() if uid_of(u["pid"]) in uids]))
+        return 0
+    if len(argv) == 2 and argv[0] == "--keep":
+        keep = argv[1]
+        h = Q.holder(QUEUE)
+        if not h or h.get("token") != keep or uid_of(h.get("pid") or -1) != pwd.getpwnam(caller).pw_uid:
+            print("ij-reap: the caller does not hold the GPU queue with that token", file=sys.stderr)
+            return 2
+        for pid in Q._pids():
+            if uid_of(pid) in uids:
+                tok = Q._environ_token(pid)
+                if tok is not None and tok != keep:
+                    try:
+                        os.kill(pid, signal.SIGKILL)
+                        hit.append(pid)
+                    except OSError:
+                        pass
+        if hit:
+            print(f"killed {len(hit)} process(es) of other users left from an earlier holder: {' '.join(map(str, hit))}")
+        return 0
+    if argv == ["--machine"] and caller == "judge":
+        pw = pwd.getpwnam("builder")
+        b = pw.pw_uid
+        groups = set()
+        for pid in Q._pids():
+            if uid_of(pid) == b and (env_has(pid, b"IJ_BOX_RUN") or "controller/box/ij-box run" in Q._cmdline(pid)):
+                try:
+                    groups.add(os.getpgid(pid))
+                except OSError:
+                    pass
+        for g in groups:                     # the runs first get a SIGTERM and 5 s to end
+            try:
+                os.killpg(g, signal.SIGTERM)
+            except OSError:
+                pass
+        if groups:
+            time.sleep(5)
+        # then every process of builder, wherever it is (a `setsid` child
+        # leaves its run's group): kill(-1) as builder, which no process of
+        # builder can dodge by forking, until none is left
+        n = len([p for p in Q._pids() if uid_of(p) == b])
+        for _ in range(20):
+            if not [p for p in Q._pids() if uid_of(p) == b]:
+                break
+            child = os.fork()
+            if child == 0:
+                try:
+                    os.setgroups([])
+                    os.setgid(pw.pw_gid)
+                    os.setuid(b)
+                    os.kill(-1, signal.SIGKILL)
+                finally:
+                    os._exit(0)
+            os.waitpid(child, 0)
+            time.sleep(0.2)
+        left = [p for p in Q._pids() if uid_of(p) == b]
+        print((f"{len(groups)} run(s) and {n} process(es) of builder stopped" if n else "nothing to stop")
+              + (f"; still alive: {left}" if left else ""))
+        return 1 if left else 0
+    print(__doc__.strip(), file=sys.stderr)
+    return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

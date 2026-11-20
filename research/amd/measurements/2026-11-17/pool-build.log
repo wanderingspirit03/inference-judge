@@ -1,0 +1,8 @@
+wrote /srv/data/pools/qwen38-agentic-main.jsonl (118.1 MB)
+wrote /srv/data/pools/qwen38-agentic-confirm.jsonl (44.1 MB)
+wrote /srv/data/pools/qwen38-agentic-manifest.json (0.4 MB)
+checked: every request fits its size as the harness counts it; main and confirm share no session and no repository
+pool build rc 0 508 s
+bcc6936772999fe60722b72efb4f9575ae2b4cddcbfc59b7e0198e02d3587bd8  /srv/data/pools/qwen38-agentic-confirm.jsonl
+fdf47bd5c12416574594018a559dc760bf28c1046edafbfe7297d78516a6d882  /srv/data/pools/qwen38-agentic-main.jsonl
+c5a6f1a3623088c520a988e80c2c95478d7893ff6bbb1fa3b36b03ba33f81368  /srv/data/pools/qwen38-agentic-manifest.json

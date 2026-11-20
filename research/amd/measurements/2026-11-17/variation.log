@@ -1,0 +1,9 @@
+ref-speed 1 rc 0 209 s: reference: 77.58 tokens/s (atom image=rocm/atom-dev@sha256:ad256a94209d2f58bfa6b0a69c555e0f8aab4fd8b76673c3532258803599099c model=/srv/models/Qwen3.8-27B kv=bf16 mem=0.5 greedy v2)
+ref-speed 2 rc 0 134 s: reference: 77.56 tokens/s (atom image=rocm/atom-dev@sha256:ad256a94209d2f58bfa6b0a69c555e0f8aab4fd8b76673c3532258803599099c model=/srv/models/Qwen3.8-27B kv=bf16 mem=0.5 greedy v2)
+ref-speed 3 rc 0 132 s: reference: 77.81 tokens/s (atom image=rocm/atom-dev@sha256:ad256a94209d2f58bfa6b0a69c555e0f8aab4fd8b76673c3532258803599099c model=/srv/models/Qwen3.8-27B kv=bf16 mem=0.5 greedy v2)
+check 1 rc 2 103 s: 
+filter rc 0 175 s: kept 43, dropped 13: ['q-q-0001-translate', 'q-q-0007-translate', 'q-q-0029-arith', 'q-q-0033-translate', 'q-q-0039-translate', 'q-q-0053-translate', 'q-q-0060-translate', 'q-q-0118-translate', 'q-q-0154-json', 'q-q-0165-translate', 'q-q-0173-translate', 'q-q-0209-translate', 'q-q-0232-json']
+check 1 rc 0 178 s: strict agreement 0.99744, close calls 13, partings 13, failed requests 0
+check 2 rc 0 178 s: strict agreement 0.99764, close calls 12, partings 12, failed requests 0
+check 3 rc 0 182 s: strict agreement 0.99646, close calls 18, partings 18, failed requests 0
+done

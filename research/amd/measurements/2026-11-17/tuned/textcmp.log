@@ -1,0 +1,9 @@
+p1-prose differs at token 2 of 128
+p2-code differs at token 13 of 128
+p3-math differs at token 108 of 128
+p4-list differs at token 1 of 128
+Traceback (most recent call last):
+  File "/root/tuned_textcmp.py", line 19, in <module>
+    "max_tokens": len(want["tokens"]), "temperature": 0, "ignore_eos": True}
+                      ~~~~^^^^^^^^^^
+TypeError: 'NoneType' object is not subscriptable

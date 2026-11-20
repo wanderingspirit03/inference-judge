@@ -346,11 +346,15 @@ it will list only numbers the judge produced.
 - The cheat suite shows that the judge catches the cheats it lists, on a mock
   server, not that no other cheat exists.
 
+## AMD MI350X judge and harness (`research/amd`)
+
+[`research/amd/`](research/amd/README.md) holds the two-machine isolated judge, container sandbox (`ij-docker`, `ij-fw`), single-GPU queue, Protocol 2 whole-request scorer, fixed three-part quality bar, and cheat suite built for `Qwen/Qwen3.8-27B` on AMD Instinct MI350X. It graded the 32.3-hour autonomous run that produced [`qwen38-mi350x-agent-engine`](https://github.com/wanderingspirit03/qwen38-mi350x-agent-engine) (1.51x geometric mean speedup over AMD's tuned `proaditya/ATOM` path across 24 unseen coding-agent prompts).
+
 ## Layout
 
 ```
 bench/       the judge (run.sh, harness, statistics, quality gate) and measure.py
-research/    the loop: queue, runner, driver, guard, agent adapters
+research/    the loop: queue, runner, driver, guard, agent adapters, and research/amd/ (MI350X judge)
 setup/       bootstrap, checks, the laptop rehearsal (setup/local_box/)
 targets/     one file per machine, model and engine
 scorecard/   the cheat suite

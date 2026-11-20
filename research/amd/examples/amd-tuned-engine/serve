@@ -1,0 +1,44 @@
+#!/bin/bash
+# serve <port>: AMD's tuned engine (the megakernel arm of its blog_benchmark/build_and_repro.sh) on <port>+1,
+# and shim.py (examples/atom-engine) on <port>.  The image is the one built from ./Dockerfile, named in
+# $IJ_ENGINE_IMAGE by ./check and ./submit.
+#
+# Where Docker is not usable directly (builder and cand on the GPU machine), the container goes through
+# controller/box/ij-docker, which runs it as the caller's uid on the host network, with the GPU devices, the
+# models read-only at /models and its own IPC namespace.  The measured run of 2026-11-17 used --ipc host and
+# seccomp=unconfined as root; whether the engine works without them is a card item (NOTES.md, C4).
+# ARM=regular serves that script's regular arm instead (MXFP4 online quantization, no megakernel).
+set -euo pipefail
+PORT="$1"
+INNER=$((PORT + 1))
+HERE="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
+SHIM="$HERE/../atom-engine/shim.py"
+[ -f "$SHIM" ] || SHIM=/opt/ij-amd/amd/examples/atom-engine/shim.py
+LAUNCHER=/opt/ij-amd/amd/controller/box/ij-docker
+IMAGE="${IJ_ENGINE_IMAGE:-ij-atom-tuned:dev973}"
+MONO=1; EXTRA=()
+if [ "${ARM:-megakernel}" = regular ]; then
+  MONO=0; EXTRA=(--online_quant_config '{"global_quant_config": "mxfp4", "exclude_layer": ["*conv1d*"]}')
+fi
+ENVS=(-e "ATOM_MONO_ENABLE=$MONO" -e GPU_MAX_HW_QUEUES=1 -e ATOM_DFLASH2_AOT=/opt/qwen38/drafter-objects)
+CMD=(env -u TEMP python3 -m atom.entrypoints.openai_server
+  --model /models/Qwen3.8-27B --served-model-name qwen3.8-27b --kv_cache_dtype bf16 -tp 1 --max-model-len 40000
+  --max-num-seqs 4 --server-port "$INNER" --method dflash --draft-model /models/Qwen3.8-27B-DFlash2
+  --num-speculative-tokens 7 "${EXTRA[@]}")
+
+if [ -w /var/run/docker.sock ]; then
+  rmc() { docker rm -f ij-engine > /dev/null 2>&1 || true; }
+  rmc; trap rmc EXIT TERM INT
+  docker run --rm --name ij-engine --network host --ipc host --shm-size 16g \
+    --device /dev/kfd --device /dev/dri --group-add video --security-opt seccomp=unconfined \
+    -v /srv/models:/models:ro "${ENVS[@]}" "$IMAGE" "${CMD[@]}" &
+else
+  rmc() { sudo -n "$LAUNCHER" rm engine > /dev/null 2>&1 || true; }
+  rmc; trap rmc EXIT TERM INT
+  sudo -n "$LAUNCHER" run -d --rm --name engine --shm-size 16g "${ENVS[@]}" "$IMAGE" "${CMD[@]}" > /dev/null
+  # follow the container, so this script lives as long as the engine does
+  ( while sudo -n "$LAUNCHER" ps 2>/dev/null | grep -qE '^ij-[a-z]+-engine .* Up'; do sleep 5; done ) &
+fi
+# the megakernel path emits token ids and no logprobs (NOTES, job 4): the shim returns the ids
+SHIM_IDS_ONLY=$MONO python3 "$SHIM" "$PORT" "http://127.0.0.1:$INNER" &
+wait -n

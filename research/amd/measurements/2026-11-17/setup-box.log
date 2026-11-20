@@ -1,0 +1,244 @@
+Hit:1 http://mirrors.digitalocean.com/ubuntu noble InRelease
+Get:2 http://mirrors.digitalocean.com/ubuntu noble-updates InRelease [126 kB]
+Get:3 http://mirrors.digitalocean.com/ubuntu noble-backports InRelease [126 kB]
+Hit:4 https://stable.repo.amd.com/rocm/core/packages/ubuntu2404 stable InRelease
+Hit:5 https://repo.radeon.com/amdainic/pensando/ubuntu/1.117.5-a-147 noble InRelease
+Get:6 http://mirrors.digitalocean.com/ubuntu noble-updates/main amd64 Packages [1452 kB]
+Get:7 http://mirrors.digitalocean.com/ubuntu noble-updates/main Translation-en [316 kB]
+Get:8 http://mirrors.digitalocean.com/ubuntu noble-updates/main amd64 Components [181 kB]
+Get:9 http://mirrors.digitalocean.com/ubuntu noble-updates/universe amd64 Packages [1712 kB]
+Get:10 http://mirrors.digitalocean.com/ubuntu noble-updates/universe Translation-en [345 kB]
+Get:11 http://mirrors.digitalocean.com/ubuntu noble-updates/universe amd64 Components [388 kB]
+Get:12 http://mirrors.digitalocean.com/ubuntu noble-updates/restricted amd64 Packages [1887 kB]
+Get:13 http://mirrors.digitalocean.com/ubuntu noble-updates/restricted Translation-en [433 kB]
+Get:14 http://mirrors.digitalocean.com/ubuntu noble-updates/multiverse amd64 Packages [50.7 kB]
+Get:15 http://mirrors.digitalocean.com/ubuntu noble-updates/multiverse Translation-en [14.6 kB]
+Get:16 http://mirrors.digitalocean.com/ubuntu noble-updates/multiverse amd64 Components [940 B]
+Get:17 http://mirrors.digitalocean.com/ubuntu noble-backports/main amd64 Components [5740 B]
+Get:18 http://mirrors.digitalocean.com/ubuntu noble-backports/universe amd64 Components [12.6 kB]
+Hit:19 https://repos-droplet.digitalocean.com/apt/droplet-agent main InRelease
+Get:20 https://repo.radeon.com/amdainic/pensando/ubuntu/1.117.5-a-196 noble InRelease [3446 B]
+Hit:21 https://repo.radeon.com/amdgpu/31.50/ubuntu noble InRelease
+Get:22 http://security.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+Hit:23 https://repo.radeon.com/device-metrics-exporter/apt/1.5.2 noble InRelease
+Hit:24 https://linux.mellanox.com/public/repo/doca/2.9.5/ubuntu24.04/x86_64 ./ InRelease
+Get:25 http://security.ubuntu.com/ubuntu noble-security/main amd64 Packages [1196 kB]
+Get:26 http://security.ubuntu.com/ubuntu noble-security/main Translation-en [238 kB]
+Get:27 http://security.ubuntu.com/ubuntu noble-security/main amd64 Components [46.4 kB]
+Get:28 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1229 kB]
+Get:29 http://security.ubuntu.com/ubuntu noble-security/universe Translation-en [248 kB]
+Get:30 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Components [76.3 kB]
+Get:31 http://security.ubuntu.com/ubuntu noble-security/restricted amd64 Packages [1788 kB]
+Get:32 http://security.ubuntu.com/ubuntu noble-security/restricted Translation-en [411 kB]
+Get:33 http://security.ubuntu.com/ubuntu noble-security/multiverse amd64 Packages [45.4 kB]
+Get:34 http://security.ubuntu.com/ubuntu noble-security/multiverse Translation-en [12.7 kB]
+Fetched 12.5 MB in 1s (9674 kB/s)
+Reading package lists...
+Reading package lists...
+Building dependency tree...
+Reading state information...
+rsync is already the newest version (3.2.7-1ubuntu1.5).
+rsync set to manually installed.
+The following additional packages will be installed:
+  bridge-utils containerd dns-root-data dnsmasq-base pigz python3-pip-whl
+  python3-setuptools-whl python3.12-venv runc ubuntu-fan
+Suggested packages:
+  ifupdown aufs-tools cgroupfs-mount | cgroup-lite debootstrap docker-buildx
+  docker-compose-v2 docker-doc rinse zfs-fuse | zfsutils
+The following NEW packages will be installed:
+  bridge-utils containerd dns-root-data dnsmasq-base docker.io pigz
+  python3-pip-whl python3-setuptools-whl python3-venv python3.12-venv runc
+  ubuntu-fan
+0 upgraded, 12 newly installed, 0 to remove and 54 not upgraded.
+Need to get 76.2 MB of archives.
+After this operation, 282 MB of additional disk space will be used.
+Get:1 http://mirrors.digitalocean.com/ubuntu noble/universe amd64 pigz amd64 2.8-1 [65.6 kB]
+Get:2 http://mirrors.digitalocean.com/ubuntu noble/main amd64 bridge-utils amd64 1.7.1-1ubuntu2 [33.9 kB]
+Get:3 http://mirrors.digitalocean.com/ubuntu noble-updates/main amd64 runc amd64 1.3.4-0ubuntu1~24.04.1 [9574 kB]
+Get:4 http://mirrors.digitalocean.com/ubuntu noble-updates/main amd64 containerd amd64 2.2.1-0ubuntu1~24.04.4 [28.2 MB]
+Get:5 http://mirrors.digitalocean.com/ubuntu noble-updates/main amd64 dns-root-data all 2024071801~ubuntu0.24.04.1 [5918 B]
+Get:6 http://mirrors.digitalocean.com/ubuntu noble-updates/main amd64 dnsmasq-base amd64 2.91-0ubuntu0.24.04.2 [381 kB]
+Get:7 http://mirrors.digitalocean.com/ubuntu noble-updates/universe amd64 docker.io amd64 29.1.3-0ubuntu3~24.04.2 [35.6 MB]
+Get:8 http://mirrors.digitalocean.com/ubuntu noble-updates/universe amd64 python3-pip-whl all 24.0+dfsg-1ubuntu1.3 [1707 kB]
+Get:9 http://mirrors.digitalocean.com/ubuntu noble-updates/universe amd64 python3-setuptools-whl all 68.1.2-2ubuntu1.2 [716 kB]
+Get:10 http://mirrors.digitalocean.com/ubuntu noble-updates/universe amd64 python3.12-venv amd64 3.12.3-1ubuntu0.17 [5684 B]
+Get:11 http://mirrors.digitalocean.com/ubuntu noble-updates/universe amd64 python3-venv amd64 3.12.3-0ubuntu2.1 [1032 B]
+Get:12 http://mirrors.digitalocean.com/ubuntu noble-updates/universe amd64 ubuntu-fan all 0.12.16+24.04.1 [34.2 kB]
+Preconfiguring packages ...
+Fetched 76.2 MB in 1s (61.8 MB/s)
+Selecting previously unselected package pigz.
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 128459 files and directories currently installed.)
+Preparing to unpack .../00-pigz_2.8-1_amd64.deb ...
+Unpacking pigz (2.8-1) ...
+Selecting previously unselected package bridge-utils.
+Preparing to unpack .../01-bridge-utils_1.7.1-1ubuntu2_amd64.deb ...
+Unpacking bridge-utils (1.7.1-1ubuntu2) ...
+Selecting previously unselected package runc.
+Preparing to unpack .../02-runc_1.3.4-0ubuntu1~24.04.1_amd64.deb ...
+Unpacking runc (1.3.4-0ubuntu1~24.04.1) ...
+Selecting previously unselected package containerd.
+Preparing to unpack .../03-containerd_2.2.1-0ubuntu1~24.04.4_amd64.deb ...
+Unpacking containerd (2.2.1-0ubuntu1~24.04.4) ...
+Selecting previously unselected package dns-root-data.
+Preparing to unpack .../04-dns-root-data_2024071801~ubuntu0.24.04.1_all.deb ...
+Unpacking dns-root-data (2024071801~ubuntu0.24.04.1) ...
+Selecting previously unselected package dnsmasq-base.
+Preparing to unpack .../05-dnsmasq-base_2.91-0ubuntu0.24.04.2_amd64.deb ...
+Unpacking dnsmasq-base (2.91-0ubuntu0.24.04.2) ...
+Selecting previously unselected package docker.io.
+Preparing to unpack .../06-docker.io_29.1.3-0ubuntu3~24.04.2_amd64.deb ...
+Unpacking docker.io (29.1.3-0ubuntu3~24.04.2) ...
+Selecting previously unselected package python3-pip-whl.
+Preparing to unpack .../07-python3-pip-whl_24.0+dfsg-1ubuntu1.3_all.deb ...
+Unpacking python3-pip-whl (24.0+dfsg-1ubuntu1.3) ...
+Selecting previously unselected package python3-setuptools-whl.
+Preparing to unpack .../08-python3-setuptools-whl_68.1.2-2ubuntu1.2_all.deb ...
+Unpacking python3-setuptools-whl (68.1.2-2ubuntu1.2) ...
+Selecting previously unselected package python3.12-venv.
+Preparing to unpack .../09-python3.12-venv_3.12.3-1ubuntu0.17_amd64.deb ...
+Unpacking python3.12-venv (3.12.3-1ubuntu0.17) ...
+Selecting previously unselected package python3-venv.
+Preparing to unpack .../10-python3-venv_3.12.3-0ubuntu2.1_amd64.deb ...
+Unpacking python3-venv (3.12.3-0ubuntu2.1) ...
+Selecting previously unselected package ubuntu-fan.
+Preparing to unpack .../11-ubuntu-fan_0.12.16+24.04.1_all.deb ...
+Unpacking ubuntu-fan (0.12.16+24.04.1) ...
+Setting up python3-setuptools-whl (68.1.2-2ubuntu1.2) ...
+Setting up python3-pip-whl (24.0+dfsg-1ubuntu1.3) ...
+Setting up dnsmasq-base (2.91-0ubuntu0.24.04.2) ...
+Setting up runc (1.3.4-0ubuntu1~24.04.1) ...
+Setting up dns-root-data (2024071801~ubuntu0.24.04.1) ...
+Setting up bridge-utils (1.7.1-1ubuntu2) ...
+Setting up pigz (2.8-1) ...
+Setting up containerd (2.2.1-0ubuntu1~24.04.4) ...
+Created symlink /etc/systemd/system/multi-user.target.wants/containerd.service → /usr/lib/systemd/system/containerd.service.
+Setting up ubuntu-fan (0.12.16+24.04.1) ...
+Created symlink /etc/systemd/system/multi-user.target.wants/ubuntu-fan.service → /usr/lib/systemd/system/ubuntu-fan.service.
+Setting up python3.12-venv (3.12.3-1ubuntu0.17) ...
+Setting up docker.io (29.1.3-0ubuntu3~24.04.2) ...
+info: Selecting GID from range 100 to 999 ...
+info: Adding group `docker' (GID 112) ...
+Created symlink /etc/systemd/system/multi-user.target.wants/docker.service → /usr/lib/systemd/system/docker.service.
+Created symlink /etc/systemd/system/sockets.target.wants/docker.socket → /usr/lib/systemd/system/docker.socket.
+Setting up python3-venv (3.12.3-0ubuntu2.1) ...
+Processing triggers for man-db (2.12.0-4build2) ...
+Processing triggers for dbus (1.14.10-4ubuntu4.1) ...
+
+Running kernel seems to be up-to-date.
+
+No services need to be restarted.
+
+No containers need to be restarted.
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+docker.io/rocm/atom-dev@sha256:ad256a94209d2f58bfa6b0a69c555e0f8aab4fd8b76673c3532258803599099c: Pulling from rocm/atom-dev
+b40150c1c271: Pulling fs layer
+b711fa9338dd: Pulling fs layer
+8a4fbfc6a7d7: Pulling fs layer
+98d708606fc4: Pulling fs layer
+72f33eaa92dd: Pulling fs layer
+c480dc3a1ce3: Pulling fs layer
+dd9255a7747c: Pulling fs layer
+797702a95a82: Pulling fs layer
+1f4183fbb3d7: Pulling fs layer
+4f4fb700ef54: Pulling fs layer
+4f4fb700ef54: Pulling fs layer
+631cf0344ddc: Pulling fs layer
+100d9e2e8a84: Pulling fs layer
+318b81e02748: Pulling fs layer
+2de2cc7b88c1: Pulling fs layer
+cf4e2d76982c: Pulling fs layer
+4442b2c3a978: Pulling fs layer
+3d0a7ec8a9bd: Pulling fs layer
+4f4fb700ef54: Pulling fs layer
+e48e1fa03ae7: Pulling fs layer
+ea3c1df4bf60: Pulling fs layer
+9a92f403d728: Pulling fs layer
+957b31c1de1d: Pulling fs layer
+44d153e63339: Pulling fs layer
+4f086b91238f: Pulling fs layer
+bc1ecf6147e2: Pulling fs layer
+a8d845d4d4d0: Pulling fs layer
+4f4fb700ef54: Pulling fs layer
+576826c4d032: Pulling fs layer
+e061e20de7b6: Pulling fs layer
+4f4fb700ef54: Pulling fs layer
+4f4fb700ef54: Pulling fs layer
+98f1fb08b8b3: Pulling fs layer
+7055378813b5: Pulling fs layer
+31269c080e17: Pulling fs layer
+4f4fb700ef54: Download complete
+4f086b91238f: Download complete
+98d708606fc4: Download complete
+631cf0344ddc: Download complete
+576826c4d032: Download complete
+797702a95a82: Download complete
+b40150c1c271: Download complete
+cf4e2d76982c: Download complete
+b711fa9338dd: Download complete
+44d153e63339: Download complete
+957b31c1de1d: Download complete
+9a92f403d728: Download complete
+bc1ecf6147e2: Download complete
+576826c4d032: Pull complete
+b40150c1c271: Pull complete
+8a4fbfc6a7d7: Download complete
+31269c080e17: Download complete
+72f33eaa92dd: Download complete
+2de2cc7b88c1: Download complete
+e061e20de7b6: Download complete
+e48e1fa03ae7: Download complete
+3d0a7ec8a9bd: Download complete
+98f1fb08b8b3: Download complete
+1f4183fbb3d7: Download complete
+100d9e2e8a84: Download complete
+72f33eaa92dd: Pull complete
+a8d845d4d4d0: Download complete
+ea3c1df4bf60: Download complete
+318b81e02748: Download complete
+2de2cc7b88c1: Pull complete
+c480dc3a1ce3: Download complete
+e061e20de7b6: Pull complete
+7055378813b5: Download complete
+dd9255a7747c: Download complete
+4442b2c3a978: Download complete
+4442b2c3a978: Pull complete
+797702a95a82: Pull complete
+dd9255a7747c: Pull complete
+8a4fbfc6a7d7: Pull complete
+318b81e02748: Pull complete
+e48e1fa03ae7: Pull complete
+bc1ecf6147e2: Pull complete
+31269c080e17: Pull complete
+98f1fb08b8b3: Pull complete
+98d708606fc4: Pull complete
+a8d845d4d4d0: Pull complete
+3d0a7ec8a9bd: Pull complete
+9a92f403d728: Pull complete
+957b31c1de1d: Pull complete
+7055378813b5: Pull complete
+4f086b91238f: Pull complete
+ea3c1df4bf60: Pull complete
+631cf0344ddc: Pull complete
+c480dc3a1ce3: Pull complete
+44d153e63339: Pull complete
+100d9e2e8a84: Pull complete
+4f4fb700ef54: Pull complete
+1f4183fbb3d7: Pull complete
+cf4e2d76982c: Pull complete
+b711fa9338dd: Pull complete
+Digest: sha256:ad256a94209d2f58bfa6b0a69c555e0f8aab4fd8b76673c3532258803599099c
+Status: Downloaded newer image for rocm/atom-dev@sha256:ad256a94209d2f58bfa6b0a69c555e0f8aab4fd8b76673c3532258803599099c
+docker.io/rocm/atom-dev@sha256:ad256a94209d2f58bfa6b0a69c555e0f8aab4fd8b76673c3532258803599099c
+WARNING: huggingface-hub 2.4.0 does not provide the extra 'hf-transfer'
+Fetching 32 files:   0%|          | 0/32 [00:00<?, ?it/s]Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Fetching 32 files:  16%|█▌        | 5/32 [00:00<00:00, 37.57it/s]Fetching 32 files:  28%|██▊       | 9/32 [00:06<00:21,  1.09it/s]Fetching 32 files:  34%|███▍      | 11/32 [00:12<00:30,  1.47s/it]Fetching 32 files:  44%|████▍     | 14/32 [00:17<00:27,  1.50s/it]Fetching 32 files:  53%|█████▎    | 17/32 [00:17<00:14,  1.00it/s]Fetching 32 files:  59%|█████▉    | 19/32 [00:18<00:11,  1.16it/s]Fetching 32 files:  62%|██████▎   | 20/32 [00:19<00:09,  1.23it/s]Fetching 32 files:  66%|██████▌   | 21/32 [00:19<00:08,  1.28it/s]Fetching 32 files:  72%|███████▏  | 23/32 [00:20<00:05,  1.61it/s]Fetching 32 files:  78%|███████▊  | 25/32 [00:21<00:04,  1.68it/s]Fetching 32 files:  81%|████████▏ | 26/32 [00:25<00:08,  1.36s/it]Fetching 32 files:  84%|████████▍ | 27/32 [00:26<00:05,  1.18s/it]Fetching 32 files:  88%|████████▊ | 28/32 [00:27<00:04,  1.08s/it]Fetching 32 files:  91%|█████████ | 29/32 [00:27<00:02,  1.08it/s]Fetching 32 files:  94%|█████████▍| 30/32 [00:29<00:02,  1.03s/it]Fetching 32 files:  97%|█████████▋| 31/32 [00:29<00:00,  1.12it/s]Fetching 32 files: 100%|██████████| 32/32 [00:29<00:00,  1.46it/s]Fetching 32 files: 100%|██████████| 32/32 [00:29<00:00,  1.08it/s]
+/srv/models/Qwen3.8-27B
+setup-box: done (real)
+
+real	2m33.325s
+user	1m0.920s
+sys	0m54.667s
+exit 0

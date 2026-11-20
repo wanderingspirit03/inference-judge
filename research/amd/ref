@@ -1,0 +1,78 @@
+#!/usr/bin/env python3
+"""./ref <prompt>: the reference engine's greedy completion and per-token
+logprobs, as JSON on stdout.
+
+  ./ref "The capital of France is"          raw text prompt (no chat template)
+  ./ref --chat "Write a haiku about rain"   one user message, chat template applied
+  ./ref --ids 785,6722,315                  a prompt given as token ids
+  ./ref --file prompts.jsonl                one JSON object per line: {"prompt": ...}
+                                            or {"messages": [...]} or {"prompt_token_ids": [...]},
+                                            optional "max_tokens"; one JSON answer per line
+  --max-tokens N (default 128)   --top K (top logprobs per position, default 20, at most 20)
+
+The reference is ROCm ATOM serving the model in bf16, greedy (temperature 0).
+Answers are cached: a prompt asked before returns at once without the GPU.
+Otherwise ./ref waits for the GPU, starts the reference, answers and stops it
+again.  Output fields: prompt_token_ids, tokens (ids), logprobs, top_logprobs
+({token id: logprob} per position), token_text, text, finish_reason, cached,
+reference.
+"""
+import argparse
+import json
+import os
+import sys
+import time
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "lib"))
+import common  # noqa: E402
+import ref as R  # noqa: E402
+
+
+def main(argv: list[str]) -> int:
+    ap = argparse.ArgumentParser(prog="./ref", add_help=False)
+    ap.add_argument("-h", "--help", action="store_true")
+    ap.add_argument("--chat", action="store_true")
+    ap.add_argument("--ids")
+    ap.add_argument("--file")
+    ap.add_argument("--max-tokens", type=int, default=128)
+    ap.add_argument("--top", type=int, default=None)
+    ap.add_argument("prompt", nargs="*")
+    a = ap.parse_args(argv)
+    if a.help or not (a.prompt or a.ids or a.file):
+        print(__doc__.strip())
+        return 0 if a.help else 2
+    if a.top is not None and not 0 < a.top <= 20:
+        print("--top must be 1..20 (the reference returns at most 20)", file=sys.stderr)
+        return 2
+    cfg, state = common.setup()
+    if a.file:
+        with open(a.file) as f:
+            items = [json.loads(x) for x in f if x.strip()]
+    elif a.ids:
+        items = [{"prompt_token_ids": [int(x) for x in a.ids.replace(" ", "").split(",") if x]}]
+    elif a.chat:
+        items = [{"messages": [{"role": "user", "content": " ".join(a.prompt)}]}]
+    else:
+        items = [{"prompt": " ".join(a.prompt)}]
+    t0 = time.monotonic()
+    s = R.Session(cfg, lambda: common.hold(state, "ref", ["./ref"] + argv), common.log)
+    rc = 0
+    try:
+        for it in items:
+            ids = s.ids_for(it)
+            ans = s.answer(ids, int(it.get("max_tokens") or a.max_tokens), a.top)
+            out = {k: v for k, v in it.items() if k in ("id", "prompt", "messages")}
+            out.update(ans)
+            print(json.dumps(out), flush=True)
+    except R.RefError as e:
+        common.log(f"ref: {e}")
+        rc = 1
+    finally:
+        s.close()
+    common.log(f"ref: {len(items)} answer(s) in {time.monotonic() - t0:.1f} s"
+               + (f" (reference start {s.start_s:.0f} s)" if s.start_s else ""))
+    return rc
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

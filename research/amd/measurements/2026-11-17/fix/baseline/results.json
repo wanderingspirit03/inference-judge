@@ -1,0 +1,190 @@
+{
+  "schema": 2,
+  "id": "baseline-atom-mi350x",
+  "run_id": "baseline-atom-mi350x-20261117T152301Z-124954",
+  "kind": "baseline",
+  "verdict": "INVALID",
+  "reasons": [
+    "baseline launch is not a measurement: invalid_requests"
+  ],
+  "target": {
+    "id": "mi350x-qwen38-27b-tps",
+    "file": "/opt/bench/targets/mi350x-qwen38-27b-tps.yaml",
+    "hash": "0da65d6f4a835750e445c3711306d8ddacc3b3cd7828ed006a799eda6aa47703",
+    "metric": "tps"
+  },
+  "stamps": null,
+  "ruler_lock": {
+    "state": "absent",
+    "path": "/opt/bench/RULER_LOCK"
+  },
+  "attestation": {
+    "weights_sha256": "not computed",
+    "tokenizer_sha256": "0997f410c57a1f4e53b09e4be8f4a172d90edd9564368fb0847030937229b9f3",
+    "chat_template_sha256": "not computed",
+    "engine_flags": [
+      "--network",
+      "none",
+      "--device",
+      "/dev/kfd",
+      "--device",
+      "/dev/dri",
+      "--group-add",
+      "992",
+      "--shm-size",
+      "16g",
+      "--entrypoint=",
+      "--ipc=host",
+      "-v",
+      "/opt/models:/opt/models:ro",
+      "-v",
+      "/tmp/inference-judge-baseline-atom-mi350x-bAmK5t/exp:/ro/exp:ro",
+      "-e",
+      "IJ_EXPERIMENT_ID=baseline-atom-mi350x",
+      "-e",
+      "IJ_TARGET=mi350x-qwen38-27b-tps",
+      "-e",
+      "IJ_SERVED_NAME=qwen3.8-27b",
+      "-e",
+      "IJ_MODEL_DIR=/opt/models/Qwen3.8-27B",
+      "-e",
+      "PORT=8000",
+      "-e",
+      "GPU_MAX_HW_QUEUES=1",
+      "-e",
+      "HF_HUB_OFFLINE=1"
+    ],
+    "engine_image_digest": "sha256:be6dd1f1e4ad4486a60b557f56176cfaa0766768002ac5325ac157eea5ded33f"
+  },
+  "metric": {
+    "kind": "tps",
+    "headline": 0.0,
+    "levels": {
+      "1": 77.52750746540525
+    },
+    "decode_tps": 79.50461622705555,
+    "stream_tps": 77.47014727782367,
+    "by_isl": {
+      "100": {
+        "n": 2,
+        "decode_tps": 79.91408063424572,
+        "stream_tps": 78.66510842149167,
+        "p50_tpot_ms": 12.51343933463796,
+        "p50_ttft_ms": 114.236,
+        "p95_ttft_ms": 122.49620000000031
+      },
+      "1000": {
+        "n": 3,
+        "decode_tps": 79.49933156775327,
+        "stream_tps": 77.48382184713866,
+        "p50_tpot_ms": 12.576567514677087,
+        "p50_ttft_ms": 128.33200000000033,
+        "p95_ttft_ms": 271.7398
+      },
+      "2000": {
+        "n": 2,
+        "decode_tps": 79.3783818336282,
+        "stream_tps": 77.40737308252334,
+        "p50_tpot_ms": 12.597888454011741,
+        "p50_ttft_ms": 176.8360000000033,
+        "p95_ttft_ms": 186.79450000000043
+      },
+      "4000": {
+        "n": 2,
+        "decode_tps": 79.22992236630476,
+        "stream_tps": 76.35866979617903,
+        "p50_tpot_ms": 12.62149412915851,
+        "p50_ttft_ms": 255.61450000000008,
+        "p95_ttft_ms": 259.53175000000283
+      }
+    }
+  },
+  "stats": null,
+  "isolation": {
+    "network": "none",
+    "writable_mounts": [],
+    "exfil_probe": "blocked",
+    "seal": "full",
+    "notes": [],
+    "probe": {
+      "net": "blocked",
+      "net_err": "OSError",
+      "sockets": {},
+      "writable": []
+    },
+    "host_sockets": []
+  },
+  "started": "2026-11-17T15:23:01Z",
+  "finished": "2026-11-17T15:33:40Z",
+  "duration_s": 639,
+  "engine_image": "ij-atom-ref:ad256a94-lp1",
+  "engine_image_digest": "sha256:be6dd1f1e4ad4486a60b557f56176cfaa0766768002ac5325ac157eea5ded33f",
+  "base_url": "http://127.0.0.1:8000/v1",
+  "deps_installed": false,
+  "cleanup_ok": true,
+  "snapshot": "/opt/bench/results/baseline-atom-mi350x/snapshot",
+  "canary": {
+    "matched": 10,
+    "total": 10
+  },
+  "quality": {
+    "passed": true,
+    "note": "baseline: the reference R is made from this launch"
+  },
+  "launches": {
+    "B": {
+      "role": "candidate",
+      "status": "invalid_requests",
+      "headline": 0.0,
+      "value": null,
+      "levels": {
+        "1": 77.52750746540525
+      },
+      "decode_tps": 79.50461622705555,
+      "stream_tps": 77.47014727782367,
+      "by_isl": {
+        "100": {
+          "n": 2,
+          "decode_tps": 79.91408063424572,
+          "stream_tps": 78.66510842149167,
+          "p50_tpot_ms": 12.51343933463796,
+          "p50_ttft_ms": 114.236,
+          "p95_ttft_ms": 122.49620000000031
+        },
+        "1000": {
+          "n": 3,
+          "decode_tps": 79.49933156775327,
+          "stream_tps": 77.48382184713866,
+          "p50_tpot_ms": 12.576567514677087,
+          "p50_ttft_ms": 128.33200000000033,
+          "p95_ttft_ms": 271.7398
+        },
+        "2000": {
+          "n": 2,
+          "decode_tps": 79.3783818336282,
+          "stream_tps": 77.40737308252334,
+          "p50_tpot_ms": 12.597888454011741,
+          "p50_ttft_ms": 176.8360000000033,
+          "p95_ttft_ms": 186.79450000000043
+        },
+        "4000": {
+          "n": 2,
+          "decode_tps": 79.22992236630476,
+          "stream_tps": 76.35866979617903,
+          "p50_tpot_ms": 12.62149412915851,
+          "p50_ttft_ms": 255.61450000000008,
+          "p95_ttft_ms": 259.53175000000283
+        }
+      },
+      "n_usable": 2,
+      "n_blocks": 2,
+      "n_stalled": 0,
+      "n_invalid": 1,
+      "invalid_reasons": {
+        "length": 1
+      }
+    }
+  },
+  "design": null,
+  "screen": null
+}

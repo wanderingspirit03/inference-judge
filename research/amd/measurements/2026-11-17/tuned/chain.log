@@ -1,0 +1,18 @@
+started ij-ref on port 8001
+14:02:29 atom ready after 65 s
+/opt/ij-amd/amd/prompts/public.jsonl: 7 requests, whole-request 47.9 tok/s, decode 79.6 tok/s, median ttft 0.115 s, median prompt 73 tokens
+/root/agentic/main-8000-9.jsonl: 8 requests, whole-request 72.6 tok/s, decode 78.5 tok/s, median ttft 0.205 s, median prompt 7502.5 tokens
+/root/agentic/main-16000-9.jsonl: 8 requests, whole-request 63.6 tok/s, decode 77.8 tok/s, median ttft 0.675 s, median prompt 14835.5 tokens
+/root/agentic/main-32000-9.jsonl: 8 requests, whole-request 45.6 tok/s, decode 76.4 tok/s, median ttft 1.976 s, median prompt 31714.5 tokens
+14:05:31 atom agentic rc 0 247 s
+14:18:28 repro (megakernel arm) rc 0 777 s
+14:27:13 submit-short rc 1 525 s:   hidden-43: request failed: the answer carried no logprobs (send logprobs for every token)   agreement with stock 0.0 (limit 0.95; stock against itself not measured yet) took 8m45s 
+14:29:58 tuned ready after 165 s
+/opt/ij-amd/amd/prompts/public.jsonl: 7 requests, whole-request 116.4 tok/s, decode 713.6 tok/s, median ttft 0.102 s, median prompt 73 tokens
+/root/agentic/main-8000-9.jsonl: 8 requests, whole-request 442.3 tok/s, decode 813.5 tok/s, median ttft 0.193 s, median prompt 7502.5 tokens
+/root/agentic/main-16000-9.jsonl: 8 requests, whole-request 27.0 tok/s, decode 739.0 tok/s, median ttft 0.683 s, median prompt 14835.5 tokens
+/root/agentic/main-32000-9.jsonl: 8 requests, whole-request 96.7 tok/s, decode 700.1 tok/s, median ttft 1.986 s, median prompt 31714.5 tokens
+14:33:29 tuned agentic rc 0 376 s
+14:33:34 done; /tmp/ij-job5-go written
+14:42:04 textcmp rc 0 270 s: TypeError: 'NoneType' object is not subscriptable
+14:42:09 job 5 flag released

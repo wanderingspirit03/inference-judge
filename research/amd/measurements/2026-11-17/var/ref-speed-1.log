@@ -1,0 +1,5 @@
+[13:17:52] gpu: GPU taken after 0.0 s in the queue
+[13:17:52] starting the reference engine (ATOM)
+[13:19:10] reference ready after 78 s
+[13:21:21] speed: 2616 tokens in 33.72 s = 77.58 tokens/s
+reference: 77.58 tokens/s (atom image=rocm/atom-dev@sha256:ad256a94209d2f58bfa6b0a69c555e0f8aab4fd8b76673c3532258803599099c model=/srv/models/Qwen3.8-27B kv=bf16 mem=0.5 greedy v2)

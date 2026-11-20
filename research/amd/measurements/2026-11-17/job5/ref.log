@@ -1,0 +1,5 @@
+[14:43:25] gpu: GPU taken after 0.0 s in the queue
+[14:43:25] starting the reference engine (ATOM)
+[14:44:32] reference ready after 66 s
+[14:44:52] ref: the reference's logprobs cover 31 of its 32 tokens (finish length); a token without visible text in the middle of the answer cannot be placed
+[14:44:52] ref: 1 answer(s) in 86.9 s (reference start 66 s)

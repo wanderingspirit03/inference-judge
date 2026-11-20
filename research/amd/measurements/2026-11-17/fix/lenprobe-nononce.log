@@ -1,0 +1,12 @@
+started ij-ref on port 8001
+{
+ "completion_tokens": 512,
+ "token_logprobs": 512,
+ "client_recount_of_text": 512,
+ "finish": "length",
+ "special_ids_generated": [],
+ "added_nonspecial_generated": [],
+ "text_chars": 1856,
+ "reasoning_chars": 0
+}
+stopped ij-ref

@@ -1,0 +1,66 @@
+{
+ "_about": "The controller's config (two-machine design), installed as /etc/ij-amd/controller.json by install-vm.sh. The installer writes it once and later only adds missing keys. The code has no default for driver.spend_cap_usd: with null the driver refuses to start a run.",
+ "paths": {
+  "ctl_dir": "/var/lib/ij-ctl",
+  "judge_dir": "/var/lib/ij-judge",
+  "score_file": "/var/lib/ij-score/score.json",
+  "code_dir": "/opt/ij-amd/amd",
+  "engine_repo": "/home/agents/engine",
+  "agents_key": "/home/agents/.ssh/ij_box"
+ },
+ "box": {
+  "user": "builder",
+  "work_dir": "/home/builder/work",
+  "code_dir": "/opt/ij-amd/amd"
+ },
+ "judge": {
+  "user": "judge",
+  "pool": "/var/lib/ij-judge/pool.jsonl",
+  "warm": "/var/lib/ij-judge/warm.jsonl",
+  "draw": {"8000": 6, "12000": 6},
+  "_pool_note": "each judged run draws `draw` rows per bucket (isl), each from a session never drawn before; rows come from ij-judge prepare-pool. 12 prompts a run (6 at 8000 and 6 at 12000 tokens) as set by the operator on 2026-11-18; agent sessions cannot be cut to 2000 or 4000",
+  "amd_config": "/opt/ij-amd/amd/config.json",
+  "certify_command": null
+ },
+ "driver": {
+  "_size_and_region": "fixed in ij-driver: gpu-mi350x1-288gb-spot in ric1",
+  "image": "gpu-amd-base",
+  "tag": "ij-amd-gpu",
+  "max_creations_per_day": 3,
+  "spend_cap_usd": 250,
+  "_spend_cap_usd_note": "set by the user on 2026-11-17",
+  "min_hours_left_to_create": 1.0,
+  "price_usd_per_hour": null,
+  "_price_usd_per_hour_note": "null: DigitalOcean's price_hourly for the size (/v2/sizes); the driver refuses to create when it has no price",
+  "do_token_file": "/etc/ij-amd/do-token",
+  "do_ssh_key_ids": [],
+  "api_base": "https://api.digitalocean.com",
+  "poll_s": 30,
+  "active_timeout_s": 900,
+  "standin": false
+ },
+ "agent": {
+  "enabled": true,
+  "binary": "/home/agents/.local/bin/prime-agent",
+  "home": "/home/agents",
+  "goal_file": "/etc/ij-amd/goal.txt",
+  "goal_token_budget": 4294967295,
+  "_goal_token_budget_note": "the largest value Prime Agent 0.10.3 accepts (set by hand on the controller on 2026-11-18)",
+  "restart_delay_s": 120,
+  "command": ["/home/agents/.local/bin/prime-agent", "--provider", "anthropic", "--model", "claude-opus-5-5", "--thinking", "high",
+              "--goal", "{goal}", "--goal-token-budget", "{budget}", "--cwd", "{repo}", "Work on the goal."],
+  "_command_note": "as set by hand on the controller on 2026-11-18; a fresh root session each start (no --continue or --resume)",
+  "settings": {
+   "rlmMaxDepth": 4,
+   "harnessRefinements": true,
+   "defaultProvider": "anthropic",
+   "defaultModel": "claude-opus-5-5",
+   "defaultThinkingLevel": "high",
+   "allowedModels": ["anthropic/claude-opus-5-5", "anthropic/claude-sonnet-5-5"],
+   "agentTraces": {"enabled": false},
+   "telemetry": {"enabled": false},
+   "onboardingShown": true
+  },
+  "_settings_note": "set in /home/agents/.prime/agent/settings.json at every install (controller/prime_settings.py), other keys kept. allowedModels is a limit Prime Agent enforces (it refuses any other model and fails closed on a wrong value); the selectors are the anthropic provider's ids in Prime Agent's model catalog (2026-11-18). agentTraces off and onboardingShown answer the first-run question about sharing traces (Not now)"
+ }
+}

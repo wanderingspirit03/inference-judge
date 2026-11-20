@@ -1,0 +1,306 @@
+#!/usr/bin/env python3
+"""./profile [options] <cmd> [args...]: like ./try, under rocprofv3, with
+amd-smi sampled alongside.  The command's own output and rocprofv3's go to a
+log file, not the screen; the screen gets a short summary and where the files
+are.
+
+  --pmc "C1 C2 ..."   also collect these hardware counters (rocprofv3 --pmc;
+                      each --pmc is one pass, a separate run of the command;
+                      `rocprofv3 -L` lists the counters)
+  --sys               also trace the HIP and HSA API calls (rocprofv3 --sys-trace)
+  --interval S        amd-smi sampling interval in seconds (default 0.5)
+
+Summary:
+  - command wall time: the whole command under rocprofv3 (its start-up, the
+    program's start-up, model loading and the GPU work);
+  - kernel span: first kernel start to last kernel end; GPU busy: the union
+    of the kernel intervals, as a share of the kernel span (not of the wall
+    time, which includes start-up);
+  - the kernels with the most total time.  A persistent kernel (one launch
+    that runs the whole model) is one row however much it does: its time is
+    not split by layer or operation;
+  - memory copies;
+  - with --pmc: counters per pass and per kernel, with units.  Counts are
+    summed over dispatches; percentages, and counters whose unit this
+    summary does not know, are never summed (mean, min, max per dispatch).
+    GB/s only from the byte counters FETCH_SIZE and WRITE_SIZE (KiB) and the
+    duration of the same dispatch; otherwise it says why there is none;
+  - from amd-smi: graphics and memory-controller activity, power, VRAM.
+
+rocprofv3 traces only the processes it starts on this host and their
+children.  A process inside a Docker container is not traced (no kernels,
+no counters); amd-smi still samples the whole GPU.
+"""
+from __future__ import annotations
+
+import csv
+import glob
+import json
+import os
+import subprocess
+import sys
+import threading
+import time
+from collections import defaultdict
+from pathlib import Path
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "lib"))
+import common  # noqa: E402
+import gpuqueue as Q  # noqa: E402
+
+# Units of the counters this summary knows; any other counter is shown with
+# "unit not known here" (`rocprofv3 -L` describes each one).
+UNITS = {
+    "FETCH_SIZE": "KiB", "WRITE_SIZE": "KiB",
+    "GRBM_COUNT": "cycles", "GRBM_GUI_ACTIVE": "cycles", "SQ_BUSY_CYCLES": "cycles", "SQ_WAVE_CYCLES": "cycles",
+    "SQ_WAVES": "waves", "SQ_INSTS_VALU": "instructions", "SQ_INSTS_SALU": "instructions",
+    "SQ_INSTS_VMEM_RD": "instructions", "SQ_INSTS_VMEM_WR": "instructions", "SQ_INSTS_LDS": "instructions",
+    "SQ_INSTS_MFMA": "instructions", "SQ_INSTS_SMEM": "instructions",
+    "TCC_HIT_sum": "requests", "TCC_MISS_sum": "requests", "TCC_EA0_RDREQ_sum": "requests",
+    "TCC_EA0_WRREQ_sum": "requests",
+    "MemUnitBusy": "%", "VALUBusy": "%", "VALUUtilization": "%", "SALUBusy": "%", "MemUnitStalled": "%",
+    "WriteUnitStalled": "%", "L2CacheHit": "%", "GPUBusy": "%",
+}
+# Byte counters, KiB per dispatch: bytes over the same dispatch's duration is a rate.
+BYTE_COUNTERS = {"FETCH_SIZE": "read", "WRITE_SIZE": "written"}
+
+
+def sampler(path: Path, interval: float, stop: threading.Event, rows: list):
+    with open(path, "w") as f:
+        f.write("t_s,gfx_activity_pct,umc_activity_pct,power_w,vram_used_mb\n")
+        t0 = time.monotonic()
+        while not stop.is_set():
+            try:
+                out = subprocess.run(["amd-smi", "metric", "-g", "0", "-u", "-p", "-m", "--json"],
+                                     capture_output=True, text=True, timeout=10).stdout
+                d = json.loads(out)["gpu_data"][0]
+                u, p, m = d.get("usage", {}), d.get("power", {}), d.get("mem_usage", {})
+
+                def val(x):
+                    v = x.get("value") if isinstance(x, dict) else x
+                    return float(v) if isinstance(v, (int, float)) else None
+                row = (round(time.monotonic() - t0, 2), val(u.get("gfx_activity")), val(u.get("umc_activity")),
+                       val(p.get("socket_power")), val(m.get("used_vram")))
+                rows.append(row)
+                f.write(",".join("" if x is None else str(x) for x in row) + "\n")
+                f.flush()
+            except Exception:  # noqa: BLE001 - a missed sample is only a gap
+                pass
+            stop.wait(interval)
+
+
+def _csv(pattern: str, root: Path) -> list[dict]:
+    """Rows of every matching CSV under root; each row gets _pass, the
+    directory it came from (rocprofv3 writes one per --pmc pass)."""
+    rows = []
+    for p in sorted(glob.glob(str(root / "**" / pattern), recursive=True)):
+        rel = os.path.relpath(os.path.dirname(p), root)
+        with open(p, newline="") as f:
+            for r in csv.DictReader(f):
+                r["_pass"] = rel
+                rows.append(r)
+    return rows
+
+
+def union_ns(iv: list[tuple[int, int]]) -> int:
+    tot, cur_s, cur_e = 0, None, None
+    for s, e in sorted(iv):
+        if cur_e is None or s > cur_e:
+            if cur_e is not None:
+                tot += cur_e - cur_s
+            cur_s, cur_e = s, e
+        else:
+            cur_e = max(cur_e, e)
+    if cur_e is not None:
+        tot += cur_e - cur_s
+    return tot
+
+
+def _times(r: dict) -> tuple[int, int] | None:
+    try:
+        s, e = int(r["Start_Timestamp"]), int(r["End_Timestamp"])
+    except (KeyError, TypeError, ValueError):
+        return None
+    return (s, e) if e > s else None
+
+
+def counter_lines(cc: list[dict], kt: list[dict]) -> list[str]:
+    """Counters per pass and per kernel, with units.  Counts are summed over
+    dispatches; a percentage is never summed (mean, min and max over the
+    dispatches).  GB/s only from a byte counter and the duration of the same
+    dispatch: the counter row's own timestamps, else the kernel-trace row with
+    the same dispatch id in the same pass directory."""
+    L = []
+    dur = {}
+    for r in kt:
+        t = _times(r)
+        if t:
+            dur[(r["_pass"], r.get("Dispatch_Id"))] = t
+    by = defaultdict(lambda: defaultdict(list))      # (pass, kernel) -> counter -> [(value, ns or None)]
+    for r in cc:
+        try:
+            v = float(r.get("Counter_Value", ""))
+        except ValueError:
+            continue
+        t = _times(r) or dur.get((r["_pass"], r.get("Dispatch_Id")))
+        by[(r["_pass"], r.get("Kernel_Name", "?"))][r.get("Counter_Name", "?")].append(
+            (v, (t[1] - t[0]) if t else None))
+    for n_pass, ps in enumerate(sorted({p for p, _ in by}), 1):
+        where = "" if ps == "." else f", {ps}"
+        L.append(f"counters, pass {n_pass}{where} (each --pmc is a separate run of the command):")
+        kernels = sorted((k for p, k in by if p == ps), key=lambda k: -max(len(x) for x in by[(ps, k)].values()))
+        for k in kernels[:12]:
+            cs = by[(ps, k)]
+            L.append(f"  {k[:100]}  ({max(len(x) for x in cs.values())} dispatches)")
+            for name in sorted(cs):
+                vals = [v for v, _ in cs[name]]
+                unit = UNITS.get(name)
+                if unit == "%":
+                    L.append(f"    {name}: mean {sum(vals) / len(vals):.1f}%, min {min(vals):.1f}%, max {max(vals):.1f}% "
+                             "over the dispatches (a percentage: never summed)")
+                    continue
+                if unit is None:
+                    # might be a percentage or a ratio: summing could be meaningless
+                    L.append(f"    {name}: per dispatch mean {sum(vals) / len(vals):.6g}, min {min(vals):.6g}, "
+                             f"max {max(vals):.6g} (unit not known here, so not summed; `rocprofv3 -L` describes it)")
+                    continue
+                txt = f"    {name}: {sum(vals):.6g} {unit} in total"
+                if name in BYTE_COUNTERS:
+                    good = [(v, ns) for v, ns in cs[name] if ns and v >= 0]
+                    if good and len(good) == len(vals):
+                        gb = sum(v for v, _ in good) * 1024 / 1e9
+                        secs = sum(ns for _, ns in good) / 1e9
+                        txt += f"; {gb / secs:.1f} GB/s {BYTE_COUNTERS[name]}, over those dispatches' own durations"
+                    elif good:
+                        txt += (f"; no GB/s: only {len(good)} of {len(vals)} dispatches have a duration matching "
+                                "their counter row")
+                    else:
+                        txt += "; no GB/s: no dispatch has a duration matching its counter row"
+                L.append(txt)
+        if len(kernels) > 12:
+            L.append(f"  ... {len(kernels) - 12} more kernels in the raw files")
+    return L
+
+
+def summarize(out: Path, wall_s: float, smi: list, pmc: bool) -> list[str]:
+    L = []
+    kt = _csv("*kernel_trace.csv", out)
+    iv = []
+    by = defaultdict(lambda: [0, 0])
+    for r in kt:
+        t = _times(r)
+        if t is None:
+            continue
+        iv.append(t)
+        b = by[r.get("Kernel_Name", "?")]
+        b[0] += 1
+        b[1] += t[1] - t[0]
+    L.append(f"command wall time: {wall_s:.2f} s (the whole command under rocprofv3, start-up included)")
+    if not iv:
+        L.append("kernels: none recorded (rocprofv3 traces only processes it starts on this host, not inside containers)")
+    else:
+        busy = union_ns(iv)
+        span = max(e for _, e in iv) - min(s for s, _ in iv)
+        L.append(f"kernel span: {span / 1e9:.3f} s, from the first kernel's start to the last kernel's end")
+        L.append(f"GPU busy: {busy / 1e9:.3f} s (the union of the kernel intervals) = {100 * busy / max(span, 1):.1f}% "
+                 f"of the kernel span; {len(iv)} dispatches of {len(by)} kernels")
+        L.append("top kernels by total time (a persistent kernel is one row however much it does):")
+        L.append(f"  {'total ms':>10} {'% of busy':>9} {'calls':>7} {'avg us':>9}  name")
+        for name, (n, ns) in sorted(by.items(), key=lambda kv: -kv[1][1])[:12]:
+            L.append(f"  {ns / 1e6:10.2f} {100 * ns / busy:9.1f} {n:7d} {ns / n / 1e3:9.1f}  {name[:110]}")
+    mc = _csv("*memory_copy_trace.csv", out)
+    if mc:
+        tot = defaultdict(lambda: [0, 0, 0])
+        for r in mc:
+            try:
+                k = r.get("Direction", "?")
+                tot[k][0] += 1
+                tot[k][1] += int(r["End_Timestamp"]) - int(r["Start_Timestamp"])
+                tot[k][2] += int(r.get("Size", 0) or 0)
+            except (KeyError, ValueError):
+                continue
+        for k, (n, ns, size) in tot.items():
+            L.append(f"memory copies {k}: {n}, {ns / 1e6:.2f} ms, {size / 2**20:.1f} MiB")
+    if pmc:
+        cc = _csv("*counter_collection.csv", out)
+        if not cc:
+            L.append("counters: none recorded (the log says why)")
+        else:
+            L += counter_lines(cc, kt)
+    if smi:
+        def col(i):
+            return [r[i] for r in smi if r[i] is not None]
+        g, u, p, v = col(1), col(2), col(3), col(4)
+        parts = [f"{len(smi)} samples over the command's wall time"]
+        if g:
+            parts.append(f"gfx activity mean {sum(g) / len(g):.0f}% max {max(g):.0f}%")
+        if u:
+            parts.append(f"memory-controller activity mean {sum(u) / len(u):.0f}% max {max(u):.0f}%")
+        if p:
+            parts.append(f"power mean {sum(p) / len(p):.0f} W max {max(p):.0f} W")
+        if v:
+            parts.append(f"VRAM in use max {max(v) / 1024:.1f} GiB")
+        L.append("amd-smi: " + "; ".join(parts))
+    else:
+        L.append("amd-smi: no samples")
+    return L
+
+
+def main(argv) -> int:
+    pmc, sys_trace, interval = [], False, 0.5
+    while argv and argv[0].startswith("-"):
+        a = argv.pop(0)
+        if a in ("-h", "--help"):
+            print(__doc__.strip())
+            return 0
+        if a == "--pmc" and argv:
+            pmc.append(argv.pop(0))
+        elif a == "--sys":
+            sys_trace = True
+        elif a == "--interval" and argv:
+            interval = float(argv.pop(0))
+        elif a == "--":
+            break
+        else:
+            print(f"./profile: unknown option {a}", file=sys.stderr)
+            return 2
+    if not argv:
+        print(__doc__.strip())
+        return 2
+    cfg, state = common.setup()
+    out = state / "profiles" / time.strftime("%Y%m%d-%H%M%S", time.gmtime())
+    out.mkdir(parents=True, exist_ok=True)
+    prof = ["rocprofv3", "--kernel-trace", "--memory-copy-trace", "--stats", "-d", str(out / "rocprof"),
+            "-o", "run", "-f", "csv"]
+    if sys_trace:
+        prof.append("--sys-trace")
+    for p in pmc:
+        prof += ["--pmc"] + p.split()
+    logp = out / "run.log"
+    common.log(f"profile: the command's output and rocprofv3's go to {logp}")
+    with common.hold(state, "profile", argv) as h, open(logp, "wb") as logf:
+        stop, smi = threading.Event(), []
+        th = threading.Thread(target=sampler, args=(out / "amd-smi.csv", interval, stop, smi), daemon=True)
+        th.start()
+        t0 = time.monotonic()
+        rc = Q.run(h, prof + ["--"] + argv, max_s=cfg["gpu"]["try_max_s"], stdout=logf, stderr=subprocess.STDOUT)
+        wall = time.monotonic() - t0
+        stop.set()
+        th.join(timeout=15)
+    lines = [f"exit code {rc}"] + summarize(out / "rocprof", wall, smi, bool(pmc))
+    lines.append(f"log: {logp} (the command's output and rocprofv3's)")
+    lines.append(f"raw files: {out}/rocprof (rocprofv3 CSV), {out}/amd-smi.csv")
+    text = "\n".join(lines)
+    (out / "summary.txt").write_text(text + "\n")
+    print("\n== profile ==\n" + text, flush=True)
+    if rc != 0:
+        try:
+            tail = logp.read_bytes()[-2000:].decode("utf-8", "replace")
+            print("last lines of the log:\n" + "\n".join(tail.splitlines()[-15:]), flush=True)
+        except OSError:
+            pass
+    return rc
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

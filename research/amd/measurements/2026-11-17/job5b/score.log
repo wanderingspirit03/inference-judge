@@ -1,0 +1,10 @@
+reference speeds (a speed is only compared with the reference speed of the same machine):
+  machine manual-checks-20261117 (the current machine):
+    reference engine (AMD's ATOM, official image): 78.2 tokens/s (measured 2026-11-17 15:11:20 UTC; atom image=ij-atom-ref:ad256a94-lp1 model=/srv/models/Qwen3.8-27B kv=bf16 mem=0.5 greedy v2)
+    AMD's tuned engine (proaditya/ATOM, branch qwen38-megakernels): not measured yet on this machine
+  memory limit: 92.2 tokens/s = 4.7 TB/s / 51 GB of bf16 weights read once per token (measured on this virtual function on 2026-11-17 with tests/hip_probe.cpp, a plain copy kernel, read plus write; a lower bound, the spec sheet says 8 TB/s)
+best passing submission: #1 78.3 tokens/s on machine manual-checks-20261117 (reference there 78.2; x1.00) (40d697641bf6)
+submissions: 2
+     #  submitted (UTC)      commit        result    tokens/s  ref same machine  agreement     machine  note / reason
+     1  2026-11-17 15:08:20  40d697641bf6  passed        78.3              78.2     1.0000  manual-checks-20261117  job 5b test, tree a
+     2  2026-11-17 15:08:25  9ff03e9be02a  passed        78.3              78.2     1.0000  manual-checks-20261117  job 5b test, tree b

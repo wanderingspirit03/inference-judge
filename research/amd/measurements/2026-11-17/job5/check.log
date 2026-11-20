@@ -1,0 +1,7 @@
+[14:46:24] gpu: GPU taken after 0.0 s in the queue
+[14:46:24] starting the reference engine (ATOM)
+[14:47:30] reference ready after 66 s
+[14:48:01] engine: starting ./serve 8100
+FAIL: the engine could not be checked: ./serve exited with 127 before it answered; its last lines:
+/home/builder/work/wt-a-bc8b7f7d1302/serve: line 11: /home/builder/work/wt-a-bc8b7f7d1302/../../reference/atom-serve.sh: No such file or directory
+logs: /var/lib/ij-amd/builder/check-runs/20261117-144624

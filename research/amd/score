@@ -1,0 +1,80 @@
+#!/usr/bin/env python3
+"""./score [N]: every submission (passed or failed, tokens/s) and the reference
+speeds; for each passed submission its speed in parts.  ./score N: also
+submission N's requests one by one.  No GPU.  A submission that failed the
+answer check has no speed.  The score is the sum of answer tokens over the sum
+of whole-request seconds, prompt time included."""
+import json
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "lib"))
+import answers  # noqa: E402
+import common  # noqa: E402
+import ledger  # noqa: E402
+
+
+def memory_limit_lines(m, g):
+    """The speed of reading each named set of weights once per token at the GPU's memory bandwidth.
+    A fact about those configurations, not a ceiling: speculation or smaller weights read fewer bytes per token.
+    (The same text is in controller/judge/ij-judge.)"""
+    bw = g["hbm_bandwidth_gb_s"]
+    sets = m.get("weight_sets") or [{"name": f"{m['precision'].upper()} weights", "gb": m["weights_gb"]}]
+    out = [f"memory bound at {bw / 1000:g} TB/s ({g['hbm_bandwidth_source']}), one request, "
+           "all weights read once per token, no speculation:"]
+    out += [f"  {s['name']}, {s['gb']:g} GB: {bw / s['gb']:.1f} tokens/s" for s in sets]
+    out.append("  (not a limit on every engine: speculative decoding or smaller weights read fewer bytes per token)")
+    return out
+
+
+def main(argv) -> int:
+    if argv and argv[0] in ("-h", "--help"):
+        print(__doc__.strip())
+        return 0
+    cfg, state = common.setup()
+    subs = ledger.read(state)
+    if argv:
+        hit = [s for s in subs if str(s.get("id")) == argv[0].lstrip("#") and s.get("speed")]
+        if not hit:
+            print(f"./score: no speed details for submission {argv[0]} (only passed submissions have them)")
+            return 1
+        print(f"#{hit[-1]['id']} ({hit[-1]['commit'][:12]}):")
+        for t in answers.speed_lines(hit[-1]["speed"], per_request=True):
+            print("  " + t)
+        return 0
+    m, g = cfg["model"], cfg["gpu_device"]
+    try:
+        rs = json.loads((state / "reference-speed.json").read_text())
+        ref_line = f"{rs['tokens_per_s']:.1f} tokens/s (measured {rs['measured']}; {rs['engine']})"
+    except (FileNotFoundError, ValueError, KeyError):
+        ref_line = "not measured yet"
+    print("reference speeds:")
+    print(f"  reference engine on this machine: {ref_line}")
+    for line in memory_limit_lines(m, g):
+        print("  " + line)
+    passed = [s for s in subs if s.get("status") == "passed" and s.get("tokens_per_s") is not None]
+    best = max(passed, key=lambda s: s["tokens_per_s"]) if passed else None
+    print(f"best passing submission: " + (f"#{best['id']} {best['tokens_per_s']:.1f} tokens/s ({best['commit'][:12]})" if best else "none"))
+    print(f"submissions: {len(subs)}")
+    if subs:
+        print(f"  {'#':>4}  {'submitted (UTC)':19}  {'commit':12}  {'result':7}  {'tokens/s':>9}  {'agreement':>9}  note / reason")
+    for s in subs:
+        tps = f"{s['tokens_per_s']:.1f}" if s.get("status") == "passed" and s.get("tokens_per_s") is not None else "-"
+        agr = f"{s['agreement']:.4f}" if s.get("agreement") is not None else "-"
+        extra = s.get("note") or ""
+        if s.get("status") != "passed" and s.get("reasons"):
+            extra = (extra + "; " if extra else "") + s["reasons"][0].splitlines()[0][:100]
+        print(f"  {s['id']:>4}  {s['submitted'][:19]:19}  {s['commit'][:12]:12}  {s['status']:7}  {tps:>9}  {agr:>9}  {extra}")
+    shown = [s for s in passed if s.get("speed") and s.get("protocol") == answers.PROTOCOL]
+    if shown:
+        print(f"speed of passed submissions (score = {answers.FORMULA}; ./score N lists the requests):")
+    for s in shown:
+        lines = answers.speed_lines(s["speed"])
+        print(f"  #{s['id']}: {lines[0]}")
+        for t in lines[1:]:
+            print(f"       {t}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

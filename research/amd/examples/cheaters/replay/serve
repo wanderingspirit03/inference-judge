@@ -1,0 +1,7 @@
+#!/bin/sh
+# A cheating stand-in engine (see ../cheat.py): replay.  It must fail ./submit.
+D=$(dirname "$(readlink -f "$0")")
+P=/opt/ij-amd/amd/examples/cheaters/cheat.py
+[ -f "$D/../cheat.py" ] && P="$D/../cheat.py"
+[ -f "$D/cheat.py" ] && P="$D/cheat.py"       # committed next to serve (the code in /opt is closed to cand)
+exec python3 "$P" replay "$1"

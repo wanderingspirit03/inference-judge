@@ -1,0 +1,8 @@
+{"id": "p1-prose", "prompt": "The lighthouse keeper had not spoken to another person in eleven days when the boat finally appeared on the horizon. He"}
+{"id": "p2-code", "prompt": "def merge_intervals(intervals):\n    \"\"\"Merge overlapping [start, end] intervals and return them sorted.\"\"\"\n"}
+{"id": "p3-math", "prompt": "Question: A train leaves at 9:40 and arrives at 13:15. How many minutes is the journey?\nAnswer: Let's think step by step."}
+{"id": "p4-list", "prompt": "Five practical ways to reduce the memory use of a Python program:\n1."}
+{"id": "p5-chat-explain", "messages": [{"role": "user", "content": "Explain in a short paragraph why the sky looks blue during the day and red at sunset."}], "chat_template_kwargs": {"enable_thinking": false}}
+{"id": "p6-chat-code", "messages": [{"role": "user", "content": "Write a C function that reverses a singly linked list in place. Only the code."}], "chat_template_kwargs": {"enable_thinking": false}}
+{"id": "p7-json", "prompt": "Convert to JSON with keys name, year, city.\nText: The Eiffel Tower was finished in 1889 in Paris.\nJSON:"}
+{"id": "p8-translate", "messages": [{"role": "user", "content": "Translate into German: The meeting has been moved to Thursday afternoon because the room is not free on Wednesday."}], "chat_template_kwargs": {"enable_thinking": false}}

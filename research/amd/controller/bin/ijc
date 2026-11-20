@@ -1,0 +1,227 @@
+#!/usr/bin/env python3
+"""The agents' commands on the controller.  The engine repository holds
+symlinks named gpu, try, profile, ref, check, submit, score and box that
+point here; the name the program is called by picks the command.
+
+  ./try, ./profile, ./check, ./box  copy the working tree of the git
+        repository you are in (.git and files that .gitignore excludes are
+        not copied; such files made on the GPU machine stay there)
+        to the GPU machine, then run the command there as `builder` and
+        stream its output.  Each directory on the controller has its own
+        directory on the GPU machine, so several working trees do not mix.
+  ./ref, ./gpu   run on the GPU machine; nothing is copied.
+  ./submit       hands the commit at HEAD to the judge (user `judge`).
+  ./score [N]    reads the judge's public score list (N: submission N's
+                 speed, request by request).
+
+When there is no GPU machine, ./gpu says so and since when; the other GPU
+commands wait until there is one.  The exit code is the command's; 255 when
+the connection to the GPU machine was lost."""
+import fcntl
+import hashlib
+import json
+import os
+import re
+import shlex
+import subprocess
+import sys
+import threading
+from pathlib import Path
+
+HERE = Path(os.path.realpath(__file__)).parent
+sys.path.insert(0, str(HERE.parent / "lib"))
+import ijctl  # noqa: E402
+
+COMMANDS = ("gpu", "try", "profile", "ref", "check", "submit", "score", "box")
+SYNCED = ("try", "profile", "check", "box")
+JUDGE = "/opt/ij-amd/amd/controller/judge/ij-judge"
+
+
+def say(msg: str) -> None:
+    print(f"[ij] {msg}", file=sys.stderr, flush=True)
+
+
+def git_top(cwd: Path) -> Path | None:
+    r = subprocess.run(["git", "-C", str(cwd), "rev-parse", "--show-toplevel"], capture_output=True, text=True)
+    return Path(r.stdout.strip()) if r.returncode == 0 and r.stdout.strip() else None
+
+
+def remote_dir(cfg: dict, top: Path) -> str:
+    key = hashlib.sha1(str(top).encode()).hexdigest()[:12]
+    name = re.sub(r"[^A-Za-z0-9._-]", "_", top.name)[:40]
+    return f"{cfg['box']['work_dir']}/{name}-{key}"
+
+
+def sync(cfg: dict, st: dict, top: Path, rdir: str) -> None:
+    key = cfg["paths"]["agents_key"]
+    lockf = Path("/tmp") / f"ij-sync-{os.getuid()}-{hashlib.sha1(str(top).encode()).hexdigest()[:12]}.lock"
+    with open(lockf, "a+") as lk:
+        fcntl.flock(lk, fcntl.LOCK_EX)
+        argv = ["rsync", "-a", "--delete", "--filter=:- .gitignore", "--exclude=/.git",
+                "--rsync-path", f"mkdir -p {shlex.quote(rdir)} && rsync",
+                "-e", ijctl.rsync_ssh(cfg, key, st), f"{top}/", f"{cfg['box']['user']}@{st['ip']}:{rdir}/"]
+        r = subprocess.run(argv)
+        if r.returncode != 0:
+            raise SystemExit(f"[ij] copying {top} to the GPU machine failed (rsync exit {r.returncode})")
+
+
+def run_remote(cfg: dict, st: dict, remote_argv: list[str], watch=None) -> int:
+    """Run on the GPU machine as builder, stream the output, return the
+    exit code.  Our end of ssh's stdin stays open: when this program ends,
+    the remote side sees end of input and stops the command."""
+    cmd = " ".join(shlex.quote(x) for x in remote_argv)
+    ssh = ijctl.ssh_base(cfg, cfg["paths"]["agents_key"], cfg["box"]["user"], st) + [cmd]
+    p = subprocess.Popen(ssh, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    seen = []
+
+    def pump():
+        for line in iter(p.stdout.readline, b""):
+            sys.stdout.buffer.write(line)
+            sys.stdout.buffer.flush()
+            if watch:
+                seen.append(line.decode("utf-8", "replace"))
+    t = threading.Thread(target=pump, daemon=True)
+    t.start()
+    try:
+        rc = p.wait()
+    except KeyboardInterrupt:
+        p.stdin.close()
+        p.terminate()
+        p.wait()
+        return 130
+    t.join(5)
+    if rc == 255:
+        now = ijctl.box_state(cfg)
+        say("the connection to the GPU machine was lost" +
+            ("" if now.get("state") == "ready" and now.get("id") == st.get("id")
+             else f"; now {ijctl.describe(now)}") + ". Run the command again.")
+    if watch:
+        watch(seen)
+    return rc
+
+
+def box_cmd(cfg: dict, kind: str, rcwd: str, argv: list[str]) -> list[str]:
+    return [f"{cfg['box']['code_dir']}/controller/box/ij-box", "run", kind, rcwd, "--", *argv]
+
+
+def profile_back(cfg: dict, st: dict, lines: list[str]) -> None:
+    for ln in lines:
+        m = re.search(r"raw files: (\S+)/rocprof", ln)
+        if m:
+            src = m.group(1)
+            dest = Path.home() / "ij-profiles" / Path(src).name
+            dest.parent.mkdir(exist_ok=True)
+            r = subprocess.run(["rsync", "-a", "-e", ijctl.rsync_ssh(cfg, cfg["paths"]["agents_key"], st),
+                                f"{cfg['box']['user']}@{st['ip']}:{src}/", f"{dest}/"])
+            say(f"raw files, summary.txt and run.log (the command's output) copied to {dest}" if r.returncode == 0 else f"copying the raw files back failed (rsync exit {r.returncode})")
+
+
+def gpu(cfg: dict) -> int:
+    st = ijctl.box_state(cfg)
+    print(f"GPU machine: {ijctl.describe(st)}")
+    if st.get("state") != "ready":
+        print("GPU commands (./try, ./profile, ./check, ./ref, ./box, ./submit) wait until it is ready.")
+        return 0
+    return run_remote(cfg, st, box_cmd(cfg, "gpu", cfg["box"]["work_dir"], []))
+
+
+def score(cfg: dict, argv: list[str]) -> int:
+    if argv and argv[0] in ("-h", "--help"):
+        print("./score: the judge's public score list.  ./score N: also submission N's speed, request by request.")
+        return 0
+    p = Path(cfg["paths"]["score_file"])
+    try:
+        doc = json.loads(p.read_text())
+    except FileNotFoundError:
+        print("no submissions yet, and no reference speed measured yet")
+        return 0
+    if argv:
+        d = (doc.get("details") or {}).get(argv[0].lstrip("#"))
+        if d is None:
+            print(f"./score: no speed details for submission {argv[0]} (only passed submissions under the current protocol have them)")
+            return 1
+        for line in d:
+            print(line)
+        return 0
+    for line in doc.get("text") or []:
+        print(line)
+    return 0
+
+
+def submit(cfg: dict, argv: list[str]) -> int:
+    if argv and argv[0] in ("-h", "--help"):
+        print("./submit [--note TEXT]: hand the commit at HEAD to the judge. Changes not committed are not part of it.\n"
+              "Exit code 0 passed, 1 failed, 2 the judge could not run it.")
+        return 0
+    note = ""
+    if argv[:1] == ["--note"] and len(argv) == 2:
+        note = argv[1]
+    elif argv:
+        print("usage: ./submit [--note TEXT]", file=sys.stderr)
+        return 2
+    top = git_top(Path.cwd())
+    if top is None:
+        print("./submit: run it inside the git repository of the engine (with at least one commit)")
+        return 2
+    sha = subprocess.run(["git", "-C", str(top), "rev-parse", "HEAD"], capture_output=True, text=True)
+    if sha.returncode != 0:
+        print("./submit: the repository has no commit yet")
+        return 2
+    if subprocess.run(["git", "-C", str(top), "status", "--porcelain"], capture_output=True, text=True).stdout.strip():
+        say("uncommitted changes in the working tree are not part of the submission")
+    tar = subprocess.run(["git", "-C", str(top), "archive", "--format=tar", "HEAD"], capture_output=True, check=True).stdout
+    p = subprocess.Popen(["sudo", "-n", "-u", cfg["judge"]["user"], JUDGE, "submit", sha.stdout.strip(), note],
+                         stdin=subprocess.PIPE)
+    try:
+        p.stdin.write(tar)
+        p.stdin.close()
+        return p.wait()
+    except KeyboardInterrupt:
+        say("stopped watching; the judge goes on with the submission (./score shows the result)")
+        return 130
+
+
+def main() -> int:
+    name = os.path.basename(sys.argv[0])
+    argv = sys.argv[1:]
+    if name not in COMMANDS:
+        if argv and argv[0] in COMMANDS:
+            name, argv = argv[0], argv[1:]
+        else:
+            print(__doc__.strip())
+            return 2
+    cfg = ijctl.load()
+    if name == "gpu":
+        return gpu(cfg)
+    if name == "score":
+        return score(cfg, argv)
+    if name == "submit":
+        return submit(cfg, argv)
+    if name == "box" and not argv:
+        print("usage: ./box <cmd> [args...]: run a command on the GPU machine without taking the GPU "
+              "(the working tree is copied first)")
+        return 2
+    st = ijctl.wait_ready(cfg, sys.stderr)
+    cwd = Path.cwd()
+    if name in SYNCED:
+        top = git_top(cwd) or cwd
+        rdir = remote_dir(cfg, top)
+        sync(cfg, st, top, rdir)
+        rel = os.path.relpath(cwd, top)
+        rcwd = rdir if rel == "." else f"{rdir}/{rel}"
+
+        def tr(a: str) -> str:
+            if a.startswith("/") and (a == str(top) or a.startswith(str(top) + "/")):
+                return rdir + a[len(str(top)):]
+            return a
+        argv = [tr(a) for a in argv]
+        if name == "check" and not argv:
+            argv = [rdir]
+    else:
+        rcwd = cfg["box"]["work_dir"]
+    watch = (lambda lines: profile_back(cfg, st, lines)) if name == "profile" else None
+    return run_remote(cfg, st, box_cmd(cfg, name, rcwd, argv), watch)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

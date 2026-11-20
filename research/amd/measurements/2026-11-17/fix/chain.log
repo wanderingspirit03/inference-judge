@@ -1,0 +1,13 @@
+14:56:45 start
+15:03:01 check56 rc 1 376 s: FAIL: agreement 0.98733 over 6707 positions of 56 prompts; limit 0.95 (not measured on AMD yet)
+15:03:01 job 5b released
+15:23:01 job 5b done
+15:33:41 baseline rc 0 640 s: {"label": "B", "status": "invalid_requests", "headline": 0.0, "n_usable": 2, "n_blocks": 2, "invalid_reasons": {"length": 1}} VERDICT INVALID  /opt/bench/results/baseline-atom-mi350x/results.json 
+15:33:41 done
+15:35:02 textcmp2 rc 0 601 s: urllib.error.URLError: <urlopen error [Errno 111] Connection refused>
+15:35:58 textcmp2 restarted by hand: first try at 15:25 failed to load, GPU held by the baseline run
+15:42:06 textcmp2 rc 0 369 s: identical 1 of 56 compared (0 without a cached answer); median first difference 2 tokens
+15:45:02 lenprobe start
+15:46:35 lenprobe rc 0 93 s
+15:47:16 lenprobe start
+15:49:38 lenprobe rc 0 142 s

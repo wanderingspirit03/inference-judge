@@ -1,0 +1,10 @@
+13:54:25 waiting for /tmp/ij-job5-go on the box
+14:43:07 go
+14:43:07 worktrees rc 0
+14:43:09 gpu rc 0 2 s
+14:43:12 box rc 0 3 s
+14:43:17 try rc 0 5 s
+14:43:24 profile rc 0 7 s
+14:44:52 ref rc 1 88 s
+14:46:20 ref-cached rc 1 88 s
+14:46:51 job5.sh stopped by hand after ref failed (special-token logprob gap); ./check left running; rerun from ./ref after the fix

@@ -1,0 +1,80 @@
+{
+ "_about": "The stand-in GPU machine's config (controller tests, no GPU): research/amd/config.json with the fake reference (fake_ref.py, a toy model) and a byte-level tokenizer. Relative paths are relative to this file.",
+ "model": {
+  "name": "toy",
+  "hf_id": "none",
+  "dir": "/srv/models/standin",
+  "weights_gb": 1.0,
+  "precision": "bf16"
+ },
+ "gpu_device": {
+  "name": "stand-in (no GPU)",
+  "arch": "none",
+  "hbm_bandwidth_gb_s": 8000,
+  "hbm_bandwidth_source": "AMD's MI350X spec sheet (8 TB/s); not measured on this virtual function"
+ },
+ "state_dir": "/var/lib/ij-amd",
+ "engine": {
+  "port": 8100,
+  "serve": "./serve",
+  "build": "./build",
+  "health_path": "/v1/models",
+  "health_timeout_s": 60,
+  "build_timeout_s": 120,
+  "request_timeout_s": 300
+ },
+ "ref": {
+  "url": "http://127.0.0.1:8001",
+  "served_model": "toy",
+  "image": "fake",
+  "start": [
+   "fake-ref.sh",
+   "start"
+  ],
+  "stop": [
+   "fake-ref.sh",
+   "stop"
+  ],
+  "ready_timeout_s": 30,
+  "gpu_memory_utilization": 0.5,
+  "top_logprobs": 20
+ },
+ "gpu": {
+  "try_max_s": 900
+ },
+ "check": {
+  "prompts": "../../prompts/public.jsonl",
+  "max_tokens": 32,
+  "engine_top": 5
+ },
+ "limits": {
+  "min_agreement": 0.95,
+  "tie_eps": 0.125,
+  "margin": 0.03,
+  "max_partings_per_item": 40,
+  "not_measured_on_amd": true,
+  "compare_stop": true
+ },
+ "quality": {
+  "_about": "As in research/amd/config.json: the bar the user set on 2026-11-18 (test_quality_bar checks that the two agree). The stand-in tasks are one-token letter picks of the toy model (standin_tasks.py).",
+  "topk": [1, 2, 5],
+  "bar": {
+   "min_topk_share": {"1": null, "2": null, "5": 0.98},
+   "max_mean_gap": 0.08,
+   "min_task_delta_lb": -0.15
+  },
+  "bar_replaces_agreement": true,
+  "tasks": {
+   "max_tokens": 8,
+   "bootstrap_resamples": 2000,
+   "check_file": "public-tasks.standin.jsonl"
+  }
+ },
+ "submit": {
+  "hidden_prompts": "/nonexistent-the-judge-sends-them",
+  "max_tokens": 32,
+  "engine_user": "cand",
+  "max_s": 600,
+  "alone_wait_s": 20
+ }
+}

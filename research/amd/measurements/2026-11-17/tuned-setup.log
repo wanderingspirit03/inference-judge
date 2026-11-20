@@ -1,0 +1,75 @@
+
+== 0. checks
+
+== 1. ATOM
+
+== 2. checkpoints
+skipped (SETUP_ONLY)
+
+== 3. FlyDSL (build time only; serving loads the code objects)
+flydsl /opt/qwen38/flydsl
+
+== 4. code objects
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/opt/atom/atom/models/qwen38_27b/mono/kernels/build.py", line 157, in build
+    raise RuntimeError(f"megakernel {name} build failed:\n{run.stderr[-4000:]}")
+RuntimeError: megakernel m8 build failed:
+tion.py", line 1699, in _compile_or_execute
+    traced = self._trace_and_compile(ctx, sig, bound, bound_self, execute=execute)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/qwen38/flydsl/python/flydsl/compiler/jit_function.py", line 1521, in _trace_and_compile
+    self.func(**named_args)
+  File "/opt/qwen38/kernel-cache/tmpz7tobrj3/verify_m8__m8.py", line 3039, in launch
+    kernel(pointer_table).launch(grid=(256, 1, 1), block=(256, 1, 1), stream=stream)
+  File "/opt/qwen38/flydsl/python/flydsl/compiler/kernel_function.py", line 361, in launch
+    kernel_name, kernel_args, gpu_func_op, smem_bytes = self._kernel_function._emit_kernel(
+                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/qwen38/flydsl/python/flydsl/compiler/kernel_function.py", line 610, in _emit_kernel
+    self._func(**dsl_args)
+  File "/opt/qwen38/kernel-cache/tmpz7tobrj3/verify_m8__m8.py", line 89, in kernel
+    if tid == 0:
+^^^^^^^^^^^^^^^^
+  File "/opt/qwen38/flydsl/python/flydsl/compiler/ast_rewriter.py", line 722, in scf_if_dispatch
+    ReplaceIfWithDispatch._call_branch(then_fn, result_names, result_values)
+  File "/opt/qwen38/flydsl/python/flydsl/compiler/ast_rewriter.py", line 666, in _call_branch
+    return fn(result_names, *state_values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/qwen38/kernel-cache/tmpz7tobrj3/verify_m8__m8.py", line 91, in __then_1
+    if (xcc < 0) | (xcc >= 8) | (command_epoch < 1) | (command_epoch > MAX_COMMAND_EPOCH):
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/qwen38/flydsl/python/flydsl/compiler/ast_rewriter.py", line 722, in scf_if_dispatch
+    ReplaceIfWithDispatch._call_branch(then_fn, result_names, result_values)
+  File "/opt/qwen38/flydsl/python/flydsl/compiler/ast_rewriter.py", line 666, in _call_branch
+    return fn(result_names, *state_values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/qwen38/kernel-cache/tmpz7tobrj3/verify_m8__m8.py", line 92, in __then_0
+    fail_native()
+  File "/opt/qwen38/kernel-cache/tmpz7tobrj3/verify_m8__m8.py", line 85, in fail_native
+    prior, won = fx.atomic_cas(native + 289, fx.Int32(0), fx.Int32(2), syncscope='agent', success_ordering=fx.AtomicOrdering.AcqRel, failure_ordering=fx.AtomicOrdering.Acquire)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/qwen38/flydsl/python/flydsl/expr/meta.py", line 175, in wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/opt/qwen38/flydsl/python/flydsl/expr/llvm.py", line 714, in atomic_cas
+    _normalize_to_llvm_ptr(ptr),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/qwen38/flydsl/python/flydsl/expr/llvm.py", line 102, in _normalize_to_llvm_ptr
+    ptr = ptr.llvm_ptr
+          ^^^^^^^^^^^^
+  File "/opt/qwen38/flydsl/python/flydsl/expr/typing.py", line 1063, in llvm_ptr
+    return to_llvm_ptr(self)
+           ^^^^^^^^^^^^^^^^^
+  File "/opt/qwen38/flydsl/python/flydsl/expr/meta.py", line 170, in wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/opt/qwen38/flydsl/python/flydsl/expr/primitive.py", line 1269, in to_llvm_ptr
+    llvm_address_space = resolve_llvm_address_space(ptr.address_space)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/qwen38/flydsl/python/flydsl/compiler/backends/__init__.py", line 74, in resolve_llvm_address_space
+    return backend_cls.llvm_address_space(address_space)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/qwen38/flydsl/python/flydsl/compiler/backends/rocm.py", line 53, in llvm_address_space
+    raise ValueError(f"ROCm address space {address_space} does not lower to a bare LLVM pointer") from None
+ValueError: ROCm address space #fly.address_space<global> does not lower to a bare LLVM pointer
+

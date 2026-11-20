@@ -1,0 +1,5 @@
+#!/bin/bash
+# The test engine made wrong on purpose: at every 20th position it answers
+# with its second-ranked token (shim.py SHIM_DAMAGE).  A fabricated failure.
+export SHIM_DAMAGE=20
+exec "$(dirname "$(readlink -f "$0")")/../atom-engine/serve" "$@"

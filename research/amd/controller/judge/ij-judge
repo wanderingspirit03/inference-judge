@@ -1,0 +1,869 @@
+#!/usr/bin/env python3
+"""The judge on the controller.  Runs as the Unix user `judge`; its directory
+(config paths.judge_dir, mode 700) holds the hidden prompts, the ledger, the
+submitted sources and its ssh key to the GPU machine.  `agents` cannot read
+any of it.
+
+  ij-judge submit SHA NOTE   (agents, through sudo; ./submit calls it) reads
+        the commit as a tar on stdin, queues it, starts a detached worker and
+        prints the worker's log until the result is in.  Exit 0 passed,
+        1 failed, 2 not judged.  Stopping it does not stop the worker.
+  ij-judge work N            the worker: one judged run at a time.
+  ij-judge remeasure         (driver, after a new GPU machine) measure the
+        reference and run the best engine again on the current machine.
+  ij-judge score             rewrite the public score list.
+  ij-judge certify [N]       hook for the full judge (bench/run.sh) on the
+        best engine; runs config judge.certify_command.  Not run yet.
+  ij-judge prepare-pool FILE [--warm|--tasks]   (operator) tokenize the rows
+        of FILE (id, prompt or messages, isl, optional session) with the
+        reference on the GPU machine and add them to the hidden pool (or,
+        with --warm, to the warm-up rows; with --tasks, to the task pool of
+        measure B: rows of bench/pools/judge_tasks.py, with answer and kind).
+  ij-judge status            the last runs, the machines, what is left of the pool
+  ij-judge quality           the quality measures of every run (to set the bar)
+  ij-judge measure atom|tuned DIR [NOTE]   (operator) judge an engine that is
+        not an agent's (plain ATOM, AMD's tuned engine) through a
+        submission's path; marked as a measurement, never ranked
+  ij-judge reference-draws K (operator) the reference's speed on K draws
+
+The hidden pool (config judge.pool, rows with prompt_token_ids, session and
+bucket): every judged run (a submission, a rerun of the best engine, a
+reference measurement) draws judge.draw rows per bucket, each from a session
+no run has drawn from; the sessions are marked used (pool-used.jsonl, under
+the ledger lock) before anything is sent, and never drawn again.  When a
+bucket has too few sessions left the run is refused, not judged.  Warm-up
+rows (config judge.warm) are sent to every run and never judged.  The task
+pool (config judge.tasks) works the same way: each submission draws
+judge.task_draw tasks never drawn before (measure B of the quality bar,
+research/amd/lib/quality.py).
+
+On the GPU machine the run goes through `ij-box judge` (the machine to
+itself) and `submit --judge-src`; the drawn prompts are copied there for the
+run and deleted after it.
+"""
+import fcntl
+import json
+import os
+import re
+import secrets
+import shlex
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+HERE = Path(os.path.realpath(__file__)).parent
+sys.path.insert(0, str(HERE.parent / "lib"))
+import ijctl  # noqa: E402
+
+CFG = ijctl.load()
+J = Path(CFG["paths"]["judge_dir"])
+KEY = str(J / "ssh" / "ij_box")
+LEDGER = J / "ledger.jsonl"
+MACHINES = J / "machines.json"
+SUBS = J / "subs"
+POOL = Path(CFG["judge"].get("pool") or J / "pool.jsonl")
+WARM = Path(CFG["judge"].get("warm") or J / "warm.jsonl")
+USED = J / "pool-used.jsonl"
+DRAW = CFG["judge"].get("draw") or {"*": 8}
+TASKS = Path(CFG["judge"].get("tasks") or J / "tasks.jsonl")
+TASK_DRAW = int(CFG["judge"].get("task_draw", 64))
+MAX_TAR = 1 << 30
+BOX_CODE = CFG["box"]["code_dir"]
+TUNED = "AMD's tuned engine (proaditya/ATOM, branch qwen38-megakernels)"
+MEASURE_KINDS = {"atom": "plain ATOM (the reference's image) as an engine", "tuned": TUNED}
+PROTOCOL = 2          # research/amd/lib/answers.py; speeds of other protocols are not compared
+
+
+def now() -> str:
+    return time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime())
+
+
+def log(msg: str) -> None:
+    print(f"[judge {time.strftime('%H:%M:%S', time.gmtime())}] {msg}", flush=True)
+
+
+# ---- ledger: one line per event; the last line of an id is its state ----
+
+def ledger_rows() -> list[dict]:
+    try:
+        with open(LEDGER) as f:
+            rows = [json.loads(x) for x in f if x.strip()]
+    except FileNotFoundError:
+        return []
+    last = {}
+    for r in rows:
+        last[r["id"]] = {**last.get(r["id"], {}), **r}
+    return [last[k] for k in sorted(last)]
+
+
+def ledger_add(rec: dict) -> None:
+    with open(J / "ledger.lock", "a+") as lk:
+        fcntl.flock(lk, fcntl.LOCK_EX)
+        with open(LEDGER, "a") as f:
+            f.write(json.dumps(rec) + "\n")
+
+
+def next_id() -> int:
+    with open(J / "ledger.lock", "a+") as lk:
+        fcntl.flock(lk, fcntl.LOCK_EX)
+        p = J / "seq"
+        n = int(p.read_text()) + 1 if p.exists() else 1
+        p.write_text(str(n))
+        return n
+
+
+def machines() -> dict:
+    try:
+        return json.loads(MACHINES.read_text())
+    except (FileNotFoundError, ValueError):
+        return {}
+
+
+def save_machines(m: dict) -> None:
+    tmp = MACHINES.with_suffix(".tmp")
+    tmp.write_text(json.dumps(m, indent=1))
+    os.replace(tmp, MACHINES)
+
+
+# ---- the hidden pool: each session is drawn once ----
+
+class PoolExhausted(Exception):
+    pass
+
+
+def _jsonl(p: Path) -> list[dict]:
+    try:
+        with open(p) as f:
+            return [json.loads(x) for x in f if x.strip()]
+    except FileNotFoundError:
+        return []
+
+
+def _sessions(rows: list[dict]) -> dict:
+    """bucket -> session -> [rows]"""
+    out: dict = {}
+    for r in rows:
+        out.setdefault(str(r.get("bucket")), {}).setdefault(str(r.get("session") or r.get("id")), []).append(r)
+    return out
+
+
+def _used() -> set:
+    """Sessions drawn by a run that was not released (release(): no judged
+    prompt of that run reached an engine).  A release frees every draw of
+    its run name, so run names must never repeat (run_name())."""
+    lines = _jsonl(USED)
+    freed = {u["run"] for u in lines if u.get("released")}
+    return {u["session"] for u in lines if "session" in u and u.get("run") not in freed}
+
+
+def run_name(n: int) -> str:
+    """The pool's name of submission n's run.  sub-<n> until 2026-11-18;
+    the numbers then started again at #1, so a new run name carries a random
+    part: an old `sub-<n>` release must not free a new run's draw, nor a new
+    release an old run's."""
+    return f"sub-{n}-{secrets.token_hex(4)}"
+
+
+def release(run: str, why: str) -> None:
+    with open(J / "ledger.lock", "a+") as lk:
+        fcntl.flock(lk, fcntl.LOCK_EX)
+        with open(USED, "a") as f:
+            f.write(json.dumps({"run": run, "released": True, "why": why, "at": now()}) + "\n")
+
+
+def pool_left() -> dict:
+    used = _used()
+    return {b: sum(1 for s in ss if s not in used) for b, ss in sorted(_sessions(_jsonl(POOL)).items())}
+
+
+def tasks_left() -> int:
+    used = _used()
+    return sum(1 for s in _sessions(_jsonl(TASKS)).get("task", {}) if s not in used)
+
+
+def bar_set() -> bool:
+    """Whether the quality bar of the AMD config is set (then every run
+    needs its tasks)."""
+    sys.path.insert(1, str(HERE.parent.parent / "lib"))
+    import quality  # noqa: E402 - research/amd/lib, pure Python
+    return quality.is_set(json.loads(Path(CFG["judge"]["amd_config"]).read_text()))
+
+
+def draw(run: str, pool: Path | None = None, plan: dict | None = None) -> list[dict]:
+    """judge.draw rows per bucket ("*": any bucket), one per session, from
+    sessions never drawn; marks those sessions used before returning.  With
+    pool and plan: the same from another pool (the tasks)."""
+    import random
+    rnd = random.SystemRandom()
+    with open(J / "ledger.lock", "a+") as lk:
+        fcntl.flock(lk, fcntl.LOCK_EX)
+        used = _used()
+        by = _sessions(_jsonl(pool or POOL))
+        free = {b: [s for s in ss if s not in used] for b, ss in by.items()}
+        picked, short = [], []
+        for b, k in (plan or DRAW).items():
+            cand = [(bb, s) for bb, ss in free.items() for s in ss if (b == "*" or bb == str(b))
+                    and (bb, s) not in picked]
+            if len(cand) < int(k):
+                short.append(f"bucket {b}: {len(cand)} unused session(s) left, {k} needed")
+                continue
+            picked += rnd.sample(cand, int(k))
+        if short:
+            raise PoolExhausted(("the task pool" if pool == TASKS else "the hidden pool") + " is used up ("
+                                + "; ".join(short) + "); the operator adds rows with ij-judge prepare-pool")
+        with open(USED, "a") as f:
+            for b, s in picked:
+                f.write(json.dumps({"session": s, "bucket": b, "run": run, "at": now()}) + "\n")
+    rows = [rnd.choice(by[b][s]) for b, s in picked]
+    rnd.shuffle(rows)
+    return rows
+
+
+# ---- the GPU machine ----
+
+def ssh(st: dict, cmd: str, stdin=None, out=None, err=subprocess.STDOUT) -> subprocess.CompletedProcess:
+    return subprocess.run(ijctl.ssh_base(CFG, KEY, "judge", st) + [cmd], stdin=stdin,
+                          stdout=out if out is not None else subprocess.PIPE, stderr=err)
+
+
+def _rows_bytes(rows: list[dict]) -> bytes:
+    return "".join(json.dumps({"prompt_token_ids": r["prompt_token_ids"],
+                               **({"max_tokens": r["max_tokens"]} if r.get("max_tokens") else {})}) + "\n"
+                   for r in rows).encode()
+
+
+TASK_KEYS = ("id", "prompt_token_ids", "answer", "kind", "max_tokens")
+
+
+def _task_bytes(rows: list[dict]) -> bytes:
+    """Task rows for measure B: the gold answer goes to the judge's run
+    directory on the machine (mode 700, cand cannot read it), never to the
+    engine."""
+    return "".join(json.dumps({k: r[k] for k in TASK_KEYS if k in r}) + "\n" for r in rows).encode()
+
+
+def on_box(st: dict, rid: str, tar_path: Path | None, args: list[str], logf, files: dict[str, bytes],
+           out_name: str = "out.json") -> tuple[int, bytes | None]:
+    """Copy the source (if any) and `files` to runs/<rid> on the machine, run
+    `ij-box judge -- submit <args>` there ("$RUN/x" in args is that
+    directory's file x, "$SRC" the source), return (exit code, the bytes of
+    out_name).  The run directory is removed after."""
+    d = f"runs/{rid}"
+    q = shlex.quote
+    r = ssh(st, f"umask 077; rm -rf {d} && mkdir -p {d}/src")
+    if r.returncode != 0:
+        return 255, json.dumps({"reasons": [f"the GPU machine could not be reached: "
+                                            f"{r.stdout.decode(errors='replace')[-300:]}"]}).encode()
+    if tar_path is not None:
+        with open(tar_path, "rb") as f:
+            r = ssh(st, f"umask 077; tar -xf - -C {d}/src", stdin=f)
+        if r.returncode != 0:
+            return r.returncode, json.dumps({"status": "error", "reasons": [
+                "the source could not be unpacked on the GPU machine: " + r.stdout.decode(errors="replace")[-300:]]}).encode()
+    for name, data in files.items():
+        p = subprocess.run(ijctl.ssh_base(CFG, KEY, "judge", st) + [f"umask 077; cat > {d}/{q(name)}"], input=data,
+                           stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        if p.returncode != 0:
+            return p.returncode, None
+
+    def arg(a: str) -> str:
+        if a == "$SRC":
+            return '"$PWD/src"'
+        if a.startswith("$RUN/"):
+            return '"$PWD/"' + q(a[5:])
+        return q(a)
+    run = (f"cd {d} && {q(BOX_CODE + '/controller/box/ij-box')} judge \"$PWD\" -- submit "
+           + " ".join(arg(a) for a in args) + "; rc=$?; rm -f " + " ".join(q(n) for n in files) + "; exit $rc")
+    p = subprocess.Popen(ijctl.ssh_base(CFG, KEY, "judge", st) + [run], stdin=subprocess.PIPE,
+                         stdout=logf, stderr=subprocess.STDOUT)
+    rc = p.wait()
+    got = ssh(st, f"cat {d}/{q(out_name)}", err=subprocess.DEVNULL)   # stdout is the file alone
+    ssh(st, f"rm -rf {d}")
+    return rc, (got.stdout if got.returncode == 0 else None)
+
+
+def _json_or_none(b: bytes | None) -> dict | None:
+    try:
+        return json.loads(b) if b else None
+    except ValueError:
+        return None
+
+
+def run_files(run: str, tasks: bool = False) -> dict[str, bytes]:
+    """A fresh draw for this run, and the warm-up rows.  tasks: also a fresh
+    draw of judge.task_draw tasks (measure B, same run id: a release frees
+    both).  Without enough tasks the run goes on without measure B while the
+    quality bar is not set, and is refused once it is."""
+    warm = _jsonl(WARM)
+    if not warm:
+        raise PoolExhausted(f"no warm-up rows in {WARM}: a run without warm-up would time a cold engine; "
+                            "the operator adds them with ij-judge prepare-pool FILE --warm")
+    if tasks and TASK_DRAW > 0 and bar_set() and tasks_left() < TASK_DRAW:
+        raise PoolExhausted(f"the task pool has {tasks_left()} unused tasks, {TASK_DRAW} needed, and the quality bar "
+                            "is set; the operator adds tasks with ij-judge prepare-pool FILE --tasks")
+    rows = draw(run)
+    files = {"hidden.jsonl": _rows_bytes(rows), "warm.jsonl": _rows_bytes(warm)}
+    if tasks and TASK_DRAW > 0:
+        try:
+            files["tasks.jsonl"] = _task_bytes(draw(run, TASKS, {"task": TASK_DRAW}))
+        except PoolExhausted as e:
+            if bar_set():
+                release(run, "the task draw failed")
+                raise
+            log(f"measure B is not taken in this run: {e}")
+    return files
+
+
+JUDGE_ARGS = ["--hidden", "$RUN/hidden.jsonl", "--warm", "$RUN/warm.jsonl", "--out", "$RUN/out.json"]
+
+
+def judge_args(files: dict) -> list[str]:
+    return JUDGE_ARGS + (["--tasks", "$RUN/tasks.jsonl"] if "tasks.jsonl" in files else [])
+
+
+def reference(st: dict, logf) -> dict | None:
+    log(f"measuring the reference engine's speed on machine {st.get('id')}")
+    rid = f"ref-{int(time.time())}"
+    try:
+        files = run_files(rid)
+    except PoolExhausted as e:
+        log(f"the reference measurement was not run: {e}")
+        return None
+    rc, raw = on_box(st, rid, None, ["--reference"] + JUDGE_ARGS, logf, files)
+    release(rid, "only the reference saw these prompts")     # no engine under test did: they may be drawn again
+    out = _json_or_none(raw)
+    if rc != 0 or not out or "tokens_per_s" not in out:
+        log(f"the reference measurement failed (exit {rc})")
+        return None
+    m = machines()
+    m.setdefault(str(st["id"]), {})["reference"] = out
+    m[str(st["id"])]["measured"] = now()
+    save_machines(m)
+    log(f"reference on machine {st.get('id')}: {out['tokens_per_s']} tokens/s")
+    return out
+
+
+def needs_reference(st: dict) -> bool:
+    return ((machines().get(str(st["id"])) or {}).get("reference") or {}).get("protocol") != PROTOCOL
+
+
+def judge_one(n: int, st: dict, logf) -> dict:
+    """One submission on the box.  While the machine has no reference speed
+    under this protocol, the run carries a second draw and the reference,
+    once up for the walk, is timed on it (one reference start, not two)."""
+    rec = next(r for r in ledger_rows() if r["id"] == n)
+    run = run_name(n)
+    try:
+        files = run_files(run, tasks=True)
+    except PoolExhausted as e:
+        return {"rc": 2, "out": {"status": "error", "reasons": [str(e)]}}
+    args = ["--judge-src", "$SRC", "--commit", rec["commit"], "--note", rec.get("note") or ""] + judge_args(files)
+    rid = None
+    if needs_reference(st):
+        try:
+            rid = "ref-" + run
+            files["ref-hidden.jsonl"] = _rows_bytes(draw(rid))
+            args += ["--ref-hidden", "$RUN/ref-hidden.jsonl"]
+            log(f"the reference's speed on machine {st.get('id')} is measured in this run")
+        except PoolExhausted as e:
+            log(f"the reference's speed is not measured in this run: {e}")
+    rc, raw = on_box(st, run, SUBS / str(n) / "src.tar", args, logf, files)
+    if rid:
+        release(rid, "only the reference saw these prompts")     # no engine under test did: they may be drawn again
+    out = _json_or_none(raw)
+    if out is not None and (out.get("times") or {}).get("judged_sent") == 0:
+        # build, start or warm-up failed: no drawn prompt reached the engine, so the draw goes back
+        release(run, "no judged prompt was sent to the engine")
+    rs = (out or {}).get("reference_speed") or {}
+    if rid and rs.get("tokens_per_s") and rs.get("protocol") == PROTOCOL:
+        m = machines()
+        m.setdefault(str(st["id"]), {})["reference"] = rs
+        m[str(st["id"])]["measured"] = now()
+        save_machines(m)
+        log(f"reference on machine {st.get('id')}: {rs['tokens_per_s']} tokens/s")
+    elif rid:
+        log(rs.get("error") or "the reference's speed was not measured in this run")
+    return {"rc": rc, "out": out}
+
+
+def ensure_measured(st: dict, logf) -> bool:
+    """Before a machine's first submission: the best engine runs again on it.
+    The machine's reference speed is measured inside the first run that
+    reaches the walk (judge_one), not in a run of its own."""
+    m = machines().get(str(st["id"]), {})
+    if not m.get("best_rerun_done"):
+        best = best_row(ledger_rows())        # under this protocol only; older speeds are not compared
+        if best is not None and best.get("machine") != st["id"]:
+            k = queue(best["commit"], f"run again on machine {st['id']} (best was #{best['id']})",
+                      SUBS / str(best.get("rerun_of") or best["id"]) / "src.tar", rerun_of=best.get("rerun_of") or best["id"])
+            log(f"running the best engine (#{best['id']}) again as #{k}")
+            finish(k, st, logf)
+        mm = machines()
+        mm.setdefault(str(st["id"]), {})["best_rerun_done"] = True
+        save_machines(mm)
+    return True
+
+
+def finish(n: int, st: dict, logf) -> dict:
+    ledger_add({"id": n, "status": "running", "started": now(), "machine": st["id"]})
+    res = judge_one(n, st, logf)
+    out = res["out"] or {}
+    ref = (machines().get(str(st["id"])) or {}).get("reference") or {}
+    status = out.get("status") or "error"
+    if res["rc"] == 255 and not res["out"]:
+        status = "error"
+    rec = {"id": n, "status": status, "finished": now(), "machine": st["id"],
+           "machine_reference_tps": ref.get("tokens_per_s"),
+           "agreement": out.get("agreement"), "required_agreement": out.get("required_agreement"),
+           "tokens_per_s": out.get("tokens_per_s") if status == "passed" else None,
+           "reasons": out.get("reasons") or ([] if res["out"] else [f"no result from the GPU machine (exit {res['rc']})"]),
+           "times": out.get("times"), "speed": out.get("speed"), "protocol": out.get("protocol"),
+           # the quality measures without the per-task answers; the measured speed of any run that reached the
+           # walk (for measuring the tuned engine and the draw noise), never ranked: only tokens_per_s is
+           "quality": public_quality(out.get("quality")),
+           "measured_tps": (out.get("measured_speed") or {}).get("tokens_per_s")}
+    (SUBS / str(n) / "result.json").write_text(json.dumps({**out, **rec}, indent=1))
+    ledger_add(rec)
+    write_score()
+    return rec
+
+
+def queue(commit: str, note: str, tar_src: Path | None, rerun_of: int | None = None, data: bytes | None = None,
+          measure: str | None = None) -> int:
+    n = next_id()
+    d = SUBS / str(n)
+    d.mkdir(parents=True)
+    if data is not None:
+        (d / "src.tar").write_bytes(data)
+    elif tar_src is not None:
+        (d / "src.tar").write_bytes(tar_src.read_bytes())
+    ledger_add({"id": n, "commit": commit, "note": note, "submitted": now(), "status": "queued",
+                **({"rerun_of": rerun_of} if rerun_of else {}), **({"measure": measure} if measure else {})})
+    write_score()
+    return n
+
+
+# ---- the public score list ----
+
+def best_row(rows: list[dict]) -> dict | None:
+    """The best passing submission measured under the current protocol (a
+    speed of another protocol is a different measure).  The operator's
+    measurement runs (ij-judge measure: plain ATOM, AMD's tuned engine) are
+    never ranked."""
+    ok = [r for r in rows if r.get("status") == "passed" and r.get("tokens_per_s") and r.get("machine_reference_tps")
+          and r.get("protocol") == PROTOCOL and not r.get("measure")]
+    return max(ok, key=lambda r: r["tokens_per_s"] / r["machine_reference_tps"]) if ok else None
+
+
+def public_quality(q: dict | None) -> dict | None:
+    """The quality record without the per-task answers (the tasks are hidden)."""
+    if not q:
+        return None
+    b = {k: v for k, v in (q.get("b") or {}).items() if k != "per_task"}
+    return {**q, "b": b}
+
+
+def quality_table(rows: list[dict]) -> list[str]:
+    """One line per run with quality measures: what the user reads to set
+    the bar (NOTES.md of 2026-11-17, "Setting the bar")."""
+    out = ["id  status  note  | strict top-1 top-2 top-5 gap cut failed | tasks engine ref delta lb95"]
+    for r in rows:
+        q = r.get("quality") or {}
+        a, b = q.get("a") or {}, q.get("b") or {}
+        if not a and not b:
+            continue
+        tk = a.get("topk_share") or {}
+        out.append(f"{r['id']}  {r.get('status')}  {str(r.get('note') or '')[:30]!r}  | {a.get('agreement_strict')} "
+                   f"{tk.get('1')} {tk.get('2')} {tk.get('5')} {a.get('mean_gap')} {a.get('answers_cut')} "
+                   f"{a.get('answers_failed')} | {b.get('tasks')} {b.get('engine_correct')} "
+                   f"{b.get('reference_correct')} {b.get('delta')} {b.get('delta_lb95')}")
+    return out
+
+
+def public_reason(r: dict) -> str:
+    rs = r.get("reasons") or []
+    return rs[0].splitlines()[0][:100] if rs else ""
+
+
+def memory_limit_lines(m, g):
+    """The speed of reading each named set of weights once per token at the GPU's memory bandwidth.
+    A fact about those configurations, not a ceiling: speculation or smaller weights read fewer bytes per token.
+    (The same text is in research/amd/score.)"""
+    bw = g["hbm_bandwidth_gb_s"]
+    sets = m.get("weight_sets") or [{"name": f"{m['precision'].upper()} weights", "gb": m["weights_gb"]}]
+    out = [f"memory bound at {bw / 1000:g} TB/s ({g['hbm_bandwidth_source']}), one request, "
+           "all weights read once per token, no speculation:"]
+    out += [f"  {s['name']}, {s['gb']:g} GB: {bw / s['gb']:.1f} tokens/s" for s in sets]
+    out.append("  (not a limit on every engine: speculative decoding or smaller weights read fewer bytes per token)")
+    return out
+
+
+def write_score() -> None:
+    rows = ledger_rows()
+    ms = machines()
+    st = ijctl.box_state(CFG)
+    amd = json.loads(Path(CFG["judge"]["amd_config"]).read_text())
+    m, g = amd["model"], amd["gpu_device"]
+    text = ["reference speeds (a speed is only compared with the reference speed of the same machine):"]
+    if not ms:
+        text.append("  reference engine (AMD's ATOM, pinned image plus the logprob patch): not measured yet")
+        text.append(f"  {TUNED}: not measured yet on this machine")
+    for mid, v in ms.items():
+        ref = v.get("reference") or {}
+        cur = " (the current machine)" if str(st.get("id")) == mid and st.get("state") == "ready" else ""
+        old = "" if ref.get("protocol") == PROTOCOL else (
+            "; measured under the old protocol 1 (warm-up on the timed prompts, usage counts), to be measured again")
+        text.append(f"  machine {mid}{cur}:")
+        text.append(f"    reference engine (AMD's ATOM, pinned image plus the logprob patch): {ref.get('tokens_per_s', '?')} tokens/s "
+                    f"(measured {v.get('measured', '?')}; {ref.get('engine', '?')}{old})")
+        tuned = v.get("tuned") or {}
+        t_old = "" if tuned.get("protocol") == PROTOCOL else "; by an older method, to be measured again"
+        text.append(f"    {TUNED}: " + (f"{tuned['tokens_per_s']} tokens/s (measured {tuned.get('measured', '?')}{t_old})"
+                                         if tuned.get("tokens_per_s") else "not measured yet on this machine"))
+    text += ["  " + line for line in memory_limit_lines(m, g)]
+    best = best_row(rows)
+    text.append("best passing submission: " + (
+        f"#{best['id']} {best['tokens_per_s']:.1f} tokens/s on machine {best['machine']} "
+        f"(reference there {best['machine_reference_tps']:.1f}; x{best['tokens_per_s'] / best['machine_reference_tps']:.2f}) "
+        f"({best['commit'][:12]})" if best else "none"))
+    text.append(f"submissions: {len(rows)}")
+    pub = []
+    if rows:
+        text.append(f"  {'#':>4}  {'submitted (UTC)':19}  {'commit':12}  {'result':7}  {'tokens/s':>9}  {'ref same machine':>16}  "
+                    f"{'agreement':>9}  {'machine':>10}  note / reason")
+    if any(r.get("status") == "passed" and r.get("protocol") != PROTOCOL for r in rows):
+        text.append("  (p1: measured under the old protocol 1; not compared with the others)")
+    for r in rows:
+        tps = f"{r['tokens_per_s']:.1f}" if r.get("status") == "passed" and r.get("tokens_per_s") is not None else "-"
+        if tps != "-" and r.get("protocol") != PROTOCOL:
+            tps += " p1"
+        ref = f"{r['machine_reference_tps']:.1f}" if r.get("machine_reference_tps") else "-"
+        agr = f"{r['agreement']:.4f}" if r.get("agreement") is not None else "-"
+        extra = r.get("note") or ""
+        if r.get("measure"):
+            extra = f"[operator's measurement: {MEASURE_KINDS.get(r['measure'], r['measure'])}, not ranked] " + extra
+            if tps != "-":
+                tps += " m"
+        if r.get("status") not in ("passed", "queued", "running") and public_reason(r):
+            extra = (extra + "; " if extra else "") + public_reason(r)
+        text.append(f"  {r['id']:>4}  {r.get('submitted', '')[:19]:19}  {r.get('commit', '?')[:12]:12}  {r.get('status', '?'):7}  "
+                    f"{tps:>9}  {ref:>16}  {agr:>9}  {str(r.get('machine', '-')):>10}  {extra}")
+        pub.append({k: r.get(k) for k in ("id", "commit", "note", "submitted", "finished", "status", "tokens_per_s",
+                                          "machine", "machine_reference_tps", "agreement", "required_agreement", "rerun_of",
+                                          "protocol", "measure")}
+                   | {"reason": public_reason(r)})
+    # The speed of each passed run in parts (./submit prints the same); `./score N` adds its per-request list.
+    sys.path.insert(1, str(HERE.parent.parent / "lib"))
+    import answers  # noqa: E402 - research/amd/lib, pure Python
+    details = {}
+    shown = [r for r in rows if r.get("status") == "passed" and r.get("protocol") == PROTOCOL and r.get("speed")
+             and not r.get("measure")]
+    if shown:
+        text.append("speed of passed submissions (score = " + answers.FORMULA + "; `./score N` lists the requests):")
+    for r in shown:
+        sp = r["speed"]
+        lines = answers.speed_lines(sp)
+        text.append(f"  #{r['id']}: " + lines[0])
+        text += ["       " + x for x in lines[1:]]
+        details[str(r["id"])] = [f"#{r['id']} ({r.get('commit', '?')[:12]}) on machine {r.get('machine')}:"] + \
+            ["  " + x for x in answers.speed_lines(sp, per_request=True)]
+    # the quality measures of every judged run (./submit prints the same)
+    for r in rows:
+        if r.get("quality"):
+            d = details.setdefault(str(r["id"]), [f"#{r['id']} ({r.get('commit', '?')[:12]}) on machine "
+                                                  f"{r.get('machine')}: {r.get('status')}"])
+            d += ["  " + x for x in answers.quality.lines(r["quality"])]
+            if r.get("status") != "passed" and r.get("measured_tps"):
+                d.append(f"  speed measured, not ranked (the run did not pass): {r['measured_tps']} tokens/s")
+    bw = g["hbm_bandwidth_gb_s"]
+    sets = m.get("weight_sets") or [{"name": f"{m['precision'].upper()} weights", "gb": m["weights_gb"]}]
+    doc = {"updated": now(), "text": text, "submissions": pub, "details": details,
+           "machines": {k: {"reference_tps": (v.get("reference") or {}).get("tokens_per_s"), "measured": v.get("measured"),
+                            "tuned_tps": (v.get("tuned") or {}).get("tokens_per_s")}
+                        for k, v in ms.items()},
+           "memory_bound_tps": {s["name"]: round(bw / s["gb"], 1) for s in sets}}
+    p = Path(CFG["paths"]["score_file"])
+    tmp = p.with_suffix(".tmp")
+    tmp.write_text(json.dumps(doc, indent=1))
+    os.chmod(tmp, 0o644)
+    os.replace(tmp, p)
+
+
+# ---- commands ----
+
+def run_lock():
+    f = open(J / "run.lock", "a+")
+    fcntl.flock(f, fcntl.LOCK_EX)
+    return f
+
+
+def cmd_submit(sha: str, note: str) -> int:
+    if not re.fullmatch(r"[0-9a-f]{40}", sha):
+        print("ij-judge submit: SHA must be a full commit id")
+        return 2
+    note = "".join(c for c in note if c.isprintable())[:300]
+    data = sys.stdin.buffer.read(MAX_TAR + 1)
+    if len(data) > MAX_TAR:
+        print("the commit is larger than 1 GiB as a tar; not judged")
+        return 2
+    n = queue(sha, note, None, data=data)
+    d = SUBS / str(n)
+    logp = d / "log"
+    with open(logp, "ab") as lf:
+        subprocess.Popen([str(Path(__file__).resolve()), "work", str(n)], stdin=subprocess.DEVNULL, stdout=lf,
+                         stderr=subprocess.STDOUT, start_new_session=True, close_fds=True)
+    print(f"submission #{n}: commit {sha[:12]} queued; the judge runs it now (Ctrl-C stops watching, not the run)", flush=True)
+    pos = 0
+    while True:
+        try:
+            with open(logp, "rb") as f:
+                f.seek(pos)
+                chunk = f.read()
+                pos += len(chunk)
+            if chunk:
+                sys.stdout.buffer.write(chunk)
+                sys.stdout.buffer.flush()
+        except FileNotFoundError:
+            pass
+        if (d / "result.json").exists() and not chunk:
+            break
+        time.sleep(1)
+    rec = json.loads((d / "result.json").read_text())
+    return {"passed": 0, "failed": 1}.get(rec.get("status"), 2)
+
+
+def cmd_work(n: int) -> int:
+    with run_lock():
+        st = ijctl.box_state(CFG)
+        if st.get("state") != "ready":
+            st = ijctl.wait_ready(CFG, sys.stdout)
+        if not ensure_measured(st, sys.stdout):
+            ledger_add({"id": n, "status": "error", "finished": now(),
+                        "reasons": ["the reference could not be measured on this machine"]})
+            (SUBS / str(n) / "result.json").write_text(json.dumps({"status": "error"}))
+            write_score()
+            return 2
+        sys.stdout.flush()
+        rec = finish(n, st, sys.stdout)
+    return {"passed": 0, "failed": 1}.get(rec["status"], 2)
+
+
+def cmd_remeasure() -> int:
+    with run_lock():
+        st = ijctl.box_state(CFG)
+        if st.get("state") != "ready":
+            print(f"no ready GPU machine: {ijctl.describe(st)}")
+            return 2
+        # idle time after a new machine: a run of its own (a submission that comes first measures it in its walk)
+        if needs_reference(st) and reference(st, sys.stdout) is None:
+            return 1
+        return 0 if ensure_measured(st, sys.stdout) else 1
+
+
+def tar_dir(d: Path) -> bytes:
+    """The engine directory as a tar, as ./submit sends a commit (symlinks
+    kept as links)."""
+    import io
+    import tarfile
+    buf = io.BytesIO()
+    with tarfile.open(fileobj=buf, mode="w") as t:
+        for p in sorted(d.rglob("*")):
+            if "__pycache__" in p.parts or ".git" in p.relative_to(d).parts:
+                continue
+            t.add(p, arcname=str(p.relative_to(d)), recursive=False)
+    return buf.getvalue()
+
+
+def cmd_measure(kind: str, src: str, note: str) -> int:
+    """(operator) Judge an engine that is not an agent's through the path of
+    a submission: a fresh draw, its tasks, cand, the walk, measures A and B.
+    kind atom: plain ATOM as an engine (examples/atom-engine); kind tuned:
+    AMD's tuned engine (examples/amd-tuned-engine).  The run is in the
+    ledger and the public list marked as a measurement and is never ranked
+    or run again on new machines.  For kind tuned the machine's record keeps
+    the measured speed (the judge's formula, whether or not the run passed)
+    and the median over its measurement runs, shown in the score list."""
+    if kind not in MEASURE_KINDS:
+        print(f"ij-judge measure: KIND is one of {', '.join(MEASURE_KINDS)}")
+        return 2
+    d = Path(src).resolve()
+    if not (d / "serve").is_file():
+        print(f"ij-judge measure: {d} has no serve")
+        return 2
+    n = queue(f"measure-{kind}", "".join(c for c in note if c.isprintable())[:300], None, data=tar_dir(d), measure=kind)
+    print(f"measurement #{n} ({MEASURE_KINDS[kind]}) queued", flush=True)
+    with run_lock():
+        st = ijctl.box_state(CFG)
+        if st.get("state") != "ready":
+            st = ijctl.wait_ready(CFG, sys.stdout)
+        rec = finish(n, st, sys.stdout)
+    if kind == "tuned":
+        tps = [r["measured_tps"] for r in ledger_rows() if r.get("measure") == "tuned" and r.get("machine") == st["id"]
+               and r.get("measured_tps") and r.get("protocol", PROTOCOL) == PROTOCOL]
+        mm = machines()
+        if tps:
+            s = sorted(tps)
+            mm.setdefault(str(st["id"]), {})["tuned"] = {
+                "tokens_per_s": round(s[len(s) // 2] if len(s) % 2 else (s[len(s) // 2 - 1] + s[len(s) // 2]) / 2, 2),
+                "runs": len(s), "min": s[0], "max": s[-1], "protocol": PROTOCOL, "measured": now(),
+                "note": "the judge's formula on fresh draws, median of the measurement runs; passed or not"}
+            save_machines(mm)
+            write_score()
+    print(f"measurement #{n}: {rec['status']}, measured speed {rec.get('measured_tps')} tokens/s")
+    return 0 if rec["status"] in ("passed", "failed") else 2
+
+
+def cmd_reference_draws(k: int) -> int:
+    """(operator) The reference's speed on k separate draws, each a run of its
+    own (the draw noise; NOTES "Draw noise").  The draws go back to the pool
+    after (only the reference saw them).  The machine's reference speed, the
+    score's denominator, is not changed; the figures are kept beside it."""
+    with run_lock():
+        st = ijctl.box_state(CFG)
+        if st.get("state") != "ready":
+            print(f"no ready GPU machine: {ijctl.describe(st)}")
+            return 2
+        got, rids = [], []
+        try:
+            for i in range(k):
+                rid = f"refdraw-{int(time.time())}-{i}"
+                rids.append(rid)
+                files = run_files(rid)              # earlier draws of this command are still marked used: k distinct draws
+                rc, raw = on_box(st, rid, None, ["--reference"] + JUDGE_ARGS, sys.stdout, files)
+                out = _json_or_none(raw) or {}
+                # every request kept (answer tokens, finish reason): the answer lengths a pool gives
+                (J / "refdraws").mkdir(mode=0o700, exist_ok=True)
+                (J / "refdraws" / f"{rid}.json").write_text(json.dumps(out))
+                got.append(out.get("tokens_per_s"))
+                log(f"reference draw {i + 1}/{k}: {out.get('tokens_per_s')} tokens/s (exit {rc})")
+        except PoolExhausted as e:
+            log(f"stopped: {e}")
+        finally:
+            for rid in rids:
+                release(rid, "only the reference saw these prompts")
+    ok = [x for x in got if x]
+    mm = machines()
+    mm.setdefault(str(st["id"]), {}).setdefault("reference_draws", []).extend(ok)
+    save_machines(mm)
+    if ok:
+        print(f"reference over {len(ok)} draws: min {min(ok)}, max {max(ok)}, "
+              f"spread {100 * (max(ok) - min(ok)) / min(ok):.1f} % of the lowest")
+    return 0 if ok and len(ok) == k else 1
+
+
+def cmd_certify(argv) -> int:
+    c = CFG["judge"].get("certify_command")
+    rows = ledger_rows()
+    target = next((r for r in rows if str(r["id"]) == argv[0]), None) if argv else best_row(rows)
+    if target is None:
+        print("certify: no such submission (or no passing one)")
+        return 2
+    if not c:
+        print("certify: not configured.  Set judge.certify_command in the controller config: an argv run on the GPU "
+              "machine as judge, with {src} (the engine's source there), {commit} and {id} filled in.  The full judge "
+              "(bench/run.sh) is not installed on the GPU machine yet.")
+        return 2
+    st = ijctl.wait_ready(CFG, sys.stdout)
+    src = SUBS / str(target.get("rerun_of") or target["id"]) / "src.tar"
+    d = f"certify/{target['id']}"
+    ssh(st, f"umask 077; rm -rf {d} && mkdir -p {d}/src")
+    with open(src, "rb") as f:
+        ssh(st, f"tar -xf - -C {d}/src", stdin=f)
+    argv2 = [a.format(src=f"$HOME/{d}/src", commit=target["commit"], id=target["id"]) for a in c]
+    with run_lock():
+        r = subprocess.run(ijctl.ssh_base(CFG, KEY, "judge", st) + [" ".join(shlex.quote(a) for a in argv2)])
+    ledger_add({"id": target["id"], "certified": now(), "certify_exit": r.returncode})
+    return r.returncode
+
+
+def add_rows(dst: Path, rows: list[dict], tasks: bool = False) -> int:
+    """Append rows whose id is not in dst yet; returns how many were added.
+    tasks: each row is its own session in the bucket "task" and keeps its
+    answer, kind and max_tokens; a task whose token ids are already in the
+    pool (the same question from another generator seed) is skipped too."""
+    old = _jsonl(dst)
+    have = {r.get("id") for r in old}
+    new = [r for r in rows if r.get("prompt_token_ids") and r.get("id") not in have]
+    if tasks:
+        seen = {tuple(r.get("prompt_token_ids") or ()) for r in old}
+        new = [r for r in new if not (tuple(r["prompt_token_ids"]) in seen or seen.add(tuple(r["prompt_token_ids"])))]
+        bad = [r.get("id") for r in new if r.get("kind") not in ("math", "mc") or r.get("answer") is None]
+        if bad:
+            raise SystemExit(f"prepare-pool --tasks: {len(bad)} row(s) without kind math|mc and an answer (first {bad[0]})")
+    with open(J / "ledger.lock", "a+") as lk:
+        fcntl.flock(lk, fcntl.LOCK_EX)
+        with open(dst, "a") as f:
+            for r in new:
+                if tasks:
+                    row = {"id": r["id"], "session": str(r["id"]), "bucket": "task",
+                           **{k: r[k] for k in TASK_KEYS + ("lang",) if k in r}}
+                else:
+                    row = {"id": r["id"], "session": str(r.get("session") or r["id"]),
+                           "bucket": str(r.get("bucket")), "prompt_token_ids": r["prompt_token_ids"]}
+                f.write(json.dumps(row) + "\n")
+    return len(new)
+
+
+def cmd_prepare_pool(path: str, kind: str) -> int:
+    """Tokenize FILE with the reference on the GPU machine (./submit
+    --tokenize) and add the rows to the hidden pool, the warm-up rows
+    (kind "warm") or the task pool (kind "tasks")."""
+    data = Path(path).read_bytes()
+    with run_lock():
+        st = ijctl.box_state(CFG)
+        if st.get("state") != "ready":
+            print(f"no ready GPU machine: {ijctl.describe(st)}")
+            return 2
+        rc, raw = on_box(st, f"pool-{int(time.time())}", None, ["--tokenize", "$RUN/in.jsonl", "$RUN/out.jsonl"],
+                         sys.stdout, {"in.jsonl": data}, out_name="out.jsonl")
+    if rc != 0 or not raw:
+        print(f"prepare-pool: tokenizing failed (exit {rc})")
+        return 1
+    rows = [json.loads(x) for x in raw.decode().splitlines() if x.strip()]
+    dst = {"warm": WARM, "tasks": TASKS}.get(kind, POOL)
+    if kind == "pool":
+        wid = {r.get("session") for r in _jsonl(WARM)}
+        rows = [r for r in rows if str(r.get("session") or r.get("id")) not in wid]
+    k = add_rows(dst, rows, tasks=kind == "tasks")
+    left = {"pool": f"; unused sessions per bucket: {pool_left()}", "tasks": f"; unused tasks: {tasks_left()}"}
+    print(f"prepare-pool: {k} new row(s) added to {dst}" + left.get(kind, ""))
+    return 0
+
+
+def main(argv) -> int:
+    os.umask(0o077)
+    if argv[:1] == ["prepare-pool"] and len(argv) in (2, 3) and argv[2:] in ([], ["--warm"], ["--tasks"]):
+        return cmd_prepare_pool(argv[1], {"--warm": "warm", "--tasks": "tasks"}.get("".join(argv[2:]), "pool"))
+    if argv[:1] == ["submit"] and len(argv) == 3:
+        return cmd_submit(argv[1], argv[2])
+    if argv[:1] == ["work"] and len(argv) == 2:
+        return cmd_work(int(argv[1]))
+    if argv == ["remeasure"]:
+        return cmd_remeasure()
+    if argv[:1] == ["measure"] and len(argv) in (3, 4):
+        return cmd_measure(argv[1], argv[2], argv[3] if len(argv) == 4 else "")
+    if argv[:1] == ["reference-draws"] and len(argv) == 2 and argv[1].isdigit():
+        return cmd_reference_draws(int(argv[1]))
+    if argv == ["score"]:
+        write_score()
+        return 0
+    if argv[:1] == ["certify"]:
+        return cmd_certify(argv[1:])
+    if argv == ["quality"]:
+        print("\n".join(quality_table(ledger_rows())))
+        return 0
+    if argv == ["status"]:
+        for r in ledger_rows()[-10:]:
+            print(json.dumps(r)[:300])
+        print(json.dumps(machines(), indent=1)[:2000])
+        print(f"hidden pool {POOL}: unused sessions per bucket {pool_left()}; draw per run {DRAW}; "
+              f"warm-up rows {len(_jsonl(WARM))}; unused tasks {tasks_left()} (draw per run {TASK_DRAW}); "
+              f"quality bar {'set' if bar_set() else 'not set'}")
+        return 0
+    print(__doc__.strip())
+    return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

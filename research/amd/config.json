@@ -1,0 +1,87 @@
+{
+ "_about": "The one config of the AMD commands (research/amd). Relative paths are relative to this file. Limits marked not_measured_on_amd were set for a Qwen setup on Nvidia.",
+ "model": {
+  "name": "Qwen3.8-27B",
+  "hf_id": "Qwen/Qwen3.8-27B",
+  "dir": "/srv/models/Qwen3.8-27B",
+  "weights_gb": 51.0,
+  "precision": "bf16",
+  "weight_sets": [
+   {"name": "BF16 weights", "gb": 51.0},
+   {"name": "4-bit weights (MXFP4, 4.25 bits per weight)", "gb": 13.6}
+  ]
+ },
+ "gpu_device": {
+  "name": "AMD Instinct MI350X VF",
+  "arch": "gfx950",
+  "hbm_bandwidth_gb_s": 4700,
+  "hbm_bandwidth_source": "measured on this virtual function on 2026-11-17 with tests/hip_probe.cpp, a plain copy kernel, read plus write; a lower bound, the spec sheet says 8 TB/s"
+ },
+ "state_dir": "/var/lib/ij-amd",
+ "engine": {
+  "port": 8100,
+  "serve": "./serve",
+  "build": "./build",
+  "health_path": "/v1/models",
+  "health_timeout_s": 1800,
+  "build_timeout_s": 3600,
+  "request_timeout_s": 300
+ },
+ "ref": {
+  "url": "http://127.0.0.1:8001",
+  "served_model": "qwen3.8-27b",
+  "image": "ij-atom-ref:ad256a94-lp1",
+  "start": ["reference/atom-serve.sh", "start"],
+  "stop": ["reference/atom-serve.sh", "stop"],
+  "ready_timeout_s": 1200,
+  "gpu_memory_utilization": 0.5,
+  "top_logprobs": 20
+ },
+ "gpu": {
+  "try_max_s": 7200
+ },
+ "check": {
+  "prompts": "prompts/public.jsonl",
+  "max_tokens": 128,
+  "engine_top": 5,
+  "speed_repeats": 2,
+  "_speed_repeats": "after the answers: each prompt rotated, once with max_tokens=1 (prompt time) and once whole, this many times; min-max is printed"
+ },
+ "limits": {
+  "min_agreement": 0.95,
+  "tie_eps": 0.125,
+  "margin": 0.03,
+  "max_partings_per_item": 40,
+  "not_measured_on_amd": true,
+  "compare_stop": true,
+  "_compare_stop": "compare where the answers end (lib/compare.py); an assumption not confirmed by the user, false switches it off"
+ },
+ "quality": {
+  "_about": "The fixed quality bar (lib/quality.py): engines may use smaller weights. Measure A from the walk of the judged answers (top-k share, mean gap); measure B from tasks graded by rule, paired with the reference. null = not set; while any limit is not set, ./submit and ./check record both measures and say 'quality bar not set', and PASS or FAIL stays the agreement limit's. The user sets the limits from card measurements (measurements/2026-11-17/NOTES.md, 'Setting the quality bar').",
+  "topk": [1, 2, 5],
+  "bar": {
+   "min_topk_share": {"1": null, "2": null, "5": 0.98},
+   "max_mean_gap": 0.08,
+   "min_task_delta_lb": -0.15,
+   "_about": "min_topk_share: per k, the least share of judged positions whose engine token is in the reference's top k (a k left null is not checked; at least one must be set). max_mean_gap: the most mean gap per walked position, nats. min_task_delta_lb: the least 95% lower bound of (engine - reference) task accuracy, a share (e.g. -0.05 = 5 points)."
+  },
+  "bar_replaces_agreement": true,
+  "_bar_replaces_agreement": "once every limit of the bar is set, the agreement limit (limits.min_agreement) is reported, not applied; false keeps applying both. No effect while the bar is not set.",
+  "tasks": {
+   "max_tokens": 512,
+   "bootstrap_resamples": 2000,
+   "check_file": "prompts/public-tasks.jsonl",
+   "_about": "max_tokens per task answer (math answers end with 'ANSWER: <number>' after a few lines). ./check uses check_file (public, fixed); ./submit gets a fresh draw from the judge (--tasks)."
+  }
+ },
+ "submit": {
+  "_about": "Protocol 2: every judged prompt is answered once with max_tokens; those answers are both timed and checked. engine_user runs build and serve on the GPU machine (setup-box.sh makes it).",
+  "hidden_prompts": "/var/lib/ij-amd-judge/hidden.jsonl",
+  "max_tokens": 128,
+  "engine_user": "cand",
+  "speed_repeats": 2,
+  "_speed_repeats": "the speed in parts from extra requests after the judged ones; they never change the score. 0 switches them off (they add a little over repeats x the time of the judged answers)",
+  "max_s": 7200,
+  "alone_wait_s": 180
+ }
+}

@@ -1,0 +1,11 @@
+[atom 14:27:48] Loading drafter model...
+[atom 14:27:48] DFlash 2 draft loaded from /models/Qwen3.8-27B-DFlash2 (target embedding and LM head)
+[atom 14:27:49] DFlash 2 single-sequence drafter: DFlash2Mono (aot /opt/qwen38/drafter-objects, max_pos 40968)
+[atom 14:29:42] Allocated draft KV pool: 126448 blocks, 41434480640 B of the paged allocation
+[atom 14:29:42] DraftKvBuilder caches 5 draft_kv rows
+[atom 14:29:42] Binding KV cache for the draft model
+[atom 14:29:56] Server started successfully and ready to accept requests
+[atom 14:31:43] DFlash 2 single-sequence draft captured
+[atom 14:31:44] DFlash 2 single-sequence context + draft captured
+[atom 14:32:04] [MTP Stats Interval] Average toks/fwd: 4.24, Accepted/Total Draft tokens: 3238/7000, Acceptance rate: 46.26%, Accepted tokens distribution: {0: '20.20%', 1: '16.60%', 2: '11.80%', 3: '9.00%', 4: '7.70%', 5: '6.70%', 6: '3.70%', 7: '24.30%'}
+[atom 14:32:04] [MTP Stats         ] Average toks/fwd: 4.24, Accepted/Total Draft tokens: 3238/7000, Acceptance rate: 46.26%, Accepted tokens distribution: {0: '20.20%', 1: '16.60%', 2: '11.80%', 3: '9.00%', 4: '7.70%', 5: '6.70%', 6: '3.70%', 7: '24.30%'}

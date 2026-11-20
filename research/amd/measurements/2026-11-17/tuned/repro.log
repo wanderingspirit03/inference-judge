@@ -1,0 +1,42 @@
+
+== 0. checks
+
+== 1. ATOM
+
+== 2. checkpoints
+model /models/Qwen3.8-27B
+draft /models/Qwen3.8-27B-DFlash2
+
+== 3. FlyDSL (build time only; serving loads the code objects)
+flydsl /opt/qwen38/flydsl
+
+== 4. code objects
+megakernel /opt/qwen38/kernel-cache/m8-16ffb881619834a9
+drafter /opt/qwen38/drafter-objects
+
+== 5. prompt sets
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Generating train split:   0%|          | 0/7473 [00:00<?, ? examples/s]Generating train split: 100%|██████████| 7473/7473 [00:00<00:00, 990677.13 examples/s]
+Generating test split:   0%|          | 0/1319 [00:00<?, ? examples/s]Generating test split: 100%|██████████| 1319/1319 [00:00<00:00, 678475.22 examples/s]
+wrote 130 gsm8k prompts to /work/prompts/gsm8k_130.jsonl
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Generating test split:   0%|          | 0/164 [00:00<?, ? examples/s]Generating test split: 100%|██████████| 164/164 [00:00<00:00, 59632.93 examples/s]
+wrote 130 humaneval prompts to /work/prompts/humaneval_130.jsonl
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Generating train split:   0%|          | 0/80 [00:00<?, ? examples/s]Generating train split: 100%|██████████| 80/80 [00:00<00:00, 32812.86 examples/s]
+wrote 130 mt-bench prompts to /work/prompts/mt-bench_130.jsonl
+
+== 6. ATOM: the megakernel, then the regular path
+megakernel:
+  gsm8k done
+  humaneval done
+  mt-bench done
+
+== 8. results (tokens/s, mean of each request's decode speed)
+set         regular  megakernel  speedup   SGLang   published (regular / megakernel)
+gsm8k             -        1036        -        -   535 / 1091
+humaneval         -         852        -        -   443 / 913
+mt-bench          -         773        -        -   412 / 824
+
+published: MI355X, ROCm 10.0, GPU_MAX_HW_QUEUES=1 on both paths (the script's default). On ROCm 7.2.4 at HIP's defaults: 481 / 1,105, 406 / 924, 368 / 846 (2.3x); on ROCm 10 the hardware-queue setting also sped up the regular path on that MI355X.
+The megakernel is not bit-reproducible run to run, so speeds move by a few percent with the acceptance length.

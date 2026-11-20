@@ -1,0 +1,145 @@
+#!/usr/bin/env python3
+"""The firewall rule for cand, the account a judged engine runs as.  On the
+GPU machine, as root (setup-box.sh and the boot unit ij-fw.service apply it;
+judge runs `check` through sudo before every judged run).
+
+  ij-fw apply   make the chain IJ-CAND in iptables and ip6tables and hook it
+                first in OUTPUT for cand's uid (-m owner --uid-owner):
+                  loopback port 53, udp and tcp: REJECT  (the local resolver
+                                                          would carry names out)
+                  the rest of loopback:          RETURN  (the engine's port,
+                                                          its own servers)
+                  everything else:               REJECT
+                Safe to run again: the chain is rebuilt and the hook is
+                placed once, at the top.
+  ij-fw check   exit 0 and print "ok" when both tables hold exactly that;
+                otherwise exit 1 with what is missing.  ./submit fails
+                closed on anything but 0.
+
+The owner match sees a socket's uid, so it also covers containers that cand
+starts through the Docker launcher (host network, --user cand).  It cannot
+see Unix sockets: a name lookup through systemd-resolved's varlink or D-Bus
+socket is not stopped by it (see NOTES, the GPU session's checks).
+
+Test mode (never as root): IJ_FW_TEST=1 with IJ_FW_TEST_BIN (a directory
+holding the iptables and ip6tables to run) and IJ_FW_TEST_UID (cand's uid)."""
+import os
+import pwd
+import subprocess
+import sys
+
+CHAIN = "IJ-CAND"
+USER = "cand"
+TOOLS = ("iptables", "ip6tables")
+
+
+def ctx() -> tuple[dict, int]:
+    if os.environ.get("IJ_FW_TEST") == "1":
+        if os.geteuid() == 0:
+            raise SystemExit("ij-fw: the test mode does not run as root")
+        b = os.environ["IJ_FW_TEST_BIN"]
+        return {t: os.path.join(b, t) for t in TOOLS}, int(os.environ["IJ_FW_TEST_UID"])
+    if os.geteuid() != 0:
+        raise SystemExit("ij-fw: run it as root (judge: sudo -n ij-fw check)")
+    if os.environ.get("SUDO_USER") in ("builder", "cand"):
+        raise SystemExit("ij-fw: not for builder or cand")
+    bins = {}
+    for t in TOOLS:
+        for d in ("/usr/sbin", "/sbin", "/usr/bin"):
+            if os.access(f"{d}/{t}", os.X_OK):
+                bins[t] = f"{d}/{t}"
+                break
+        else:
+            raise SystemExit(f"ij-fw: no {t} on this machine")
+    try:
+        return bins, pwd.getpwnam(USER).pw_uid
+    except KeyError:
+        raise SystemExit(f"ij-fw: no user {USER}") from None
+
+
+def rules(uid: int) -> tuple[list[list[str]], list[str]]:
+    """The chain's rules and the hook, as argument lists after -A/-I."""
+    chain = [["-o", "lo", "-p", "udp", "--dport", "53", "-j", "REJECT"],
+             ["-o", "lo", "-p", "tcp", "--dport", "53", "-j", "REJECT", "--reject-with", "tcp-reset"],
+             ["-o", "lo", "-j", "RETURN"],
+             ["-j", "REJECT"]]
+    hook = ["-m", "owner", "--uid-owner", str(uid), "-j", CHAIN]
+    return chain, hook
+
+
+def tool(b: str, *a, check=True) -> subprocess.CompletedProcess:
+    r = subprocess.run([b, "-w", "10", *a], capture_output=True, text=True, timeout=60)
+    if check and r.returncode != 0:
+        raise SystemExit(f"ij-fw: {os.path.basename(b)} {' '.join(a)}: {r.stderr.strip()[:300]}")
+    return r
+
+
+def apply(bins: dict, uid: int) -> int:
+    chain, hook = rules(uid)
+    for t, b in bins.items():
+        if tool(b, "-S", CHAIN, check=False).returncode != 0:
+            tool(b, "-N", CHAIN)
+        # the hook goes first so that no earlier ACCEPT passes cand's packets
+        while tool(b, "-C", "OUTPUT", *hook, check=False).returncode == 0:
+            tool(b, "-D", "OUTPUT", *hook)
+        tool(b, "-F", CHAIN)
+        for r in chain:
+            tool(b, "-A", CHAIN, *r)
+        tool(b, "-I", "OUTPUT", "1", *hook)
+    print(f"ij-fw: applied ({CHAIN} for uid {uid}, IPv4 and IPv6)")
+    return 0
+
+
+def _has(line: str, args: list[str]) -> bool:
+    """True when the -S line holds the rule: its words in that order (the
+    tool may add words of its own, such as -m udp)."""
+    words = line.split()
+    i = 0
+    for w in words:
+        if i < len(args) and w == args[i]:
+            i += 1
+    return i == len(args)
+
+
+def problems(bins: dict, uid: int) -> list[str]:
+    chain, hook = rules(uid)
+    out = []
+    for t, b in bins.items():
+        r = tool(b, "-S", "OUTPUT", check=False)
+        if r.returncode != 0:
+            out.append(f"{t}: cannot list OUTPUT: {r.stderr.strip()[:200]}")
+            continue
+        rows = [x for x in r.stdout.splitlines() if x.startswith("-A OUTPUT ")]
+        if not rows or not (_has(rows[0], hook) and f"--uid-owner {uid} " in rows[0] + " "):
+            out.append(f"{t}: the first rule of OUTPUT is not the hook for uid {uid}")
+        r = tool(b, "-S", CHAIN, check=False)
+        if r.returncode != 0:
+            out.append(f"{t}: no chain {CHAIN}")
+            continue
+        rows = [x for x in r.stdout.splitlines() if x.startswith(f"-A {CHAIN} ")]
+        if len(rows) != len(chain) or not all(_has(x, want) for x, want in zip(rows, chain)):
+            out.append(f"{t}: {CHAIN} is not the rule ({len(rows)} rule(s): {' | '.join(rows)[:300]})")
+        elif any(" -d " in x or " -s " in x or " ! " in x for x in rows):
+            out.append(f"{t}: {CHAIN} has an address or a negation in a rule: {' | '.join(rows)[:300]}")
+    return out
+
+
+def main(argv) -> int:
+    if argv not in (["apply"], ["check"]):
+        print(__doc__.strip(), file=sys.stderr)
+        return 2
+    bins, uid = ctx()
+    if argv == ["apply"]:
+        if os.environ.get("SUDO_USER") == "judge":
+            raise SystemExit("ij-fw: judge only checks; root applies")
+        return apply(bins, uid)
+    p = problems(bins, uid)
+    if p:
+        print("ij-fw: the rule for cand is not in place: " + "; ".join(p))
+        return 1
+    print("ok")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

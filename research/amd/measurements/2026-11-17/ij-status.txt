@@ -1,0 +1,52 @@
+ij status (written 2026-11-17 ~13:30 UTC, before the Mac's network outage)
+
+Running, detached (nohup):
+- /root/variation.sh  -> /root/variation.log (one line per run, "done" at the end), files in /root/var/
+  3 x reference speed (submit --reference), then 3 x check of examples/atom-engine against the reference.
+  config: /opt/ij-amd/amd/var-config.json
+- /root/after-var.sh  -> /root/after-var.log
+  waits for "done" in variation.log, stops ij-ref, then runs the full judge baseline:
+  sudo -u bench /opt/bench/run.sh baseline-atom-mi350x  -> /var/log/inference-judge/baseline-atom-mi350x.log
+  exit code and times in /root/after-var.log. Results in /opt/bench/results/baseline-atom-mi350x.
+
+Stopped / failed:
+- AMD tuned engine (proaditya/ATOM qwen38-megakernels): image build fails at the megakernel step.
+  The pinned flydsl 0.4.0.dev963 wheel is no longer published; dev973 (/root/fwheel) gives
+  "address space ... does not lower" / "make_buffer_ptr requires a global-address-space pointer".
+  Logs: /root/tuned-build2.log, /root/tuned-setup.log. Partial images: ij-atom-tuned:fly973.
+
+Next (after the outage): read the logs above; collect variation results; job 5 (controller path),
+job 6 (memory-limit wording); one more tuned attempt only if the GPU is free.
+
+UPDATE 13:35: check 1 failed (a quality prompt makes the reference drop a logprob mid-answer). variation.sh was stopped;
+/root/variation2.sh (log /root/variation2.out, results in /root/variation.log and /root/var/) filters the prompts
+(/root/var/filter.log -> /root/var-prompts-ok.jsonl), runs 3 checks, then writes done, which starts /root/after-var.sh (the judge).
+
+UPDATE 13:56:
+- pools: /root/pool-build.log (done), /srv/data/pools/qwen38-agentic-{main,confirm,manifest}; parquet /srv/data/swe-rebench (rev 35455389).
+- /root/agentic-ref.sh -> /root/agentic-ref.log, /root/agentic/: waits for "baseline exit" in after-var.log, then plain ATOM
+  ./submit --reference on 8 agentic requests each of 8K/16K/32K (IJ_REF_MAX_LEN=40000). Then a watcher writes /tmp/ij-job5-go.
+- controller VM: /root/job5.sh -> /root/job5/summary.log waits for /tmp/ij-job5-go on the box, then runs the agents commands
+  and two ./submit at once. GPU queue note: root jobs here use IJ_AMD_STATE=/var/lib/ij-amd/root, a different queue than the agents.
+- 13:59 /root/tuned-setup3.sh -> /root/tuned-setup3.log: last tuned attempt (wheel frontend), CPU only, cpus 16-23
+- 14:05 tuned image BUILT (ij-atom-tuned:dev973; fix: the dev973 wheel own Python frontend, log /root/tuned-setup3.log).
+  The job 5 flag watcher was removed; /root/tuned-chain.sh -> /root/tuned/chain.log now runs after agentic-ref:
+  AMD repro (megakernel arm) -> /root/tuned/repro.log, then our method (submit --judge-src /root/tuned-engine) on
+  short prompts and agentic 8K/16K/32K, then writes /tmp/ij-job5-go (starts job 5 on the controller).
+- 14:08 REPLACED: agentic submit-method runs stopped (answers stop after ~2 tokens without ignore_eos: meaningless).
+  /root/tuned-chain.sh -> /root/tuned/chain.log runs now: ATOM agentic (agentic_measure.py), AMD repro, tuned submit, tuned agentic, then /tmp/ij-job5-go.
+- 14:30 tuned has no logprobs (megakernel): /root/tuned-textcmp.sh compares greedy text after the chain, then releases the job 5 flag (/tmp/ij-job5-go is a directory until then).
+- 14:42 textcmp ended with a cache-key bug (TypeError); fixed script uploaded as /root/tuned_textcmp.py, rerun only after job 5 (GPU).
+- 14:43 job 5 running on the controller (agents queue); hip_probe copy 4.7 TB/s read+write.
+- 14:52 /root/lpdiag.py (logprob gap diagnosis) on ij-ref :8001 -> /root/lpdiag.log
+- 14:53 ROOT CAUSE (lpdiag.log): the missing entry is <think> (id 248068, added token, special=false, 7 ASCII bytes,
+  valid UTF-8), generated mid-answer (pos 3 of translate prompts, pos 117 of q-q-0232-json). ATOM's reasoning filter
+  strips the marker from visible text, so no logprob entry. Not a UTF-8 fragment. q-q-0154-json: first token is the
+  stop token (empty answer). FIX in progress: image ij-atom-ref:ad256a94-lp1 (reference/build-ref-image.sh, patch
+  reference/atom_token_logprobs.py adds choices[].token_logprobs, one per token id); lib/ref.py reads it, fail closed.
+- 14:56 /root/fix-chain.sh -> /root/fix/chain.log: check of all 56 prompts on the patched image, then releases job 5b (/tmp/ij-job5b-go) and waits for /tmp/ij-job5b-done, then the full judge baseline (/root/fix/baseline.log; old result kept as results/baseline-atom-mi350x.run1-1341)
+- 15:04 check56 on the patched image: 55 of 56 compared, all translate rows 1.000; only q-q-0154-json (empty answer) failed. job 5b running on the controller (/root/job5b/summary.log there).
+- 15:24 job 5b done on the controller: ref ok, check PASS, two submits PASSED (78.3 tok/s), score ok. Controller box.json restored to before-checks (manual copy kept as box.json.manual-checks). Baseline rerun running (/root/fix/baseline.log).
+- 15:25 /root/after-fix.sh: after the baseline, the fixed tuned text comparison -> /root/tuned/textcmp2.log
+15:42:53 logprob fix done: patched image ij-atom-ref:ad256a94-lp1; check56 55/56 (0.98733, only q-q-0154-json empty answer); job 5b all PASS; baseline rerun quality2 passed, VERDICT INVALID on one length:505!=512 request in b2 (ignore_eos ran past turn end, hidden special tokens), not changed; textcmp2 1/56 identical, median first diff token 2 (mostly the <think> marker). GPU idle, no containers. Results copied to the Mac. Box can be destroyed after the report.
+15:50:10 corrections: textcmp2 early partings are 8 <think> marker, 5 plain-text reasoning start, 1 whitespace, 16 real word choices (of 30 by token 3). Baseline INVALID cause shown with lenprobe (8/8 nonced runs of real-main-4000-40-python write <|im_end|>/<|im_start|>, hidden from text, recount 458-505 vs 512, tol 5): the prompt fails whenever a block draws it. GPU idle (VRAM 0%, no containers).

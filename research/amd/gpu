@@ -1,0 +1,58 @@
+#!/usr/bin/env python3
+"""./gpu: who holds the GPU, who waits, and what else has it open.  No GPU use."""
+import os
+import sys
+import time
+from pathlib import Path
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "lib"))
+import common  # noqa: E402
+import gpuqueue as Q  # noqa: E402
+
+
+def vram() -> str:
+    for card in sorted(Path("/sys/class/drm").glob("card*/device")):
+        try:
+            used = int((card / "mem_info_vram_used").read_text())
+            total = int((card / "mem_info_vram_total").read_text())
+        except (OSError, ValueError):
+            continue
+        return f"{used / 2**30:.1f} GiB of {total / 2**30:.1f} GiB"
+    return "unknown (no mem_info_vram_used in /sys/class/drm)"
+
+
+def main() -> int:
+    cfg, state = common.setup()
+    d = Q.qdir(state)
+    now = time.time()
+    h = Q.holder(d)
+    ws = Q.waiters(d)
+    print(f"GPU: {cfg['gpu_device']['name']} ({cfg['gpu_device']['arch']}), VRAM in use: {vram()}")
+    if h:
+        age = common.fmt_s(now - h.get("since_epoch", now))
+        print(f"held by: pid {h.get('pid')} [{h.get('kind', '?')}] {h.get('cmd', '?')}")
+        print(f"         cwd {h.get('cwd', '?')}, since {h.get('since', '?')} ({age})")
+    else:
+        print("held by: nobody (free)")
+    if ws:
+        print(f"waiting: {len(ws)}")
+        for i, w in enumerate(ws, 1):
+            age = common.fmt_s(now - w.get("since_epoch", now))
+            print(f"  {i}. pid {w.get('pid')} [{w.get('kind', '?')}] {w.get('cmd', '?')}  (waiting {age}, cwd {w.get('cwd', '?')})")
+    else:
+        print("waiting: none")
+    users = Q.kfd_users()
+    tok = h.get("token") if h else None
+    mine = [u for u in users if tok and u["token"] == tok]
+    other = [u for u in users if not (tok and u["token"] == tok)]
+    print(f"processes with /dev/kfd open: {len(users)} ({len(mine)} in the holder's job, {len(other)} outside the queue)")
+    for u in other:
+        print(f"  outside the queue: pid {u['pid']} {u['cmd'][:120]}")
+    for c in Q.labelled_containers():
+        tag = "the holder's job" if tok and c["token"] == tok else "no live job"
+        print(f"  container {c['name']} ({tag})")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

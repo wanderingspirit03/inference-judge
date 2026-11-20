@@ -1,0 +1,10 @@
+{
+ "tokens_per_s": 77.56,
+ "tokens": 2616,
+ "seconds": 33.729,
+ "requests": 16,
+ "per_request_min": 63.14,
+ "per_request_max": 78.55,
+ "engine": "atom image=rocm/atom-dev@sha256:ad256a94209d2f58bfa6b0a69c555e0f8aab4fd8b76673c3532258803599099c model=/srv/models/Qwen3.8-27B kv=bf16 mem=0.5 greedy v2",
+ "measured": "2026-11-17 13:23 UTC"
+}
